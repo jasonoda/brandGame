@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Lost & Found</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Sanchez&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="shared.css">
+
+    <style>
+      body { margin: 0; background: #f5f5f5; font-family: sans-serif; }
+    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+    
+    <!-- Load local THREE.js -->
+    <script type="module" src="three/three.js"></script>
+    
+    <!-- Load GLTFLoader from local files -->
+    <script type="module">
+      console.log('[HTML] GLTFLoader script starting...');
+      try {
+        import('./three/loaders/GLTFLoader.js').then((module) => {
+          const GLTFLoader = module.GLTFLoader;
+          console.log('[HTML] GLTFLoader imported:', typeof GLTFLoader);
+          console.log('[HTML] GLTFLoader class:', GLTFLoader);
+          
+          function addGLTFLoader() {
+            console.log('[HTML] addGLTFLoader called');
+            console.log('[HTML] window.THREE available:', typeof window.THREE !== 'undefined');
+            console.log('[HTML] THREE available:', typeof THREE !== 'undefined');
+            console.log('[HTML] THREE.Scene available:', typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined');
+            console.log('[HTML] GLTFLoader:', typeof GLTFLoader);
+            
+            if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
+              // THREE.js is fully loaded, safely add GLTFLoader
+              console.log('[HTML] Attempting to add GLTFLoader to window.THREE...');
+              console.log('[HTML] window.THREE before:', window.THREE);
+              console.log('[HTML] window.THREE.GLTFLoader before:', window.THREE.GLTFLoader);
+              console.log('[HTML] window.THREE is frozen:', Object.isFrozen(window.THREE));
+              console.log('[HTML] window.THREE is sealed:', Object.isSealed(window.THREE));
+              
+              try {
+                // Try direct assignment first
+                window.THREE.GLTFLoader = GLTFLoader;
+                console.log('[HTML] Direct assignment attempted');
+              } catch (e) {
+                console.error('[HTML] Direct assignment failed:', e);
+                // Try using defineProperty if direct assignment fails
+                try {
+                  Object.defineProperty(window.THREE, 'GLTFLoader', {
+                    value: GLTFLoader,
+                    writable: true,
+                    enumerable: true,
+                    configurable: true
+                  });
+                  console.log('[HTML] defineProperty assignment attempted');
+                } catch (e2) {
+                  console.error('[HTML] defineProperty also failed:', e2);
+                }
+              }
+              
+              console.log('[HTML] GLTFLoader added to THREE');
+              console.log('[HTML] window.THREE after:', window.THREE);
+              console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
+              console.log('[HTML] THREE.GLTFLoader value:', window.THREE.GLTFLoader);
+              console.log('[HTML] GLTFLoader in window.THREE:', 'GLTFLoader' in window.THREE);
+              console.log('[HTML] window.THREE.hasOwnProperty("GLTFLoader"):', window.THREE.hasOwnProperty ? window.THREE.hasOwnProperty('GLTFLoader') : 'no hasOwnProperty');
+              
+              // Verify it's actually there
+              if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                console.log('[HTML] SUCCESS: GLTFLoader is now on THREE!');
+                window.dispatchEvent(new Event('gltfloader-loaded'));
+              } else {
+                console.error('[HTML] ERROR: GLTFLoader was not added successfully!');
+                console.error('[HTML] Attempting alternative approach - creating wrapper...');
+                // Alternative: create a wrapper object
+                const originalTHREE = window.THREE;
+                window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                console.log('[HTML] Wrapper created, THREE.GLTFLoader:', typeof window.THREE.GLTFLoader);
+                if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                  window.dispatchEvent(new Event('gltfloader-loaded'));
+                }
+              }
+            } else {
+              // THREE.js not ready yet, wait for it
+              console.log('[HTML] GLTFLoader: THREE.js not ready, waiting...');
+              
+              // Check if event already fired (in case we're late)
+              function tryAddGLTFLoader() {
+                if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
+                  console.log('[HTML] THREE is now ready, adding GLTFLoader...');
+                  try {
+                    window.THREE.GLTFLoader = GLTFLoader;
+                  } catch (e) {
+                    console.error('[HTML] Direct assignment failed in tryAddGLTFLoader:', e);
+                    const originalTHREE = window.THREE;
+                    window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                  }
+                  console.log('[HTML] GLTFLoader added to THREE (after waiting)');
+                  console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
+                  if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                    window.dispatchEvent(new Event('gltfloader-loaded'));
+                  }
+                } else {
+                  console.log('[HTML] Still waiting for THREE...', typeof window.THREE, typeof window.THREE?.Scene);
+                  setTimeout(tryAddGLTFLoader, 100);
+                }
+              }
+              
+              window.addEventListener('three-loaded', function() {
+                console.log('[HTML] three-loaded event received');
+                try {
+                  window.THREE.GLTFLoader = GLTFLoader;
+                } catch (e) {
+                  console.error('[HTML] Direct assignment failed in event listener:', e);
+                  const originalTHREE = window.THREE;
+                  window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                }
+                console.log('[HTML] GLTFLoader added to THREE (after event)');
+                console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
+                if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                  window.dispatchEvent(new Event('gltfloader-loaded'));
+                }
+              }, { once: true });
+              
+              // Also try polling in case event was missed
+              setTimeout(tryAddGLTFLoader, 100);
+            }
+          }
+          
+          // Wait a bit to ensure THREE.js has time to load
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', addGLTFLoader);
+          } else {
+            // Use setTimeout to ensure other scripts have run
+            setTimeout(addGLTFLoader, 50);
+          }
+        }).catch((error) => {
+          console.error('[HTML] Error importing GLTFLoader:', error);
+        });
+      } catch (error) {
+        console.error('[HTML] Error in GLTFLoader script:', error);
+      }
+    </script>
+    <script type="module">
+      import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+      window.CANNON = CANNON;
+      window.dispatchEvent(new Event('cannon-loaded'));
+    </script>
+
+    <script>
+      window.addEventListener("load", (event) => {
+        window.parent.postMessage(
+          JSON.stringify({
+            type: "GameLoaded",
+          }),
+          "*"
+        );
+      });
+    </script>
+</head>
+
+<body>
+
+    <div id="hideMe">
+      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    </div>
+        
+    <div id="leftBlocker" class="side-blocker"></div>
+    <div id="rightBlocker" class="side-blocker"></div>
+
+    <div id="feedback">asdf</div>
+
+    <div id="fader"></div>
+    <div id="faderBlack"></div>
+    
+    <div id="streakBrokenText">STREAK BROKEN</div>
+    <div id="timeBonusText">+5 SECONDS</div>
+    <div id="countdownText">3</div>
+
+    <div id="loadingBack"></div>
+
+    <div class="ui" id="upperLeftDiv"></div>
+    <div class="ui" id="upperRightDiv"></div>
+    <div class="ui" id="targetDiv">MEGA: FRENCH FRIES</div>
+
+    
+    <div id="topDiv"></div>
+    <div id="bonusDiv">
+      <div id="bonusText">BONUS</div>
+      <div id="bonusBar">
+        <div id="innerBar"></div>
+      </div>
+      <div id="bonusText2">x1</div>
+    </div>
+
+    <div id="scoreTimeContainer">
+      <div id="scoreDisplay">0</div>
+      <div id="scoreTimeDivider">|</div>
+      <div id="timeDisplay">2:00</div>
+    </div>
+
+    <div id="startMenu">
+      <div id="startMenuContainer">
+        <img src="../src/img/lostAndFount.svg" alt="Lost & Found" style="height: 40px; width: auto; margin-bottom: 10px;">
+        <div id="memoryTitle">LOST & FOUND</div>
+        <div id="instructionsStartDiv">
+          <div class="instructionLine">match similar items by dragging them<br>onto the squares to score points</div>
+          <div class="instructionDivider"></div>
+          <div class="instructionLine">match faster to raise your multiplier<br>and earn score bonuses</div>
+          <div class="instructionDivider"></div>
+          <div class="instructionLine"><br><b>MEGA MATCH</b></div>
+          <div class="instructionLine">match the specific item assigned to be MEGA MATCH to earn extra points and time</div>
+        </div>
+        <div id="playButton">PLAY</div>
+      </div>
+    </div>
+
+    <div id="tutorialDiv1" style="display: none;">
+      <div id="tutorialText1">Match identical items on the<br>squares to score points.</div>
+      <div id="tutorialContinue1">CONTINUE</div>
+    </div>
+
+    <div id="tutorialDiv2" style="display: none;">
+      <div id="tutorialText2">Match faster to raise your multiplier and earn score bonuses.</div>
+      <div id="tutorialContinue2">CONTINUE</div>
+    </div>
+
+    <div id="finalDiv"></div>
+
+
+    <div id="pauseOverlay">
+        <div id="pauseTitle">PAUSE</div>
+        <div id="pauseSubtitle">NEXT MEGAMATCH:</div>
+        <div id="pauseItemName">CAR</div>
+        <div id="pauseImage">
+          <canvas id="targetCanvas" style="width: 150px; height: 150px; background: white; border: none"></canvas>
+        </div>
+        <div id="pauseResume">RESUME IN 5</div>
+    </div>
+
+    <script src="lostAndFound.js" defer></script>
+</body>
+</html>
+
+

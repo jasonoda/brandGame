@@ -1,0 +1,617 @@
+@font-face {
+    font-family: 'Gotham';
+    src: url('fonts/GothamBook.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Gotham';
+    src: url('fonts/GothamMedium.ttf') format('truetype');
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Gotham';
+    src: url('fonts/Gotham-Bold.otf') format('opentype');
+    font-weight: 700;
+}
+
+html, body{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+body{
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+}
+
+
+#feedback{
+    position: fixed;
+    display: none;
+    z-index:50000;
+    color:aliceblue;
+    background-color: rgb(0, 0, 0);
+}
+
+#fader{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10001;
+    background-color: white;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#faderBlack{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background-color: black;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#loadingImage{
+    display: none !important;
+    opacity: 0 !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingBack{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index:10000;
+    background-color: #ffffff;
+    pointer-events: none;
+    opacity: 1;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(5px, 1vw, 10px);
+    max-width: 480px;
+    width: min(90vw, 480px);
+    box-sizing: border-box;
+    margin: 0;
+    padding: clamp(10px, 2vw, 20px);
+    justify-content: center;
+    line-height: 0;
+}
+
+.card {
+    width: 100%;
+    aspect-ratio: 3/4.5;
+    position: relative;
+    cursor: pointer;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .card-grid {
+        width: 95vw;
+        gap: 3px;
+        padding: 10px;
+        margin-bottom: 120px;
+    }
+    
+    .card {
+        aspect-ratio: 2/3.5;
+    }
+}
+
+.card-back, .card-front {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.card-back {
+    background: linear-gradient(to bottom, #6BDFFF, #5BCFEF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: 400;
+    color: white;
+    font-family: 'Orelega One', cursive;
+}
+
+.card-front {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    transform: rotateY(180deg);
+}
+
+.ui{
+    position: absolute;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+}
+
+#levelDiv{
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #666;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Nunito', sans-serif;
+    z-index: 3001;
+}
+
+#bonusDisplay{
+    top: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #333;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Nunito', sans-serif;
+    z-index: 3001;
+    text-align: center;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-block;
+    width: auto;
+    min-width: fit-content;
+}
+
+#timeFreezeDisplay{
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00d4ff;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Nunito', sans-serif;
+    z-index: 3001;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    opacity: 0;
+    white-space: nowrap;
+    display: inline-block;
+    width: auto;
+    min-width: fit-content;
+}
+
+#timeFreezeDisplay::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: rgba(0, 0, 0, 1);
+    border-radius: 18px;
+    z-index: -1;
+}
+
+#x2BonusDisplay{
+    position: absolute;
+    top: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff4444;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Nunito', sans-serif;
+    z-index: 3001;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+    background: linear-gradient(to bottom, #ff4444, #cc0000);
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    opacity: 0;
+    white-space: nowrap;
+    display: inline-block;
+    width: auto;
+    min-width: fit-content;
+}
+
+#x2BonusDisplay::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: rgba(0, 0, 0, 1);
+    border-radius: 18px;
+    z-index: -1;
+}
+
+#bonusBackground{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    z-index: 1;
+    transform-origin: bottom;
+    transform: scaleY(0);
+    transition: transform 0.3s ease-out;
+    display: none;
+}
+
+
+#bonusButtonContainer{
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bonusButton{
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.bonusButton:hover{
+    transform: scale(1.1);
+}
+
+.bonusImage {
+    width: 45px;
+    height: 45px;
+    margin-right: 12px;
+    object-fit: contain;
+}
+
+.bonusItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.bonusDescription {
+    font-size: 13px;
+    font-weight: 700;
+    color: #cccccc;
+    text-align: left;
+    flex: 1;
+}
+
+#bonusInstructions {
+    margin-bottom: 3px;
+}
+
+#instructionsText {
+    margin-bottom: 20px;
+}
+
+#scorePopup{
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    font-weight: 700;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0px;
+    color: #999;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#playButton {
+    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    color: white;
+}
+
+#scoreTimeContainer {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 24px;
+    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 1px;
+}
+
+#scoreDisplay {
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+    transform: translateY(-1px);
+}
+
+#scoreTimeDivider {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    width: 10px;
+    transform: translateY(-2px);
+}
+
+#timeDisplay {
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+    transform: translateY(-1px);
+}
+
+:root{ --play-area-width: 500px; }
+
+.side-blocker{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background: #000000;
+    z-index: 442000;
+    pointer-events: none;
+}
+
+#leftBlocker{
+    left: 0;
+    right: calc(50% + (var(--play-area-width) / 2));
+}
+
+#rightBlocker{
+    left: calc(50% + (var(--play-area-width) / 2));
+    right: 0;
+}
+
+@media (max-width: 768px){
+    #leftBlocker, #rightBlocker{ display: none; }
+}
+
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 8000;
+}
+
+#startMenuContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: opacity 0.5s ease-out;
+}
+
+#memoryTitle {
+    font-size: 32px;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#instructionsStartDiv {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    max-width: 450px;
+}
+
+#instructionsStartDiv .instructionLine {
+    color: #666;
+    font-weight: 500;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#instructionsStartDiv .bonusDescription {
+    color: #666;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+}
+
+#bonusInstructionsStart {
+    margin-top: 10px;
+}
+
+#playButton {
+    height: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-align: center;
+    width: 55%;
+    max-width: 250px;
+    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin-top: 10px;
+}
+
+#playButton:hover {
+    box-shadow: 0 4px 12px rgba(0, 153, 204, 0.4);
+    transform: translateY(-1px);
+}
+
+#playButton:active {
+    transform: translateY(0);
+}
+
+.instructionLine {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+}
+
+.instructionDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.15);
+    margin: 8px 0;
+    width: 100%;
+}
+
+.finalScoreOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 16000;
+    opacity: 0;
+}
+
+.finalScoreContentContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 1;
+}
+
+.finalScoreText {
+    font-family: 'Sanchez', serif;
+    font-size: 72px;
+    font-weight: 400;
+    color: #FFD700;
+    text-align: center;
+    text-shadow: none;
+    opacity: 0;
+    transform: scale(0.5);
+    position: relative;
+}
+
+.finalScoreStatsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    margin-top: 20px;
+}
+
+.finalScoreStatItem {
+    font-family: 'Sanchez', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #555555;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.finalScoreStatsHeader {
+    font-family: 'Sanchez', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #555555;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.finalScoreStatsSeparator {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #FFD700, transparent);
+    margin-bottom: 15px;
+}
+
+.finalScoreStarDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 40px;
+    margin-bottom: 20px;
+}
+
+.finalScoreStar {
+    font-size: 40px;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+

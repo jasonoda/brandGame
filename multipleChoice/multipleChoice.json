@@ -1,0 +1,39 @@
+[
+   
+    {
+        "question": "What was the first year the New York Stock Exchange officially closed in observance of Thanksgiving?",
+        "answers": ["1863", "1870", "1905", "1924"],
+        "correct": 1
+    },
+    {
+        "question": "What popular spice blend, created after 1900, dramatically reshaped modern American holiday baking flavors and became a Thanksgiving flavor archetype?",
+        "answers": ["Apple pie spice", "Five-spice", "Pumpkin spice", "Mulling mix"],
+        "correct": 2
+    },
+    
+    {
+        "question": "What U.S. President attempted moving Thanksgiving one week earlier to extend the holiday shopping season and caused nationwide backlash?",
+        "answers": ["Dwight D. Eisenhower", "Franklin D. Roosevelt", "Harry S. Truman", "Herbert Hoover"],
+        "correct": 1
+    },
+    {
+        "question": "The phrase 'a national day of giving thanks' first gained traction in America through what type of document or spoken genre historically?",
+        "answers": ["Sermons", "War letters", "Recipes", "Shipping logs"],
+        "correct": 0
+    },
+    {
+        "question": "What major 20th-century convenience food brand — not originally intended for Thanksgiving — influenced modern holiday meal convenience norms through an accidental invention?",
+        "answers": ["Swanson", "Stouffer's", "Gorton's", "Hormel"],
+        "correct": 0
+    },
+    {
+        "question": "The modern cultural concept of 'Friendsgiving' was indirectly popularized before the term existed by Thanksgiving episodes of which iconic 90s sitcom?",
+        "answers": ["Friends", "Seinfeld", "Frasier", "Full House"],
+        "correct": 0
+    },
+    {
+        "question": "What alternative Thanksgiving observance, created in 1970 and still recognized today, centers on indigenous protest and is not a cheerful celebration?",
+        "answers": ["National Thanks Day", "Day of Mourning", "Freedom Feast", "November Vigil"],
+        "correct": 1
+    }
+]

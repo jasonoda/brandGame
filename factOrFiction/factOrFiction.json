@@ -1,0 +1,172 @@
+[
+    {
+        "set": 1,
+        "statements": [
+            {
+                "statement": "Wild turkey can run 15+ mph",
+                "isFact": true
+            },
+            {
+                "statement": "Thanksgiving was declared a fixed national date by Lincoln",
+                "isFact": false
+            },
+            {
+                "statement": "Macy's parade introduced character balloons in the 1920s",
+                "isFact": false
+            }
+        ]
+    },
+    {
+        "set": 2,
+        "statements": [
+            {
+                "statement": "The earliest Thanksgiving proclamations varied by state, not federal law",
+                "isFact": true
+            },
+            {
+                "statement": "\"Turkey trot\" races predate the 1900s",
+                "isFact": false
+            },
+            {
+                "statement": "Franklin D. Roosevelt moved Thanksgiving to boost the economy",
+                "isFact": true
+            }
+        ]
+    },
+    {
+        "set": 3,
+        "statements": [
+            {
+                "statement": "The first Thanksgiving feast was not originally called \"Thanksgiving\"",
+                "isFact": true
+            },
+            {
+                "statement": "Pumpkin pie was served at the 1621 feast",
+                "isFact": false
+            },
+            {
+                "statement": "NFL Thanksgiving games began before the Super Bowl era",
+                "isFact": true
+            }
+        ]
+    },
+    {
+        "set": 4,
+        "statements": [
+            {
+                "statement": "TV dinner was invented because of Thanksgiving overstock",
+                "isFact": true
+            },
+            {
+                "statement": "Cranberries were sweetened with white sugar at the 1621 feast",
+                "isFact": false
+            },
+            {
+                "statement": "Thanksgiving once fell on the 3rd Thursday during Roosevelt's change",
+                "isFact": true
+            }
+        ]
+    },
+    {
+        "set": 5,
+        "statements": [
+            {
+                "statement": "Thanksgiving wasn't an annual tradition everywhere in the U.S. until after the Civil War",
+                "isFact": true
+            },
+            {
+                "statement": "Pecan pie was created in New England",
+                "isFact": false
+            },
+            {
+                "statement": "The Thanksgiving turkey pardon was an official televised ceremony before the 1980s",
+                "isFact": false
+            }
+        ]
+    },
+    {
+        "set": 6,
+        "statements": [
+            {
+                "statement": "\"Spatchcock\" turkey prep predates the Thanksgiving turkey stereotype",
+                "isFact": true
+            },
+            {
+                "statement": "Thanksgiving has always been the 4th Thursday by law",
+                "isFact": false
+            },
+            {
+                "statement": "Pumpkin spice existed before canned pumpkin",
+                "isFact": false
+            }
+        ]
+    },
+    {
+        "set": 7,
+        "statements": [
+            {
+                "statement": "The Thanksgiving parade was first broadcast nationally on TV before WWII",
+                "isFact": false
+            },
+            {
+                "statement": "Turkeys roosting in trees overnight is true of wild turkeys, not farmed ones",
+                "isFact": true
+            },
+            {
+                "statement": "Thanksgiving NFL games inspired the Madden game franchise later, not the other way around",
+                "isFact": true
+            }
+        ]
+    },
+    {
+        "set": 8,
+        "statements": [
+            {
+                "statement": "Turkey replaced goose regionally before it replaced it symbolically",
+                "isFact": true
+            },
+            {
+                "statement": "Campbell Soup Company invented green bean casserole in the 1950s",
+                "isFact": false
+            },
+            {
+                "statement": "Sweet potatoes were common in Thanksgiving menus before white potatoes",
+                "isFact": true
+            }
+        ]
+    },
+    {
+        "set": 9,
+        "statements": [
+            {
+                "statement": "Thanksgiving leftovers are the origin of modern frozen convenience meals",
+                "isFact": false
+            },
+            {
+                "statement": "John Madden popularized the leg-turkey-six-drumstick obsession",
+                "isFact": false
+            },
+            {
+                "statement": "Thanksgiving was briefly rescheduled during WWII due to ration logistics",
+                "isFact": false
+            }
+        ]
+    },
+    {
+        "set": 10,
+        "statements": [
+            {
+                "statement": "The parade balloons are filled at ground level but inflated by internal blowers",
+                "isFact": true
+            },
+            {
+                "statement": "Thanksgiving date standardization came from Congress, not the President",
+                "isFact": true
+            },
+            {
+                "statement": "Thanksgiving football broadcasts air on more networks now than before cable existed",
+                "isFact": true
+            }
+        ]
+    }
+]

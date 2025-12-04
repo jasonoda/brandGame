@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Gold Case</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chonburi:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Sanchez&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="shared.css">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+    
+    <!-- Load local THREE.js -->
+    <script type="module" src="three/three.js"></script>
+    
+    <!-- Load GLTFLoader from local files -->
+    <script type="module">
+      console.log('[HTML] GLTFLoader script starting...');
+      try {
+        import('./three/loaders/GLTFLoader.js').then((module) => {
+          const GLTFLoader = module.GLTFLoader;
+          console.log('[HTML] GLTFLoader imported:', typeof GLTFLoader);
+          
+          function addGLTFLoader() {
+            console.log('[HTML] addGLTFLoader called');
+            console.log('[HTML] window.THREE available:', typeof window.THREE !== 'undefined');
+            console.log('[HTML] THREE.Scene available:', typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined');
+            
+            if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
+              try {
+                window.THREE.GLTFLoader = GLTFLoader;
+                console.log('[HTML] GLTFLoader added to THREE');
+                console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
+                if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                  window.dispatchEvent(new Event('gltfloader-loaded'));
+                  console.log('[HTML] gltfloader-loaded event dispatched');
+                }
+              } catch (e) {
+                console.error('[HTML] Direct assignment failed:', e);
+                const originalTHREE = window.THREE;
+                window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                console.log('[HTML] Wrapper created, THREE.GLTFLoader:', typeof window.THREE.GLTFLoader);
+                if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                  window.dispatchEvent(new Event('gltfloader-loaded'));
+                }
+              }
+            } else {
+              console.log('[HTML] THREE.js not ready, waiting...');
+              function tryAddGLTFLoader() {
+                if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
+                  try {
+                    window.THREE.GLTFLoader = GLTFLoader;
+                  } catch (e) {
+                    const originalTHREE = window.THREE;
+                    window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                  }
+                  console.log('[HTML] GLTFLoader added to THREE (after waiting)');
+                  if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                    window.dispatchEvent(new Event('gltfloader-loaded'));
+                  }
+                } else {
+                  setTimeout(tryAddGLTFLoader, 100);
+                }
+              }
+              window.addEventListener('three-loaded', function() {
+                try {
+                  window.THREE.GLTFLoader = GLTFLoader;
+                } catch (e) {
+                  const originalTHREE = window.THREE;
+                  window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
+                }
+                console.log('[HTML] GLTFLoader added to THREE (after event)');
+                if (typeof window.THREE.GLTFLoader !== 'undefined') {
+                  window.dispatchEvent(new Event('gltfloader-loaded'));
+                }
+              }, { once: true });
+              setTimeout(tryAddGLTFLoader, 100);
+            }
+          }
+          
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', addGLTFLoader);
+          } else {
+            setTimeout(addGLTFLoader, 50);
+          }
+        }).catch((error) => {
+          console.error('[HTML] Error importing GLTFLoader:', error);
+        });
+      } catch (error) {
+        console.error('[HTML] Error in GLTFLoader script:', error);
+      }
+    </script>
+
+    <script>
+      window.addEventListener("load", (event) => {
+        window.parent.postMessage(
+          JSON.stringify({
+            type: "GameLoaded",
+          }),
+          "*"
+        );
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        function setMobileViewportHeight() {
+          if (window.innerWidth <= 768) {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            document.body.style.height = `${window.innerHeight}px`;
+            document.documentElement.style.height = `${window.innerHeight}px`;
+          }
+        }
+        
+        setMobileViewportHeight();
+        
+        window.addEventListener('resize', setMobileViewportHeight);
+        window.addEventListener('orientationchange', () => {
+          setTimeout(setMobileViewportHeight, 100);
+        });
+        
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+          document.body.style.webkitTransform = 'translateZ(0)';
+          document.body.style.transform = 'translateZ(0)';
+        }
+      });
+    </script>
+
+</head>
+
+<body>
+
+    <div id="backgroundImage"></div>
+
+    <div id="tempBlocker"></div>
+    <div id="leftBlocker" class="side-blocker"></div>
+    <div id="rightBlocker" class="side-blocker"></div>
+    
+    <div id="hideMe"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></div>
+
+    <div id="feedback">Jewel Match - Drag jewels to swap adjacent pieces</div>
+
+    <div class="ui" id="levelDiv"></div>
+    <div class="ui" id="upperRightDiv"></div>
+    <div class="ui" id="frameCounter">FPS: 0</div>
+    <button id="caseValueDiv" class="deal-button">TAKE DEAL: $0</button>
+    <div id="timerDiv" class="timer-display">2:00</div>
+    <div id="scorePopup">+100</div>
+    
+    <div id="caseRevealWindow" style="display: none;">
+        <div id="caseRevealContent">
+            <div id="caseRevealTitle">CASE VALUE</div>
+            <div id="caseRevealValue">0</div>
+            <div id="caseRevealClose">CLOSE</div>
+        </div>
+    </div>
+    
+    <div id="clueWindow" style="display: none;">
+        <div id="clueContent">
+            <div id="clueTitle">CLUES GATHERED</div>
+            <div id="noCluesMessage">No clues yet. Use the free clue button or open cases to find more clues.</div>
+            <div id="clueList">
+            </div>
+            <div id="clueClose">CLICK TO CONTINUE</div>
+        </div>
+    </div>
+
+    <div id="startMenu">
+        <div id="startMenuContainer">
+          <img src="../src/img/goldCase.svg" alt="Gold Case" style="height: 40px; width: auto; margin-bottom: 10px;">
+          <div id="goldCaseStar">★</div>
+          <div id="memoryTitle">GOLD CASE</div>
+          <div id="instructionsStartDiv">
+            <div class="instructionLine">Open cases to eliminate them</div>
+            <div class="instructionDivider"></div>
+            <div class="instructionLine">Use clues to figure out<br>which ones to pick</div>
+            <div class="instructionDivider"></div>
+            <div class="instructionLine">Press the TAKE DEAL button, when you think you can't score any higher</div>
+            <div class="instructionDivider"></div>
+            <div class="instructionLine">Time limit: 2 minutes</div>
+          </div>
+          <div id="playButton">PLAY</div>
+        </div>
+      </div>
+
+    <div id="gameContainer">
+        <div id="topSection">
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">1</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">2</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">3</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">4</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">5</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">6</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">7</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">8</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">9</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">10</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">11</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">12</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">13</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">14</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">15</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">16</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">17</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">18</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">19</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">20</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">21</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">22</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">23</div><div class="case-value-indicator"></div></button></div>
+            <div class="grid-cell"><button class="cell-button"><img src="images/case.png" alt="case" width="100%" height="100%"><div class="case-number">24</div><div class="case-value-indicator"></div></button></div>
+        </div>
+
+        <div id="thirdSection">
+            <div class="action-cell"><button class="action-button">GET CLUE</button></div>
+            <div class="action-cell"><button class="action-button">PICK 3</button></div>
+            <div class="action-cell"><button class="action-button">DOUBLE</button></div>
+        </div>
+
+        <div id="bottomSection">
+            <div class="scoring-grid">
+                <div class="score-column">
+                    <div class="score-cell header">LOW</div>
+                    <div class="score-cell">1</div>
+                    <div class="score-cell">5</div>
+                    <div class="score-cell">10</div>
+                    <div class="score-cell">25</div>
+                    <div class="score-cell">50</div>
+                    <div class="score-cell">100</div>
+                    <div class="score-cell">500</div>
+                </div>
+                <div class="score-column">
+                    <div class="score-cell header">MED</div>
+                    <div class="score-cell">1000</div>
+                    <div class="score-cell">2500</div>
+                    <div class="score-cell">5000</div>
+                    <div class="score-cell">7500</div>
+                    <div class="score-cell">10000</div>
+                    <div class="score-cell">20000</div>
+                    <div class="score-cell">25000</div>
+                </div>
+                <div class="score-column">
+                    <div class="score-cell header">HIGH</div>
+                    <div class="score-cell">50000</div>
+                    <div class="score-cell">75000</div>
+                    <div class="score-cell">100000</div>
+                    <div class="score-cell">300000</div>
+                    <div class="score-cell">500000</div>
+                    <div class="score-cell">750000</div>
+                    <div class="score-cell">1000000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="clueButton">YOUR CLUES</div>
+
+    <div id="suitcase3DContainer" style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        display: none;
+    "></div>
+
+    <div id="topDiv">
+    </div>
+
+    <div id="bonusDiv">
+    </div>
+
+    <div id="instructionsOverlay" style="display: none;">
+        <div id="instructionsContainer">
+            <div id="instructionsTitle">INSTRUCTIONS</div>
+            
+            <div id="instructionsText">
+                <div class="instructionLine">Open cases to eliminate them</div>
+                <div class="instructionDivider"></div>
+                
+                <div class="instructionLine">Use clues to figure out<br>which ones to pick</div>
+                <div class="instructionDivider"></div>
+                
+                <div class="instructionLine">Press the TAKE DEAL button, when you think you can't score any higher</div>
+                <div class="instructionDivider"></div>
+                
+                <div class="instructionLine">Time limit: 2 minutes</div>
+                
+                <div class="instructionDivider"></div>
+                
+                <div style="height: 20px;"></div>
+                
+                <div class="instructionLine helperButtonsHeader"><b>HELPER BUTTONS:</b></div>
+                
+                <div class="helperButtonItem">
+                    <div class="helperButtonIcon">GET CLUE</div>
+                    <div class="helperButtonDescription">
+                        Get a free clue once you've opened 7 cases
+                    </div>
+                </div>
+                
+                <div class="helperButtonItem">
+                    <div class="helperButtonIcon">PICK 3</div>
+                    <div class="helperButtonDescription">
+                        Pick 3 cases, the lowest value will be revealed
+                    </div>
+                </div>
+                
+                <div class="helperButtonItem">
+                    <div class="helperButtonIcon">DOUBLE</div>
+                    <div class="helperButtonDescription">
+                        Double the value of your highest available case. All low and medium cases become worth 1
+                    </div>
+                </div>
+            </div>
+            
+            <div id="closeInstructionsButton">CLOSE</div>
+        </div>
+    </div>
+
+    <div id="finalDiv">
+    </div>
+
+    <div id="fader"></div>
+
+    <script src="goldCase.js" defer></script>
+</body>
+</html>
+

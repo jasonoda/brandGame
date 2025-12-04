@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Abril+Fatface&family=Lora:wght@400;500;600&family=Spectral:wght@700;800&family=Nunito:wght@600;700&family=Aleo:wght@400;700&family=Inter:wght@400;700&family=Gravitas+One&family=Chonburi&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="multipleChoice/multipleChoice.js" defer></script>
+    <script src="factOrFiction/factOrFiction.js" defer></script>
+</head>
+<body>
+    <div class="content">
+        <div class="header-bar">
+            <div class="game-overlay-close">✕</div>
+            <div class="menu-icon">
+                <img src="src/img/jos/jos_logo.png" alt="Logo" class="logo-img">
+            </div>
+            <div class="date">NOVEMBER 26, 2025</div>
+            <div class="star-counter">
+                <span class="star-icon">★</span> <span class="star-count">x 0</span>
+            </div>
+        </div>
+
+        <div id="games-page" class="page active">
+        <div class="top-logo-box"></div>
+        <div class="week-header-background"></div>
+        <div class="week-section">
+            <div class="week-title">THIS WEEK:</div>
+            <div class="week-subtitle">THANKSGIVING</div>
+            <div class="week-container">
+                <div class="week-box">
+                    <div class="day-initial">S</div>
+                    <div class="day-number">0</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">M</div>
+                    <div class="day-number">2</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">T</div>
+                    <div class="day-number">7</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">W</div>
+                    <div class="day-number">4</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">T</div>
+                    <div class="day-number">&nbsp;</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">F</div>
+                    <div class="day-number">&nbsp;</div>
+                </div>
+                <div class="week-box">
+                    <div class="day-initial">S</div>
+                    <div class="day-number">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">DAILY QUIZ</div>
+            <div class="on-this-day-container">
+                <div class="subsection-title">On this day...</div>
+                <div class="unscramble-boxes">
+                    <div class="letter-box">A</div>
+                    <div class="letter-box">U</div>
+                    <div class="letter-box">T</div>
+                    <div class="letter-box">U</div>
+                    <div class="letter-box">M</div>
+                    <div class="letter-box">N</div>
+                </div>
+                <div class="unscramble-footer">
+                    <div class="unscramble-label">Unscramble the letters</div>
+                    <button class="unscramble-hint-btn">Hint</button>
+                </div>
+                <div class="unscramble-stars" style="display: none;">★★</div>
+            </div>
+            <div class="mc-container">
+                <div class="mc-question"></div>
+                <div class="mc-buttons">
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
+                </div>
+                <div class="mc-stars" style="display: none;">★★</div>
+            </div>
+            <div class="highlow-container" style="display: none;">
+                <div class="highlow-question">Who has won the most Oscars?</div>
+                <div class="highlow-items"></div>
+                <div class="highlow-footer">
+                    <div class="highlow-instruction">Drag to order most to least</div>
+                    <button class="highlow-guess-btn">Guess</button>
+                </div>
+                <div class="highlow-stars" style="display: none;">
+                    <span class="star earned">★</span><span class="star earned">★</span><span class="star earned">★</span>
+                </div>
+            </div>
+            <div class="fof-container">
+                <div class="subsection-title">Fact or Fiction?</div>
+                <div class="fof-buttons">
+                    <button class="fof-button"></button>
+                    <button class="fof-button"></button>
+                    <button class="fof-button"></button>
+                </div>
+                <div class="fof-footer">
+                    <div class="fof-instruction">Select the true statements</div>
+                    <button class="fof-guess-btn">Guess</button>
+                </div>
+                <div class="fof-stars" style="display: none;">★★★</div>
+            </div>
+            <div class="section-title">DAILY PUZZLES</div>
+            <div class="play-boxes">
+                <div class="play-box" id="mysteryWordBox">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #6B8FE8, #4A5FA8);">
+                        <img src="src/img/mysteryWord.svg" alt="Mystery Word" style="height: 30px; width: auto; margin-bottom: 1px;">
+                        <div class="game-title">MYSTERY WORD</div>
+                    </div>
+                    <div class="play-text" id="mysteryWordStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★</div>
+                </div>
+                <div class="play-box" id="beticleBox">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #AB69E0, #7B37B0);">
+                        <img src="src/img/betical.svg" alt="Beticle" style="height: 30px; width: auto; margin-bottom: 1px;">
+                        <div class="game-title">BETICLE</div>
+                    </div>
+                    <div class="play-text" id="beticleStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">DAILY ARCADE</div>
+            <div class="arcade-box" id="memoryBox">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BEFFF, #3BAFD0);">
+                    <img src="src/img/memory.svg" alt="Memory" style="height: 30px; width: auto; margin-bottom: 1px;">
+                    <div class="game-title">MEMORY</div>
+                </div>
+                <div class="arcade-text">
+                    <div class="score-section">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-text" id="memoryScore">0</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="stars" id="memoryStars" style="color: #ddd;">★★★★★</div>
+                </div>
+            </div>
+            <div class="arcade-box" id="speed21Box">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BED9A, #41B860);">
+                    <img src="src/img/speed21.svg" alt="Speed 21" style="height: 30px; width: auto; margin-bottom: 1px;">
+                    <div class="game-title">SPEED 21</div>
+                </div>
+                <div class="arcade-text">
+                    <div class="score-section">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-text" id="blackjackScore">0</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="stars" id="blackjackStars" style="color: #ddd;">★★★★★</div>
+                </div>
+            </div>
+            <div class="arcade-box" id="lostAndFoundBox">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #F86DAA, #C6387A);">
+                    <img src="src/img/lostAndFount.svg" alt="Lost & Found" style="height: 30px; width: auto; margin-bottom: 1px;">
+                    <div class="game-title">LOST & FOUND</div>
+                </div>
+                <div class="arcade-text">
+                    <div class="score-section">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-text" id="lostAndFoundScore">0</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="stars" id="lostAndFoundStars" style="color: #ddd;">★★★★★</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">DAILY BONUS</div>
+            <div class="bonus-box" id="goldCaseBox">
+                <div class="bonus-color" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
+                    <img src="src/img/goldCase.svg" alt="Gold Case" style="height: 30px; width: auto; margin-bottom: 1px;">
+                    <div class="game-title">GOLD CASE</div>
+                </div>
+                <div class="bonus-text">
+                    <div class="lock-icon">🔒</div>
+                    <div>Play all games to unlock your bonus reward</div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="redeem-page" class="page">
+            <div class="section">
+                <!-- <div class="section-title">REDEEM REWARDS</div> -->
+                
+                <div class="points-balance">
+                    <div class="points-icon-box" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
+                        <div class="points-star">★</div>
+                    </div>
+                    <div class="points-details">
+                        <div class="points-label">Your Balance</div>
+                        <div class="points-amount">247 Stars</div>
+                    </div>
+                </div>
+                
+                <div class="coupon-item">
+                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #FA4931, #BA1909);">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/200px-McDonald%27s_Golden_Arches.svg.png" alt="McDonald's" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
+                    </div>
+                    <div class="coupon-details">
+                        <div class="coupon-title">McDonald's</div>
+                        <div class="coupon-description">Enter sweeps</div>
+                        <div class="coupon-cost">★ 80</div>
+                    </div>
+                </div>
+                <div class="coupon-item">
+                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #00906A, #00321B);">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/200px-Starbucks_Corporation_Logo_2011.svg.png" alt="Starbucks" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
+                    </div>
+                    <div class="coupon-details">
+                        <div class="coupon-title">Starbucks</div>
+                        <div class="coupon-description">Frappacino</div>
+                        <div class="coupon-cost">★ 120</div>
+                    </div>
+                </div>
+                <div class="coupon-item">
+                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #0091EE, #003F7F);">
+                        <img src="src/img/Walmart_spark_(2025).svg.webp" alt="Walmart" style="width: 70%; height: 70%; object-fit: contain;">
+                    </div>
+                    <div class="coupon-details">
+                        <div class="coupon-title">Walmart</div>
+                        <div class="coupon-description">$5 Gift Card</div>
+                        <div class="coupon-cost">★ 150</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sweeps-page" class="page">
+            <div class="sweeps-container">
+                <div class="sweeps-header">
+                    <h1 class="sweeps-title">SWEEPSTAKES</h1>
+                    <div class="sweeps-subtitle">Collect coins in the Journey tab to enter</div>
+                    <div class="sweeps-coin-tracker">
+                        <div class="coin-indicator">
+                            <div class="coin-icon-tracker">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                            </div>
+                            <span class="coin-x">x</span>
+                            <span class="coin-count" id="sweeps-gold-coin-count">0</span>
+                </div>
+                        <div class="coin-indicator">
+                            <div class="coin-icon-tracker">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
+                                </svg>
+                    </div>
+                            <span class="coin-x">x</span>
+                            <span class="coin-count" id="sweeps-silver-coin-count">0</span>
+                        </div>
+                        <div class="coin-indicator">
+                            <div class="coin-icon-tracker">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                            </div>
+                            <span class="coin-x">x</span>
+                            <span class="coin-count" id="sweeps-bronze-coin-count">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sweeps-prizes">
+                    <div class="prize-card gold-prize">
+                        <div class="prize-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="prize-amount">$100</div>
+                        <div class="prize-label">Cash Prize</div>
+                        <button class="prize-entry-button" data-prize="gold">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                            </svg>
+                            Enter
+                        </button>
+                        </div>
+                    <div class="prize-card silver-prize">
+                        <div class="prize-icon"><i class="fas fa-gift"></i></div>
+                        <div class="prize-amount">$20</div>
+                        <div class="prize-label">Gift Certificate</div>
+                        <button class="prize-entry-button" data-prize="silver">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
+                            </svg>
+                            Enter
+                        </button>
+                    </div>
+                    <div class="prize-card bronze-prize">
+                        <div class="prize-icon"><i class="fas fa-ticket"></i></div>
+                        <div class="prize-amount">$5</div>
+                        <div class="prize-label">Gift Certificate</div>
+                        <button class="prize-entry-button" data-prize="bronze">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                            </svg>
+                            Enter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="contest-rules">
+                    <div class="rules-text">Contest Rules</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wallet-page" class="page">
+            <div class="profile-container">
+                <div class="profile-username">Username</div>
+                <div class="profile-location-level">
+                    <span class="profile-level">Level 3-2</span>
+                </div>
+                <div class="profile-picture"></div>
+                <div class="profile-stars-section">
+                    <div class="profile-today-stars">
+                        <div class="star-label-row">
+                            <span class="star-icon">★</span>
+                            <span class="stat-label-inline">Today</span>
+                        </div>
+                        <div class="star-number">0</div>
+                    </div>
+                </div>
+                <div class="profile-stars-row">
+                    <div class="profile-stat-small">
+                        <div class="star-label-row">
+                            <span class="star-icon-small">★</span>
+                            <span class="stat-label-inline">Week</span>
+                        </div>
+                        <div class="stat-number">0</div>
+                    </div>
+                    <div class="profile-stat-small">
+                        <div class="star-label-row">
+                            <span class="star-icon-small">★</span>
+                            <span class="stat-label-inline">Ever</span>
+                        </div>
+                        <div class="stat-number">247</div>
+                    </div>
+                </div>
+                <div class="coin-tracker">
+                    <div class="coin-indicator">
+                        <div class="coin-icon-tracker">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                            </svg>
+                        </div>
+                        <span class="coin-x">x</span>
+                        <span class="coin-count" id="gold-coin-count">0</span>
+                    </div>
+                    <div class="coin-indicator">
+                        <div class="coin-icon-tracker">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
+                            </svg>
+                        </div>
+                        <span class="coin-x">x</span>
+                        <span class="coin-count" id="silver-coin-count">0</span>
+                    </div>
+                    <div class="coin-indicator">
+                        <div class="coin-icon-tracker">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
+                                <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
+                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                            </svg>
+                        </div>
+                        <span class="coin-x">x</span>
+                        <span class="coin-count" id="bronze-coin-count">0</span>
+                    </div>
+                </div>
+                <div class="profile-stat">
+                    <div class="stat-label">Longest streak:</div>
+                    <div class="stat-value">13 Days</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="journey-page" class="page">
+            <div class="platforms-container">
+                <!-- Platforms will be created by journey.js -->
+            </div>
+            <div class="journey-button-container">
+                <div class="journey-button-glow"></div>
+                <button class="journey-go-button">
+                    Go (<span class="star-icon">★</span> x <span class="journey-star-count">0</span>)
+                </button>
+            </div>
+            <button class="journey-help-button">?</button>
+        </div>
+
+        <div id="rival-page" class="page">
+            <div class="rival-container">
+                <h2 class="rival-title">DAILY RIVAL</h2>
+                
+                <div class="rival-vs-section">
+                    <div class="rival-profile">
+                        <div class="rival-name">Username</div>
+                        <div class="rival-avatar"></div>
+                        <div class="rival-stars"><span class="star-icon">★</span> x 14</div>
+                    </div>
+                    
+                    <div class="rival-divider">
+                        <span class="rival-vs">VS</span>
+                    </div>
+                    
+                    <div class="rival-profile">
+                        <div class="rival-name">Rivalname</div>
+                        <div class="rival-avatar"></div>
+                        <div class="rival-stars"><span class="star-icon">★</span> x 12</div>
+                    </div>
+                </div>
+                
+                <div class="rival-challenge">
+                    Beat your daily rival to win 
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin: 0 4px;">
+                        <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
+                        <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
+                        <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                    </svg>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Game Overlay -->
+    <div id="memoryOverlay" class="game-overlay">
+        <iframe id="memoryIframe" src="memory/index.html" scrolling="no"></iframe>
+    </div>
+
+    <!-- Mystery Word Overlay -->
+    <div id="mysteryWordOverlay" class="game-overlay">
+        <iframe id="mysteryWordIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Beticle Overlay -->
+    <div id="beticleOverlay" class="game-overlay">
+        <iframe id="beticleIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Blackjack (Speed 21) Overlay -->
+    <div id="blackjackOverlay" class="game-overlay">
+        <iframe id="blackjackIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Lost and Found Overlay -->
+    <div id="lostAndFoundOverlay" class="game-overlay">
+        <iframe id="lostAndFoundIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Gold Case Overlay -->
+    <div id="goldCaseOverlay" class="game-overlay">
+        <iframe id="goldCaseIframe" scrolling="no"></iframe>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="tab-button active" data-page="games">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C10.34 2 9 3.34 9 5V11H7C5.34 11 4 12.34 4 14V18C4 19.66 5.34 21 7 21H17C18.66 21 20 19.66 20 18V14C20 12.34 18.66 11 17 11H15V5C15 3.34 13.66 2 12 2ZM12 4C12.55 4 13 4.45 13 5V11H11V5C11 4.45 11.45 4 12 4ZM12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Games</div>
+        </button>
+        <button class="tab-button" data-page="rival">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11ZM8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11ZM8 13C5.67 13 1 14.17 1 16.5V19H15V16.5C15 14.17 10.33 13 8 13ZM16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V19H23V16.5C23 14.17 18.33 13 16 13Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Rival</div>
+        </button>
+        <button class="tab-button" data-page="journey">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.5 3L20.34 3.03L15 5.1L9 3L3.36 4.9C3.15 4.97 3 5.15 3 5.38V20.5C3 20.78 3.22 21 3.5 21L3.66 20.97L9 18.9L15 21L20.64 19.1C20.85 19.03 21 18.85 21 18.62V3.5C21 3.22 20.78 3 20.5 3ZM15 19L9 16.89V5L15 7.11V19Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Journey</div>
+        </button>
+        <button class="tab-button" data-page="sweeps">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Sweeps</div>
+        </button>
+        <button class="tab-button" data-page="wallet">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 18V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V6H12C10.9 6 10 6.9 10 8V16C10 17.1 10.9 18 12 18H21ZM12 16H22V8H12V16ZM16 13.5C15.17 13.5 14.5 12.83 14.5 12C14.5 11.17 15.17 10.5 16 10.5C16.83 10.5 17.5 11.17 17.5 12C17.5 12.83 16.83 13.5 16 13.5Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Wallet</div>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="scramble.js"></script>
+    <script src="highLow.js"></script>
+    <script src="journey/journey.js"></script>
+</body>
+</html>
+

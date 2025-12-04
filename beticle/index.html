@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beticle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="beticle.css">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Start Menu -->
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../src/img/betical.svg" alt="Beticle" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="beticleTitle">BETICLE</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">Find the secret word in 13 guesses.</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">The word will lie alphebetically between the words you guess.</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">Guess more to narrow down the answer.</div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <button id="helpButton"></button>
+        <div id="guessCounter">
+            <div class="guess-label">GUESSES</div>
+            <div class="guess-circle">
+                <span id="guessNumber">13</span>
+            </div>
+            <div id="guessStars">
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+            </div>
+        </div>
+        
+        <div id="gameRows">
+            <div id="topWordRow" class="word-row"></div>
+            <div id="guessRow" class="word-row guess-row"></div>
+            <div id="bottomWordRow" class="word-row"></div>
+        </div>
+        
+        <div id="proximityHint">hint</div>
+        
+        <div class="keyboard">
+            <div class="keyboard-row">
+                <button class="key" data-key="Q">Q</button>
+                <button class="key" data-key="W">W</button>
+                <button class="key" data-key="E">E</button>
+                <button class="key" data-key="R">R</button>
+                <button class="key" data-key="T">T</button>
+                <button class="key" data-key="Y">Y</button>
+                <button class="key" data-key="U">U</button>
+                <button class="key" data-key="I">I</button>
+                <button class="key" data-key="O">O</button>
+                <button class="key" data-key="P">P</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key" data-key="A">A</button>
+                <button class="key" data-key="S">S</button>
+                <button class="key" data-key="D">D</button>
+                <button class="key" data-key="F">F</button>
+                <button class="key" data-key="G">G</button>
+                <button class="key" data-key="H">H</button>
+                <button class="key" data-key="J">J</button>
+                <button class="key" data-key="K">K</button>
+                <button class="key" data-key="L">L</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-large" data-key="ENTER">ENTER</button>
+                <button class="key" data-key="Z">Z</button>
+                <button class="key" data-key="X">X</button>
+                <button class="key" data-key="C">C</button>
+                <button class="key" data-key="V">V</button>
+                <button class="key" data-key="B">B</button>
+                <button class="key" data-key="N">N</button>
+                <button class="key" data-key="M">M</button>
+                <button class="key key-large" data-key="BACKSPACE">⌫</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="beticle.js"></script>
+</body>
+</html>
+
