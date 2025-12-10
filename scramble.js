@@ -1012,6 +1012,7 @@ function updateCalendar() {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - dayOfWeek);
     
+    
     weekBoxes.forEach((box, index) => {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + index);
@@ -1021,12 +1022,12 @@ function updateCalendar() {
         
         if (index < dayOfWeek) {
             // Past days
-            const stars = localStorage.getItem(`dailyStars_${dayKey}`);
-            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + (stars || '0') + '</span>';
+            const stars = parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0');
+            dayNumberElement.textContent = stars;
         } else if (index === dayOfWeek) {
             // Today
             const stars = getDailyStars();
-            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
+            dayNumberElement.textContent = stars;
         } else {
             // Future days
             dayNumberElement.innerHTML = '&nbsp;';

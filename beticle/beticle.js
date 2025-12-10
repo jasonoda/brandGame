@@ -70,6 +70,11 @@ function addStars(count) {
     if (window.parent && window.parent.loadGameScores) {
         window.parent.loadGameScores();
     }
+    
+    // Update parent window calendar if accessible
+    if (window.parent && window.parent.updateCalendar) {
+        window.parent.updateCalendar();
+    }
 }
 
 // Common 5-letter words that people would know (same as Mystery Word)

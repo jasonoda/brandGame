@@ -3161,6 +3161,12 @@ class Scene {
     
     createDealAmountOverlay(dealValue) {
 
+        // Calculate stars earned from the final score
+        const starsEarned = calculateGoldCaseStarsFromScore(dealValue);
+        
+        // Save the game result
+        saveGoldCaseGameResult(dealValue, starsEarned);
+
         // Use endScore to create the final score overlay
         // Pass the time bonus as the only stat to display
         const statsArray = [['TIME BONUS', this.timeBonus]];
@@ -5959,4 +5965,100 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initGame();
 });
+
+// Helper function to get today's key for localStorage
+function getTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+// Calculate stars from Gold Case score
+function calculateGoldCaseStarsFromScore(scoreValue) {
+    let stars = 0;
+    // Star thresholds for Gold Case (matching EndScore defaults)
+    const starThresholds = [0, 100000, 600000, 1200000, 2000000];
+    // 1 star = >= 0
+    // 2 stars = >= 100000
+    // 3 stars = >= 600000
+    // 4 stars = >= 1200000
+    // 5 stars = >= 2000000
+    for (let i = starThresholds.length - 1; i >= 0; i--) {
+        if (scoreValue >= starThresholds[i]) {
+            stars = i + 1; // Add 1 because index 0 = 1 star, index 4 = 5 stars
+            break;
+        }
+    }
+    return stars;
+}
+
+// Save Gold Case game result (similar to blackjack/lostAndFound)
+function saveGoldCaseGameResult(finalScore, starsEarned) {
+    const todayKey = getTodayKey();
+    
+    console.log('[GoldCase] Saving game result:', { finalScore, starsEarned, todayKey });
+    
+    // Check if already played today BEFORE overwriting
+    const previousStars = parseInt(localStorage.getItem(`goldCaseStars_${todayKey}`) || '0');
+    const previousScore = parseInt(localStorage.getItem(`goldCaseScore_${todayKey}`) || '0');
+    const wasComplete = localStorage.getItem(`goldCaseComplete_${todayKey}`) === 'true';
+    
+    console.log('[GoldCase] Previous stars:', previousStars, 'Was complete:', wasComplete);
+    
+    // Check if this is a better result
+    const isBetter = !wasComplete || finalScore > previousScore || starsEarned > previousStars;
+    
+    if (isBetter) {
+        // Calculate star difference to add to totals
+        const starDifference = wasComplete ? (starsEarned - previousStars) : starsEarned;
+        
+        console.log('[GoldCase] Adding star difference:', starDifference);
+    
+        // Update daily and total stars if there's a difference
+        if (starDifference !== 0) {
+            const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+            const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
+            const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
+    
+            localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
+            localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
+            localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + starDifference));
+        }
+        
+        // Always save the new score and stars if better
+        localStorage.setItem(`goldCaseScore_${todayKey}`, String(finalScore));
+        localStorage.setItem(`goldCaseStars_${todayKey}`, String(starsEarned));
+        localStorage.setItem(`goldCaseComplete_${todayKey}`, 'true');
+        
+        console.log('[GoldCase] Verified saved stars:', localStorage.getItem(`goldCaseStars_${todayKey}`));
+    }
+    
+    // Update parent window displays if accessible
+    if (window.parent && window.parent !== window) {
+        if (window.parent.updateStarDisplay) {
+            window.parent.updateStarDisplay();
+        }
+        if (window.parent.updateWalletStars) {
+            window.parent.updateWalletStars();
+        }
+        if (window.parent.updateRivalStars) {
+            window.parent.updateRivalStars();
+        }
+        if (window.parent.updateHeaderStarCounter) {
+            window.parent.updateHeaderStarCounter();
+        }
+        if (window.parent.updateWalletStars2) {
+            window.parent.updateWalletStars2();
+        }
+        
+        // Update calendar
+        if (window.parent.updateCalendar) {
+            window.parent.updateCalendar();
+        }
+        
+        // Reload Gold Case scores on main page
+        if (window.parent.loadGameScores) {
+            window.parent.loadGameScores();
+        }
+    }
+}
 

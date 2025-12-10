@@ -3157,6 +3157,11 @@ function saveLostAndFoundGameResult(finalScore, starsEarned) {
             window.parent.updateRivalStars();
         }
         
+        // Update calendar
+        if (window.parent.updateCalendar) {
+            window.parent.updateCalendar();
+        }
+        
         // Reload Lost and Found scores on main page
         if (window.parent.loadGameScores) {
             window.parent.loadGameScores();

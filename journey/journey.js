@@ -236,6 +236,41 @@ document.addEventListener('DOMContentLoaded', function() {
     player.style.pointerEvents = 'none';
     // Debug border for container
     // player.style.border = '1px solid red';
+    
+    // Create level progress display at top of page
+    const levelProgress = document.createElement('div');
+    levelProgress.className = 'journey-level-progress';
+    levelProgress.style.position = 'fixed';
+    levelProgress.style.left = '50%';
+    levelProgress.style.top = '70px';
+    levelProgress.style.transform = 'translateX(-50%)';
+    levelProgress.style.backgroundColor = '#3e1274';
+    levelProgress.style.color = 'white';
+    levelProgress.style.fontFamily = "'Nunito', 'Helvetica Neue', sans-serif";
+    levelProgress.style.fontSize = '12px';
+    levelProgress.style.fontWeight = '700';
+    levelProgress.style.textAlign = 'center';
+    levelProgress.style.whiteSpace = 'nowrap';
+    levelProgress.style.pointerEvents = 'none';
+    levelProgress.style.padding = '4px 10px';
+    levelProgress.style.borderRadius = '20px';
+    levelProgress.style.zIndex = '10002';
+    
+    // Function to update level progress display
+    function updateLevelProgress() {
+        const level = getJourneyLevel();
+        const position = getPlayerPosition();
+        levelProgress.textContent = `LEVEL: ${level} - ${position + 1}`;
+    }
+    
+    // Update progress display initially
+    updateLevelProgress();
+    
+    // Add progress display to journey page
+    const journeyPage = document.getElementById('journey-page');
+    if (journeyPage) {
+        journeyPage.appendChild(levelProgress);
+    }
 
     // Create shadow div (behind the player, at the feet)
     const shadow = document.createElement('div');
@@ -365,6 +400,67 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track initial player Y position
     let initialPlayerY = 0;
     
+    // Function to snap container to correct position (no lerp)
+    function snapContainerPosition() {
+        // Use the exact same calculation as updateContainerPosition
+        const playerTop = parseFloat(gsap.getProperty(player, "top")) || parseFloat(player.style.top) || 0;
+        const playerY = parseFloat(gsap.getProperty(innerPlayer, "y") || -35);
+        const playerCenterY = playerTop + playerY + 35;
+
+        // Current container position on screen
+        const containerRect = container.getBoundingClientRect();
+        const playerCenterScreenY = containerRect.top + playerCenterY;
+
+        // Target screen Y is 2/3 down the viewport
+        const screenHeight = window.innerHeight || 0;
+        const targetScreenY = screenHeight * (2 / 3);
+
+        // Desired delta to move container so player sits at target
+        const desiredDelta = targetScreenY - playerCenterScreenY;
+        
+        // Calculate final position
+        const finalOffset = containerYOffset + desiredDelta;
+        if (isNaN(finalOffset)) finalOffset = 0;
+        
+        // Set target and current to the same value (snap, no lerp)
+        targetContainerYOffset = finalOffset;
+        containerYOffset = finalOffset;
+
+        // Set initial position 100px higher
+        const initialOffset = finalOffset - 100;
+        container.style.transform = `translateX(-50%) translateY(${initialOffset}px)`;
+        
+        // Set opacity to 0
+        gsap.set(container, { opacity: 0 });
+        
+        // Animate both position and opacity together
+        const animObj = { offset: initialOffset };
+        gsap.to(animObj, {
+            offset: finalOffset,
+            duration: 1,
+            ease: 'power2.out',
+            onUpdate: function() {
+                const currentOffset = animObj.offset;
+                container.style.transform = `translateX(-50%) translateY(${currentOffset}px)`;
+            },
+            onComplete: function() {
+                // Ensure final position is set
+                containerYOffset = finalOffset;
+                container.style.transform = `translateX(-50%) translateY(${finalOffset}px)`;
+            }
+        });
+        
+        // Animate opacity
+        gsap.to(container, {
+            opacity: 1,
+            duration: 1,
+            ease: 'power2.out'
+        });
+    }
+    
+    // Expose snap function globally for tab switching
+    window.snapJourneyContainer = snapContainerPosition;
+    
     // Function to update container position based on player movement
     function updateContainerPosition() {
         // Player center in container space
@@ -439,6 +535,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             currentPlatformIndex = index;
             
+            // Update level progress display
+            if (typeof updateLevelProgress === 'function') {
+                updateLevelProgress();
+            }
+            
             // Collect coin if present
             if (coinOnPlatform && coinType > 0) {
                 // Animate coin collection with timeline
@@ -477,10 +578,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Track if initial positioning is complete
+    let initialPositionComplete = false;
+    
     // Position player on saved position or first platform
     if (platforms.length > 0) {
         const startPosition = Math.min(savedPosition, platforms.length - 1);
-        movePlayerToPlatform(startPosition);
+        const platform = platforms[startPosition];
+        const targetLeft = parseFloat(platform.style.left);
+        const targetTop = parseFloat(platform.style.top);
+        
+        // Set player position immediately (no animation on initial load)
+        gsap.set(player, {
+            left: targetLeft + 'px',
+            top: targetTop + 'px'
+        });
+        gsap.set(innerPlayer, { y: -35 });
+        currentPlatformIndex = startPosition;
+        
         console.log('[Journey] Positioned player at platform:', startPosition);
     }
     
@@ -492,14 +607,14 @@ document.addEventListener('DOMContentLoaded', function() {
         updateMoveStarsDisplay();
     }, 100);
     
-    // Wait a frame for positioning to complete, then get initial player Y position and start loop
+    // Wait for layout to settle, then get initial player Y position and start loop
     requestAnimationFrame(() => {
         // Get initial player Y position
         const playerTop = parseFloat(player.style.top) || 0;
         const playerY = parseFloat(gsap.getProperty(innerPlayer, "y") || -35);
         initialPlayerY = playerTop + playerY;
         
-        // Start the animation loop after initial position is set
+        // Start the animation loop - it will handle positioning
         animateLoop();
     });
     
@@ -519,6 +634,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (removeMoveStars(1)) {
                     // Save new position
                     setPlayerPosition(currentPlatformIndex + 1);
+                    // Update level progress display
+                    if (typeof updateLevelProgress === 'function') {
+                        updateLevelProgress();
+                    }
                     // Disable button during movement
                     isButtonActive = false;
                     goButton.style.cursor = 'not-allowed';
@@ -580,6 +699,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const newIndex = currentPlatformIndex + 1;
                 movePlayerToPlatform(newIndex);
                 setPlayerPosition(newIndex);
+                // Update level progress display
+                if (typeof updateLevelProgress === 'function') {
+                    updateLevelProgress();
+                }
             }
         } else if (event.key === 'ArrowDown') {
             // Move to previous platform (lower index = lower down)
@@ -587,6 +710,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const newIndex = currentPlatformIndex - 1;
                 movePlayerToPlatform(newIndex);
                 setPlayerPosition(newIndex);
+                // Update level progress display
+                if (typeof updateLevelProgress === 'function') {
+                    updateLevelProgress();
+                }
             }
         } else if (event.key === 'w' || event.key === 'W') {
             // Cheat key: add 5 stars and 5 move stars

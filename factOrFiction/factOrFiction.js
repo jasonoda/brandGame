@@ -153,12 +153,6 @@ function checkAnswers() {
             isFact: item.isFact
         });
         
-        // Update button colors and add emoji
-        if (item.isFact) {
-            buttons[index].style.background = 'linear-gradient(to bottom, #26D7A4, #1DB88A)';
-        } else {
-            buttons[index].style.background = 'linear-gradient(to bottom, #FF8FA3, #FF6B82)';
-        }
         
         // Add check or X emoji
         const emoji = isCorrect ? ' ✓' : ' ✗';
@@ -264,12 +258,8 @@ function showCompletedFOF() {
             const isCorrect = result ? result.isCorrect : true;
             const isFact = result ? result.isFact : item.isFact;
             
-            // Set color based on whether it's a fact or fiction
-            if (isFact) {
-                button.style.background = 'linear-gradient(to bottom, #26D7A4, #1DB88A)';
-            } else {
-                button.style.background = 'linear-gradient(to bottom, #FF8FA3, #FF6B82)';
-            }
+            // Keep default styling; do not change colors on reveal
+            button.style.background = '';
             
             // Add check or X emoji based on whether user got it right
             const emoji = isCorrect ? ' ✓' : ' ✗';

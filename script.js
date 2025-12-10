@@ -20,6 +20,7 @@ function updateCalendar() {
     const weekStart = getWeekStartDate();
     const weekBoxes = document.querySelectorAll('.week-box');
     
+    
     weekBoxes.forEach((box, index) => {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + index);
@@ -28,11 +29,10 @@ function updateCalendar() {
         
         if (!dayNumberElement) return;
         
-        // If this day is in the past or today, show stars earned
+        // If this day is in the past or today, show stars earned (without star icon)
         if (index <= dayOfWeek) {
             const stars = parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0');
-            // Use the same format for all days
-            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
+            dayNumberElement.textContent = stars;
         } else {
             // Future days show nothing
             dayNumberElement.innerHTML = '&nbsp;';
@@ -59,6 +59,54 @@ window.updateHeaderStarCounter = updateHeaderStarCounter;
 window.updateStarDisplay = updateHeaderStarCounter;
 
 // Function to update wallet star displays
+// Calculate longest streak of consecutive days played
+function calculateLongestStreak() {
+    // Get all dates that have dailyStars > 0 (days played)
+    const playedDates = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('dailyStars_')) {
+            const stars = parseInt(localStorage.getItem(key) || '0');
+            if (stars > 0) {
+                // Extract date from key (format: dailyStars_YYYY-MM-DD)
+                const dateStr = key.replace('dailyStars_', '');
+                playedDates.push(dateStr);
+            }
+        }
+    }
+    
+    if (playedDates.length === 0) {
+        return 0;
+    }
+    
+    // Sort dates chronologically
+    playedDates.sort();
+    
+    // Find longest consecutive sequence
+    let longestStreak = 1;
+    let currentStreak = 1;
+    
+    for (let i = 1; i < playedDates.length; i++) {
+        const prevDate = new Date(playedDates[i - 1]);
+        const currDate = new Date(playedDates[i]);
+        
+        // Calculate difference in days
+        const diffTime = currDate - prevDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            // Consecutive day
+            currentStreak++;
+            longestStreak = Math.max(longestStreak, currentStreak);
+        } else {
+            // Streak broken
+            currentStreak = 1;
+        }
+    }
+    
+    return longestStreak;
+}
+
 function updateWalletStars2() {
 
     try {
@@ -107,6 +155,13 @@ function updateWalletStars2() {
         if (weekElements[2]) {
             weekElements[2].textContent = everStars;
         }
+        
+        // Update longest streak
+        const longestStreak = calculateLongestStreak();
+        const streakElement = document.getElementById('longestStreakValue');
+        if (streakElement) {
+            streakElement.textContent = `${longestStreak} ${longestStreak === 1 ? 'Day' : 'Days'}`;
+        }
     } catch (error) {
         console.error('[Wallet] ERROR:', error);
     }
@@ -143,15 +198,44 @@ function updateLoyaltyStats() {
 
 // Set the current date in the header
 function setCurrentDate() {
-    const dateElement = document.querySelector('.date');
-    if (!dateElement) return;
-    
-    // Check if p=2 parameter is set
+    // Check if p=2 parameter is set first
     const urlParams = new URLSearchParams(window.location.search);
     const logoPlacement = urlParams.get('p');
     
+    // Always remove weekly background element entirely
+    const weekHeaderBackground = document.querySelector('.week-header-background');
+    if (weekHeaderBackground) {
+        weekHeaderBackground.remove();
+    }
+    
+    // Hide/remove standalone top-logo-box div when p=2
+    if (logoPlacement === '2') {
+        const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+        if (topLogoBoxStandalone) {
+            topLogoBoxStandalone.style.display = 'none';
+        }
+    }
+    
+    const dateElement = document.querySelector('.date');
+    if (!dateElement) return;
+    
+    const dateSubtitleElement = document.querySelector('.date-subtitle');
+    
     if (logoPlacement === '2') {
         dateElement.textContent = 'DAILY GAME SUITE';
+        
+        // Set date in subtitle
+        if (dateSubtitleElement) {
+            const today = new Date();
+            const months = [
+                'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+            ];
+            const month = months[today.getMonth()];
+            const day = today.getDate();
+            const year = today.getFullYear();
+            dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
+        }
     } else {
         const today = new Date();
         
@@ -165,10 +249,20 @@ function setCurrentDate() {
         const year = today.getFullYear();
         
         // dateElement.textContent = `${month} ${day}, ${year}`;
+        
+        // Hide subtitle when not p=2
+        if (dateSubtitleElement) {
+            dateSubtitleElement.textContent = '';
+        }
     }
 }
 
 // Load game stars and display them on main page
+// Alias for loadGameScores2 for backward compatibility
+function loadGameScores() {
+    loadGameScores2();
+}
+
 function loadGameScores2() {
     // console.log("loadGameScores called1");
     const todayKey = getTodayKey();
@@ -223,6 +317,46 @@ function loadGameScores2() {
             blackjackStarsElement.appendChild(star);
         }
     }
+    
+    // Load gold case score and stars
+    const goldCaseScore = parseInt(localStorage.getItem(`goldCaseScore_${todayKey}`) || '0');
+    const goldCaseStars = parseInt(localStorage.getItem(`goldCaseStars_${todayKey}`) || '0');
+    const goldCaseComplete = localStorage.getItem(`goldCaseComplete_${todayKey}`) === 'true';
+    
+    const goldCaseLockText = document.getElementById('goldCaseLockText');
+    const goldCaseScoreText = document.getElementById('goldCaseScoreText');
+    const goldCaseScoreElement = document.getElementById('goldCaseScore');
+    const goldCaseStarsElement = document.getElementById('goldCaseStars');
+    
+    if (goldCaseComplete && goldCaseLockText && goldCaseScoreText) {
+        // Hide lock text and show score/stars
+        goldCaseLockText.style.display = 'none';
+        goldCaseScoreText.style.display = 'flex';
+        
+        // Update score
+        if (goldCaseScoreElement) {
+            goldCaseScoreElement.textContent = goldCaseScore.toLocaleString();
+        }
+        
+        // Update stars
+        if (goldCaseStarsElement) {
+            goldCaseStarsElement.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                star.style.color = i < goldCaseStars ? '#FF8C42' : '#ddd';
+                goldCaseStarsElement.appendChild(star);
+            }
+        }
+    } else {
+        // Show lock text and hide score/stars
+        if (goldCaseLockText) {
+            goldCaseLockText.style.display = 'flex';
+        }
+        if (goldCaseScoreText) {
+            goldCaseScoreText.style.display = 'none';
+        }
+    }
 }
 
 // Function to update blackjack stars display
@@ -244,6 +378,31 @@ function updateBlackjackStars() {
 // Make it globally accessible
 window.updateBlackjackStars = updateBlackjackStars;
 
+// Hide weekly background immediately - run multiple times to ensure it's hidden
+(function() {
+    function hideWeekHeaderBackground() {
+        const weekHeaderBackground = document.querySelector('.week-header-background');
+        if (weekHeaderBackground) {
+            weekHeaderBackground.remove();
+        }
+        // Hide/remove standalone top-logo-box div when p=2
+        const urlParams = new URLSearchParams(window.location.search);
+        const logoPlacement = urlParams.get('p');
+        if (logoPlacement === '2') {
+            const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+            if (topLogoBoxStandalone) {
+                topLogoBoxStandalone.style.display = 'none';
+            }
+        }
+    }
+    // Run immediately
+    hideWeekHeaderBackground();
+    // Run again after delays to catch any late-loading scripts
+    setTimeout(hideWeekHeaderBackground, 100);
+    setTimeout(hideWeekHeaderBackground, 500);
+    setTimeout(hideWeekHeaderBackground, 1000);
+})();
+
 // Run when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     setCurrentDate();
@@ -257,6 +416,39 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.updateCoinDisplays) {
         window.updateCoinDisplays();
     }
+    
+    // Initialize help button
+    const helpButton = document.querySelector('.help-button');
+    const helpPopup = document.getElementById('help-popup-overlay');
+    const helpPopupClose = document.querySelector('.help-popup-close');
+    
+    if (helpButton && helpPopup) {
+        helpButton.addEventListener('click', () => {
+            helpPopup.classList.add('show');
+            // Disable body scrolling when popup is open
+            document.body.style.overflow = 'hidden';
+        });
+    }
+    
+    if (helpPopupClose && helpPopup) {
+        const closePopup = () => {
+            helpPopup.classList.remove('show');
+            // Re-enable body scrolling when popup is closed
+            document.body.style.overflow = '';
+        };
+        
+        helpPopupClose.addEventListener('click', closePopup);
+        
+        // Close when clicking overlay
+        helpPopup.addEventListener('click', (e) => {
+            if (e.target === helpPopup) {
+                closePopup();
+            }
+        });
+    }
+    
+    // Update help button visibility on load
+    updateLogoVisibility();
 });
 
 // Tab button functionality
@@ -312,6 +504,46 @@ buttons.forEach(button => {
             const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             const moveStars = localStorage.getItem(`moveStars_${todayKey}`);
             console.log('[Journey Tab] Current move stars:', moveStars);
+            
+            // Hide help button on journey page
+            const helpButton = document.querySelector('.help-button');
+            if (helpButton) {
+                helpButton.classList.add('hidden');
+            }
+            
+            // Snap container position when journey tab becomes active (prevent lerp animation)
+            // Use multiple timeouts to ensure page is fully rendered
+            setTimeout(() => {
+                const journeyPage = document.getElementById('journey-page');
+                if (journeyPage && journeyPage.classList.contains('active')) {
+                    // Call snap function if it exists (journey.js needs to expose this)
+                    if (window.snapJourneyContainer) {
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                window.snapJourneyContainer();
+                            });
+                        });
+                    }
+                }
+            }, 100);
+        } else {
+            // Show help button on other pages (if close button is not showing)
+            const helpButton = document.querySelector('.help-button');
+            if (helpButton) {
+                updateLogoVisibility();
+            }
+        }
+        
+        // Hide top-logo-box when switching to games tab if p=2 is set
+        if (targetPage === 'games') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const logoPlacement = urlParams.get('p');
+            if (logoPlacement === '2') {
+                const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+                if (topLogoBoxStandalone) {
+                    topLogoBoxStandalone.style.display = 'none';
+                }
+            }
         }
         
         // Trigger rival page animations
@@ -1045,8 +1277,18 @@ function updateLogoVisibility() {
     const logo = document.querySelector('.logo-img');
     const topLogoBox = document.querySelector('.top-logo-box');
     const closeButton = document.querySelector('.game-overlay-close');
+    const helpButton = document.querySelector('.help-button');
     const urlParams = new URLSearchParams(window.location.search);
     const logoPlacement = urlParams.get('p');
+    
+    // Hide/show help button based on close button state
+    if (helpButton) {
+        if (closeButton && closeButton.classList.contains('show')) {
+            helpButton.classList.add('hidden');
+        } else {
+            helpButton.classList.remove('hidden');
+        }
+    }
     
     if (hasLogo) {
         if (logoPlacement === '2') {

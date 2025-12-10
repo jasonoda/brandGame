@@ -82,6 +82,7 @@ function hlUpdateCalendar() {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - dayOfWeek);
     
+    
     weekBoxes.forEach((box, index) => {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + index);
@@ -90,11 +91,11 @@ function hlUpdateCalendar() {
         const dayNumberElement = box.querySelector('.day-number');
         
         if (index < dayOfWeek) {
-            const stars = localStorage.getItem(`dailyStars_${dayKey}`);
-            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + (stars || '0') + '</span>';
+            const stars = parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0');
+            dayNumberElement.textContent = stars;
         } else if (index === dayOfWeek) {
             const stars = hlGetDailyStars();
-            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
+            dayNumberElement.textContent = stars;
         } else {
             dayNumberElement.innerHTML = '&nbsp;';
         }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BG</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,12 +17,31 @@
     <div class="content">
         <div class="header-bar">
             <div class="game-overlay-close">✕</div>
+            <div class="help-button">?</div>
             <div class="menu-icon">
                 <img src="src/img/jos/jos_logo.png" alt="Logo" class="logo-img">
             </div>
-            <div class="date">NOVEMBER 26, 2025</div>
+            <div class="date-container">
+                <div class="date">NOVEMBER 26, 2025</div>
+                <div class="date-subtitle"></div>
+            </div>
             <div class="star-counter">
                 <span class="star-icon">★</span> <span class="star-count">x 0</span>
+            </div>
+        </div>
+        
+        <!-- Help Popup -->
+        <div id="help-popup-overlay" class="help-popup-overlay">
+            <div class="help-popup-content">
+                <div class="help-popup-close">✕</div>
+                <h2 class="help-popup-title">Daily Game Suite</h2>
+                <div class="help-popup-text">
+                    <p>Visit daily for new game content. Complete quizzes, arcade games, and bonus challenges to build your daily star collection.</p>
+                    <p><strong>Earn Stars:</strong> Each game rewards you with stars based on your performance. The better you play, the more stars you earn!</p>
+                    <p><strong>Progress in Journey:</strong> Use your stars to move forward in the Journey tab. Advance through levels and collect gold coins as you progress.</p>
+                    <p><strong>Enter Sweepstakes:</strong> User your daily stars and coins to earn time advantages in the Sweepstakes game. The more you play, the more entries you can earn!</p>
+                    <p>Stars reset daily, so come back every day to keep earning and progressing!</p>
+                </div>
             </div>
         </div>
 
@@ -60,38 +79,42 @@
             </div>
             <div class="carousel-arrow carousel-arrow-right">›</div>
         </div>
-        <div class="week-header-background"></div>
         <div class="week-section">
             <div class="week-title">THIS WEEK:</div>
             <div class="week-subtitle">THANKSGIVING</div>
             <div class="week-container">
-                <div class="week-box">
-                    <div class="day-initial">S</div>
-                    <div class="day-number">0</div>
+                <div class="week-record-box">
+                    <div class="week-record-text">WEEKLY <span class="week-record-star">★</span> RECORD</div>
                 </div>
-                <div class="week-box">
-                    <div class="day-initial">M</div>
-                    <div class="day-number">2</div>
-                </div>
-                <div class="week-box">
-                    <div class="day-initial">T</div>
-                    <div class="day-number">7</div>
-                </div>
-                <div class="week-box">
-                    <div class="day-initial">W</div>
-                    <div class="day-number">4</div>
-                </div>
-                <div class="week-box">
-                    <div class="day-initial">T</div>
-                    <div class="day-number">&nbsp;</div>
-                </div>
-                <div class="week-box">
-                    <div class="day-initial">F</div>
-                    <div class="day-number">&nbsp;</div>
-                </div>
-                <div class="week-box">
-                    <div class="day-initial">S</div>
-                    <div class="day-number">&nbsp;</div>
+                <div class="week-days-container">
+                    <div class="week-box">
+                        <div class="day-initial">S</div>
+                        <div class="day-number">0</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">M</div>
+                        <div class="day-number">2</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">T</div>
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">W</div>
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">T</div>
+                        <div class="day-number">&nbsp;</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">F</div>
+                        <div class="day-number">&nbsp;</div>
+                    </div>
+                    <div class="week-box">
+                        <div class="day-initial">S</div>
+                        <div class="day-number">&nbsp;</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -220,9 +243,17 @@
                     <img src="src/img/goldCase.svg" alt="Gold Case" style="height: 30px; width: auto; margin-bottom: 1px;">
                     <div class="game-title">GOLD CASE</div>
                 </div>
-                <div class="bonus-text">
+                <div class="bonus-text" id="goldCaseLockText">
                     <div class="lock-icon">🔒</div>
                     <div>Play all games to unlock your bonus reward</div>
+                </div>
+                <div class="arcade-text" id="goldCaseScoreText" style="display: none;">
+                    <div class="score-section">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-text" id="goldCaseScore">0</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="stars" id="goldCaseStars" style="color: #ddd;">★★★★★</div>
                 </div>
             </div>
         </div>
@@ -466,7 +497,7 @@
                 </div>
                 <div class="profile-stat">
                     <div class="stat-label">Longest streak:</div>
-                    <div class="stat-value">13 Days</div>
+                    <div class="stat-value" id="longestStreakValue">0 Days</div>
                 </div>
             </div>
         </div>
@@ -481,7 +512,6 @@
                     Go (<span class="star-icon">★</span> x <span class="journey-star-count">0</span>)
                 </button>
             </div>
-            <button class="journey-help-button">?</button>
         </div>
 
         <div id="rival-page" class="page">
@@ -585,10 +615,10 @@
         <button class="tab-button" data-page="wallet">
             <div class="icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 18V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V6H12C10.9 6 10 6.9 10 8V16C10 17.1 10.9 18 12 18H21ZM12 16H22V8H12V16ZM16 13.5C15.17 13.5 14.5 12.83 14.5 12C14.5 11.17 15.17 10.5 16 10.5C16.83 10.5 17.5 11.17 17.5 12C17.5 12.83 16.83 13.5 16 13.5Z" fill="#555"/>
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#555"/>
                 </svg>
             </div>
-            <div class="label">Wallet</div>
+            <div class="label">Profile</div>
         </button>
     </div>
 
