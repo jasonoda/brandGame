@@ -511,21 +511,13 @@ buttons.forEach(button => {
                 helpButton.classList.add('hidden');
             }
             
-            // Snap container position when journey tab becomes active (prevent lerp animation)
-            // Use multiple timeouts to ensure page is fully rendered
-            setTimeout(() => {
+            // Snap container position when journey tab becomes active
+            if (window.snapJourneyContainer) {
                 const journeyPage = document.getElementById('journey-page');
                 if (journeyPage && journeyPage.classList.contains('active')) {
-                    // Call snap function if it exists (journey.js needs to expose this)
-                    if (window.snapJourneyContainer) {
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                window.snapJourneyContainer();
-                            });
-                        });
-                    }
+                    window.snapJourneyContainer();
                 }
-            }, 100);
+            }
         } else {
             // Show help button on other pages (if close button is not showing)
             const helpButton = document.querySelector('.help-button');

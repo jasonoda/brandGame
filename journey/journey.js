@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Set initial Y transform value on the inner player (for bounce)
-    gsap.set(innerPlayer, { y: -35 });
+    innerPlayer.style.transform = 'translateY(-35px)';
     
     // Track current platform index
     let currentPlatformIndex = 0;
@@ -390,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track container's current Y offset
     let containerYOffset = 0;
     let targetContainerYOffset = 0;
-    let isAnimating = false;
     
     // Lerp function for smooth interpolation
     function lerp(start, end, factor) {
@@ -400,12 +399,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track initial player Y position
     let initialPlayerY = 0;
     
-    // Function to snap container to correct position (no lerp)
+    // Function to snap container to correct position (no lerp, no animations)
     function snapContainerPosition() {
         // Use the exact same calculation as updateContainerPosition
-        const playerTop = parseFloat(gsap.getProperty(player, "top")) || parseFloat(player.style.top) || 0;
+        const playerTop = parseFloat(player.style.top) || 0;
+        // Get player Y from GSAP property (reading, not animating)
         const playerY = parseFloat(gsap.getProperty(innerPlayer, "y") || -35);
-        const playerCenterY = playerTop + playerY + 35;
+        const playerCenterY = playerTop + playerY + 125;
 
         // Current container position on screen
         const containerRect = container.getBoundingClientRect();
@@ -420,42 +420,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate final position
         const finalOffset = containerYOffset + desiredDelta;
-        if (isNaN(finalOffset)) finalOffset = 0;
+        if (isNaN(finalOffset)) {
+            containerYOffset = 0;
+            targetContainerYOffset = 0;
+            return;
+        }
         
         // Set target and current to the same value (snap, no lerp)
         targetContainerYOffset = finalOffset;
         containerYOffset = finalOffset;
 
-        // Set initial position 100px higher
-        const initialOffset = finalOffset - 100;
-        container.style.transform = `translateX(-50%) translateY(${initialOffset}px)`;
+        // Set position immediately (no animation - just snap)
+        container.style.transform = `translateX(-50%) translateY(${finalOffset}px)`;
         
-        // Set opacity to 0
-        gsap.set(container, { opacity: 0 });
-        
-        // Animate both position and opacity together
-        const animObj = { offset: initialOffset };
-        gsap.to(animObj, {
-            offset: finalOffset,
-            duration: 1,
-            ease: 'power2.out',
-            onUpdate: function() {
-                const currentOffset = animObj.offset;
-                container.style.transform = `translateX(-50%) translateY(${currentOffset}px)`;
-            },
-            onComplete: function() {
-                // Ensure final position is set
-                containerYOffset = finalOffset;
-                container.style.transform = `translateX(-50%) translateY(${finalOffset}px)`;
-            }
-        });
-        
-        // Animate opacity
-        gsap.to(container, {
-            opacity: 1,
-            duration: 1,
-            ease: 'power2.out'
-        });
+        // Set opacity to 1 immediately (no animation)
+        container.style.opacity = '1';
     }
     
     // Expose snap function globally for tab switching
@@ -464,7 +443,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to update container position based on player movement
     function updateContainerPosition() {
         // Player center in container space
-        const playerTop = parseFloat(gsap.getProperty(player, "top")) || parseFloat(player.style.top) || 0;
+        const playerTop = parseFloat(player.style.top) || 0;
+        // Get player Y from GSAP property (reading, not animating)
         const playerY = parseFloat(gsap.getProperty(innerPlayer, "y") || -35);
         const playerCenterY = playerTop + playerY + 35;
 
@@ -589,11 +569,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetTop = parseFloat(platform.style.top);
         
         // Set player position immediately (no animation on initial load)
-        gsap.set(player, {
-            left: targetLeft + 'px',
-            top: targetTop + 'px'
-        });
-        gsap.set(innerPlayer, { y: -35 });
+        player.style.left = targetLeft + 'px';
+        player.style.top = targetTop + 'px';
+        innerPlayer.style.transform = 'translateY(-35px)';
         currentPlatformIndex = startPosition;
         
         console.log('[Journey] Positioned player at platform:', startPosition);

@@ -105,7 +105,9 @@ function saveGameState() {
     const guesses = [];
     
     // Collect all guesses from the grid
-    for (let row = 0; row < currentRow; row++) {
+    // Include currentRow in the loop to capture the last guess if game is over
+    const rowsToSave = gameOver ? currentRow + 1 : currentRow;
+    for (let row = 0; row < rowsToSave; row++) {
         let guess = '';
         for (let col = 0; col < WORD_LENGTH; col++) {
             const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -210,8 +212,12 @@ async function init() {
     updateGuessCounter();
     handleResponsiveLayout();
     
-    // If game is already complete, skip start menu and go straight to game
-    if (isMysteryWordComplete()) {
+    // Load saved game state to check if game is over (won or lost)
+    const hasLoadedState = loadGameState();
+    const gameIsOver = hasLoadedState && gameOver;
+    
+    // If game is already complete (won) or over (lost), skip start menu and go straight to game
+    if (isMysteryWordComplete() || gameIsOver) {
         const startMenu = document.getElementById('startMenu');
         const gameContainer = document.getElementById('gameContainer');
         
@@ -241,11 +247,8 @@ async function init() {
             }, 100);
         }
         
-        // Load saved game state
-        const hasLoadedState = loadGameState();
-        
-        // If game was won, fade out keyboard and show win message
-        if (hasLoadedState && gameOver) {
+        // If game is over (won or lost), fade out keyboard and show appropriate message
+        if (gameIsOver) {
             const keyboard = document.querySelector('.keyboard');
             const guessCounter = document.getElementById('guessCounter');
             if (keyboard) {
@@ -256,10 +259,15 @@ async function init() {
                 guessCounter.style.transition = 'opacity 0.5s ease';
                 guessCounter.style.opacity = '0';
             }
-            // Show win message after a delay and mark as shown
+            // Show appropriate message after a delay
             setTimeout(() => {
-                console.log("1");
-                showWinMessage();
+                if (isMysteryWordComplete()) {
+                    // Game was won
+                    showWinMessage();
+                } else {
+                    // Game was lost
+                    showGameOver();
+                }
                 winMessageShownOnLoad = true;
             }, 600);
         }
@@ -304,8 +312,8 @@ function setupPlayButton() {
             // Load saved game state
             const hasLoadedState = loadGameState();
             
-            // If game was already won, fade out keyboard and show win message
-            if (hasLoadedState && gameOver && isMysteryWordComplete()) {
+            // If game is over (won or lost), fade out keyboard and show appropriate message
+            if (hasLoadedState && gameOver) {
                 const keyboard = document.querySelector('.keyboard');
                 const guessCounter = document.getElementById('guessCounter');
                 if (keyboard) {
@@ -316,10 +324,15 @@ function setupPlayButton() {
                     guessCounter.style.transition = 'opacity 0.5s ease';
                     guessCounter.style.opacity = '0';
                 }
-                // Show win message after a delay to ensure rendering is complete
+                // Show appropriate message after a delay to ensure rendering is complete
                 setTimeout(() => {
-                    console.log("2");
-                    showWinMessage();
+                    if (isMysteryWordComplete()) {
+                        // Game was won
+                        showWinMessage();
+                    } else {
+                        // Game was lost
+                        showGameOver();
+                    }
                     winMessageShownOnLoad = true;
                 }, 300);
             }
@@ -471,30 +484,35 @@ function submitGuess() {
     // Check the guess
     checkGuess(guess);
     
-    // Move to next row
-    currentRow++;
-    currentTile = 0;
-    
-    // Update guess counter
-    updateGuessCounter();
-    
-    // Check if game is won or lost
+    // Check if game is won or lost BEFORE moving to next row
     if (guess === targetWord) {
         gameOver = true;
         saveGameState();
         setTimeout(() => {
             celebrateWin();
         }, WORD_LENGTH * 400 + 300); // Wait for all flips to complete
-    } else if (currentRow === MAX_GUESSES) {
+        // Don't increment row or update counter - game is over
+        return;
+    } else if (currentRow === MAX_GUESSES - 1) {
+        // This was the last guess (5th guess at row index 4)
         gameOver = true;
         saveGameState();
         setTimeout(() => {
             showGameOver();
         }, WORD_LENGTH * 400 + 300); // Wait for all flips to complete
-    } else {
-        // Save state after each guess
-        saveGameState();
+        // Don't increment row or update counter - game is over
+        return;
     }
+    
+    // Save state after each guess (only if game is not over)
+    saveGameState();
+    
+    // Move to next row
+    currentRow++;
+    currentTile = 0;
+    
+    // Update guess counter
+    updateGuessCounter();
 }
 
 // Check guess and color tiles
@@ -875,8 +893,111 @@ function showWinMessage() {
 
 // Show game over message
 function showGameOver() {
-    // Could add a game over overlay here
-    // console.log("Game Over! The word was:", targetWord);
+    // Fade out keyboard and guess counter
+    const keyboard = document.querySelector('.keyboard');
+    const guessCounter = document.getElementById('guessCounter');
+    if (keyboard) {
+        setTimeout(() => {
+            keyboard.style.transition = 'opacity 0.5s ease';
+            keyboard.style.opacity = '0';
+        }, 500);
+    }
+    if (guessCounter) {
+        setTimeout(() => {
+            guessCounter.style.transition = 'opacity 0.5s ease';
+            guessCounter.style.opacity = '0';
+        }, 500);
+    }
+    
+    // Show game over message (same structure as win message)
+    setTimeout(() => {
+        const gameContainer = document.querySelector('.game-container');
+        const grid = document.getElementById('grid');
+        
+        if (!gameContainer || !grid) return;
+        
+        // Remove any existing game over message first
+        const existingGameOver = gameContainer.querySelector('.mystery-word-win-container');
+        if (existingGameOver) {
+            existingGameOver.remove();
+        }
+        
+        // Create container for message and stars (same class as win message for consistency)
+        const winContainer = document.createElement('div');
+        winContainer.className = 'mystery-word-win-container';
+        winContainer.style.position = 'absolute';
+        winContainer.style.left = '50%';
+        winContainer.style.transform = 'translateX(-50%)';
+        winContainer.style.display = 'flex';
+        winContainer.style.flexDirection = 'column';
+        winContainer.style.alignItems = 'center';
+        winContainer.style.zIndex = '100';
+        winContainer.style.opacity = '0';
+        
+        // Create message - just the word, no "CORRECT" or "GAME OVER"
+        const message = document.createElement('div');
+        message.textContent = targetWord;
+        message.style.fontSize = '16px';
+        message.style.fontWeight = '700';
+        message.style.fontFamily = "'Nunito', sans-serif";
+        message.style.color = '#000';
+        message.style.paddingTop = '15px';
+        message.style.marginBottom = '3px';
+        
+        // Create stars - all 5 stars are grey
+        const stars = document.createElement('div');
+        stars.style.fontSize = '18px';
+        stars.style.letterSpacing = '0px';
+        stars.style.display = 'flex';
+        stars.style.gap = '0px';
+        
+        // Add all 5 stars as grey
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = '#999'; // All grey
+            stars.appendChild(star);
+        }
+        
+        winContainer.appendChild(message);
+        winContainer.appendChild(stars);
+        
+        gameContainer.appendChild(winContainer);
+        
+        // Function to calculate and set position (same as win message)
+        const positionMessage = () => {
+            const gridRect = grid.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            
+            // Only set position if both rects have valid dimensions
+            if (gridRect.height > 0 && containerRect.height > 0) {
+                winContainer.style.top = `${gridRect.bottom - containerRect.top + 15}px`;
+            }
+        };
+        
+        // Calculate and set position multiple times to ensure it's correct
+        // Use requestAnimationFrame to ensure layout is complete (same as win message)
+        requestAnimationFrame(() => {
+            positionMessage();
+            requestAnimationFrame(() => {
+                positionMessage();
+                // Continue positioning but keep invisible
+                setTimeout(() => {
+                    positionMessage();
+                }, 100);
+                setTimeout(() => {
+                    positionMessage();
+                }, 300);
+                // Final positioning and then make visible
+                setTimeout(() => {
+                    positionMessage();
+                    // Make visible after all positioning is complete
+                    winContainer.style.transition = 'opacity 0.3s ease';
+                    winContainer.style.opacity = '1';
+                }, 600);
+            });
+        });
+    }, 500);
 }
 
 // Add shake animation
