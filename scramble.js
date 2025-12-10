@@ -1022,11 +1022,11 @@ function updateCalendar() {
         if (index < dayOfWeek) {
             // Past days
             const stars = localStorage.getItem(`dailyStars_${dayKey}`);
-            dayNumberElement.textContent = stars || '0';
+            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + (stars || '0') + '</span>';
         } else if (index === dayOfWeek) {
             // Today
             const stars = getDailyStars();
-            dayNumberElement.textContent = stars;
+            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
         } else {
             // Future days
             dayNumberElement.innerHTML = '&nbsp;';

@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
     <title>Lost & Found</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,32 +27,18 @@
     
     <!-- Load GLTFLoader from local files -->
     <script type="module">
-      console.log('[HTML] GLTFLoader script starting...');
       try {
         import('./three/loaders/GLTFLoader.js').then((module) => {
           const GLTFLoader = module.GLTFLoader;
-          console.log('[HTML] GLTFLoader imported:', typeof GLTFLoader);
-          console.log('[HTML] GLTFLoader class:', GLTFLoader);
           
           function addGLTFLoader() {
-            console.log('[HTML] addGLTFLoader called');
-            console.log('[HTML] window.THREE available:', typeof window.THREE !== 'undefined');
-            console.log('[HTML] THREE available:', typeof THREE !== 'undefined');
-            console.log('[HTML] THREE.Scene available:', typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined');
-            console.log('[HTML] GLTFLoader:', typeof GLTFLoader);
             
             if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
               // THREE.js is fully loaded, safely add GLTFLoader
-              console.log('[HTML] Attempting to add GLTFLoader to window.THREE...');
-              console.log('[HTML] window.THREE before:', window.THREE);
-              console.log('[HTML] window.THREE.GLTFLoader before:', window.THREE.GLTFLoader);
-              console.log('[HTML] window.THREE is frozen:', Object.isFrozen(window.THREE));
-              console.log('[HTML] window.THREE is sealed:', Object.isSealed(window.THREE));
               
               try {
                 // Try direct assignment first
                 window.THREE.GLTFLoader = GLTFLoader;
-                console.log('[HTML] Direct assignment attempted');
               } catch (e) {
                 console.error('[HTML] Direct assignment failed:', e);
                 // Try using defineProperty if direct assignment fails
@@ -61,22 +49,13 @@
                     enumerable: true,
                     configurable: true
                   });
-                  console.log('[HTML] defineProperty assignment attempted');
                 } catch (e2) {
                   console.error('[HTML] defineProperty also failed:', e2);
                 }
               }
               
-              console.log('[HTML] GLTFLoader added to THREE');
-              console.log('[HTML] window.THREE after:', window.THREE);
-              console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
-              console.log('[HTML] THREE.GLTFLoader value:', window.THREE.GLTFLoader);
-              console.log('[HTML] GLTFLoader in window.THREE:', 'GLTFLoader' in window.THREE);
-              console.log('[HTML] window.THREE.hasOwnProperty("GLTFLoader"):', window.THREE.hasOwnProperty ? window.THREE.hasOwnProperty('GLTFLoader') : 'no hasOwnProperty');
-              
               // Verify it's actually there
               if (typeof window.THREE.GLTFLoader !== 'undefined') {
-                console.log('[HTML] SUCCESS: GLTFLoader is now on THREE!');
                 window.dispatchEvent(new Event('gltfloader-loaded'));
               } else {
                 console.error('[HTML] ERROR: GLTFLoader was not added successfully!');
@@ -91,12 +70,10 @@
               }
             } else {
               // THREE.js not ready yet, wait for it
-              console.log('[HTML] GLTFLoader: THREE.js not ready, waiting...');
               
               // Check if event already fired (in case we're late)
               function tryAddGLTFLoader() {
                 if (typeof window.THREE !== 'undefined' && typeof window.THREE.Scene !== 'undefined') {
-                  console.log('[HTML] THREE is now ready, adding GLTFLoader...');
                   try {
                     window.THREE.GLTFLoader = GLTFLoader;
                   } catch (e) {
@@ -104,19 +81,15 @@
                     const originalTHREE = window.THREE;
                     window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
                   }
-                  console.log('[HTML] GLTFLoader added to THREE (after waiting)');
-                  console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
                   if (typeof window.THREE.GLTFLoader !== 'undefined') {
                     window.dispatchEvent(new Event('gltfloader-loaded'));
                   }
                 } else {
-                  console.log('[HTML] Still waiting for THREE...', typeof window.THREE, typeof window.THREE?.Scene);
                   setTimeout(tryAddGLTFLoader, 100);
                 }
               }
               
               window.addEventListener('three-loaded', function() {
-                console.log('[HTML] three-loaded event received');
                 try {
                   window.THREE.GLTFLoader = GLTFLoader;
                 } catch (e) {
@@ -124,8 +97,6 @@
                   const originalTHREE = window.THREE;
                   window.THREE = Object.assign({}, originalTHREE, { GLTFLoader: GLTFLoader });
                 }
-                console.log('[HTML] GLTFLoader added to THREE (after event)');
-                console.log('[HTML] THREE.GLTFLoader now available:', typeof window.THREE.GLTFLoader !== 'undefined');
                 if (typeof window.THREE.GLTFLoader !== 'undefined') {
                   window.dispatchEvent(new Event('gltfloader-loaded'));
                 }
@@ -195,11 +166,11 @@
     
     <div id="topDiv"></div>
     <div id="bonusDiv">
+      <div id="bonusText2">x1</div>
       <div id="bonusText">BONUS</div>
       <div id="bonusBar">
         <div id="innerBar"></div>
       </div>
-      <div id="bonusText2">x1</div>
     </div>
 
     <div id="scoreTimeContainer">

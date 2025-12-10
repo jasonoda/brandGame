@@ -13,6 +13,10 @@ body{
     -webkit-tap-highlight-color: transparent;
 }
 
+canvas {
+    touch-action: none;
+}
+
 /* Splash gradient overlay */
 #splashGradientOverlay {
     position: fixed;
@@ -48,27 +52,34 @@ body{
 /* topDiv and bonusDiv moved to shared.css */
 
 #bonusText{
-    color: #888888;
+    color: #333333;
     font-size: 9pt;
     font-weight: 700;
     letter-spacing: 1px;
+    text-align: center;
+    white-space: nowrap;
+    width: 70px;
+    margin-top: -2px;
 }
 
 #bonusText2{
-    color: #888888;
-    width: 20px;
-    font-size: 9pt;
+    color: #ff0000;
+    font-size: 14pt;
     font-weight: 700;
     letter-spacing: 1px;
+    text-align: center;
+    white-space: nowrap;
+    width: 70px;
+    margin-bottom: -2px;
 }
 
 #bonusBar{
     position: relative;
-    width: 100px;
-    height: 8px;
+    width: 70px;
+    height: 16px;
     border-radius: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 0;
+    margin-right: 0;
     background-color: #5a1515;
     border: 2px solid white;
     z-index: 2001;

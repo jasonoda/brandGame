@@ -1,5 +1,6 @@
 (() => {
 'use strict';
+console.log("Loading Speed 21 (Blackjack) game...");
 ;
 // String rotation helpers used by the game for obfuscated message types
 if (typeof String.prototype._0xa68b0d !== 'function') {
@@ -109,6 +110,12 @@ class Loader{
     setUp(e){
 
         this.e = e;
+
+        // Hide HUD initially
+        const scoreTimeContainer = document.getElementById('scoreTimeContainer');
+        const bonusDisplay = document.getElementById('bonusDisplay');
+        if (scoreTimeContainer) scoreTimeContainer.style.opacity = '0';
+        if (bonusDisplay) bonusDisplay.style.opacity = '0';
 
     }
 
@@ -483,6 +490,7 @@ class Scene {
         // Game state
         this.gameAction = "waiting"; // Start in waiting state, not new round
         this.gameTime = 120; // 2:00 in seconds
+        this.lastTickSecond = -1;
         this.score = 0;
         this.currentCards = [];
         this.cardElements = []; // Array to track card DOM elements
@@ -582,6 +590,24 @@ class Scene {
                 console.log('Play button clicked');
                 this.startCountdownSequence();
                 this.e.startGame();
+
+                // Fade in HUD
+                const scoreTimeContainer = document.getElementById('scoreTimeContainer');
+                const bonusDisplay = document.getElementById('bonusDisplay');
+
+                if (scoreTimeContainer) {
+                    scoreTimeContainer.style.opacity = '0';
+                    requestAnimationFrame(() => {
+                        scoreTimeContainer.style.opacity = '1';
+                    });
+                }
+
+                if (bonusDisplay) {
+                    bonusDisplay.style.opacity = '0';
+                    requestAnimationFrame(() => {
+                        bonusDisplay.style.opacity = '1';
+                    });
+                }
             });
         }
 
@@ -741,6 +767,15 @@ class Scene {
             // Timer countdown (only after game starts)
             if (this.gameAction !== "waiting") {
                 this.gameTime -= this.e.dt;
+                
+                // Play tick sound when time is running out (last 20 seconds)
+                if (this.gameTime <= 20 && this.gameTime > 0) {
+                    const currentSecond = Math.floor(this.gameTime);
+                    if (currentSecond !== this.lastTickSecond) {
+                        this.e.s.p("tick");
+                        this.lastTickSecond = currentSecond;
+                    }
+                }
                 
                 if (this.gameTime <= 0) {
                     this.gameTime = 0;
@@ -2094,6 +2129,9 @@ function saveBlackjackGameResult(finalScore, starsEarned) {
     // Update parent window displays if accessible
     if (window.parent && window.parent.updateStarDisplay) {
         window.parent.updateStarDisplay();
+    }
+    if (window.parent && window.parent.updateBlackjackStars) {
+        window.parent.updateBlackjackStars();
     }
     if (window.parent && window.parent.updateWalletStars) {
         window.parent.updateWalletStars();

@@ -28,6 +28,38 @@
 
         <div id="games-page" class="page active">
         <div class="top-logo-box"></div>
+        <div class="top-logo-carousel-container">
+            <div class="carousel-arrow carousel-arrow-left">‹</div>
+            <div class="top-logo-carousel">
+                <div class="carousel-slide active">
+                    <div class="top-logo-box-carousel"></div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="carousel-content">
+                        <div class="carousel-icon">
+                            <div class="carousel-icon-circle">
+                                <span class="carousel-dollar">$</span>
+                            </div>
+                        </div>
+                        <div class="carousel-text">More Perks<br>for My Points</div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="carousel-content">
+                        <div class="carousel-icon">
+                            <div class="carousel-icon-circle">
+                                <span class="carousel-dollar">$</span>
+                            </div>
+                        </div>
+                        <div class="carousel-text">More Miles<br>for My Tank</div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="top-logo-box-carousel"></div>
+                </div>
+            </div>
+            <div class="carousel-arrow carousel-arrow-right">›</div>
+        </div>
         <div class="week-header-background"></div>
         <div class="week-section">
             <div class="week-title">THIS WEEK:</div>
@@ -123,7 +155,7 @@
                         <img src="src/img/mysteryWord.svg" alt="Mystery Word" style="height: 30px; width: auto; margin-bottom: 1px;">
                         <div class="game-title">MYSTERY WORD</div>
                     </div>
-                    <div class="play-text" id="mysteryWordStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★</div>
+                    <div class="play-text" id="mysteryWordStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
                 </div>
                 <div class="play-box" id="beticleBox">
                     <div class="play-color-box" style="background: linear-gradient(to bottom, #AB69E0, #7B37B0);">
@@ -138,7 +170,7 @@
         <div class="section">
             <div class="section-title">DAILY ARCADE</div>
             <div class="arcade-box" id="memoryBox">
-                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BEFFF, #3BAFD0);">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BEFFF, #5BC5E0);">
                     <img src="src/img/memory.svg" alt="Memory" style="height: 30px; width: auto; margin-bottom: 1px;">
                     <div class="game-title">MEMORY</div>
                 </div>
@@ -152,7 +184,7 @@
                 </div>
             </div>
             <div class="arcade-box" id="speed21Box">
-                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BED9A, #41B860);">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BED9A, #5BCA7A);">
                     <img src="src/img/speed21.svg" alt="Speed 21" style="height: 30px; width: auto; margin-bottom: 1px;">
                     <div class="game-title">SPEED 21</div>
                 </div>
@@ -260,28 +292,6 @@
                             <span class="coin-x">x</span>
                             <span class="coin-count" id="sweeps-gold-coin-count">0</span>
                 </div>
-                        <div class="coin-indicator">
-                            <div class="coin-icon-tracker">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
-                                </svg>
-                    </div>
-                            <span class="coin-x">x</span>
-                            <span class="coin-count" id="sweeps-silver-coin-count">0</span>
-                        </div>
-                        <div class="coin-indicator">
-                            <div class="coin-icon-tracker">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                            </div>
-                            <span class="coin-x">x</span>
-                            <span class="coin-count" id="sweeps-bronze-coin-count">0</span>
-                        </div>
                     </div>
                 </div>
 
@@ -291,12 +301,24 @@
                         <div class="prize-amount">$100</div>
                         <div class="prize-label">Cash Prize</div>
                         <button class="prize-entry-button" data-prize="gold">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                            </svg>
-                            Enter
+                            <div class="coins-row">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                            </div>
+                            <div class="enter-text">ENTER</div>
                         </button>
                         </div>
                     <div class="prize-card silver-prize">
@@ -304,25 +326,34 @@
                         <div class="prize-amount">$20</div>
                         <div class="prize-label">Gift Certificate</div>
                         <button class="prize-entry-button" data-prize="silver">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
-                            </svg>
-                            Enter
+                            <div class="coins-row">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                            </div>
+                            <div class="enter-text">ENTER</div>
                         </button>
                     </div>
                     <div class="prize-card bronze-prize">
                         <div class="prize-icon"><i class="fas fa-ticket"></i></div>
-                        <div class="prize-amount">$5</div>
-                        <div class="prize-label">Gift Certificate</div>
+                        <div class="prize-amount">$2</div>
+                        <div class="prize-label">Coupon</div>
                         <button class="prize-entry-button" data-prize="bronze">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                            </svg>
-                            Enter
+                            <div class="coins-row">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                            </div>
+                            <div class="enter-text">ENTER</div>
                         </button>
                     </div>
                 </div>
@@ -333,36 +364,91 @@
             </div>
         </div>
 
+        <div id="loyalty-page" class="page">
+            <div class="sweeps-container">
+                <div class="sweeps-header">
+                    <h1 class="sweeps-title">SWEEPSTAKES</h1>
+                    <div class="sweeps-subtitle">Gain daily stars and coins for extra time</div>
+                </div>
+                <div class="loyalty-game-box">
+                    <div class="loyalty-game-top">
+                        <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B9D, #C44569);">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1px;">
+                                <circle cx="12" cy="12" r="10" fill="white" opacity="0.9"/>
+                                <circle cx="12" cy="12" r="6" fill="none" stroke="#FF6B9D" stroke-width="2"/>
+                                <circle cx="12" cy="12" r="3" fill="#FF6B9D"/>
+                            </svg>
+                            <div class="game-title">DONUT MATCHER</div>
+                        </div>
+                    </div>
+                    <div class="loyalty-game-score">
+                        <div class="loyalty-high-score">YOUR HIGH SCORE: <span id="loyalty-high-score">0</span></div>
+                    </div>
+                    <div class="loyalty-game-bottom">
+                        <div class="loyalty-prize-text">
+                            <div class="loyalty-prize-small">Score higher to win:</div>
+                            <div class="loyalty-prize-amount">$100 cash</div>
+                            <div class="loyalty-prize-small">or loyalty coupons</div>
+                        </div>
+                        <div class="loyalty-stats-inline">
+                            <div class="loyalty-stat-item">
+                                <span>Daily</span>
+                                <span class="star-icon">★</span>
+                                <span>x</span>
+                                <span class="loyalty-daily-stars" id="loyalty-daily-stars">0</span>
+                            </div>
+                            <div class="loyalty-stat-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
+                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                </svg>
+                                <span>x</span>
+                                <span class="loyalty-coin-count" id="loyalty-coin-count">0</span>
+                            </div>
+                        </div>
+                        <div class="loyalty-earned">You've earned <span id="loyalty-extra-seconds">0</span> extra seconds</div>
+                        <button class="loyalty-spend-button" data-prize="gold">Spend 25 Loyalty Points</button>
+                    </div>
+                </div>
+                <div class="contest-rules">
+                    <div class="rules-title">Contest Rules</div>
+                    
+                </div>
+            </div>
+        </div>
+
         <div id="wallet-page" class="page">
             <div class="profile-container">
-                <div class="profile-username">Username</div>
+                <div class="profile-username">Player</div>
                 <div class="profile-location-level">
                     <span class="profile-level">Level 3-2</span>
                 </div>
                 <div class="profile-picture"></div>
-                <div class="profile-stars-section">
-                    <div class="profile-today-stars">
-                        <div class="star-label-row">
-                            <span class="star-icon">★</span>
-                            <span class="stat-label-inline">Today</span>
+                <div class="profile-actions">Log In | Sign Up | Change Avatar</div>
+                <div class="profile-stars-container">
+                    <div class="profile-stars-row">
+                        <div class="profile-stat-small">
+                            <div class="star-label-row">
+                                <span class="star-icon-small">★</span>
+                                <span class="stat-label-inline">Today</span>
+                            </div>
+                            <div class="stat-number">0</div>
                         </div>
-                        <div class="star-number">0</div>
-                    </div>
-                </div>
-                <div class="profile-stars-row">
-                    <div class="profile-stat-small">
-                        <div class="star-label-row">
-                            <span class="star-icon-small">★</span>
-                            <span class="stat-label-inline">Week</span>
+                        <div class="profile-stat-small">
+                            <div class="star-label-row">
+                                <span class="star-icon-small">★</span>
+                                <span class="stat-label-inline">Week</span>
+                            </div>
+                            <div class="stat-number">0</div>
                         </div>
-                        <div class="stat-number">0</div>
-                    </div>
-                    <div class="profile-stat-small">
-                        <div class="star-label-row">
-                            <span class="star-icon-small">★</span>
-                            <span class="stat-label-inline">Ever</span>
+                        <div class="profile-stat-small">
+                            <div class="star-label-row">
+                                <span class="star-icon-small">★</span>
+                                <span class="stat-label-inline">Ever</span>
+                            </div>
+                            <div class="stat-number">247</div>
                         </div>
-                        <div class="stat-number">247</div>
                     </div>
                 </div>
                 <div class="coin-tracker">
@@ -376,28 +462,6 @@
                         </div>
                         <span class="coin-x">x</span>
                         <span class="coin-count" id="gold-coin-count">0</span>
-                    </div>
-                    <div class="coin-indicator">
-                        <div class="coin-icon-tracker">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#E8E8E8" stroke="#808080" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#808080" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#505050" text-anchor="middle">$</text>
-                            </svg>
-                        </div>
-                        <span class="coin-x">x</span>
-                        <span class="coin-count" id="silver-coin-count">0</span>
-                    </div>
-                    <div class="coin-indicator">
-                        <div class="coin-icon-tracker">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                            </svg>
-                        </div>
-                        <span class="coin-x">x</span>
-                        <span class="coin-count" id="bronze-coin-count">0</span>
                     </div>
                 </div>
                 <div class="profile-stat">
@@ -445,8 +509,8 @@
                 <div class="rival-challenge">
                     Beat your daily rival to win 
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin: 0 4px;">
-                        <circle cx="12" cy="12" r="10" fill="#E6C89A" stroke="#B8860B" stroke-width="2.5"/>
-                        <circle cx="12" cy="12" r="7" fill="none" stroke="#B8860B" stroke-width="1.8" opacity="0.9"/>
+                        <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
+                        <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
                         <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
                     </svg>
                    
@@ -477,7 +541,7 @@
 
     <!-- Lost and Found Overlay -->
     <div id="lostAndFoundOverlay" class="game-overlay">
-        <iframe id="lostAndFoundIframe" scrolling="no"></iframe>
+        <iframe id="lostAndFoundIframe" scrolling="no" allow="touch" sandbox="allow-scripts allow-same-origin allow-pointer-lock" style="touch-action: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%; border: none;"></iframe>
     </div>
 
     <!-- Gold Case Overlay -->

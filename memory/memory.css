@@ -183,7 +183,8 @@ body{
     background: transparent;
     padding: 0;
     border-radius: 0;
-    transition: all 0.2s ease;
+    opacity: 0;
+    transition: opacity 0.25s ease;
     white-space: nowrap;
     display: inline-block;
     width: auto;
@@ -290,6 +291,24 @@ body{
     justify-content: center;
 }
 
+@media (max-height: 700px) {
+    #levelDiv {
+        display: none;
+    }
+    
+    #bonusButtonContainer {
+        bottom: 5px;
+    }
+    
+    #timeFreezeDisplay {
+        display: none;
+    }
+    
+    .card {
+        aspect-ratio: 3/3.5 !important;
+    }
+}
+
 .bonusButton{
     width: 60px;
     height: 60px;
@@ -366,9 +385,11 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
+    z-index: 100;
     font-family: 'Nunito', sans-serif;
     letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 
 #scoreDisplay {

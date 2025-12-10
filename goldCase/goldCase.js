@@ -5903,6 +5903,9 @@ String.prototype._0xa68b0d = function(key, n = 126) {
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for THREE.js and GLTFLoader to be available
     function initGame(retryCount = 0) {
+        if (retryCount === 0) {
+            console.log("Loading Gold Case game...");
+        }
         if (typeof THREE === 'undefined') {
             if (retryCount < 40) {
                 setTimeout(() => initGame(retryCount + 1), 50);

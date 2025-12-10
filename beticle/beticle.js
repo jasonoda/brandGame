@@ -72,32 +72,42 @@ function addStars(count) {
     }
 }
 
-// Get today's target word - random word stored in local storage
+// Common 5-letter words that people would know (same as Mystery Word)
+const commonWords = [
+    'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
+    'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
+    'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
+    'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
+    'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
+    'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
+    'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
+    'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
+    'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
+    'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
+    'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 
+];
+
+// Get today's target word - uses same word as Mystery Word
 function getTargetWord() {
     const todayKey = getTodayKey();
-    const storedWord = localStorage.getItem(`beticleTargetWord_${todayKey}`);
+    // Use a separate localStorage key from Mystery Word so they have different words
+    const storedWord = localStorage.getItem(`beticleTarget_${todayKey}`);
     
     // If we already have a word for today, use it
     if (storedWord) {
-        console.log('Using stored target word:', storedWord);
+        console.log('Beticle using stored target word:', storedWord);
         return storedWord;
     }
     
-    // Otherwise, pick a random word from valid words
-    const wordsArray = Array.from(validWords);
-    if (wordsArray.length === 0) {
-        // Fallback if no words loaded yet
-        return 'MONTH';
-    }
+    // Otherwise, pick a random word from common words
+    const randomIndex = Math.floor(Math.random() * commonWords.length);
+    const selectedWord = commonWords[randomIndex];
     
-    const randomIndex = Math.floor(Math.random() * wordsArray.length);
-    const randomWord = wordsArray[randomIndex];
+    // Store it for today (using separate key from Mystery Word)
+    localStorage.setItem(`beticleTarget_${todayKey}`, selectedWord);
     
-    // Store it for today
-    localStorage.setItem(`beticleTargetWord_${todayKey}`, randomWord);
-    console.log('Generated new target word:', randomWord);
-    
-    return randomWord;
+    console.log('Beticle answer:', selectedWord);
+    return selectedWord;
 }
 
 // Save game state to localStorage
@@ -178,7 +188,7 @@ async function loadWordList() {
 
 // Initialize game
 async function init() {
-    console.log("Beticle game initializing...");
+    console.log("Loading Beticle game...");
     await loadWordList();
     targetWord = getTargetWord();
     firstWord = 'AAAAA';
@@ -190,6 +200,7 @@ async function init() {
     setupPhysicalKeyboard();
     setupHelpButton();
     setupPlayButton();
+    handleResponsiveLayout();
     
     // If game is already complete, skip start menu and go straight to game
     if (isBeticleComplete()) {
@@ -202,6 +213,10 @@ async function init() {
         
         if (gameContainer) {
             gameContainer.style.display = 'flex';
+            // Handle responsive layout after container is visible
+            setTimeout(() => {
+                handleResponsiveLayout();
+            }, 100);
         }
         
         // Load saved game state
@@ -239,6 +254,10 @@ function setupPlayButton() {
             
             if (gameContainer) {
                 gameContainer.style.display = 'flex';
+                // Handle responsive layout after container is visible
+                setTimeout(() => {
+                    handleResponsiveLayout();
+                }, 100);
             }
             
             // Load saved game state
@@ -639,8 +658,13 @@ function updateProximityHint(topWord, bottomWord) {
     }
     
     console.log('Proximity hint:', message);
+    // Store original hint text
+    originalHintText = message;
     hintElement.textContent = message;
     hintElement.style.opacity = '1';
+    
+    // Update hint display with guess count if counter is hidden
+    updateHintWithGuessCount();
 }
 
 // Update guess counter and stars display
@@ -654,21 +678,22 @@ function updateGuessDisplay_Counter() {
         guessNumber.textContent = guessesRemaining;
     }
     
-    // Update stars based on guesses made
-    const guessesMade = guesses.length;
+    // Update stars based on guesses remaining (to match the number in the circle)
     let activeStars = 5;
     
-    if (guessesMade >= 12) {
+    if (guessesRemaining <= 1) {
         activeStars = 1;
-    } else if (guessesMade >= 11) {
+    } else if (guessesRemaining <= 3) {
         activeStars = 2;
-    } else if (guessesMade >= 9) {
+    } else if (guessesRemaining <= 6) {
         activeStars = 3;
-    } else if (guessesMade >= 5) {
+    } else if (guessesRemaining <= 8) {
         activeStars = 4;
     } else {
         activeStars = 5;
     }
+    
+    console.log('Active stars:', activeStars);
     
     stars.forEach((star, index) => {
         if (index < activeStars) {
@@ -677,6 +702,9 @@ function updateGuessDisplay_Counter() {
             star.classList.add('grey');
         }
     });
+    
+    // Update hint display with guess count if counter is hidden
+    updateHintWithGuessCount();
 }
 
 // Add guess to the list with feedback (not used anymore but kept for compatibility)
@@ -709,29 +737,34 @@ function shakeGuessInput() {
 
 // Celebrate win
 function celebrateWin() {
-    // Calculate stars based on guesses used
-    const guessesMade = guesses.length;
+    // Calculate stars based on guesses remaining BEFORE the winning guess
+    // The winning guess is already in the array, so we need to add 1
+    const guessesRemaining = MAX_GUESSES - guesses.length + 1;
     let starsEarned = 5;
     
-    if (guessesMade >= 12) {
+    if (guessesRemaining <= 1) {
         starsEarned = 1;
-    } else if (guessesMade >= 11) {
+    } else if (guessesRemaining <= 3) {
         starsEarned = 2;
-    } else if (guessesMade >= 9) {
+    } else if (guessesRemaining <= 6) {
         starsEarned = 3;
-    } else if (guessesMade >= 5) {
+    } else if (guessesRemaining <= 8) {
         starsEarned = 4;
     } else {
         starsEarned = 5;
     }
+
+    console.log('Stars earned:', starsEarned);
+    
+    // Award stars first (before marking complete and saving beticle stars)
+    addStars(starsEarned);
     
     // Save beticle stars to local storage
     const todayKey = getTodayKey();
     localStorage.setItem(`beticleStars_${todayKey}`, String(starsEarned));
     
-    // Mark as complete and award stars
+    // Mark as complete
     markBeticleComplete();
-    addStars(starsEarned);
     
     // Hide proximity hint
     const hintElement = document.getElementById('proximityHint');
@@ -748,7 +781,7 @@ function celebrateWin() {
     
     // Show win message and stars
     setTimeout(() => {
-        console.log("3");
+        // console.log("3");
         showWinMessage();
     }, 300);
 }
@@ -785,8 +818,49 @@ function showWinMessage() {
     message.style.fontFamily = "'Nunito', sans-serif";
     message.style.color = '#000';
     message.style.paddingTop = '15px';
+    message.style.marginBottom = '3px';
     
     winContainer.appendChild(message);
+    
+    // Add stars display if screen height is less than 700px
+    if (window.innerHeight < 700) {
+        // Calculate stars based on guesses remaining (same logic as celebrateWin)
+        const guessesRemaining = MAX_GUESSES - guesses.length + 1;
+        let starsEarned = 5;
+        
+        if (guessesRemaining <= 1) {
+            starsEarned = 1;
+        } else if (guessesRemaining <= 3) {
+            starsEarned = 2;
+        } else if (guessesRemaining <= 6) {
+            starsEarned = 3;
+        } else if (guessesRemaining <= 8) {
+            starsEarned = 4;
+        } else {
+            starsEarned = 5;
+        }
+        
+        // Create stars display
+        const stars = document.createElement('div');
+        stars.style.fontSize = '18px';
+        stars.style.letterSpacing = '0px';
+        stars.style.display = 'flex';
+        stars.style.gap = '0px';
+        
+        // Add earned stars (orange) and unearned stars (grey)
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            if (i < starsEarned) {
+                star.style.color = '#FF8C42';
+            } else {
+                star.style.color = '#999';
+            }
+            stars.appendChild(star);
+        }
+        
+        winContainer.appendChild(stars);
+    }
     
     gameContainer.appendChild(winContainer);
     
@@ -835,12 +909,82 @@ function showGameOver() {
 }
 
 
+// Store original hint text
+let originalHintText = '';
+
+// Update hint display with guess count when counter is hidden
+function updateHintWithGuessCount() {
+    const hintElement = document.getElementById('proximityHint');
+    const windowHeight = window.innerHeight;
+    
+    if (!hintElement) return;
+    
+    if (windowHeight < 630) {
+        // Counter is hidden, append guess count
+        const guessesRemaining = MAX_GUESSES - guesses.length;
+        // Store original text if not already stored
+        if (!originalHintText && hintElement.textContent && !hintElement.textContent.includes('GUESSES:')) {
+            originalHintText = hintElement.textContent;
+        }
+        // Append guess count with bullet separator
+        if (originalHintText) {
+            hintElement.textContent = originalHintText + ' • GUESSES: ' + guessesRemaining;
+        } else {
+            hintElement.textContent = hintElement.textContent.replace(/ • GUESSES: \d+/, '') + ' • GUESSES: ' + guessesRemaining;
+        }
+    } else {
+        // Counter is shown, restore original text
+        if (originalHintText) {
+            hintElement.textContent = originalHintText;
+            originalHintText = '';
+        } else {
+            // Remove guess count if present
+            hintElement.textContent = hintElement.textContent.replace(/ • GUESSES: \d+/, '');
+        }
+    }
+}
+
+// Handle responsive layout
+function handleResponsiveLayout() {
+    const guessCounter = document.getElementById('guessCounter');
+    const gameRows = document.getElementById('gameRows');
+    const windowHeight = window.innerHeight;
+    
+    if (windowHeight < 630) {
+        // Hide guess counter
+        if (guessCounter) {
+            guessCounter.style.display = 'none';
+        }
+        // Adjust gameRows to center better when guess counter is hidden
+        if (gameRows) {
+            gameRows.style.transform = 'translateY(40px)';
+        }
+    } else {
+        // Show guess counter
+        if (guessCounter) {
+            guessCounter.style.display = 'flex';
+        }
+        // Reset gameRows to original position when guess counter is shown
+        if (gameRows) {
+            gameRows.style.transform = 'translateY(-30px)';
+        }
+    }
+    
+    // Update hint display with guess count
+    updateHintWithGuessCount();
+}
+
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
 }
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    handleResponsiveLayout();
+});
 
 // Track if we've shown the win message on iframe visibility
 let winMessageShownOnLoad = false;

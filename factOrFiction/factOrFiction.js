@@ -63,11 +63,11 @@ async function loadFOFData() {
         fofCurrentSet = allSets[randomIndex];
         fofGameData = fofCurrentSet.statements;
         
-        console.log('Today\'s Fact or Fiction set:', fofCurrentSet.set);
+        // console.log('Today\'s Fact or Fiction set:', fofCurrentSet.set);
         
         initFOFGame();
     } catch (error) {
-        console.error('Error loading fact or fiction data:', error);
+        // console.error('Error loading fact or fiction data:', error);
     }
 }
 

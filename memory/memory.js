@@ -130,8 +130,7 @@ function preloadJosImages() {
 
 // ===== INITIALIZATION =====
 function init() {
-    // console.log("=== MEMORY GAME INITIALIZING ===");
-    // console.log("Starting initialization...");
+    console.log("Loading Memory game...");
     
     // Fade out loading screen
     const loadingBack = document.getElementById('loadingBack');
@@ -682,7 +681,12 @@ function updateBonusDisplay() {
     const bonusDisplay = document.getElementById('bonusDisplay');
     
     if (bonusDisplay) {
-        bonusDisplay.textContent = `BONUS: x${bonusTime.toFixed(1)}`;
+        let bonusText = `BONUS: x${bonusTime.toFixed(1)}`;
+        // Check if double points is active and append it
+        if (x2BonusRemaining > 0) {
+            bonusText += ' • DOUBLE POINTS';
+        }
+        bonusDisplay.textContent = bonusText;
     }
 }
 
@@ -742,24 +746,53 @@ function updateBonusCountdowns() {
 function updateTimeFreezeDisplay() {
     const timeFreezeDisplay = document.getElementById('timeFreezeDisplay');
     const x2BonusDisplay = document.getElementById('x2BonusDisplay');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const windowHeight = window.innerHeight;
     
     if (timeFreezeDisplay) {
         if (timeBonusActive) {
             const timeLeft = Math.ceil(timeBonusRemaining);
             timeFreezeDisplay.textContent = `TIME FROZEN: ${Math.max(0, timeLeft)}`;
-            timeFreezeDisplay.style.opacity = '1';
+            // Only show timeFreezeDisplay if height >= 700px
+            if (windowHeight >= 700) {
+                timeFreezeDisplay.style.opacity = '1';
+            } else {
+                timeFreezeDisplay.style.opacity = '0';
+            }
         } else {
             timeFreezeDisplay.style.opacity = '0';
         }
     }
     
-    if (x2BonusDisplay) {
-        if (x2BonusActive) {
-            const timeLeft = Math.ceil(x2BonusRemaining);
-            x2BonusDisplay.textContent = `DOUBLE POINTS: ${Math.max(0, timeLeft)}`;
-            x2BonusDisplay.style.opacity = '1';
+    // Change timer background color when time is frozen (only when height < 700px)
+    const scoreTimeContainer = document.getElementById('scoreTimeContainer');
+    if (scoreTimeContainer && windowHeight < 700) {
+        if (timeBonusActive) {
+            scoreTimeContainer.style.background = '#ff4444';
         } else {
-            x2BonusDisplay.style.opacity = '0';
+            scoreTimeContainer.style.background = 'linear-gradient(to bottom, #00d4ff, #0099cc)';
+        }
+    }
+    
+    if (x2BonusDisplay) {
+        // Always hide x2BonusDisplay - we'll show it in bonusDisplay instead
+        x2BonusDisplay.style.opacity = '0';
+        
+        // Update bonusDisplay to include DOUBLE POINTS when active
+        const bonusDisplay = document.getElementById('bonusDisplay');
+        if (bonusDisplay) {
+            if (x2BonusActive) {
+                // Get current bonus text and add DOUBLE POINTS if not already there
+                let bonusText = bonusDisplay.textContent || `BONUS: x${bonusTime.toFixed(1)}`;
+                if (!bonusText.includes('DOUBLE POINTS')) {
+                    bonusText += ' • DOUBLE POINTS';
+                }
+                bonusDisplay.textContent = bonusText;
+            } else {
+                // Remove DOUBLE POINTS from bonusDisplay
+                let bonusText = bonusDisplay.textContent || `BONUS: x${bonusTime.toFixed(1)}`;
+                bonusDisplay.textContent = bonusText.replace(/ • DOUBLE POINTS.*/, '');
+            }
         }
     }
 }
@@ -873,6 +906,24 @@ function setupPlayButton() {
                 const startMenu = document.getElementById('startMenu');
                 if (startMenu) {
                     startMenu.style.display = 'none';
+                }
+                
+                // Fade in HUD elements
+                const scoreTimeContainer = document.getElementById('scoreTimeContainer');
+                const bonusDisplay = document.getElementById('bonusDisplay');
+                
+                if (scoreTimeContainer) {
+                    scoreTimeContainer.style.opacity = '0';
+                    requestAnimationFrame(() => {
+                        scoreTimeContainer.style.opacity = '1';
+                    });
+                }
+                
+                if (bonusDisplay) {
+                    bonusDisplay.style.opacity = '0';
+                    requestAnimationFrame(() => {
+                        bonusDisplay.style.opacity = '1';
+                    });
                 }
                 
                 // console.log("Setting action to 'set up'");

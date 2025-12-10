@@ -1503,6 +1503,21 @@ body::before {
     text-align: center;
 }
 
+@media (max-height: 700px) {
+    .case-number {
+        font-size: clamp(14px, 1.5vw, 18px);
+        background: transparent;
+        color: #333333;
+        font-weight: 900;
+        font-family: 'Montserrat', sans-serif;
+        text-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+    }
+    
+    #topSection {
+        gap: 0px;
+    }
+}
+
 .case-value-indicator {
     position: absolute;
     bottom: 2px;
@@ -2106,6 +2121,17 @@ body::before {
     border-radius: 24px;
     z-index: 999;
     letter-spacing: 1px;
+}
+
+@media (max-height: 700px) {
+    .timer-display {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        left: auto;
+        transform: none;
+        justify-content: flex-end;
+    }
 }
 
 @keyframes textPulse {

@@ -31,7 +31,8 @@ function updateCalendar() {
         // If this day is in the past or today, show stars earned
         if (index <= dayOfWeek) {
             const stars = parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0');
-            dayNumberElement.textContent = stars;
+            // Use the same format for all days
+            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
         } else {
             // Future days show nothing
             dayNumberElement.innerHTML = '&nbsp;';
@@ -54,6 +55,8 @@ function updateHeaderStarCounter() {
 
 // Make it globally accessible
 window.updateHeaderStarCounter = updateHeaderStarCounter;
+// Alias for games that call updateStarDisplay
+window.updateStarDisplay = updateHeaderStarCounter;
 
 // Function to update wallet star displays
 function updateWalletStars2() {
@@ -71,10 +74,6 @@ function updateWalletStars2() {
         
         // Update today's stars
         const todayStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-        const todayElement = document.querySelector('.profile-today-stars .star-number');
-        if (todayElement) {
-            todayElement.textContent = todayStars;
-        }
         
         // Calculate week's stars (sum of all days this week)
         let weekStars = 0;
@@ -87,11 +86,6 @@ function updateWalletStars2() {
             weekStars += dayStars;
         }
         
-        const weekElements = document.querySelectorAll('.profile-stat-small .stat-number');
-        if (weekElements[0]) {
-            weekElements[0].textContent = weekStars;
-        }
-        
         // Update ever stars (sum of all dailyStars from all dates)
         let everStars = 0;
         for (let i = 0; i < localStorage.length; i++) {
@@ -101,47 +95,95 @@ function updateWalletStars2() {
                 everStars += stars;
             }
         }
+        
+        // Get all stat-number elements (Today is [0], Week is [1], Ever is [2])
+        const weekElements = document.querySelectorAll('.profile-stat-small .stat-number');
+        if (weekElements[0]) {
+            weekElements[0].textContent = todayStars;
+        }
         if (weekElements[1]) {
-            weekElements[1].textContent = everStars;
+            weekElements[1].textContent = weekStars;
+        }
+        if (weekElements[2]) {
+            weekElements[2].textContent = everStars;
         }
     } catch (error) {
         console.error('[Wallet] ERROR:', error);
     }
 }
 
+function updateLoyaltyStats() {
+    try {
+        const todayKey = getTodayKey();
+        
+        // Update daily stars
+        const todayStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+        const dailyStarsElement = document.getElementById('loyalty-daily-stars');
+        if (dailyStarsElement) {
+            dailyStarsElement.textContent = todayStars;
+        }
+        
+        // Update coins (get from localStorage - same key as journey uses)
+        const coins = parseInt(localStorage.getItem('goldCoins') || '0');
+        const coinCountElement = document.getElementById('loyalty-coin-count');
+        if (coinCountElement) {
+            coinCountElement.textContent = coins;
+        }
+        
+        // Update extra seconds (daily stars + coins)
+        const extraSeconds = todayStars + coins;
+        const extraSecondsElement = document.getElementById('loyalty-extra-seconds');
+        if (extraSecondsElement) {
+            extraSecondsElement.textContent = extraSeconds;
+        }
+    } catch (error) {
+        console.error('[Loyalty] ERROR:', error);
+    }
+}
+
 // Set the current date in the header
 function setCurrentDate() {
     const dateElement = document.querySelector('.date');
-    const today = new Date();
+    if (!dateElement) return;
     
-    const months = [
-        'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-        'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
-    ];
+    // Check if p=2 parameter is set
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoPlacement = urlParams.get('p');
     
-    const month = months[today.getMonth()];
-    const day = today.getDate();
-    const year = today.getFullYear();
-    
-    // dateElement.textContent = `${month} ${day}, ${year}`;
+    if (logoPlacement === '2') {
+        dateElement.textContent = 'DAILY GAME SUITE';
+    } else {
+        const today = new Date();
+        
+        const months = [
+            'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+            'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+        ];
+        
+        const month = months[today.getMonth()];
+        const day = today.getDate();
+        const year = today.getFullYear();
+        
+        // dateElement.textContent = `${month} ${day}, ${year}`;
+    }
 }
 
 // Load game stars and display them on main page
 function loadGameScores2() {
-    console.log("loadGameScores called1");
+    // console.log("loadGameScores called1");
     const todayKey = getTodayKey();
     
-    console.log("loadGameScores called");
-    console.log('todayKey:', todayKey);
-    console.log('All localStorage keys:', Object.keys(localStorage));
+    // console.log("loadGameScores called");
+    // console.log('todayKey:', todayKey);
+    // console.log('All localStorage keys:', Object.keys(localStorage));
     
     // Load beticle stars
     const beticleStarsKey = `beticleStars_${todayKey}`;
     const beticleStarsValue = localStorage.getItem(beticleStarsKey);
-    console.log('beticleStars key:', beticleStarsKey);
-    console.log('beticleStars raw value:', beticleStarsValue);
+    // console.log('beticleStars key:', beticleStarsKey);
+    // console.log('beticleStars raw value:', beticleStarsValue);
     const beticleStars = parseInt(beticleStarsValue || '0');
-    console.log('Loading beticle stars:', beticleStars, 'for key:', todayKey);
+    // console.log('Loading beticle stars:', beticleStars, 'for key:', todayKey);
     const beticleStarsElement = document.getElementById('beticleStars');
     if (beticleStarsElement) {
         beticleStarsElement.innerHTML = '';
@@ -151,9 +193,9 @@ function loadGameScores2() {
             star.style.color = i < beticleStars ? '#FF8C42' : '#ddd';
             beticleStarsElement.appendChild(star);
         }
-        console.log('Beticle stars updated on main page');
+        // console.log('Beticle stars updated on main page');
     } else {
-        console.log('beticleStars element not found');
+        // console.log('beticleStars element not found');
     }
     
     // Load mystery word stars
@@ -161,14 +203,46 @@ function loadGameScores2() {
     const mysteryWordStarsElement = document.getElementById('mysteryWordStars');
     if (mysteryWordStarsElement) {
         mysteryWordStarsElement.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             const star = document.createElement('span');
             star.textContent = '★';
             star.style.color = i < mysteryWordStars ? '#FF8C42' : '#ddd';
             mysteryWordStarsElement.appendChild(star);
         }
     }
+    
+    // Load blackjack stars
+    const blackjackStars = parseInt(localStorage.getItem(`blackjackStars_${todayKey}`) || '0');
+    const blackjackStarsElement = document.getElementById('blackjackStars');
+    if (blackjackStarsElement) {
+        blackjackStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < blackjackStars ? '#FF8C42' : '#ddd';
+            blackjackStarsElement.appendChild(star);
+        }
+    }
 }
+
+// Function to update blackjack stars display
+function updateBlackjackStars() {
+    const todayKey = getTodayKey();
+    const blackjackStars = parseInt(localStorage.getItem(`blackjackStars_${todayKey}`) || '0');
+    const blackjackStarsElement = document.getElementById('blackjackStars');
+    if (blackjackStarsElement) {
+        blackjackStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < blackjackStars ? '#FF8C42' : '#ddd';
+            blackjackStarsElement.appendChild(star);
+        }
+    }
+}
+
+// Make it globally accessible
+window.updateBlackjackStars = updateBlackjackStars;
 
 // Run when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -177,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateWalletStars2();
     updateCalendar();
     loadGameScores2();
-    console.log("loadGameScores called");
+    // console.log("loadGameScores called");
     
     // Initialize coin displays if function exists
     if (window.updateCoinDisplays) {
@@ -199,9 +273,33 @@ buttons.forEach(button => {
         
         // Add active class to clicked button and corresponding page
         button.classList.add('active');
-        const targetPageElement = document.getElementById(`${targetPage}-page`);
-        if (targetPageElement) {
-            targetPageElement.classList.add('active');
+        
+        // Check for mode=B parameter (case-insensitive)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode')?.toLowerCase();
+        
+        // If mode=b and clicking sweeps tab, show loyalty page instead
+        if (targetPage === 'sweeps' && mode === 'b') {
+            const loyaltyPage = document.getElementById('loyalty-page');
+            const sweepsPage = document.getElementById('sweeps-page');
+            if (loyaltyPage) {
+                loyaltyPage.classList.add('active');
+            }
+            if (sweepsPage) {
+                sweepsPage.classList.remove('active');
+            }
+        } else {
+            const targetPageElement = document.getElementById(`${targetPage}-page`);
+            if (targetPageElement) {
+                targetPageElement.classList.add('active');
+            }
+            // Make sure loyalty page is hidden if not in mode=b
+            if (targetPage === 'sweeps' && mode !== 'b') {
+                const loyaltyPage = document.getElementById('loyalty-page');
+                if (loyaltyPage) {
+                    loyaltyPage.classList.remove('active');
+                }
+            }
         }
         
         // Update move stars display when switching to journey tab
@@ -240,8 +338,15 @@ buttons.forEach(button => {
             }, 50);
         }
         
-        // Initialize sweepstakes page when shown
-        if (targetPage === 'sweeps') {
+        // Update loyalty page stats when loyalty page is shown
+        if (targetPage === 'sweeps' && mode === 'b') {
+            updateLoyaltyStats();
+            // Update loyalty page for bigy style if applicable
+            updateLoyaltyPageForBigy();
+        }
+        
+        // Initialize sweepstakes page when shown (only if not loyalty mode)
+        if (targetPage === 'sweeps' && mode !== 'b') {
             setTimeout(initSweepsPage, 100);
         }
     });
@@ -337,11 +442,341 @@ function checkURLParameters() {
         const logoPath = null; // Keep logo hidden
         
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
+    } else if (scheme === 'bigy') {
+        // Apply Bigy color scheme - keep default background and text, use red for header/calendar
+        const schemeBack = '#f5f5f5';
+        const schemeBarGrad = 'linear-gradient(to bottom, #e84066, #c82a48)';
+        const schemeCalendarGrad = 'linear-gradient(to bottom, #e84066, #c82a48)';
+        const schemeBigText = '#363636';
+        const logoPath = 'src/img/bigy/bigy.png';  
+        
+        changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
+        
+        // Update loyalty page for bigy style
+        updateLoyaltyPageForBigy();
+        
+        // Hide regular top-logo-box when bigy is active
+        const topLogoBox = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+        if (topLogoBox) {
+            topLogoBox.style.display = 'none';
+        }
+        
+        // Initialize carousel for bigy
+        initBigyCarousel();
+    } else {
+        // Hide carousel if not bigy
+        const carouselContainer = document.querySelector('.top-logo-carousel-container');
+        if (carouselContainer) {
+            carouselContainer.classList.remove('active');
+        }
+        // Show regular top-logo-box if not bigy
+        const topLogoBox = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+        if (topLogoBox) {
+            topLogoBox.style.display = 'block';
+        }
+    }
+    
+    // Update date display based on p parameter
+    setCurrentDate();
+}
+
+// Initialize bigy carousel
+let carouselInterval = null;
+
+function initBigyCarousel() {
+    const carouselContainer = document.querySelector('.top-logo-carousel-container');
+    if (!carouselContainer) {
+        console.error('Carousel container not found!');
+        return;
+    }
+    
+    // Show carousel
+    carouselContainer.classList.add('active');
+    carouselContainer.style.display = 'block';
+    
+    const slides = carouselContainer.querySelectorAll('.carousel-slide');
+    
+    // Set logo in first slide (index 0) and duplicate slide (index 3)
+    if (slides.length > 0) {
+        const firstSlide = slides[0];
+        const firstSlideLogo = firstSlide.querySelector('.top-logo-box-carousel');
+        if (firstSlideLogo) {
+            firstSlideLogo.style.backgroundImage = "url('src/img/bigy/bigy.png')";
+            firstSlideLogo.style.backgroundSize = 'contain';
+            firstSlideLogo.style.backgroundPosition = 'center';
+            firstSlideLogo.style.backgroundRepeat = 'no-repeat';
+            firstSlideLogo.style.border = 'none';
+            firstSlideLogo.style.backgroundColor = 'transparent';
+        }
+        
+        // Set logo in duplicate slide (index 3, which is slide 4)
+        if (slides.length > 3) {
+            const duplicateSlide = slides[3];
+            const duplicateSlideLogo = duplicateSlide.querySelector('.top-logo-box-carousel');
+            if (duplicateSlideLogo) {
+                duplicateSlideLogo.style.backgroundImage = "url('src/img/bigy/bigy.png')";
+                duplicateSlideLogo.style.backgroundSize = 'contain';
+                duplicateSlideLogo.style.backgroundPosition = 'center';
+                duplicateSlideLogo.style.backgroundRepeat = 'no-repeat';
+                duplicateSlideLogo.style.border = 'none';
+                duplicateSlideLogo.style.backgroundColor = 'transparent';
+            }
+        }
+    }
+    const carousel = carouselContainer.querySelector('.top-logo-carousel');
+    const leftArrow = carouselContainer.querySelector('.carousel-arrow-left');
+    const rightArrow = carouselContainer.querySelector('.carousel-arrow-right');
+    let currentSlide = 0;
+    
+    if (!carousel || slides.length === 0) {
+        return;
+    }
+    
+    
+    // Initialize carousel wrapper for sliding
+    carousel.style.display = 'flex';
+    carousel.style.transition = 'transform 0.5s ease';
+    // Reset any existing transform - start at slide 0
+    carousel.style.transform = 'translateX(0px)';
+    carousel.style.left = '0';
+    carousel.style.right = 'auto';
+    carousel.style.marginLeft = '0';
+    carousel.style.marginRight = '0';
+    
+    // Function to update carousel width and slide positioning
+    function updateCarouselDimensions() {
+        const containerWidth = carouselContainer.offsetWidth || window.innerWidth;
+        if (containerWidth === 0) return;
+        
+        carousel.style.width = `${slides.length * containerWidth}px`;
+        
+        // Update each slide to be full container width
+        slides.forEach((slide, index) => {
+            slide.style.width = `${containerWidth}px`;
+            slide.style.flexShrink = '0';
+            slide.style.position = 'relative';
+        });
+    }
+    
+    // Function to show slide with horizontal movement
+    // Each slide is full container width, so translate by -index * containerWidth
+    function showSlide(index, instant = false) {
+        if (index < 0 || index >= slides.length) {
+            console.warn('Invalid slide index:', index);
+            return;
+        }
+        const containerWidth = carouselContainer.offsetWidth || window.innerWidth;
+        if (containerWidth === 0) {
+            // Container not ready yet, try again
+            requestAnimationFrame(() => showSlide(index, instant));
+            return;
+        }
+        
+        // If instant, disable transition temporarily
+        if (instant) {
+            carousel.style.transition = 'none';
+        } else {
+            carousel.style.transition = 'transform 0.5s ease';
+        }
+        
+        // Calculate offset: move carousel left by index * containerWidth
+        // This positions slide[index] at the left edge of the visible container
+        const offset = -index * containerWidth;
+        carousel.style.transform = `translateX(${offset}px)`;
+        currentSlide = index;
+        
+        // If instant, re-enable transition after a brief moment
+        if (instant) {
+            requestAnimationFrame(() => {
+                carousel.style.transition = 'transform 0.5s ease';
+            });
+        }
+    }
+    
+    // Function to go to next slide (for auto-cycling - loops around)
+    function nextSlide() {
+        // If we're at slide 3 (index 2), go to slide 4 (index 3), then instantly jump to slide 1 (index 0)
+        if (currentSlide === 2) {
+            // Animate to slide 4 (duplicate of slide 1)
+            showSlide(3, false);
+            // After animation completes, instantly jump to slide 1
+            setTimeout(() => {
+                showSlide(0, true);
+            }, 500); // Match the transition duration
+        } else {
+            const next = currentSlide + 1;
+            showSlide(next);
+        }
+    }
+    
+    // Function to go to next slide manually (no wrap around)
+    function nextSlideManual() {
+        // Don't go past slide 2 (the last real slide, index 2)
+        if (currentSlide >= 2) {
+            return;
+        }
+        const next = currentSlide + 1;
+        showSlide(next);
+    }
+    
+    // Function to go to previous slide manually (no wrap around)
+    function prevSlide() {
+        // Don't go before slide 0 (the first slide)
+        if (currentSlide <= 0) {
+            return;
+        }
+        const prev = currentSlide - 1;
+        showSlide(prev);
+    }
+    
+    // Initialize dimensions and show first slide (logo)
+    // Use requestAnimationFrame to ensure container is rendered
+    requestAnimationFrame(() => {
+        updateCarouselDimensions();
+        // Reset to slide 0 (logo) - ensure transform is 0
+        currentSlide = 0;
+        carousel.style.transform = 'translateX(0px)';
+        
+        // Double-check after dimensions are set
+        setTimeout(() => {
+            updateCarouselDimensions();
+            carousel.style.transform = 'translateX(0px)';
+            currentSlide = 0;
+        }, 10);
+    });
+    
+    // Update on window resize
+    window.addEventListener('resize', () => {
+        updateCarouselDimensions();
+        showSlide(currentSlide); // Re-center current slide after resize
+    });
+    
+    // Arrow click handlers
+    if (leftArrow) {
+        leftArrow.addEventListener('click', () => {
+            prevSlide(); // Manual navigation - no wrap around
+            // Reset auto-cycle timer
+            clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextSlide, 6000);
+        });
+    }
+    
+    if (rightArrow) {
+        rightArrow.addEventListener('click', () => {
+            nextSlideManual(); // Manual navigation - no wrap around
+            // Reset auto-cycle timer
+            clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextSlide, 6000);
+        });
+    }
+    
+    // Auto-cycle every 3 seconds
+    clearInterval(carouselInterval);
+    carouselInterval = setInterval(nextSlide, 3000);
+}
+
+// Update loyalty page for bigy style
+function updateLoyaltyPageForBigy() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const scheme = urlParams.get('s');
+    
+    if (scheme !== 'bigy') {
+        // Reset to default if not bigy
+        const gameTitle = document.querySelector('#loyalty-page .game-title');
+        if (gameTitle) {
+            gameTitle.textContent = 'DONUT MATCHER';
+        }
+        const playColorBox = document.querySelector('#loyalty-page .play-color-box');
+        if (playColorBox) {
+            playColorBox.style.background = 'linear-gradient(to bottom, #FF6B9D, #C44569)';
+            // Remove image if it exists
+            const img = playColorBox.querySelector('img');
+            if (img) {
+                img.remove();
+            }
+            // Restore SVG if it was removed
+            if (!playColorBox.querySelector('svg')) {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '120');
+                svg.setAttribute('height', '120');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('style', 'margin-bottom: 1px;');
+                const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle1.setAttribute('cx', '12');
+                circle1.setAttribute('cy', '12');
+                circle1.setAttribute('r', '10');
+                circle1.setAttribute('fill', 'white');
+                circle1.setAttribute('opacity', '0.9');
+                const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle2.setAttribute('cx', '12');
+                circle2.setAttribute('cy', '12');
+                circle2.setAttribute('r', '6');
+                circle2.setAttribute('fill', 'none');
+                circle2.setAttribute('stroke', '#FF6B9D');
+                circle2.setAttribute('stroke-width', '2');
+                const circle3 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle3.setAttribute('cx', '12');
+                circle3.setAttribute('cy', '12');
+                circle3.setAttribute('r', '3');
+                circle3.setAttribute('fill', '#FF6B9D');
+                svg.appendChild(circle1);
+                svg.appendChild(circle2);
+                svg.appendChild(circle3);
+                const gameTitle = playColorBox.querySelector('.game-title');
+                if (gameTitle) {
+                    playColorBox.insertBefore(svg, gameTitle);
+                } else {
+                    playColorBox.appendChild(svg);
+                }
+            }
+        }
+        return;
+    }
+    
+    // Change game title to Market Match
+    const gameTitle = document.querySelector('#loyalty-page .game-title');
+    if (gameTitle) {
+        gameTitle.textContent = 'MARKET MATCH';
+    }
+    
+    // Update play-color-box with image and red gradient
+    const playColorBox = document.querySelector('#loyalty-page .play-color-box');
+    if (playColorBox) {
+        playColorBox.style.background = 'linear-gradient(to bottom, #e84066, #c82a48)';
+        
+        // Remove existing SVG
+        const svg = playColorBox.querySelector('svg');
+        if (svg) {
+            svg.remove();
+        }
+        
+        // Add image if it doesn't exist
+        let img = playColorBox.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            img.src = 'src/img/bigy/sweepsGame.png';
+            img.style.height = '100px';
+            img.style.width = 'auto';
+            img.style.marginBottom = '4px';
+            img.style.marginTop = '8px';
+            img.style.objectFit = 'contain';
+            const title = playColorBox.querySelector('.game-title');
+            if (title) {
+                playColorBox.insertBefore(img, title);
+            } else {
+                playColorBox.appendChild(img);
+            }
+        } else {
+            img.src = 'src/img/bigy/sweepsGame.png';
+            img.style.height = '100px';
+        }
     }
 }
 
 // Store current color scheme
 let currentColorScheme = null;
+// Store whether a logo has been specified
+let hasLogo = false;
 
 // Color scheme function
 function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, logoPath) {
@@ -402,7 +837,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     });
     
     // Change large serif text (section titles)
-    const sectionTitles = document.querySelectorAll('.section-title, .week-subtitle');
+    const sectionTitles = document.querySelectorAll('.section-title, .week-subtitle, .week-title');
     sectionTitles.forEach(title => {
         title.style.color = textColor;
     });
@@ -540,19 +975,100 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
         });
     }
     
+    // Check URL parameter for logo placement
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoPlacement = urlParams.get('p');
+    
     // Show and set logo
     const logo = document.querySelector('.logo-img');
-    if (logo) {
-        if (logoPath) {
-            logo.src = logoPath;
-            logo.style.display = 'block';
+    const topLogoBox = document.querySelector('.top-logo-box');
+    
+    if (logoPath) {
+        hasLogo = true;
+        
+        if (logoPlacement === '2') {
+            // Place logo in top-logo-box instead of header
+            if (logo) {
+                logo.style.display = 'none';
+            }
+            // Find top-logo-box (could be in carousel or standalone)
+            const topLogoBoxInCarousel = document.querySelector('.carousel-slide .top-logo-box-carousel');
+            const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
+            const topLogoBox = topLogoBoxInCarousel || topLogoBoxStandalone;
+            
+            if (topLogoBox) {
+                topLogoBox.style.backgroundImage = `url('${logoPath}')`;
+                topLogoBox.style.backgroundSize = 'contain';
+                topLogoBox.style.backgroundPosition = 'center';
+                topLogoBox.style.backgroundRepeat = 'no-repeat';
+                topLogoBox.style.border = 'none';
+                topLogoBox.style.backgroundColor = 'transparent';
+                // Only show if close button is not showing
+                const closeButton = document.querySelector('.game-overlay-close');
+                if (closeButton && !closeButton.classList.contains('show')) {
+                    topLogoBox.style.display = 'block';
+                } else {
+                    topLogoBox.style.display = 'none';
+                }
+            }
         } else {
-            logo.style.display = 'none';
+            // Default: place logo in header
+            if (topLogoBox) {
+                topLogoBox.style.display = 'block';
+                topLogoBox.style.border = '2px solid #000';
+            }
+            if (logo) {
+                logo.src = logoPath;
+                // Only show logo if close button is not showing
+                const closeButton = document.querySelector('.game-overlay-close');
+                if (closeButton && !closeButton.classList.contains('show')) {
+                    logo.style.display = 'block';
+                } else {
+                    logo.style.display = 'none';
+                }
+            }
+        }
+    } else {
+        logo.style.display = 'none';
+        hasLogo = false;
+        if (topLogoBox && logoPlacement !== '2') {
+            topLogoBox.style.border = '2px solid #000';
         }
     }
     
     // Watch for dynamically added letter boxes
     observeLetterBoxes();
+}
+
+// Helper function to update logo visibility based on close button state
+function updateLogoVisibility() {
+    const logo = document.querySelector('.logo-img');
+    const topLogoBox = document.querySelector('.top-logo-box');
+    const closeButton = document.querySelector('.game-overlay-close');
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoPlacement = urlParams.get('p');
+    
+    if (hasLogo) {
+        if (logoPlacement === '2') {
+            // Logo is in top-logo-box
+            if (topLogoBox) {
+                if (closeButton && closeButton.classList.contains('show')) {
+                    topLogoBox.style.display = 'none';
+                } else {
+                    topLogoBox.style.display = 'block';
+                }
+            }
+        } else {
+            // Logo is in header
+            if (logo) {
+                if (closeButton && closeButton.classList.contains('show')) {
+                    logo.style.display = 'none';
+                } else {
+                    logo.style.display = 'block';
+                }
+            }
+        }
+    }
 }
 
 // Function to observe and style dynamically added letter boxes
@@ -659,13 +1175,15 @@ if (memoryBox) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
             
-            // Pass color scheme to iframe
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('memoryIframe');
-            if (iframe && scheme) {
-                iframe.src = `memory/index.html?s=${scheme}`;
+            if (iframe) {
+                iframe.src = scheme ? `memory/index.html?s=${scheme}` : 'memory/index.html';
+                console.log(`Reloading memory game iframe: ${iframe.src}`);
             }
         }
     });
@@ -677,12 +1195,12 @@ if (memoryBox) {
 const closeButton = document.querySelector('.game-overlay-close');
 if (closeButton) {
     closeButton.addEventListener('click', () => {
-        console.log('HIDING game (close button)');
         
         // Hide close button
         closeButton.classList.remove('show');
+        updateLogoVisibility();
         
-        // Close all overlays
+        // Find which overlay is currently active
         const memoryOverlay = document.getElementById('memoryOverlay');
         const mysteryWordOverlay = document.getElementById('mysteryWordOverlay');
         const beticleOverlay = document.getElementById('beticleOverlay');
@@ -690,27 +1208,44 @@ if (closeButton) {
         const lostAndFoundOverlay = document.getElementById('lostAndFoundOverlay');
         const goldCaseOverlay = document.getElementById('goldCaseOverlay');
         
-        if (memoryOverlay) memoryOverlay.classList.remove('active');
-        if (mysteryWordOverlay) mysteryWordOverlay.classList.remove('active');
-        if (beticleOverlay) beticleOverlay.classList.remove('active');
-        if (blackjackOverlay) blackjackOverlay.classList.remove('active');
-        if (lostAndFoundOverlay) lostAndFoundOverlay.classList.remove('active');
-        if (goldCaseOverlay) goldCaseOverlay.classList.remove('active');
+        // Determine which overlay is active and only reload that iframe
+        let activeOverlay = null;
+        let iframeToUnload = null;
+        if (memoryOverlay && memoryOverlay.classList.contains('active')) {
+            activeOverlay = 'memory';
+            memoryOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('memoryIframe');
+        } else if (mysteryWordOverlay && mysteryWordOverlay.classList.contains('active')) {
+            activeOverlay = 'mysteryWord';
+            mysteryWordOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('mysteryWordIframe');
+        } else if (beticleOverlay && beticleOverlay.classList.contains('active')) {
+            activeOverlay = 'beticle';
+            beticleOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('beticleIframe');
+        } else if (blackjackOverlay && blackjackOverlay.classList.contains('active')) {
+            activeOverlay = 'blackjack';
+            blackjackOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('blackjackIframe');
+        } else if (lostAndFoundOverlay && lostAndFoundOverlay.classList.contains('active')) {
+            activeOverlay = 'lostAndFound';
+            lostAndFoundOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('lostAndFoundIframe');
+        } else if (goldCaseOverlay && goldCaseOverlay.classList.contains('active')) {
+            activeOverlay = 'goldCase';
+            goldCaseOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('goldCaseIframe');
+        }
+        
+        // Unload the iframe by setting src to blank
+        if (iframeToUnload) {
+            console.log(`Unloading ${activeOverlay} game iframe by setting src to 'about:blank'`);
+            iframeToUnload.src = 'about:blank';
+        }
+        
         document.body.style.overflow = '';
         
-        // Reload iframes for arcade games
-        const memoryIframe = document.getElementById('memoryIframe');
-        const blackjackIframe = document.getElementById('blackjackIframe');
-        const lostAndFoundIframe = document.getElementById('lostAndFoundIframe');
-        const goldCaseIframe = document.getElementById('goldCaseIframe');
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const scheme = urlParams.get('s');
-        
-        if (memoryIframe) memoryIframe.src = scheme ? `memory/index.html?s=${scheme}` : 'memory/index.html';
-        if (blackjackIframe) blackjackIframe.src = scheme ? `blackjack/index.html?s=${scheme}` : 'blackjack/index.html';
-        if (lostAndFoundIframe) lostAndFoundIframe.src = scheme ? `lostAndFound/index.html?s=${scheme}` : 'lostAndFound/index.html';
-        if (goldCaseIframe) goldCaseIframe.src = scheme ? `goldCase/index.html?s=${scheme}` : 'goldCase/index.html';
+        // Don't reload iframes when closing - just close the overlay
         
         // Reload game scores to update stars
         // if (typeof loadGameScores === 'function') {
@@ -729,12 +1264,12 @@ if (memoryOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
             
             const iframe = document.getElementById('memoryIframe');
             if (iframe) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                iframe.src = scheme ? `memory/index.html?s=${scheme}` : 'memory/index.html';
+                console.log("Unloading memory game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
             }
         }
     });
@@ -758,20 +1293,21 @@ if (mysteryWordBox) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
             
-            // Set iframe src with scheme parameter on first open
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const mysteryIframe = document.getElementById('mysteryWordIframe');
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
-            if (mysteryIframe && !mysteryIframe.dataset.initialized) {
+            if (mysteryIframe) {
                 mysteryIframe.src = scheme ? `mysteryWord/index.html?s=${scheme}` : 'mysteryWord/index.html';
-                mysteryIframe.dataset.initialized = 'true';
+                console.log(`Reloading mysteryWord game iframe: ${mysteryIframe.src}`);
             }
             
             // Tell iframe it's now visible - call positioning win message
             setTimeout(() => {
                 if (mysteryIframe && mysteryIframe.contentWindow) {
-                    console.log('Sending mysteryWordShown message to iframe');
+                    // console.log('Sending mysteryWordShown message to iframe');
                     mysteryIframe.contentWindow.postMessage('mysteryWordShown', '*');
                 }
             }, 100);
@@ -792,6 +1328,13 @@ if (mysteryWordOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
+            
+            const iframe = document.getElementById('mysteryWordIframe');
+            if (iframe) {
+                console.log("Unloading mysteryWord game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
+            }
         }
     });
 }
@@ -806,14 +1349,15 @@ if (beticleBox) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
             
-            // Set iframe src with scheme parameter on first open
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const beticleIframe = document.getElementById('beticleIframe');
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
-            if (beticleIframe && !beticleIframe.dataset.initialized) {
+            if (beticleIframe) {
                 beticleIframe.src = scheme ? `beticle/index.html?s=${scheme}` : 'beticle/index.html';
-                beticleIframe.dataset.initialized = 'true';
+                console.log(`Reloading beticle game iframe: ${beticleIframe.src}`);
             }
             
             // Tell iframe it's now visible
@@ -838,6 +1382,13 @@ if (beticleOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
+            
+            const iframe = document.getElementById('beticleIframe');
+            if (iframe) {
+                console.log("Unloading beticle game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
+            }
         }
     });
 }
@@ -855,15 +1406,15 @@ if (speed21Box) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
             
-            // Pass color scheme to iframe
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('blackjackIframe');
-            if (iframe && scheme) {
-                iframe.src = `blackjack/index.html?s=${scheme}`;
-            } else if (iframe) {
-                iframe.src = 'blackjack/index.html';
+            if (iframe) {
+                iframe.src = scheme ? `blackjack/index.html?s=${scheme}` : 'blackjack/index.html';
+                console.log(`Reloading blackjack game iframe: ${iframe.src}`);
             }
         }
     });
@@ -879,12 +1430,12 @@ if (blackjackOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
             
             const iframe = document.getElementById('blackjackIframe');
             if (iframe) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                iframe.src = scheme ? `blackjack/index.html?s=${scheme}` : 'blackjack/index.html';
+                console.log("Unloading blackjack game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
             }
         }
     });
@@ -903,15 +1454,19 @@ if (lostAndFoundBox) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
             
-            // Pass color scheme to iframe
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('lostAndFoundIframe');
-            if (iframe && scheme) {
-                iframe.src = `lostAndFound/index.html?s=${scheme}`;
-            } else if (iframe) {
-                iframe.src = 'lostAndFound/index.html';
+            if (iframe) {
+                iframe.src = scheme ? `lostAndFound/index.html?s=${scheme}` : 'lostAndFound/index.html';
+                // Set iOS-specific attributes for touch handling
+                iframe.setAttribute('allow', 'touch');
+                iframe.style.touchAction = 'none';
+                iframe.style.webkitOverflowScrolling = 'touch';
+                console.log(`Reloading lostAndFound game iframe: ${iframe.src}`);
             }
         }
     });
@@ -930,15 +1485,15 @@ if (goldCaseBox) {
             // Show close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
 
-            // Pass color scheme to iframe
+            // Reload iframe (it may have been unloaded to 'about:blank')
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('goldCaseIframe');
-            if (iframe && scheme) {
-                iframe.src = `goldCase/index.html?s=${scheme}`;
-            } else if (iframe) {
-                iframe.src = 'goldCase/index.html';
+            if (iframe) {
+                iframe.src = scheme ? `goldCase/index.html?s=${scheme}` : 'goldCase/index.html';
+                console.log(`Reloading goldCase game iframe: ${iframe.src}`);
             }
         }
     });
@@ -954,12 +1509,12 @@ if (goldCaseOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
             
             const iframe = document.getElementById('goldCaseIframe');
             if (iframe) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                iframe.src = scheme ? `goldCase/index.html?s=${scheme}` : 'goldCase/index.html';
+                console.log("Unloading goldCase game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
             }
         }
     });
@@ -978,17 +1533,14 @@ if (lostAndFoundOverlay) {
             // Hide close button
             const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton) closeButton.classList.remove('show');
+            updateLogoVisibility();
             
             const iframe = document.getElementById('lostAndFoundIframe');
             if (iframe) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                iframe.src = scheme ? `lostAndFound/index.html?s=${scheme}` : 'lostAndFound/index.html';
+                console.log("Unloading lostAndFound game iframe by setting src to 'about:blank' (click outside)");
+                iframe.src = 'about:blank';
             }
-            // Reload game scores to update stars
-            // if (typeof loadGameScores === 'function') {
-                loadGameScores2();
-            // }
+            loadGameScores2();
         }
     });
 }
@@ -1087,8 +1639,25 @@ function initSweepsPage() {
 
 // Initialize sweepstakes on page load if active
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('sweeps-page')?.classList.contains('active')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode')?.toLowerCase();
+    
+    // Check if sweeps page is active (and not loyalty mode)
+    if (document.getElementById('sweeps-page')?.classList.contains('active') && mode !== 'b') {
         initSweepsPage();
+    }
+    
+    // If mode=b, ensure loyalty page shows when sweeps tab is clicked
+    // Also handle if sweeps tab is already active on page load
+    if (mode === 'b') {
+        const sweepsButton = document.querySelector('.tab-button[data-page="sweeps"]');
+        const sweepsPage = document.getElementById('sweeps-page');
+        const loyaltyPage = document.getElementById('loyalty-page');
+        
+        if (sweepsButton && sweepsButton.classList.contains('active')) {
+            if (sweepsPage) sweepsPage.classList.remove('active');
+            if (loyaltyPage) loyaltyPage.classList.add('active');
+        }
     }
 });
 

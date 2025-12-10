@@ -91,10 +91,10 @@ function hlUpdateCalendar() {
         
         if (index < dayOfWeek) {
             const stars = localStorage.getItem(`dailyStars_${dayKey}`);
-            dayNumberElement.textContent = stars || '0';
+            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + (stars || '0') + '</span>';
         } else if (index === dayOfWeek) {
             const stars = hlGetDailyStars();
-            dayNumberElement.textContent = stars;
+            dayNumberElement.innerHTML = '<span style="color: #FF8C42; font-size: 14px; transform: translateY(-1px); display: inline-block;">★</span><span style="font-size: 15px;">' + stars + '</span>';
         } else {
             dayNumberElement.innerHTML = '&nbsp;';
         }

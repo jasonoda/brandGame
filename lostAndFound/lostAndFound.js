@@ -61,48 +61,32 @@ class Loader {
         this.isLoaded_3D = false;
         this.e.reflectionTexture = null;
         this.totalSkinsLoaded = 0;
-        console.log("set up loader");
     }
 
     loadCubeTexture(loader) {
-        console.log("[LOADER] Cube texture loaded!");
         this.isLoaded_CUBE = true;
-        console.log("[LOADER] isLoaded_CUBE set to:", this.isLoaded_CUBE);
     }
 
     loadTexture(loader) {
         this.texturesLoaded += 1;
-        console.log("[LOADER] Texture loaded: " + this.texturesLoaded + " / " + this.textureArray.length);
         if (this.texturesLoaded === this.textureArray.length) {
-            console.log("[LOADER] All textures loaded! Setting isLoaded_3DTEXTURES to true");
             this.isLoaded_3DTEXTURES = true;
         }
     }
 
     managerLoad(obName) {
-        console.log("[LOADER] managerLoad() called with obName:", obName);
-        console.log("[LOADER] Current modelsLoaded:", this.modelsLoaded);
-        console.log("[LOADER] modelArray:", this.modelArray);
         this.modelsLoaded += 1;
-        console.log("[LOADER] Model loaded: " + obName + " (" + this.modelsLoaded + " / " + this.modelArray.length + ")");
         if (this.modelsLoaded === this.modelArray.length) {
-            console.log("[LOADER] All models loaded! Setting isLoaded_3D to true");
             this.isLoaded_3D = true;
-        } else {
-            console.log("[LOADER] Still waiting for more models. Current:", this.modelsLoaded, "Expected:", this.modelArray.length);
         }
     }
 
     load() {
-        console.log("[LOADER] Starting 3D asset load...");
-        console.log("[LOADER] Texture array length:", this.textureArray.length);
-        console.log("[LOADER] Model array length:", this.modelArray.length);
         
         var e = this.e;
         var loader = new THREE.CubeTextureLoader();
         loader.name = "skyboxLoaderName";
 
-        console.log("[LOADER] Loading cube texture...");
         this.e.reflectionTexture = loader.load([
             './images/ref/pos-x.png',
             './images/ref/neg-x.png',
@@ -137,55 +121,29 @@ class Loader {
         this.modelArray.push(this.myObject1);
         this.modelArray.push("items");
         this.manage = new THREE.LoadingManager();
-        console.log("[LOADER] Creating LoadingManager...");
-        this.manage.onLoad = () => {
-            console.log("[LOADER] ===== LoadingManager onLoad called - all items loaded =====");
-        };
+        this.manage.onLoad = () => {};
         this.manage.onError = (url) => {
             console.error("[LOADER] ===== LoadingManager ERROR loading:", url, "=====");
         };
-        this.manage.onProgress = (url, itemsLoaded, itemsTotal) => {
-            console.log("[LOADER] LoadingManager progress:", itemsLoaded, "/", itemsTotal, "(", url, ")");
-        };
-        this.manage.onStart = (url, itemsLoaded, itemsTotal) => {
-            console.log("[LOADER] LoadingManager onStart:", url, "Total items:", itemsTotal);
-        };
-        console.log("[LOADER] LoadingManager created with callbacks:", {
-            onLoad: typeof this.manage.onLoad,
-            onError: typeof this.manage.onError,
-            onProgress: typeof this.manage.onProgress
-        });
+        this.manage.onProgress = (url, itemsLoaded, itemsTotal) => {};
+        this.manage.onStart = (url, itemsLoaded, itemsTotal) => {};
 
-        console.log("[LOADER] Checking THREE and GLTFLoader...");
-        console.log("[LOADER] THREE available:", typeof THREE !== 'undefined');
-        console.log("[LOADER] THREE.GLTFLoader available:", typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined');
         if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
             console.error("GLTFLoader not found. Please ensure three.js and GLTFLoader are loaded");
-            console.error("THREE:", typeof THREE !== 'undefined' ? THREE : 'undefined');
-            console.error("THREE.GLTFLoader:", typeof THREE !== 'undefined' && THREE.GLTFLoader ? THREE.GLTFLoader : 'undefined');
             return;
         }
 
-        console.log("[LOADER] Loading GLTF models...");
-        console.log("[LOADER] Creating GLTFLoader instance with LoadingManager...");
         try {
             this.loader = new THREE.GLTFLoader(this.manage);
-            console.log("[LOADER] GLTFLoader instance created successfully");
         } catch (error) {
             console.error("[LOADER] Error creating GLTFLoader:", error);
             return;
         }
 
         const loaderInstance = this;
-        console.log("[LOADER] Starting ped.glb load...");
-        console.log("[LOADER] File path: ./models/ped.glb");
         try {
             this.loader.load('./models/ped.glb', 
                 (gltf) => {
-                    console.log("[LOADER] ped.glb SUCCESS callback fired!");
-                    console.log("[LOADER] ped.glb gltf object:", gltf);
-                    console.log("[LOADER] ped.glb scene:", gltf.scene);
-                    console.log("[LOADER] ped.glb scene children:", gltf.scene ? gltf.scene.children.length : 'no scene');
                     try {
                         gltf.scene.traverse(function(object) {
                             e.ped = gltf.scene;
@@ -195,49 +153,23 @@ class Loader {
                                 object.material.side = THREE.FrontSide;
                             }
                         });
-                        console.log("[LOADER] ped.glb traverse complete");
                     } catch (error) {
                         console.error("[LOADER] Error traversing ped.glb scene:", error);
                     }
-                    console.log("[LOADER] About to call managerLoad('ped')...");
-                    console.log("[LOADER] loaderInstance:", loaderInstance);
-                    console.log("[LOADER] loaderInstance.managerLoad:", typeof loaderInstance.managerLoad);
                     loaderInstance.managerLoad("ped");
-                    console.log("[LOADER] managerLoad('ped') called");
                 }, 
-                (progress) => {
-                    console.log("[LOADER] ped.glb PROGRESS callback fired");
-                    console.log("[LOADER] ped.glb progress object:", progress);
-                    console.log("[LOADER] ped.glb progress.lengthComputable:", progress.lengthComputable);
-                    if (progress.lengthComputable) {
-                        const percentComplete = progress.loaded / progress.total * 100;
-                        console.log("[LOADER] ped.glb progress:", percentComplete.toFixed(2) + "% (" + progress.loaded + " / " + progress.total + " bytes)");
-                    } else {
-                        console.log("[LOADER] ped.glb progress: loaded =", progress.loaded, "total =", progress.total);
-                    }
-                }, 
+                (progress) => {},
                 (error) => {
-                    console.error("[LOADER] ped.glb ERROR callback fired!");
                     console.error("[LOADER] Error loading ped.glb:", error);
-                    console.error("[LOADER] Error type:", typeof error);
-                    console.error("[LOADER] Error message:", error ? error.message : 'no message');
-                    console.error("[LOADER] Error stack:", error ? error.stack : 'no stack');
                 }
             );
-            console.log("[LOADER] ped.glb load() call completed");
         } catch (error) {
             console.error("[LOADER] Exception thrown while calling load() for ped.glb:", error);
         }
 
-        console.log("[LOADER] Starting items.glb load...");
-        console.log("[LOADER] File path: ./models/items.glb");
         try {
             this.loader.load('./models/items.glb', 
                 (gltf) => {
-                    console.log("[LOADER] items.glb SUCCESS callback fired!");
-                    console.log("[LOADER] items.glb gltf object:", gltf);
-                    console.log("[LOADER] items.glb scene:", gltf.scene);
-                    console.log("[LOADER] items.glb scene children:", gltf.scene ? gltf.scene.children.length : 'no scene');
                     try {
                         const itemsRoot = gltf.scene;
                         itemsRoot.traverse((child) => {
@@ -247,7 +179,6 @@ class Loader {
                                 child.material.side = THREE.FrontSide;
                             }
                         });
-                        console.log("[LOADER] items.glb traverse complete");
 
                         this.e.itemObjects = [];
                         itemsRoot.children.forEach((itemGroup, index) => {
@@ -255,40 +186,19 @@ class Loader {
                             const item = itemGroup.clone(true);
                             this.e.itemObjects.push(item);
                         });
-                        console.log("[LOADER] items.glb processed", this.countit, "items");
                     } catch (error) {
                         console.error("[LOADER] Error processing items.glb:", error);
                     }
-                    console.log("[LOADER] About to call managerLoad('items')...");
-                    console.log("[LOADER] this:", this);
-                    console.log("[LOADER] this.managerLoad:", typeof this.managerLoad);
                     loaderInstance.managerLoad("items");
-                    console.log("[LOADER] managerLoad('items') called");
                 }, 
-                (progress) => {
-                    console.log("[LOADER] items.glb PROGRESS callback fired");
-                    console.log("[LOADER] items.glb progress object:", progress);
-                    console.log("[LOADER] items.glb progress.lengthComputable:", progress.lengthComputable);
-                    if (progress.lengthComputable) {
-                        const percentComplete = progress.loaded / progress.total * 100;
-                        console.log("[LOADER] items.glb progress:", percentComplete.toFixed(2) + "% (" + progress.loaded + " / " + progress.total + " bytes)");
-                    } else {
-                        console.log("[LOADER] items.glb progress: loaded =", progress.loaded, "total =", progress.total);
-                    }
-                }, 
+                (progress) => {},
                 (error) => {
-                    console.error("[LOADER] items.glb ERROR callback fired!");
                     console.error("[LOADER] Error loading items.glb:", error);
-                    console.error("[LOADER] Error type:", typeof error);
-                    console.error("[LOADER] Error message:", error ? error.message : 'no message');
-                    console.error("[LOADER] Error stack:", error ? error.stack : 'no stack');
                 }
             );
-            console.log("[LOADER] items.glb load() call completed");
         } catch (error) {
             console.error("[LOADER] Exception thrown while calling load() for items.glb:", error);
         }
-        console.log("[LOADER] All load() calls initiated");
     }
 }
 
@@ -296,36 +206,38 @@ class Loader {
 // SOUNDS CLASS
 // ============================================================================
 
+// Shared sound system (same as Memory game)
+let soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
+let loadedSounds = {};
+let engineInstance = null;
+
+function initSounds() {
+    soundArray.forEach(soundName => {
+        try {
+            loadedSounds[soundName] = new Howl({
+                src: [`../sounds/${soundName}.mp3`]
+            });
+        } catch(e) {
+            console.error(`Error loading sound ${soundName}:`, e);
+        }
+    });
+}
+
+function playSound(type) {
+    if (engineInstance && !engineInstance.muteState && loadedSounds[type]) {
+        loadedSounds[type].play();
+    }
+}
+
 class Sounds {
     setUp(e) {
         this.e = e;
-        this.soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
-        this.loadedSounds = [];
-
-        for (var i = 0; i < this.soundArray.length; i++) {
-            this.loadSounds(this.soundArray[i]);
-        }
-    }
-
-    loadSounds(url) {
-        var theSound = new Howl({
-            src: ['../sounds/' + url + ".mp3"]
-        });
-
-        theSound.on('load', (event) => {
-            theSound.name = url;
-            this.loadedSounds.push(theSound);
-        });
+        engineInstance = e;
+        initSounds();
     }
 
     p(type) {
-        if (this.e.muteState === false) {
-            for (var i = 0; i < this.loadedSounds.length; i++) {
-                if (this.loadedSounds[i].name === type) {
-                    this.loadedSounds[i].play();
-                }
-            }
-        }
+        playSound(type);
     }
 }
 
@@ -558,9 +470,7 @@ class UI {
     }
 
     load() {
-        console.log("[UI] Loading UI images...");
         this.isLoaded_UI = true;
-        console.log("[UI] UI images loaded!");
     }
 
     update() {
@@ -586,7 +496,6 @@ class EndScore {
         try {
             const response = await fetch('./starScores.json');
             this.starThresholds = await response.json();
-            console.log('Star thresholds loaded successfully:', this.starThresholds);
         } catch (error) {
             console.error('Failed to load star thresholds:', error);
             this.starThresholds = [0, 10000, 20000, 30000, 45000];
@@ -595,7 +504,6 @@ class EndScore {
 
     createFinalScoreOverlay(scoreValue, statsArray = []) {
         if (!this.starThresholds) {
-            console.log('Star thresholds not loaded yet, using fallback values');
             this.starThresholds = [0, 10000, 20000, 30000, 45000];
         }
 
@@ -803,7 +711,6 @@ class EndScore {
 class Scene {
     setUp(e) {
         this.e = e;
-        console.log("startme");
     }
 
     buildScene() {
@@ -991,9 +898,11 @@ class Scene {
         window.addEventListener('mousemove', this.onMouseMove.bind(this));
         window.addEventListener('mouseup', this.onMouseUp.bind(this));
 
-        window.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
-        window.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-        window.addEventListener('touchend', this.onTouchEnd.bind(this));
+        // Add touch listeners with capture phase for better iOS support
+        window.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false, capture: true });
+        window.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false, capture: true });
+        window.addEventListener('touchend', this.onTouchEnd.bind(this), { capture: true });
+        window.addEventListener('touchcancel', this.onTouchEnd.bind(this), { capture: true });
 
         this.upperLeftDiv = document.getElementById("upperLeftDiv");
         this.upperRightDiv = document.getElementById("upperRightDiv");
@@ -1097,7 +1006,6 @@ class Scene {
         }
 
         this.numberOfPairs = numberOfPairs;
-        console.log(`Loading ${numberOfPairs} pairs for ${this.difficulty} difficulty`);
 
         const shuffledItems = [...this.e.itemObjects];
         this.shuffleArray(shuffledItems);
@@ -1106,7 +1014,6 @@ class Scene {
         this.gameObjects = selectedItems;
 
         const viewportLimits = this.calculateViewportLimits();
-        console.log("Viewport limits for spawning:", viewportLimits);
 
         for (let i = 0; i < selectedItems.length; i++) {
             for (let j = 0; j < 2; j++) {
@@ -1177,7 +1084,6 @@ update() {
         if (!this._actionLogCounter) this._actionLogCounter = 0;
         this._actionLogCounter++;
         if (this._actionLogCounter % 60 === 0) { // Log every 60 frames (~1 second at 60fps)
-            console.log("[ENGINE] Current action:", this.action);
         }
 
         if(this.action==="zoom fixer"){
@@ -1221,9 +1127,7 @@ update() {
                 document.getElementById("loadingBack").style.opacity = "1";
                 gsap.to(document.getElementById("loadingBack"), { opacity: 0, duration: 1, delay: 1, ease: "linear" });
                 
-                console.log("[ENGINE] Action changing: zoom fixer -> start");
                 this.action = "start";
-                console.log("[ENGINE] Action changed to:", this.action);
             }
 
             
@@ -1236,7 +1140,6 @@ update() {
 
         }else if(this.action==="start game"){
 
-            console.log("[ENGINE] In 'start game' action, playing start sound");
             
             // Hide the start menu
             const startMenu = document.getElementById("startMenu");
@@ -1245,13 +1148,11 @@ update() {
             if (startMenuContainer) {
                 startMenuContainer.style.transition = 'opacity 0.3s ease-out';
                 startMenuContainer.style.opacity = '0';
-                console.log("[ENGINE] Fading out start menu container");
             }
 
             setTimeout(() => {
                 if (startMenu) {
                     startMenu.style.display = 'none';
-                    console.log("[ENGINE] Start menu hidden");
                 }
             }, 300);
 
@@ -1269,9 +1170,7 @@ update() {
             // }
 
             // Change action to "game" to allow gameplay
-            console.log("[ENGINE] Action changing: start game -> game");
             this.action = "game";
-            console.log("[ENGINE] Action changed to:", this.action);
 
         }else if(this.action==="game"){
 
@@ -1530,7 +1429,6 @@ update() {
 
                     // Reset objects that fall through floor or go above ceiling
                     if (this.matchOb.boxBody.position.y < -5 || this.matchOb.boxBody.position.y > 25) {
-                        console.log(`Resetting object ${this.matchOb.threeCube.name} from Y position ${this.matchOb.boxBody.position.y}`);
                         
                         // Reset to safe position
                         this.matchOb.boxBody.position.y = 10;
@@ -1818,8 +1716,15 @@ update() {
 
     onTouchStart(event) {
 
+        // Don't interfere with button clicks or other interactive elements
+        const target = event.target;
+        if (target && (target.tagName === 'BUTTON' || target.closest('button') || target.closest('#playButton') || target.closest('#tutorialBut') || target.closest('.game-overlay-close'))) {
+            return; // Let the button handle its own touch events
+        }
+
         // console.log("start")
         event.preventDefault();  // Prevent default touch behavior (like zoom)
+        event.stopPropagation(); // Prevent event bubbling
         
         // Handle start game action
         // if(this.action==="start"){
@@ -1827,26 +1732,40 @@ update() {
         //     return;
         // }
         
-        if (event.touches.length === 1) { // Single touch
-            this.mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
-            console.log("Touch start - action:", this.action, "isTablet:", this.e.isTablet);
+        if (event.touches && event.touches.length === 1) { // Single touch
+            const touch = event.touches[0];
+            this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            console.log("Touch start - action:", this.action, "isTablet:", this.e.isTablet, "mobile:", this.e.mobile, "clientX:", touch.clientX, "clientY:", touch.clientY);
             this.onMouseDown(event);
         }
     }
     
     onTouchMove(event) {
+        // Don't interfere with button interactions
+        const target = event.target;
+        if (target && (target.tagName === 'BUTTON' || target.closest('button') || target.closest('#playButton') || target.closest('#tutorialBut') || target.closest('.game-overlay-close'))) {
+            return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         
-        if (event.touches.length === 1) { // Single touch
-            this.mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+        if (event.touches && event.touches.length === 1) { // Single touch
+            const touch = event.touches[0];
+            this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
             this.onMouseMove(event);
         }
     }
     
     onTouchEnd(event) {
+        // Don't interfere with button interactions
+        const target = event.target;
+        if (target && (target.tagName === 'BUTTON' || target.closest('button') || target.closest('#playButton') || target.closest('#tutorialBut') || target.closest('.game-overlay-close'))) {
+            return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         this.onMouseUp(event);
@@ -1930,7 +1849,6 @@ update() {
             bottom: -bottomIntersectPoint.z - padding+2
         };
         } catch (error) {
-            console.log("Viewport calculation error:", error, "using fallback values");
             return {
                 left: -2.4,
                 right: 2.4,
@@ -1944,7 +1862,9 @@ update() {
 
     onMouseMove(event) {
 
-        if(this.e.mobile===false){
+        // Only update mouse coordinates from event if it's a mouse event (not touch)
+        // Touch events have coordinates set in onTouchMove before calling this
+        if(this.e.mobile===false && event.clientX !== undefined){
             this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
@@ -1994,13 +1914,17 @@ update() {
 
     onMouseDown(event) {
 
-        if(this.e.mobile===false && this.e.isTablet!==true){
+        // Only update mouse coordinates from event if it's a mouse event (not touch)
+        // Touch events have coordinates set in onTouchStart before calling this
+        if(this.e.mobile===false && this.e.isTablet!==true && event.clientX !== undefined){
             this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
         this.raycaster.setFromCamera(this.mouse, this.e.camera);
         const intersects = this.raycaster.intersectObjects(this.matchObs.map(matchOb => matchOb.threeCube));
+
+        console.log("onMouseDown - intersects:", intersects.length, "action:", this.action, "mobile:", this.e.mobile, "mouse.x:", this.mouse.x, "mouse.y:", this.mouse.y);
 
         if (intersects.length > 0 && (this.action==="game" || this.action==="tutorial_playing")) {
 
@@ -2627,7 +2551,6 @@ class Engine{
     }
 
     start(){
-        console.log("[ENGINE] start() called, action:", this.action);
     }
 
     update(){
@@ -2649,13 +2572,11 @@ class Engine{
 
         // Log action changes only (not every frame)
         if (!this.lastAction || this.lastAction !== this.action) {
-            console.log("[ENGINE] Action changed:", this.lastAction, "->", this.action);
             this.lastAction = this.action;
         }
 
         if(this.action==="set up"){
 
-            console.log("[ENGINE] Starting setup...");
 
             //---3D SET UP----------------------------------------------------------------------------------------------------------------
 
@@ -2720,7 +2641,6 @@ class Engine{
                     const message = JSON.parse(event.data);
                     if (message?.type) {
 
-                        console.log("MESSAGE TYPE v2: "+message.type);
 
                         if (message.type === "InitGame") {
                             // Case CG_API.InitGame
@@ -2731,7 +2651,6 @@ class Engine{
                         } catch (e) {
                             console.log("Failed to parse message data:", e);
                         }
-                            console.log("LOAD GAME DATA")
                         }
                         
                         // Handle MuteState message from parent
@@ -2739,7 +2658,6 @@ class Engine{
                             const { musicMuted, soundsMuted } = message.data;
                             // Both should be the same value
                             this.muteState = soundsMuted;
-                            console.log('MuteState received from parent:', this.muteState);
                             
                             // Update localStorage
                             localStorage.setItem("mutestate", this.muteState.toString());
@@ -2748,25 +2666,20 @@ class Engine{
                     }
                 } catch (e) {
                     // Ignore exception - not a message for us and couldn't JSON parse it
-                    console.log("FAIL:");
-                    console.log(e);
                 }
             });
 
             //---end--------------------------------------------------------------------------------------------------------------
 
-            console.log("[ENGINE] Setup complete, moving to load images");
             this.action="load images";
 
         }else if(this.action==="load images"){
 
-            console.log("[ENGINE] Loading 2D images...");
 
             // load 2d images
 
             this.ui.load();
 
-            console.log("[ENGINE] Started UI load, waiting for images...");
             this.action="wait for images";
 
         }else if(this.action==="wait for images"){
@@ -2777,23 +2690,19 @@ class Engine{
             if (!this.waitingImagesLogCounter) this.waitingImagesLogCounter = 0;
             this.waitingImagesLogCounter++;
             if (this.waitingImagesLogCounter % 60 === 0) {
-                console.log("[ENGINE] Waiting for images, isLoaded_UI:", this.ui.isLoaded_UI);
             }
 
             if(this.ui.isLoaded_UI===true){
-                console.log("[ENGINE] Images loaded! Moving to load 3D");
                 this.waitingImagesLogCounter = 0;
                 this.action="load 3d";
             }
 
         }else if(this.action==="load 3d"){
 
-            console.log("[ENGINE] Loading 3D assets...");
 
             // load 3d assets
 
             this.loader.load();
-            console.log("[ENGINE] Started 3D load, waiting...");
             this.action="loading 3d";
 
         }else if(this.action==="loading 3d"){
@@ -2808,14 +2717,9 @@ class Engine{
             if (!this.loading3DLogCounter) this.loading3DLogCounter = 0;
             this.loading3DLogCounter++;
             if (this.loading3DLogCounter % 30 === 0) {
-                console.log("[ENGINE] Loading 3D - Textures:", textures, "Models:", models, "Cube:", cube);
-                console.log("[ENGINE] Texture progress:", this.loader.texturesLoaded, "/", this.loader.textureArray.length);
-                console.log("[ENGINE] Model progress:", this.loader.modelsLoaded, "/", this.loader.modelArray.length);
             }
 
             if(textures===true && models===true && cube===true){
-                console.log("[ENGINE] All 3D assets loaded! Textures:", textures, "Models:", models, "Cube:", cube);
-                console.log("[ENGINE] Moving to wait before build");
                 this.loading3DLogCounter = 0;
                 this.action="wait before build";
             }
@@ -2824,24 +2728,48 @@ class Engine{
 
             // wait before build
 
-            console.log("[ENGINE] Waiting before build, count:", this.count);
             this.count+=this.dt;
             if(this.count>.1){
-                console.log("[ENGINE] Wait complete, building scene");
                 this.count=0;
                 this.action="build"
             }
 
         }else if(this.action==="build"){
 
-            console.log("[ENGINE] Building scene...");
 
             // build everything here
 
             // add 3d dom element to page
 
             document.body.appendChild(this.renderer.domElement);
-            this.renderer.domElement.style.pointerEvents="none";
+            this.renderer.domElement.style.pointerEvents="auto";
+            // iOS-specific touch handling
+            this.renderer.domElement.style.touchAction = "none";
+            this.renderer.domElement.style.webkitTouchCallout = "none";
+            this.renderer.domElement.style.webkitUserSelect = "none";
+            this.renderer.domElement.setAttribute('touch-action', 'none');
+            
+            // Also add touch listeners directly to canvas for iOS iframe support
+            const canvasTouchStart = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.onTouchStart(e);
+            };
+            const canvasTouchMove = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.onTouchMove(e);
+            };
+            const canvasTouchEnd = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.onTouchEnd(e);
+            };
+            
+            this.renderer.domElement.addEventListener('touchstart', canvasTouchStart, { passive: false, capture: true });
+            this.renderer.domElement.addEventListener('touchmove', canvasTouchMove, { passive: false, capture: true });
+            this.renderer.domElement.addEventListener('touchend', canvasTouchEnd, { capture: true });
+            this.renderer.domElement.addEventListener('touchcancel', canvasTouchEnd, { capture: true });
 
             // call builds
 
@@ -2859,7 +2787,6 @@ class Engine{
             this.loadBack=1;
 
             this.count=0;
-            console.log("[ENGINE] Build complete, waiting...");
             this.action="wait";
 
         }else if(this.action==="wait"){
@@ -2873,7 +2800,6 @@ class Engine{
 
             this.count+=this.dt;
             if(this.count>1){
-                console.log("[ENGINE] Wait complete, starting game!");
                 this.count=0;
                 this.action="go"
             }
@@ -3088,56 +3014,45 @@ class Engine{
 // INITIALIZATION
 // ============================================================================
 
+let initGameLogged = false;
+
 function initGame(retryCount = 0) {
-    console.log("[INIT] Initializing game... (attempt " + (retryCount + 1) + ")");
-    console.log("[INIT] THREE available:", typeof THREE !== 'undefined');
-    if (typeof THREE !== 'undefined') {
-        console.log("[INIT] THREE object:", THREE);
-        console.log("[INIT] THREE keys:", Object.keys(THREE).slice(0, 10));
-        console.log("[INIT] THREE.GLTFLoader available:", typeof THREE.GLTFLoader !== 'undefined');
+    if (!initGameLogged) {
+        console.log("Loading Lost and Found game...");
+        initGameLogged = true;
     }
-    console.log("[INIT] THREE.Scene available:", typeof THREE !== 'undefined' && typeof THREE.Scene !== 'undefined');
-    console.log("[INIT] CANNON available:", typeof CANNON !== 'undefined');
     
     // Check if THREE exists but Scene is not available yet - retry with polling
     if (typeof THREE !== 'undefined' && typeof THREE.Scene === 'undefined') {
         if (retryCount < 20) { // Max 20 retries (1 second total)
-            console.log("[INIT] THREE exists but Scene not available, retrying in 50ms...");
             setTimeout(() => initGame(retryCount + 1), 50);
             return;
         } else {
-            console.error("[INIT] THREE.Scene still not available after 1 second, waiting for three-loaded event");
             window.addEventListener('three-loaded', () => initGame(0), { once: true });
             return;
         }
     }
     
     if (typeof THREE === 'undefined' || typeof THREE.Scene === 'undefined') {
-        console.log("[INIT] Waiting for THREE to load...");
         window.addEventListener('three-loaded', () => initGame(0), { once: true });
         return;
     }
     
     // Check if GLTFLoader is available
     if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
-        console.log("[INIT] Waiting for GLTFLoader to load...");
         if (retryCount < 40) { // Max 40 retries (2 seconds total)
             setTimeout(() => initGame(retryCount + 1), 50);
             return;
         } else {
-            console.error("[INIT] GLTFLoader still not available after 2 seconds, waiting for gltfloader-loaded event");
             window.addEventListener('gltfloader-loaded', () => initGame(0), { once: true });
             return;
         }
     }
     
     if (typeof CANNON === 'undefined') {
-        console.log("[INIT] Waiting for CANNON to load...");
         window.addEventListener('cannon-loaded', () => initGame(0), { once: true });
         return;
     }
-
-    console.log("[INIT] All dependencies loaded, creating game objects...");
     var input = new Input();
     var loader = new Loader();
     var scene = new Scene();
@@ -3146,10 +3061,7 @@ function initGame(retryCount = 0) {
     var ui = new UI();
     var endScore = new EndScore();
 
-    console.log("[INIT] Creating engine...");
     var engine = new Engine(input, loader, scene, sounds, utilities, ui, endScore);
-
-    console.log("[INIT] Setting up components...");
     ui.setUp(engine);
     utilities.setUp(engine);
     loader.setUp(engine);
@@ -3158,18 +3070,13 @@ function initGame(retryCount = 0) {
     input.setUp(engine);
     endScore.setUp(engine);
 
-    console.log("[INIT] Starting engine...");
-    console.log("[INIT] Initial action:", engine.action);
     engine.start(engine);
-
-    console.log("[INIT] Starting update loop...");
     function update() {
         engine.update();
         requestAnimationFrame(update);
     }
 
     requestAnimationFrame(update);
-    console.log("[INIT] Game initialization complete!");
 }
 
 // Helper function to get today's key for localStorage
@@ -3286,5 +3193,4 @@ function saveLostAndFoundGameResult(finalScore, starsEarned) {
     }
 }
 
-console.log("[INIT] Script loaded, calling initGame()");
 initGame();

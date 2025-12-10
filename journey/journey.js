@@ -26,39 +26,28 @@ function setPlayerPosition(position) {
     localStorage.setItem(`journeyPosition_level${level}`, String(position));
 }
 
-// Coin inventory functions
-function getCoins(type) {
-    // type: 'gold', 'silver', or 'bronze'
-    return parseInt(localStorage.getItem(`${type}Coins`) || '0');
+// Coin inventory functions - only gold coins now
+function getCoins() {
+    return parseInt(localStorage.getItem('goldCoins') || '0');
 }
 
-function addCoin(type) {
-    const current = getCoins(type);
-    localStorage.setItem(`${type}Coins`, String(current + 1));
+function addCoin() {
+    const current = getCoins();
+    localStorage.setItem('goldCoins', String(current + 1));
     updateCoinDisplays();
 }
 
 function updateCoinDisplays() {
     // Update all coin displays across the site
-    const goldCount = getCoins('gold');
-    const silverCount = getCoins('silver');
-    const bronzeCount = getCoins('bronze');
+    const goldCount = getCoins();
     
     // Update wallet page
     const walletGold = document.getElementById('gold-coin-count');
-    const walletSilver = document.getElementById('silver-coin-count');
-    const walletBronze = document.getElementById('bronze-coin-count');
     if (walletGold) walletGold.textContent = goldCount;
-    if (walletSilver) walletSilver.textContent = silverCount;
-    if (walletBronze) walletBronze.textContent = bronzeCount;
     
     // Update sweeps page
     const sweepsGold = document.getElementById('sweeps-gold-coin-count');
-    const sweepsSilver = document.getElementById('sweeps-silver-coin-count');
-    const sweepsBronze = document.getElementById('sweeps-bronze-coin-count');
     if (sweepsGold) sweepsGold.textContent = goldCount;
-    if (sweepsSilver) sweepsSilver.textContent = silverCount;
-    if (sweepsBronze) sweepsBronze.textContent = bronzeCount;
 }
 
 // Make globally accessible
@@ -125,10 +114,10 @@ window.awardStars = function(amount) {
 };
 
 // Level data - each array represents a level with 50 platforms
-// Each number represents what's on that platform: 0 = empty, 1 = bronze coin, 2 = silver coin, 3 = gold coin
+// Each number represents what's on that platform: 0 = empty, 1 = gold coin
 const levels = [
     // Level 1
-    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3],
+    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
     // Level 2
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 3
@@ -136,17 +125,17 @@ const levels = [
     // Level 4
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 5
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 6
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 7
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 8
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 9
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // Level 10
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
 ];
 
 // Create platforms in zig-zag pattern
@@ -282,29 +271,18 @@ document.addEventListener('DOMContentLoaded', function() {
     player.appendChild(shadow);
     player.appendChild(innerPlayer);
     
-    // Function to create a coin on a platform
-    function createCoin(platformIndex, coinType) {
+    // Function to create a coin on a platform - only gold coins now
+    function createCoin(platformIndex) {
         if (platformIndex < 0 || platformIndex >= platforms.length) return;
         
         const platform = platforms[platformIndex];
         const platformLeft = parseFloat(platform.style.left);
         const platformTop = parseFloat(platform.style.top);
         
-        // Coin colors based on type
-        let fillColor, strokeColor, textColor;
-        if (coinType === 'gold') {
-            fillColor = '#FFD700';
-            strokeColor = '#DAA520';
-            textColor = '#8B6914';
-        } else if (coinType === 'silver') {
-            fillColor = '#E8E8E8';
-            strokeColor = '#808080';
-            textColor = '#505050';
-        } else { // bronze
-            fillColor = '#E6C89A';
-            strokeColor = '#B8860B';
-            textColor = '#8B6914';
-        }
+        // Coin colors - always gold
+        const fillColor = '#FFD700';
+        const strokeColor = '#DAA520';
+        const textColor = '#8B6914';
         
         // Create coin container
         const coinContainer = document.createElement('div');
@@ -363,12 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
     levelData.forEach((coinType, index) => {
         // Only place coins on platforms ahead of player
         if (index > savedPosition && coinType > 0) {
-            let coinTypeStr = '';
-            if (coinType === 1) coinTypeStr = 'bronze';
-            else if (coinType === 2) coinTypeStr = 'silver';
-            else if (coinType === 3) coinTypeStr = 'gold';
-            
-            const coin = createCoin(index, coinTypeStr);
+            const coin = createCoin(index);
             coinElements[index] = coin;
         }
     });
@@ -394,47 +367,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to update container position based on player movement
     function updateContainerPosition() {
-        // Get player's Y position from top of container
-        const playerTop = parseFloat(player.style.top) || 0;
+        // Player center in container space
+        const playerTop = parseFloat(gsap.getProperty(player, "top")) || parseFloat(player.style.top) || 0;
         const playerY = parseFloat(gsap.getProperty(innerPlayer, "y") || -35);
-        const playerCenterY = playerTop + playerY + 35; // Player center Y relative to container top
-        
-        // Get container height
-        const containerHeight = container.offsetHeight || container.scrollHeight;
-        
-        // Calculate player's distance from bottom of container
-        const playerDistanceFromBottom = containerHeight - playerCenterY;
-        
-        // Get screen height
-        const screenHeight = window.innerHeight;
-        
-        // Calculate where container bottom should be (same distance from screen bottom)
-        const targetContainerBottomFromScreen = playerDistanceFromBottom;
-        
-        // Get container's current screen position
-        const containerRect = container.getBoundingClientRect();
-        const currentContainerBottomFromScreen = screenHeight - containerRect.bottom;
-        
-        // Calculate the difference and adjust container offset
-        const difference = targetContainerBottomFromScreen - currentContainerBottomFromScreen;
-        targetContainerYOffset = containerYOffset - difference;
-        
-        // Don't allow container to move down past initial position (only allow negative or zero offsets)
-        if (targetContainerYOffset > 0) {
-            targetContainerYOffset = 0;
-        }
+        const playerCenterY = playerTop + playerY + 35;
 
-        targetContainerYOffset+=window.innerHeight*.2;
-        
-        // Lerp towards target
-        const lerpFactor = 0.03;
-        containerYOffset = lerp(containerYOffset, -targetContainerYOffset, lerpFactor);
-        
-        // Ensure containerYOffset is a valid number
-        if (isNaN(containerYOffset)) {
-            containerYOffset = 0;
-        }
-        
+        // Current container position on screen
+        const containerRect = container.getBoundingClientRect();
+        const playerCenterScreenY = containerRect.top + playerCenterY;
+
+        // Target screen Y is 2/3 down the viewport
+        const screenHeight = window.innerHeight || 0;
+        const targetScreenY = screenHeight * (2 / 3);
+
+        // Desired delta to move container so player sits at target
+        const desiredDelta = targetScreenY - playerCenterScreenY;
+        targetContainerYOffset = containerYOffset + desiredDelta;
+
+        // Lerp towards target (faster to follow player)
+        const lerpFactor = 0.08;
+        containerYOffset = lerp(containerYOffset, targetContainerYOffset, lerpFactor);
+
+        if (isNaN(containerYOffset)) containerYOffset = 0;
+
         container.style.transform = `translateX(-50%) translateY(${containerYOffset}px)`;
     }
     
@@ -486,8 +441,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Collect coin if present
             if (coinOnPlatform && coinType > 0) {
-                const coinTypeStr = coinType === 1 ? 'bronze' : coinType === 2 ? 'silver' : 'gold';
-                
                 // Animate coin collection with timeline
                 const coinGraphic = coinOnPlatform.querySelector('div:last-child');
                 const coinShadow = coinOnPlatform.querySelector('div:first-child');
@@ -517,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Add coin to inventory after full animation (0.3 delay + 0.7 up + 0.5 wait + 0.75 fade = 2.25s)
                 setTimeout(() => {
-                    addCoin(coinTypeStr);
+                    addCoin();
                     coinElements[index] = null; // Remove reference
                 }, 2250);
             }

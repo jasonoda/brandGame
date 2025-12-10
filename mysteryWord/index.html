@@ -6,7 +6,7 @@
     <title>Mystery Word</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Aleo:wght@400;700&family=Sanchez&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="mysteryWord.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
             <img src="../src/img/mysteryWord.svg" alt="Mystery Word" style="height: 40px; width: auto; margin-bottom: 10px;">
             <div id="mysteryWordTitle">MYSTERY WORD</div>
             <div id="instructionsStartDiv">
-                <div class="instructionLine">guess the 5-letter word in 6 tries</div>
+                <div class="instructionLine">guess the 5-letter word in 5 tries</div>
                 <div class="instructionDivider"></div>
                 <div class="instructionLine">after each guess, the tiles will<br>change color to show how close you are:</div>
                 <div class="instructionDivider"></div>
@@ -38,7 +38,21 @@
     </div>
 
     <div class="game-container" id="gameContainer" style="display: none;">
-        <div id="grid" class="grid"></div>
+        <button id="helpButton"></button>
+        <div id="guessCounter" style="opacity: 0;">
+            <div class="guess-label">GUESSES</div>
+            <div class="guess-circle">
+                <span id="guessNumber">5</span>
+            </div>
+            <div id="guessStars">
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+            </div>
+        </div>
+        <div id="grid" class="grid" style="opacity: 0;"></div>
         
         <div class="keyboard">
             <div class="keyboard-row">
