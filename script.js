@@ -1467,7 +1467,7 @@ if (memoryBox) {
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('memoryIframe');
             if (iframe) {
-                iframe.src = scheme ? `memory/index.html?s=${scheme}` : 'memory/index.html';
+                iframe.src = scheme ? `games/memory/index.html?s=${scheme}` : 'games/memory/index.html';
                 console.log(`Reloading memory game iframe: ${iframe.src}`);
             }
         }
@@ -1585,7 +1585,7 @@ if (mysteryWordBox) {
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             if (mysteryIframe) {
-                mysteryIframe.src = scheme ? `mysteryWord/index.html?s=${scheme}` : 'mysteryWord/index.html';
+                mysteryIframe.src = scheme ? `games/mysteryWord/index.html?s=${scheme}` : 'games/mysteryWord/index.html';
                 console.log(`Reloading mysteryWord game iframe: ${mysteryIframe.src}`);
             }
             
@@ -1641,7 +1641,7 @@ if (beticleBox) {
             const urlParams = new URLSearchParams(window.location.search);
             const scheme = urlParams.get('s');
             if (beticleIframe) {
-                beticleIframe.src = scheme ? `beticle/index.html?s=${scheme}` : 'beticle/index.html';
+                beticleIframe.src = scheme ? `games/beticle/index.html?s=${scheme}` : 'games/beticle/index.html';
                 console.log(`Reloading beticle game iframe: ${beticleIframe.src}`);
             }
             
@@ -1698,7 +1698,7 @@ if (speed21Box) {
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('blackjackIframe');
             if (iframe) {
-                iframe.src = scheme ? `blackjack/index.html?s=${scheme}` : 'blackjack/index.html';
+                iframe.src = scheme ? `games/blackjack/index.html?s=${scheme}` : 'games/blackjack/index.html';
                 console.log(`Reloading blackjack game iframe: ${iframe.src}`);
             }
         }
@@ -1746,7 +1746,7 @@ if (lostAndFoundBox) {
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('lostAndFoundIframe');
             if (iframe) {
-                iframe.src = scheme ? `lostAndFound/index.html?s=${scheme}` : 'lostAndFound/index.html';
+                iframe.src = scheme ? `games/lostAndFound/index.html?s=${scheme}` : 'games/lostAndFound/index.html';
                 // Set iOS-specific attributes for touch handling
                 iframe.setAttribute('allow', 'touch');
                 iframe.style.touchAction = 'none';
@@ -1777,7 +1777,7 @@ if (goldCaseBox) {
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('goldCaseIframe');
             if (iframe) {
-                iframe.src = scheme ? `goldCase/index.html?s=${scheme}` : 'goldCase/index.html';
+                iframe.src = scheme ? `games/goldCase/index.html?s=${scheme}` : 'games/goldCase/index.html';
                 console.log(`Reloading goldCase game iframe: ${iframe.src}`);
             }
         }

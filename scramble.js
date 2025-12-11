@@ -445,7 +445,7 @@ let animationFrame = null;
 // Load the JSON data
 async function loadGameData() {
     try {
-        const response = await fetch('scramble/history.json');
+        const response = await fetch('games/scramble/history.json');
         gameData = await response.json();
         initializeScramble();
         updateStarDisplay();

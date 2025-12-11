@@ -195,7 +195,7 @@ function loadGameState() {
 // Load valid words list
 async function loadWordList() {
     try {
-        const response = await fetch('../words.txt');
+        const response = await fetch('../../words.txt');
         const text = await response.text();
         const words = text.split('\n').map(word => word.trim().toUpperCase()).filter(word => word.length === WORD_LENGTH);
         validWords = new Set(words);

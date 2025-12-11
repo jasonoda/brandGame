@@ -85,7 +85,7 @@ async function loadFOFData() {
             fofGameData = fofCurrentSet.statements;
         } else {
             // Pick a random set
-            const response = await fetch('factOrFiction/factOrFiction.json');
+            const response = await fetch('games/factOrFiction/factOrFiction.json');
             const allSets = await response.json();
             
             const randomIndex = Math.floor(Math.random() * allSets.length);

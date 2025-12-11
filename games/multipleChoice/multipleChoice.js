@@ -77,7 +77,7 @@ function mcAddStars(count) {
 // Load game data from JSON
 async function loadMCData() {
     try {
-        const response = await fetch('multipleChoice/multipleChoice.json');
+        const response = await fetch('games/multipleChoice/multipleChoice.json');
         mcGameData = await response.json();
         initMCGame();
     } catch (error) {
