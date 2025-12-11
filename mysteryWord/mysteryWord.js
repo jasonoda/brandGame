@@ -247,7 +247,7 @@ async function init() {
             }, 100);
         }
         
-        // If game is over (won or lost), fade out keyboard and show appropriate message
+        // If game is over (won or lost), hide keyboard and guess counter completely
         if (gameIsOver) {
             const keyboard = document.querySelector('.keyboard');
             const guessCounter = document.getElementById('guessCounter');
@@ -258,6 +258,8 @@ async function init() {
             if (guessCounter) {
                 guessCounter.style.transition = 'opacity 0.5s ease';
                 guessCounter.style.opacity = '0';
+                // Hide it completely
+                guessCounter.style.display = 'none';
             }
             // Show appropriate message after a delay
             setTimeout(() => {
@@ -312,7 +314,7 @@ function setupPlayButton() {
             // Load saved game state
             const hasLoadedState = loadGameState();
             
-            // If game is over (won or lost), fade out keyboard and show appropriate message
+            // If game is over (won or lost), hide keyboard and guess counter completely
             if (hasLoadedState && gameOver) {
                 const keyboard = document.querySelector('.keyboard');
                 const guessCounter = document.getElementById('guessCounter');
@@ -323,6 +325,8 @@ function setupPlayButton() {
                 if (guessCounter) {
                     guessCounter.style.transition = 'opacity 0.5s ease';
                     guessCounter.style.opacity = '0';
+                    // Hide it completely
+                    guessCounter.style.display = 'none';
                 }
                 // Show appropriate message after a delay to ensure rendering is complete
                 setTimeout(() => {
@@ -649,6 +653,21 @@ function handleResponsiveLayout() {
     const keyboard = document.querySelector('.keyboard');
     const windowHeight = window.innerHeight;
     
+    // Check if game is done (won or lost)
+    const todayKey = getTodayKey();
+    const isComplete = localStorage.getItem(`mysteryWordComplete_${todayKey}`) === 'true';
+    const savedState = localStorage.getItem(`mysteryWordState_${todayKey}`);
+    let gameIsOver = false;
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+            gameIsOver = state.gameOver === true;
+        } catch (e) {
+            // Ignore parse errors
+        }
+    }
+    const gameDone = isComplete || gameIsOver;
+    
     if (windowHeight < 750) {
         // Hide guess counter
         if (guessCounter) {
@@ -669,19 +688,29 @@ function handleResponsiveLayout() {
             grid.style.transition = 'none';
             grid.style.visibility = 'hidden';
             
-            // Fade in grid after positioning (0.1s delay, 0.5s duration)
-            setTimeout(() => {
+            // Only fade in grid if game is not done
+            if (!gameDone) {
+                setTimeout(() => {
+                    grid.style.visibility = 'visible';
+                    grid.style.transition = 'opacity 0.5s ease';
+                    grid.style.opacity = '1';
+                }, 100);
+            } else {
+                // Game is done, keep grid visible but don't animate
                 grid.style.visibility = 'visible';
-                grid.style.transition = 'opacity 0.5s ease';
                 grid.style.opacity = '1';
-            }, 100);
+            }
         }
     } else {
-        // Show guess counter
+        // Show guess counter (unless game is done)
         if (guessCounter) {
-            guessCounter.style.display = 'flex';
-            // Ensure opacity is 0 initially
-            guessCounter.style.opacity = '0';
+            if (gameDone) {
+                guessCounter.style.display = 'none';
+            } else {
+                guessCounter.style.display = 'flex';
+                // Ensure opacity is 0 initially
+                guessCounter.style.opacity = '0';
+            }
         }
         
         // Center grid normally (moved up 30px)
@@ -695,29 +724,39 @@ function handleResponsiveLayout() {
         }
         
         // Ensure opacity is 0 and no transition during positioning
-        if (guessCounter) {
+        if (guessCounter && !gameDone) {
             guessCounter.style.opacity = '0';
             guessCounter.style.transition = 'none';
             guessCounter.style.visibility = 'hidden';
         }
         
-        // Reposition guess counter
-        positionGuessCounter();
-        
-        // Fade in guess counter and grid after positioning (0.1s delay, 0.5s duration)
-        if (guessCounter) {
-            setTimeout(() => {
-                guessCounter.style.visibility = 'visible';
-                guessCounter.style.transition = 'opacity 0.5s ease';
-                guessCounter.style.opacity = '1';
-            }, 100);
+        // Reposition guess counter (only if game is not done)
+        if (!gameDone) {
+            positionGuessCounter();
         }
-        if (grid) {
-            setTimeout(() => {
+        
+        // Only fade in guess counter and grid if game is not done
+        if (!gameDone) {
+            if (guessCounter) {
+                setTimeout(() => {
+                    guessCounter.style.visibility = 'visible';
+                    guessCounter.style.transition = 'opacity 0.5s ease';
+                    guessCounter.style.opacity = '1';
+                }, 100);
+            }
+            if (grid) {
+                setTimeout(() => {
+                    grid.style.visibility = 'visible';
+                    grid.style.transition = 'opacity 0.5s ease';
+                    grid.style.opacity = '1';
+                }, 100);
+            }
+        } else {
+            // Game is done, keep grid visible but don't animate
+            if (grid) {
                 grid.style.visibility = 'visible';
-                grid.style.transition = 'opacity 0.5s ease';
                 grid.style.opacity = '1';
-            }, 100);
+            }
         }
     }
 }
@@ -768,7 +807,7 @@ function celebrateWin() {
     const todayKey = getTodayKey();
     localStorage.setItem(`mysteryWordStars_${todayKey}`, String(starsEarned));
     
-    // Fade out keyboard and guess counter
+    // Hide keyboard and guess counter completely
     const keyboard = document.querySelector('.keyboard');
     const guessCounter = document.getElementById('guessCounter');
     if (keyboard) {
@@ -778,10 +817,8 @@ function celebrateWin() {
         }, 500);
     }
     if (guessCounter) {
-        setTimeout(() => {
-            guessCounter.style.transition = 'opacity 0.5s ease';
-            guessCounter.style.opacity = '0';
-        }, 500);
+        // Hide the guess counter immediately (no fade)
+        guessCounter.style.display = 'none';
     }
     
     // Show win message and stars
@@ -893,7 +930,7 @@ function showWinMessage() {
 
 // Show game over message
 function showGameOver() {
-    // Fade out keyboard and guess counter
+    // Hide keyboard and guess counter completely
     const keyboard = document.querySelector('.keyboard');
     const guessCounter = document.getElementById('guessCounter');
     if (keyboard) {
@@ -903,10 +940,8 @@ function showGameOver() {
         }, 500);
     }
     if (guessCounter) {
-        setTimeout(() => {
-            guessCounter.style.transition = 'opacity 0.5s ease';
-            guessCounter.style.opacity = '0';
-        }, 500);
+        // Hide the guess counter immediately (no fade)
+        guessCounter.style.display = 'none';
     }
     
     // Show game over message (same structure as win message)

@@ -21,6 +21,34 @@ function markScrambleComplete() {
     localStorage.setItem(`scrambleComplete_${todayKey}`, 'true');
 }
 
+// Save the word and day data to localStorage
+function saveScrambleWord() {
+    const todayKey = getTodayKey();
+    if (currentDayData && currentWord) {
+        const wordData = {
+            word: currentWord,
+            dayData: currentDayData
+        };
+        localStorage.setItem(`scrambleWord_${todayKey}`, JSON.stringify(wordData));
+    }
+}
+
+// Load the saved word and day data from localStorage
+function loadScrambleWord() {
+    const todayKey = getTodayKey();
+    const savedWordData = localStorage.getItem(`scrambleWord_${todayKey}`);
+    if (savedWordData) {
+        try {
+            const wordData = JSON.parse(savedWordData);
+            return wordData;
+        } catch (error) {
+            console.error('Error loading saved scramble word:', error);
+            return null;
+        }
+    }
+    return null;
+}
+
 function getDailyStars() {
     const todayKey = getTodayKey();
     return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
@@ -537,10 +565,18 @@ function initializeScramble() {
     updateStarDisplay();
     updateCalendar();
     
-    // Pick random word
-    currentDayData = pickRandomDay();
-    currentWord = currentDayData.word;
-    scrambledLetters = scrambleWord(currentWord);
+    // Try to load saved word first, otherwise pick random
+    const savedWordData = loadScrambleWord();
+    if (savedWordData) {
+        currentDayData = savedWordData.dayData;
+        currentWord = savedWordData.word;
+        scrambledLetters = scrambleWord(currentWord);
+    } else {
+        // Pick random word
+        currentDayData = pickRandomDay();
+        currentWord = currentDayData.word;
+        scrambledLetters = scrambleWord(currentWord);
+    }
     
     // Check if scramble is already complete
     if (isScrambleComplete()) {
@@ -784,6 +820,9 @@ function celebrateWin() {
     const todayKey = getTodayKey();
     localStorage.setItem(`scrambleStars_${todayKey}`, String(starsEarned));
     
+    // Save the word and day data so it can be reloaded
+    saveScrambleWord();
+    
     // Update star display to show earned (orange) and unearned (grey) stars
     const starsElement = document.querySelector('.unscramble-stars');
     if (starsElement) {
@@ -828,6 +867,13 @@ function celebrateWin() {
 
 // Show completed scramble without animation
 function showCompletedScramble() {
+    // Load saved word if it exists (in case currentWord wasn't set)
+    const savedWordData = loadScrambleWord();
+    if (savedWordData && !currentWord) {
+        currentDayData = savedWordData.dayData;
+        currentWord = savedWordData.word;
+    }
+    
     // Hide hint button
     const hintButton = document.querySelector('.unscramble-hint-btn');
     if (hintButton) {

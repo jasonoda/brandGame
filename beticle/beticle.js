@@ -160,13 +160,28 @@ function loadGameState() {
         updateBoundaryWord('bottom', lastWord);
     }
     
-    // If game is won, show the target word in the guess row
-    if (gameOver && guesses.some(g => g === targetWord)) {
+    // If game is over (won or lost), show the target word in the guess row
+    if (gameOver) {
         const tiles = document.querySelectorAll('[data-row="guess"]');
         tiles.forEach((tile, index) => {
             tile.textContent = targetWord[index];
             tile.classList.add('filled');
         });
+        
+        // If game was lost (max guesses reached), update hint and stars
+        const won = guesses.some(g => g === targetWord);
+        if (!won) {
+            // Game was lost - show "out of guesses" and make all stars grey
+            const hintElement = document.getElementById('proximityHint');
+            if (hintElement) {
+                hintElement.textContent = 'out of guesses';
+                hintElement.style.opacity = '1';
+            }
+            
+            // Make all stars grey
+            const stars = document.querySelectorAll('.guess-star');
+            stars.forEach(star => star.classList.add('grey'));
+        }
     }
     
     // Update guess counter with loaded state
@@ -207,8 +222,25 @@ async function init() {
     setupPlayButton();
     handleResponsiveLayout();
     
-    // If game is already complete, skip start menu and go straight to game
-    if (isBeticleComplete()) {
+    // Check if game is complete (won) or over (lost) by checking saved state
+    const todayKey = getTodayKey();
+    const savedState = localStorage.getItem(`beticleState_${todayKey}`);
+    let gameIsDone = isBeticleComplete(); // Check if won
+    if (!gameIsDone && savedState) {
+        // Check if game is over (lost) by parsing saved state
+        try {
+            const gameState = JSON.parse(savedState);
+            // Verify target word matches before checking gameOver
+            if (gameState.targetWord === targetWord && gameState.gameOver === true) {
+                gameIsDone = true;
+            }
+        } catch (e) {
+            // Ignore parse errors
+        }
+    }
+    
+    // If game is done (won or lost), skip start menu and go straight to game
+    if (gameIsDone) {
         const startMenu = document.getElementById('startMenu');
         const gameContainer = document.getElementById('gameContainer');
         
@@ -227,19 +259,24 @@ async function init() {
         // Load saved game state
         const hasLoadedState = loadGameState();
         
-        // If game was won, fade out keyboard and show win message
+        // If game is over (won or lost), fade out keyboard and show appropriate message
         if (hasLoadedState && gameOver) {
             const keyboard = document.querySelector('.keyboard');
             if (keyboard) {
                 keyboard.style.transition = 'opacity 0.5s ease';
                 keyboard.style.opacity = '0';
             }
-            // Show win message after a delay and mark as shown
-            setTimeout(() => {
-                console.log("1");
-                showWinMessage();
-                winMessageShownOnLoad = true;
-            }, 600);
+            // Check if game was won or lost
+            const won = guesses.some(g => g === targetWord);
+            if (won) {
+                // Show win message after a delay and mark as shown
+                setTimeout(() => {
+                    console.log("1");
+                    showWinMessage();
+                    winMessageShownOnLoad = true;
+                }, 600);
+            }
+            // If lost, the correct answer is already shown in loadGameState
         }
     }
 }
@@ -268,19 +305,24 @@ function setupPlayButton() {
             // Load saved game state
             const hasLoadedState = loadGameState();
             
-            // If game was already won, fade out keyboard and show win message
-            if (hasLoadedState && gameOver && isBeticleComplete()) {
+            // If game is over (won or lost), fade out keyboard and show appropriate message
+            if (hasLoadedState && gameOver) {
                 const keyboard = document.querySelector('.keyboard');
                 if (keyboard) {
                     keyboard.style.transition = 'opacity 0.5s ease';
                     keyboard.style.opacity = '0';
                 }
-                // Show win message after a delay to ensure rendering is complete
-                setTimeout(() => {
-                    console.log("2");
-                    showWinMessage();
-                    winMessageShownOnLoad = true;
-                }, 300);
+                // Check if game was won or lost
+                const won = guesses.some(g => g === targetWord);
+                if (won && isBeticleComplete()) {
+                    // Show win message after a delay to ensure rendering is complete
+                    setTimeout(() => {
+                        console.log("2");
+                        showWinMessage();
+                        winMessageShownOnLoad = true;
+                    }, 300);
+                }
+                // If lost, the correct answer is already shown in loadGameState
             }
         });
     }
@@ -684,9 +726,13 @@ function updateGuessDisplay_Counter() {
     }
     
     // Update stars based on guesses remaining (to match the number in the circle)
+    // If 0 guesses remaining (game lost), all stars should be grey
     let activeStars = 5;
     
-    if (guessesRemaining <= 1) {
+    if (guessesRemaining === 0) {
+        // Game lost - all stars grey
+        activeStars = 0;
+    } else if (guessesRemaining <= 1) {
         activeStars = 1;
     } else if (guessesRemaining <= 3) {
         activeStars = 2;

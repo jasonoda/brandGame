@@ -222,7 +222,7 @@ function setCurrentDate() {
     const dateSubtitleElement = document.querySelector('.date-subtitle');
     
     if (logoPlacement === '2') {
-        dateElement.textContent = 'DAILY GAME SUITE';
+        dateElement.textContent = 'DAILY GAME CENTER';
         
         // Set date in subtitle
         if (dateSubtitleElement) {
@@ -669,8 +669,8 @@ function checkURLParameters() {
     } else if (scheme === 'bigy') {
         // Apply Bigy color scheme - keep default background and text, use red for header/calendar
         const schemeBack = '#f5f5f5';
-        const schemeBarGrad = 'linear-gradient(to bottom, #e84066, #c82a48)';
-        const schemeCalendarGrad = 'linear-gradient(to bottom, #e84066, #c82a48)';
+        const schemeBarGrad = 'linear-gradient(to bottom, #df2b51, #c82a48)';
+        const schemeCalendarGrad = 'linear-gradient(to bottom, #df2b51, #c82a48)';
         const schemeBigText = '#363636';
         const logoPath = 'src/img/bigy/bigy.png';  
         
@@ -1325,6 +1325,57 @@ function observeLetterBoxes() {
 
 // Check URL parameters when page loads
 checkURLParameters();
+
+// Check for splash overlay parameter
+function checkSplashOverlay() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const splash = urlParams.get('splash');
+    
+    if (splash === 'true') {
+        // Use multiple attempts to ensure DOM is ready
+        const showOverlay = () => {
+            const splashOverlay = document.getElementById('splash-overlay');
+            if (splashOverlay) {
+                splashOverlay.style.display = 'block';
+                
+                // Remove overlay on click
+                splashOverlay.addEventListener('click', () => {
+                    splashOverlay.style.display = 'none';
+                });
+                return true;
+            }
+            return false;
+        };
+        
+        // Try immediately
+        if (!showOverlay()) {
+            // If element not found, try after DOMContentLoaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(showOverlay, 50);
+                });
+            } else {
+                // DOM already loaded, try with a small delay
+                setTimeout(showOverlay, 50);
+            }
+        }
+    }
+}
+
+// Initialize splash overlay
+checkSplashOverlay();
+
+// Also check on window load as a fallback
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const splash = urlParams.get('splash');
+    if (splash === 'true') {
+        const splashOverlay = document.getElementById('splash-overlay');
+        if (splashOverlay && splashOverlay.style.display === 'none') {
+            splashOverlay.style.display = 'block';
+        }
+    }
+});
 
 // Keyboard shortcut to test color scheme
 document.addEventListener('keydown', (e) => {

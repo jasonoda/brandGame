@@ -19,6 +19,29 @@ function markMCComplete() {
     localStorage.setItem(`multipleChoiceComplete_${todayKey}`, 'true');
 }
 
+// Save the question to localStorage
+function saveMCQuestion() {
+    const todayKey = mcGetTodayKey();
+    if (mcCurrentQuestion) {
+        localStorage.setItem(`multipleChoiceQuestion_${todayKey}`, JSON.stringify(mcCurrentQuestion));
+    }
+}
+
+// Load the saved question from localStorage
+function loadMCQuestion() {
+    const todayKey = mcGetTodayKey();
+    const savedQuestion = localStorage.getItem(`multipleChoiceQuestion_${todayKey}`);
+    if (savedQuestion) {
+        try {
+            return JSON.parse(savedQuestion);
+        } catch (error) {
+            console.error('Error loading saved multiple choice question:', error);
+            return null;
+        }
+    }
+    return null;
+}
+
 function mcGetDailyStars() {
     const todayKey = mcGetTodayKey();
     return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
@@ -67,14 +90,20 @@ function initMCGame() {
     const container = document.querySelector('.mc-container');
     if (!container) return;
     
-    // Pick a random question first
-    if (mcGameData.length === 0) {
-        console.log('No multiple choice questions available');
-        return;
+    // Try to load saved question first, otherwise pick random
+    const savedQuestion = loadMCQuestion();
+    if (savedQuestion) {
+        mcCurrentQuestion = savedQuestion;
+    } else {
+        // Pick a random question
+        if (mcGameData.length === 0) {
+            console.log('No multiple choice questions available');
+            return;
+        }
+        
+        const randomIndex = Math.floor(Math.random() * mcGameData.length);
+        mcCurrentQuestion = mcGameData[randomIndex];
     }
-    
-    const randomIndex = Math.floor(Math.random() * mcGameData.length);
-    mcCurrentQuestion = mcGameData[randomIndex];
     
     // Check if already complete
     if (isMCComplete()) {
@@ -150,6 +179,9 @@ function checkMCAnswer(selectedIndex) {
         // Save stars earned
         const todayKey = mcGetTodayKey();
         localStorage.setItem(`multipleChoiceStars_${todayKey}`, '2');
+        
+        // Save the question so it can be reloaded
+        saveMCQuestion();
         
         // Show stars with animation
         setTimeout(() => {
@@ -240,8 +272,14 @@ function checkMCAnswer(selectedIndex) {
 
 // Show completed state
 function showCompletedMC() {
+    // Load saved question if it exists (in case mcCurrentQuestion wasn't set)
+    const savedQuestion = loadMCQuestion();
+    if (savedQuestion && !mcCurrentQuestion) {
+        mcCurrentQuestion = savedQuestion;
+    }
+    
     const questionElement = document.querySelector('.mc-question');
-    if (questionElement) {
+    if (questionElement && mcCurrentQuestion) {
         questionElement.textContent = mcCurrentQuestion.question;
     }
     

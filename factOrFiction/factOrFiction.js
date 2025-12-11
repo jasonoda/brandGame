@@ -20,6 +20,29 @@ function markFOFComplete() {
     localStorage.setItem(`factOrFictionComplete_${todayKey}`, 'true');
 }
 
+// Save the set to localStorage
+function saveFOFSet() {
+    const todayKey = fofGetTodayKey();
+    if (fofCurrentSet) {
+        localStorage.setItem(`factOrFictionSet_${todayKey}`, JSON.stringify(fofCurrentSet));
+    }
+}
+
+// Load the saved set from localStorage
+function loadFOFSet() {
+    const todayKey = fofGetTodayKey();
+    const savedSet = localStorage.getItem(`factOrFictionSet_${todayKey}`);
+    if (savedSet) {
+        try {
+            return JSON.parse(savedSet);
+        } catch (error) {
+            console.error('Error loading saved fact or fiction set:', error);
+            return null;
+        }
+    }
+    return null;
+}
+
 function fofGetDailyStars() {
     const todayKey = fofGetTodayKey();
     return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
@@ -55,13 +78,20 @@ function fofAddStars(count) {
 // Load game data from JSON
 async function loadFOFData() {
     try {
-        const response = await fetch('factOrFiction/factOrFiction.json');
-        const allSets = await response.json();
-        
-        // Pick a random set
-        const randomIndex = Math.floor(Math.random() * allSets.length);
-        fofCurrentSet = allSets[randomIndex];
-        fofGameData = fofCurrentSet.statements;
+        // Try to load saved set first
+        const savedSet = loadFOFSet();
+        if (savedSet) {
+            fofCurrentSet = savedSet;
+            fofGameData = fofCurrentSet.statements;
+        } else {
+            // Pick a random set
+            const response = await fetch('factOrFiction/factOrFiction.json');
+            const allSets = await response.json();
+            
+            const randomIndex = Math.floor(Math.random() * allSets.length);
+            fofCurrentSet = allSets[randomIndex];
+            fofGameData = fofCurrentSet.statements;
+        }
         
         // console.log('Today\'s Fact or Fiction set:', fofCurrentSet.set);
         
@@ -164,9 +194,16 @@ function checkAnswers() {
     localStorage.setItem(`factOrFictionStars_${todayKey}`, String(correctCount));
     localStorage.setItem(`factOrFictionResults_${todayKey}`, JSON.stringify(results));
     
+    // Save which statements were selected (marked as fact)
+    const selectedIndices = Array.from(fofSelectedStatements);
+    localStorage.setItem(`factOrFictionSelections_${todayKey}`, JSON.stringify(selectedIndices));
+    
     // Mark complete and award stars
     markFOFComplete();
     fofAddStars(correctCount);
+    
+    // Save the set so it can be reloaded
+    saveFOFSet();
     
     // Fade out footer
     const container = document.querySelector('.fof-container');
@@ -235,6 +272,13 @@ function showStars(correctCount) {
 
 // Show completed state
 function showCompletedFOF() {
+    // Load saved set if it exists (in case fofCurrentSet wasn't set)
+    const savedSet = loadFOFSet();
+    if (savedSet && !fofCurrentSet) {
+        fofCurrentSet = savedSet;
+        fofGameData = fofCurrentSet.statements;
+    }
+    
     const buttonsContainer = document.querySelector('.fof-buttons');
     const footer = document.querySelector('.fof-footer');
     const starsElement = document.querySelector('.fof-stars');
@@ -248,6 +292,11 @@ function showCompletedFOF() {
     if (buttonsContainer) {
         buttonsContainer.innerHTML = '';
         
+        // Load saved selections (which statements were marked as fact)
+        const selectionsJSON = localStorage.getItem(`factOrFictionSelections_${todayKey}`);
+        const savedSelections = selectionsJSON ? JSON.parse(selectionsJSON) : [];
+        const selectedSet = new Set(savedSelections);
+        
         fofGameData.forEach((item, index) => {
             const button = document.createElement('button');
             button.className = 'fof-button';
@@ -258,8 +307,15 @@ function showCompletedFOF() {
             const isCorrect = result ? result.isCorrect : true;
             const isFact = result ? result.isFact : item.isFact;
             
-            // Keep default styling; do not change colors on reveal
-            button.style.background = '';
+            // Apply the background color based on whether this statement was selected (marked as fact)
+            const wasSelected = selectedSet.has(index);
+            if (wasSelected) {
+                // Green background for statements marked as fact
+                button.style.background = 'linear-gradient(to bottom, #26D7A4, #1DB88A)';
+            } else {
+                // Red background for statements not marked as fact
+                button.style.background = 'linear-gradient(to bottom, #FF8FA3, #FF6B82)';
+            }
             
             // Add check or X emoji based on whether user got it right
             const emoji = isCorrect ? ' ✓' : ' ✗';
