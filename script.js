@@ -178,15 +178,15 @@ function updateLoyaltyStats() {
             dailyStarsElement.textContent = todayStars;
         }
         
-        // Update coins (get from localStorage - same key as journey uses)
-        const coins = parseInt(localStorage.getItem('goldCoins') || '0');
-        const coinCountElement = document.getElementById('loyalty-coin-count');
-        if (coinCountElement) {
-            coinCountElement.textContent = coins;
+        // Update clocks (get from localStorage)
+        const clocks = parseInt(localStorage.getItem('clocks') || '0');
+        const clockCountElement = document.getElementById('loyalty-clock-count');
+        if (clockCountElement) {
+            clockCountElement.textContent = clocks;
         }
         
-        // Update extra seconds (daily stars + coins)
-        const extraSeconds = todayStars + coins;
+        // Update extra seconds (daily stars + clocks)
+        const extraSeconds = todayStars + clocks;
         const extraSecondsElement = document.getElementById('loyalty-extra-seconds');
         if (extraSecondsElement) {
             extraSecondsElement.textContent = extraSeconds;
@@ -1017,7 +1017,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     });
     
     // Keep rival and wallet pages light (unless dark mode)
-    const lightPages = document.querySelectorAll('#rival-page, #wallet-page');
+    const lightPages = document.querySelectorAll('#rival-page, #wallet-page, #prizes-page');
     lightPages.forEach(page => {
         if (backgroundColor === '#000000') {
             page.style.backgroundColor = '#1a1a1a';
@@ -1138,6 +1138,11 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
             walletProfileContainer.style.background = darkGrey;
             walletProfileContainer.style.backgroundColor = darkGrey;
             walletProfileContainer.style.border = 'none';
+        }
+        
+        const prizesPage = document.querySelector('#prizes-page');
+        if (prizesPage) {
+            prizesPage.style.backgroundColor = darkGrey;
         }
         
         const rivalPage = document.querySelector('#rival-page');

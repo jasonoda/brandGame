@@ -402,8 +402,8 @@
         <div id="loyalty-page" class="page">
             <div class="sweeps-container">
                 <div class="sweeps-header">
-                    <h1 class="sweeps-title">SWEEPSTAKES</h1>
-                    <div class="sweeps-subtitle">Gain daily stars and coins for extra time</div>
+                    <h1 class="sweeps-title">BOOST GAME</h1>
+                    <div class="sweeps-subtitle">Earn extra gold to win prizes</div>
                 </div>
                 <div class="loyalty-game-box">
                     <div class="loyalty-game-top">
@@ -420,29 +420,21 @@
                         <div class="loyalty-high-score">YOUR HIGH SCORE: <span id="loyalty-high-score">0</span></div>
                     </div>
                     <div class="loyalty-game-bottom">
-                        <div class="loyalty-prize-text">
-                            <div class="loyalty-prize-small">Score higher to win:</div>
-                            <div class="loyalty-prize-amount">$100 cash</div>
-                            <div class="loyalty-prize-small">or loyalty coupons</div>
-                        </div>
-                        <div class="loyalty-stats-inline">
-                            <div class="loyalty-stat-item">
-                                <span>Daily</span>
-                                <span class="star-icon">★</span>
-                                <span>x</span>
-                                <span class="loyalty-daily-stars" id="loyalty-daily-stars">0</span>
-                            </div>
-                            <div class="loyalty-stat-item">
+                        
+                        <!-- <div class="loyalty-stats-inline"> -->
+                            
+                            <!-- <div class="loyalty-stat-item">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
+                                    <circle cx="12" cy="12" r="10" fill="none" stroke="#555" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="1.5" fill="#555"/>
+                                    <line x1="12" y1="12" x2="12" y2="7" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+                                    <line x1="12" y1="12" x2="16" y2="12" stroke="#555" stroke-width="2" stroke-linecap="round"/>
                                 </svg>
                                 <span>x</span>
-                                <span class="loyalty-coin-count" id="loyalty-coin-count">0</span>
-                            </div>
-                        </div>
-                        <div class="loyalty-earned">You've earned <span id="loyalty-extra-seconds">0</span> extra seconds</div>
+                                <span class="loyalty-clock-count" id="loyalty-clock-count">0</span>
+                            </div> -->
+                        <!-- </div> -->
+                        <div class="sweeps-subtitle">Earn up to 5 stars for each play.</div>
                         <button class="loyalty-spend-button" data-prize="gold">Spend 25 Rewards Points</button>
                     </div>
                 </div>
@@ -511,9 +503,77 @@
                 <!-- Platforms will be created by journey.js -->
             </div>
             <div class="journey-button-container">
+                <div class="journey-button-text">Move one space per game played</div>
                 <div class="journey-button-glow"></div>
                 <button class="journey-go-button">
-                    Go (<span class="star-icon">★</span> x <span class="journey-star-count">0</span>)
+                    GO
+                </button>
+            </div>
+        </div>
+
+        <div id="prizes-page" class="page">
+            <div class="prizes-scrollable-content">
+                <div class="sweeps-container">
+                    <div class="sweeps-header">
+                        <h1 class="sweeps-title">PRIZES</h1>
+                        <div class="prizes-collect-text">Spend your stars to buy prize tiles.<br>Fill in all the spaces to win the prize.</div>
+                        <!-- <div class="prizes-collect-text">Use gold to earn more prize pieces.</div> -->
+                    </div>
+                </div>
+                
+                <div class="prize-section">
+                    <div class="prize-section-title">$100 Prize</div>
+                    <div class="prize-container">
+                        <div class="prize-grid grid-4x3">
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prize-section">
+                    <div class="prize-section-title">$20 gift Certificate</div>
+                    <div class="prize-container">
+                        <div class="prize-grid grid-2x4">
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prize-section">
+                    <div class="prize-section-title">$5 Coupons</div>
+                    <div class="prize-container">
+                        <div class="prize-grid grid-1x4">
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prizes-button-container">
+                <div class="journey-button-glow"></div>
+                <button class="journey-go-button">
+                    Draw (<span class="star-icon">★</span> x <span class="prize-star-count">4</span>)
                 </button>
             </div>
         </div>
@@ -592,13 +652,13 @@
             </div>
             <div class="label">Games</div>
         </button>
-        <button class="tab-button" data-page="rival">
+        <button class="tab-button" data-page="sweeps">
             <div class="icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11ZM8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11ZM8 13C5.67 13 1 14.17 1 16.5V19H15V16.5C15 14.17 10.33 13 8 13ZM16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V19H23V16.5C23 14.17 18.33 13 16 13Z" fill="#555"/>
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#555"/>
                 </svg>
             </div>
-            <div class="label">Rival</div>
+            <div class="label">Boost</div>
         </button>
         <button class="tab-button" data-page="journey">
             <div class="icon">
@@ -608,13 +668,13 @@
             </div>
             <div class="label">Journey</div>
         </button>
-        <button class="tab-button" data-page="sweeps">
+        <button class="tab-button" data-page="prizes">
             <div class="icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#555"/>
+                    <path d="M20 6H17.82C17.4 4.84 16.3 4 15 4H9C7.7 4 6.6 4.84 6.18 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM12 7C13.1 7 14 7.9 14 9C14 10.1 13.1 11 12 11C10.9 11 10 10.1 10 9C10 7.9 10.9 7 12 7ZM18 19H6V17C6 15.67 8.67 15 12 15C15.33 15 18 15.67 18 17V19ZM18 14H6V9H18V14Z" fill="#555"/>
                 </svg>
             </div>
-            <div class="label">Sweeps</div>
+            <div class="label">Prizes</div>
         </button>
         <button class="tab-button" data-page="wallet">
             <div class="icon">

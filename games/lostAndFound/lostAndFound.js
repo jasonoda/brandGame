@@ -215,7 +215,7 @@ function initSounds() {
     soundArray.forEach(soundName => {
         try {
             loadedSounds[soundName] = new Howl({
-                src: [`../sounds/${soundName}.mp3`]
+                src: [`../../sounds/${soundName}.mp3`]
             });
         } catch(e) {
             console.error(`Error loading sound ${soundName}:`, e);

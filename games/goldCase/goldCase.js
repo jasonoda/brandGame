@@ -495,7 +495,7 @@ class Sounds {
     loadSounds(url){
 
         var theSound = new Howl({
-            src: ['../sounds/'+url+".mp3"]
+            src: ['../../sounds/'+url+".mp3"]
         });
 
         theSound.on('load', (event) => {

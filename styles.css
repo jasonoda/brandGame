@@ -1547,7 +1547,19 @@ body {
     z-index: 1000;
     width: 100%;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    pointer-events: none;
+    gap: 8px;
+}
+
+.journey-button-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    text-align: center;
     pointer-events: none;
 }
 
@@ -1568,7 +1580,7 @@ body {
 
 .journey-go-button {
     position: relative;
-    background: var(--header-gradient);
+    background: linear-gradient(to bottom, #df2b51, #c82a48);
     color: white;
     border: none;
     border-radius: 8px;
@@ -1596,6 +1608,10 @@ body {
 }
 
 .journey-star-count {
+    font-weight: 700;
+}
+
+.prize-star-count {
     font-weight: 700;
 }
 
@@ -1949,7 +1965,7 @@ body {
 }
 
 .loyalty-stat-item .loyalty-daily-stars,
-.loyalty-stat-item .loyalty-coin-count {
+.loyalty-stat-item .loyalty-clock-count {
     font-weight: 700;
     font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
@@ -2472,5 +2488,141 @@ body[style*="background-color: #000000"] .sweeps-title {
 body[style*="background-color: rgb(0, 0, 0)"] .cost-text,
 body[style*="background-color: #000000"] .cost-text {
     color: #ccc;
+}
+
+/* Prizes Page Styles */
+#prizes-page {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.prizes-scrollable-content {
+    overflow-y: auto;
+    height: 100%;
+    padding: 20px;
+    padding-bottom: 120px;
+}
+
+.prizes-collect-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: #444;
+    font-family: 'Nunito', serif;
+    margin-top: 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.prize-section {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.prize-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    font-family: 'Nunito', sans-serif;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.prize-container {
+    width: calc(100% - 40px);
+    margin: 0 20px;
+    border: 1px solid #bbe1f0;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.prize-container .prize-box {
+    aspect-ratio: 1;
+    border: none;
+    /* border-right: 2px dotted #87CEEB; */
+    /* border: 1px dashed  #bbe1f0; */
+    border: 1px dashed  #bbe1f0;
+    width: 100%;
+    height: auto;
+    background-color: #ffffff;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.prize-grid {
+    display: grid;
+    gap: 0;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.prize-grid.grid-4x3 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.prize-grid.grid-2x4 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+}
+
+.prize-grid.grid-1x4 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+}
+
+.prize-box {
+    aspect-ratio: 1;
+    border: 2px dashed #87CEEB;
+    background: transparent;
+    border-radius: 4px;
+}
+
+.prize-container .prize-grid.grid-4x3 .prize-box:nth-child(4n) {
+    border-right: none;
+}
+
+.prize-container .prize-grid.grid-4x3 .prize-box:nth-child(n+9) {
+    border-bottom: none;
+}
+
+.prize-container .prize-grid.grid-2x4 .prize-box:nth-child(4n) {
+    border-right: none;
+}
+
+.prize-container .prize-grid.grid-2x4 .prize-box:nth-child(n+5) {
+    border-bottom: none;
+}
+
+.prize-container .prize-grid.grid-1x4 .prize-box:nth-child(4n) {
+    border-right: none;
+}
+
+.prize-container .prize-grid.grid-1x4 .prize-box {
+    border-bottom: none;
+}
+
+.prize-container .prize-grid .prize-box:nth-child(-n+4) {
+    border-top: none;
+}
+
+.prize-container .prize-grid .prize-box:nth-child(4n+1) {
+    border-left: none;
+}
+
+.prizes-button-container {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    transform: none;
+    z-index: 1000;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
 }
 

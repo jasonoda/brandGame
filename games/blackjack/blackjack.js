@@ -157,7 +157,7 @@ class Sounds {
         console.log("is new")
 
         var theSound = new Howl({
-            src: ['../sounds/'+url+".mp3"]
+            src: ['../../sounds/'+url+".mp3"]
         });
 
         theSound.on('load', (event) => {
