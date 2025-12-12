@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="games/multipleChoice/multipleChoice.js" defer></script>
     <script src="games/factOrFiction/factOrFiction.js" defer></script>
+    <script src="prizes/prizes.js" defer></script>
 </head>
 <body>
     <div class="content">
@@ -50,12 +51,10 @@
         </div>
 
         <div id="games-page" class="page active">
-        <div class="top-logo-box"></div>
         <div class="top-logo-carousel-container">
             <div class="carousel-arrow carousel-arrow-left">‹</div>
             <div class="top-logo-carousel">
                 <div class="carousel-slide active">
-                    <div class="top-logo-box-carousel"></div>
                 </div>
                 <div class="carousel-slide">
                     <div class="carousel-content">
@@ -78,7 +77,6 @@
                     </div>
                 </div>
                 <div class="carousel-slide">
-                    <div class="top-logo-box-carousel"></div>
                 </div>
             </div>
             <div class="carousel-arrow carousel-arrow-right">›</div>
@@ -258,53 +256,6 @@
                     </div>
                     <div class="divider"></div>
                     <div class="stars" id="goldCaseStars" style="color: #ddd;">★★★★★</div>
-                </div>
-            </div>
-        </div>
-        </div>
-
-        <div id="redeem-page" class="page">
-            <div class="section">
-                <!-- <div class="section-title">REDEEM REWARDS</div> -->
-                
-                <div class="points-balance">
-                    <div class="points-icon-box" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
-                        <div class="points-star">★</div>
-                    </div>
-                    <div class="points-details">
-                        <div class="points-label">Your Balance</div>
-                        <div class="points-amount">247 Stars</div>
-                    </div>
-                </div>
-                
-                <div class="coupon-item">
-                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #FA4931, #BA1909);">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/200px-McDonald%27s_Golden_Arches.svg.png" alt="McDonald's" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
-                    </div>
-                    <div class="coupon-details">
-                        <div class="coupon-title">McDonald's</div>
-                        <div class="coupon-description">Enter sweeps</div>
-                        <div class="coupon-cost">★ 80</div>
-                    </div>
-                </div>
-                <div class="coupon-item">
-                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #00906A, #00321B);">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/200px-Starbucks_Corporation_Logo_2011.svg.png" alt="Starbucks" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
-                    </div>
-                    <div class="coupon-details">
-                        <div class="coupon-title">Starbucks</div>
-                        <div class="coupon-description">Frappacino</div>
-                        <div class="coupon-cost">★ 120</div>
-                    </div>
-                </div>
-                <div class="coupon-item">
-                    <div class="coupon-logo" style="background: linear-gradient(to bottom, #0091EE, #003F7F);">
-                        <img src="src/img/Walmart_spark_(2025).svg.webp" alt="Walmart" style="width: 70%; height: 70%; object-fit: contain;">
-                    </div>
-                    <div class="coupon-details">
-                        <div class="coupon-title">Walmart</div>
-                        <div class="coupon-description">$5 Gift Card</div>
-                        <div class="coupon-cost">★ 150</div>
                     </div>
                 </div>
             </div>
@@ -330,83 +281,20 @@
                     </div>
                 </div>
 
-                <div class="sweeps-prizes">
-                    <div class="prize-card gold-prize">
-                        <div class="prize-icon"><i class="fas fa-trophy"></i></div>
-                        <div class="prize-amount">$100</div>
-                        <div class="prize-label">Cash Prize</div>
-                        <button class="prize-entry-button" data-prize="gold">
-                            <div class="coins-row">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                            </div>
-                            <div class="enter-text">ENTER</div>
-                        </button>
-                        </div>
-                    <div class="prize-card silver-prize">
-                        <div class="prize-icon"><i class="fas fa-gift"></i></div>
-                        <div class="prize-amount">$20</div>
-                        <div class="prize-label">Gift Certificate</div>
-                        <button class="prize-entry-button" data-prize="silver">
-                            <div class="coins-row">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                            </div>
-                            <div class="enter-text">ENTER</div>
-                        </button>
-                    </div>
-                    <div class="prize-card bronze-prize">
-                        <div class="prize-icon"><i class="fas fa-ticket"></i></div>
-                        <div class="prize-amount">$2</div>
-                        <div class="prize-label">Coupon</div>
-                        <button class="prize-entry-button" data-prize="bronze">
-                            <div class="coins-row">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                    <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                    <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                                </svg>
-                            </div>
-                            <div class="enter-text">ENTER</div>
-                        </button>
-                    </div>
-                </div>
-
                 <div class="contest-rules">
                     <div class="rules-text">Contest Rules</div>
                 </div>
             </div>
         </div>
 
-        <div id="loyalty-page" class="page">
-            <div class="sweeps-container">
-                <div class="sweeps-header">
-                    <h1 class="sweeps-title">BOOST GAME</h1>
-                    <div class="sweeps-subtitle">Earn extra gold to win prizes</div>
+        <div id="boost-page" class="page">
+            <div class="boost-container">
+                <div class="boost-header">
+                    <h1 class="boost-title">BOOST GAME</h1>
+                    <div class="boost-subtitle">Earn unlimited stars</div>
                 </div>
-                <div class="loyalty-game-box">
-                    <div class="loyalty-game-top">
+                <div class="boost-game-box">
+                    <div class="boost-game-top">
                         <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B9D, #C44569);">
                             <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1px;">
                                 <circle cx="12" cy="12" r="10" fill="white" opacity="0.9"/>
@@ -416,14 +304,14 @@
                             <div class="game-title">DONUT MATCHER</div>
                         </div>
                     </div>
-                    <div class="loyalty-game-score">
-                        <div class="loyalty-high-score">YOUR HIGH SCORE: <span id="loyalty-high-score">0</span></div>
+                    <div class="boost-game-score">
+                        <div class="boost-high-score">YOUR HIGH SCORE: <span id="boost-high-score">0</span></div>
                     </div>
-                    <div class="loyalty-game-bottom">
+                    <div class="boost-game-bottom">
                         
-                        <!-- <div class="loyalty-stats-inline"> -->
+                        <!-- <div class="boost-stats-inline"> -->
                             
-                            <!-- <div class="loyalty-stat-item">
+                            <!-- <div class="boost-stat-item">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="10" fill="none" stroke="#555" stroke-width="2"/>
                                     <circle cx="12" cy="12" r="1.5" fill="#555"/>
@@ -431,17 +319,18 @@
                                     <line x1="12" y1="12" x2="16" y2="12" stroke="#555" stroke-width="2" stroke-linecap="round"/>
                                 </svg>
                                 <span>x</span>
-                                <span class="loyalty-clock-count" id="loyalty-clock-count">0</span>
+                                <span class="boost-clock-count" id="boost-clock-count">0</span>
                             </div> -->
                         <!-- </div> -->
-                        <div class="sweeps-subtitle">Earn up to 5 stars for each play.</div>
-                        <button class="loyalty-spend-button" data-prize="gold">Spend 25 Rewards Points</button>
-                    </div>
-                </div>
-                <div class="contest-rules">
+                        <div class="boost-subtitle">Earn up to 15 <span class="star-icon">★</span> for each play.</div>
+                        <button class="boost-spend-button" data-prize="gold">Spend 25 Rewards Points</button>
+                        <button class="boost-practice-button">Practice Game</button>
+                            </div>
+                        </div>
+                <!-- <div class="contest-rules">
                     <div class="rules-title">Contest Rules</div>
                     
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -451,7 +340,9 @@
                 <div class="profile-location-level">
                     <span class="profile-level">Level 3-2</span>
                 </div>
-                <div class="profile-picture"></div>
+                <div class="profile-picture">
+                    <img src="src/img/profile.png" alt="Profile" class="profile-image">
+                </div>
                 <div class="profile-actions">Log In | Sign Up | Change Avatar</div>
                 <div class="profile-stars-container">
                     <div class="profile-stars-row">
@@ -478,23 +369,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="coin-tracker">
-                    <div class="coin-indicator">
-                        <div class="coin-icon-tracker">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#DAA520" stroke-width="2.5"/>
-                                <circle cx="12" cy="12" r="7" fill="none" stroke="#DAA520" stroke-width="1.8" opacity="0.9"/>
-                                <text x="12" y="16" font-size="11" font-weight="bold" fill="#8B6914" text-anchor="middle">$</text>
-                            </svg>
-                        </div>
-                        <span class="coin-x">x</span>
-                        <span class="coin-count" id="gold-coin-count">0</span>
-                    </div>
-                </div>
                 <div class="profile-stat">
                     <div class="stat-label">Longest streak:</div>
                     <div class="stat-value" id="longestStreakValue">0 Days</div>
                 </div>
+                <button class="reset-all-data-button" id="reset-all-data-button">Reset all data</button>
             </div>
         </div>
 
@@ -503,7 +382,7 @@
                 <!-- Platforms will be created by journey.js -->
             </div>
             <div class="journey-button-container">
-                <div class="journey-button-text">Move one space per game played</div>
+                <div class="journey-button-text">Move one space per game played (<span id="journey-games-played">0</span>)</div>
                 <div class="journey-button-glow"></div>
                 <button class="journey-go-button">
                     GO
@@ -513,18 +392,22 @@
 
         <div id="prizes-page" class="page">
             <div class="prizes-scrollable-content">
-                <div class="sweeps-container">
+                <!-- <div class="sweeps-container"> -->
                     <div class="sweeps-header">
                         <h1 class="sweeps-title">PRIZES</h1>
                         <div class="prizes-collect-text">Spend your stars to buy prize tiles.<br>Fill in all the spaces to win the prize.</div>
                         <!-- <div class="prizes-collect-text">Use gold to earn more prize pieces.</div> -->
                     </div>
-                </div>
+                <!-- </div> -->
                 
                 <div class="prize-section">
                     <div class="prize-section-title">$100 Prize</div>
                     <div class="prize-container">
-                        <div class="prize-grid grid-4x3">
+                        <div class="prize-grid grid-4x4">
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
+                            <div class="prize-box"></div>
                             <div class="prize-box"></div>
                             <div class="prize-box"></div>
                             <div class="prize-box"></div>
@@ -572,9 +455,34 @@
             
             <div class="prizes-button-container">
                 <div class="journey-button-glow"></div>
-                <button class="journey-go-button">
+                <button class="journey-go-button" id="prizes-draw-button">
                     Draw (<span class="star-icon">★</span> x <span class="prize-star-count">4</span>)
                 </button>
+            </div>
+            <div id="prizes-overlay" class="prizes-overlay" style="display: none;">
+                <div class="prizes-overlay-title">Select a prize tile</div>
+                <div class="prizes-overlay-grid" id="prizes-overlay-grid">
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                    <div class="prizes-card">?</div>
+                </div>
             </div>
         </div>
 
@@ -617,27 +525,27 @@
     <div id="memoryOverlay" class="game-overlay">
         <iframe id="memoryIframe" src="games/memory/index.html" scrolling="no"></iframe>
     </div>
-    
+
     <!-- Mystery Word Overlay -->
     <div id="mysteryWordOverlay" class="game-overlay">
         <iframe id="mysteryWordIframe" scrolling="no"></iframe>
     </div>
-    
+
     <!-- Beticle Overlay -->
     <div id="beticleOverlay" class="game-overlay">
         <iframe id="beticleIframe" scrolling="no"></iframe>
     </div>
-    
+
     <!-- Blackjack (Speed 21) Overlay -->
     <div id="blackjackOverlay" class="game-overlay">
         <iframe id="blackjackIframe" scrolling="no"></iframe>
     </div>
-    
+
     <!-- Lost and Found Overlay -->
     <div id="lostAndFoundOverlay" class="game-overlay">
         <iframe id="lostAndFoundIframe" scrolling="no" allow="touch" sandbox="allow-scripts allow-same-origin allow-pointer-lock" style="touch-action: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%; border: none;"></iframe>
     </div>
-    
+
     <!-- Gold Case Overlay -->
     <div id="goldCaseOverlay" class="game-overlay">
         <iframe id="goldCaseIframe" scrolling="no"></iframe>

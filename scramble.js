@@ -69,9 +69,14 @@ function addStars(count) {
     // Update total stars
     localStorage.setItem('totalStars', String(currentTotalStars + count));
     
-    // Add move stars (same amount as regular stars)
-    const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-    localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + count));
+    // Award stars and games played (1 point per game, only once per game)
+    if (window.awardStars) {
+        window.awardStars(count, 'scramble');
+    } else {
+        // Fallback if awardStars not available
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+    }
     
     updateStarDisplay();
     updateWalletStars();
@@ -79,10 +84,10 @@ function addStars(count) {
 }
 
 function updateStarDisplay() {
-    const stars = getTotalStars();
-    const starCountElement = document.querySelector('.star-count');
-    if (starCountElement) {
-        starCountElement.textContent = `x ${stars}`;
+    // Don't update .star-count here - it should only show usable stars via updateMoveStarsDisplay
+    // Update usable stars display if available
+    if (window.updateMoveStarsDisplay) {
+        window.updateMoveStarsDisplay();
     }
 }
 
@@ -421,7 +426,8 @@ function loadGameScores() {
 }
 
 // Expose functions to window for iframe access
-window.updateStarDisplay = updateStarDisplay;
+// Don't override updateStarDisplay - it should use the global one from script.js
+// window.updateStarDisplay = updateStarDisplay; // Removed - use global updateHeaderStarCounter instead
 window.updateWalletStars = updateWalletStars;
 window.updateRivalStars = updateRivalStars;
 window.loadGameScores = loadGameScores;
@@ -1084,88 +1090,113 @@ function updateCalendar() {
 // Reset progress (Q key)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'q' || e.key === 'Q') {
-        // Clear all progress
-        const todayKey = getTodayKey();
-        
-        console.log('[Reset] Resetting all data for:', todayKey);
-        console.log('[Reset] Before removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
-        
-        // Clear ALL highLow data (including old date formats)
-        console.log('[Reset] Clearing all highLow-related data...');
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
-                        key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
-                        key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction'))) {
-                keysToRemove.push(key);
+        // Call the global reset function if available, otherwise use local implementation
+        if (window.resetAllData) {
+            window.resetAllData();
+        } else {
+            // Fallback: Clear all progress
+            const todayKey = getTodayKey();
+            
+            console.log('[Reset] Resetting all data for:', todayKey);
+            console.log('[Reset] Before removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
+            
+            // Clear ALL highLow data (including old date formats)
+            console.log('[Reset] Clearing all highLow-related data...');
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
+                            key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
+                            key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction'))) {
+                    keysToRemove.push(key);
+                }
             }
+            keysToRemove.forEach(key => {
+                console.log('[Reset] Removing:', key);
+                localStorage.removeItem(key);
+            });
+            
+            console.log('[Reset] After removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
+            
+            // Reset mystery word completion and state
+            localStorage.removeItem(`mysteryWordComplete_${todayKey}`);
+            localStorage.removeItem(`mysteryWordState_${todayKey}`);
+            
+            // Reset beticle completion and state
+            localStorage.removeItem(`beticleComplete_${todayKey}`);
+            localStorage.removeItem(`beticleState_${todayKey}`);
+            
+            // Reset memory game completion and data
+            localStorage.removeItem(`memoryComplete_${todayKey}`);
+            localStorage.removeItem(`memoryScore_${todayKey}`);
+            localStorage.removeItem(`memoryStars_${todayKey}`);
+            localStorage.removeItem(`blackjackComplete_${todayKey}`);
+            localStorage.removeItem(`blackjackScore_${todayKey}`);
+            localStorage.removeItem(`blackjackStars_${todayKey}`);
+            localStorage.removeItem(`lostAndFoundComplete_${todayKey}`);
+            localStorage.removeItem(`lostAndFoundScore_${todayKey}`);
+            localStorage.removeItem(`lostAndFoundStars_${todayKey}`);
+            
+            // Reset daily stars to zero
+            localStorage.setItem(`dailyStars_${todayKey}`, '0');
+            
+            // Reset total stars to zero
+            localStorage.setItem('totalStars', '0');
+            
+            // Reset move stars to zero
+            localStorage.removeItem(`moveStars_${todayKey}`);
+            
+            // Reset usable stars to zero
+            localStorage.removeItem(`usableStars_${todayKey}`);
+            
+            // Reset games played
+            localStorage.setItem('gamesPlayed', '0');
+            localStorage.removeItem(`playedGames_${todayKey}`);
+            
+            // Reset prize tiles
+            localStorage.removeItem('prizeTiles');
+            
+            // Reset coins
+            localStorage.removeItem('goldCoins');
+            localStorage.removeItem('silverCoins');
+            localStorage.removeItem('bronzeCoins');
+            
+            // Reset journey progress
+            localStorage.removeItem('journeyLevel');
+            for (let i = 1; i <= 10; i++) {
+                localStorage.removeItem(`journeyPosition_level${i}`);
+            }
+            
+            console.log('[Reset] All data cleared, reloading page...');
+            
+            // Update displays immediately before reload
+            updateStarDisplay();
+            updateWalletStars();
+            updateRivalStars();
+            updateMemoryDisplay();
+            updateBlackjackDisplay();
+            if (typeof loadGameScores === 'function') {
+                loadGameScores();
+            }
+            updateMysteryWordStars();
+            updateBeticleStars();
+            updateCalendar();
+            
+            // Update usable stars display
+            if (window.updateMoveStarsDisplay) {
+                window.updateMoveStarsDisplay();
+            }
+            
+            // Update journey button state
+            if (window.updateJourneyButtonState) {
+                window.updateJourneyButtonState();
+            }
+            
+            // Small delay to ensure display updates before reload
+            setTimeout(() => {
+                location.reload();
+            }, 100);
         }
-        keysToRemove.forEach(key => {
-            console.log('[Reset] Removing:', key);
-            localStorage.removeItem(key);
-        });
-        
-        console.log('[Reset] After removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
-        
-        // Reset mystery word completion and state
-        localStorage.removeItem(`mysteryWordComplete_${todayKey}`);
-        localStorage.removeItem(`mysteryWordState_${todayKey}`);
-        
-        // Reset beticle completion and state
-        localStorage.removeItem(`beticleComplete_${todayKey}`);
-        localStorage.removeItem(`beticleState_${todayKey}`);
-        
-        // Reset memory game completion and data
-        localStorage.removeItem(`memoryComplete_${todayKey}`);
-        localStorage.removeItem(`memoryScore_${todayKey}`);
-        localStorage.removeItem(`memoryStars_${todayKey}`);
-        localStorage.removeItem(`blackjackComplete_${todayKey}`);
-        localStorage.removeItem(`blackjackScore_${todayKey}`);
-        localStorage.removeItem(`blackjackStars_${todayKey}`);
-        localStorage.removeItem(`lostAndFoundComplete_${todayKey}`);
-        localStorage.removeItem(`lostAndFoundScore_${todayKey}`);
-        localStorage.removeItem(`lostAndFoundStars_${todayKey}`);
-        
-        // Reset daily stars to zero
-        localStorage.setItem(`dailyStars_${todayKey}`, '0');
-        
-        // Reset total stars to zero
-        localStorage.setItem('totalStars', '0');
-        
-        // Reset move stars to zero
-        localStorage.removeItem(`moveStars_${todayKey}`);
-        
-        // Reset coins
-        localStorage.removeItem('goldCoins');
-        localStorage.removeItem('silverCoins');
-        localStorage.removeItem('bronzeCoins');
-        
-        // Reset journey progress
-        localStorage.removeItem('journeyLevel');
-        for (let i = 1; i <= 10; i++) {
-            localStorage.removeItem(`journeyPosition_level${i}`);
-        }
-        
-        console.log('[Reset] All data cleared, reloading page...');
-        
-        // Update displays immediately before reload
-        updateStarDisplay();
-        updateWalletStars();
-        updateRivalStars();
-        updateMemoryDisplay();
-        updateBlackjackDisplay();
-        if (typeof loadGameScores === 'function') {
-            loadGameScores();
-        }
-        updateMysteryWordStars();
-        updateBeticleStars();
-        updateCalendar();
-        
-        // Small delay to ensure display updates before reload
-        setTimeout(() => {
-            // location.reload();
-        }, 100);
     }
 });
 

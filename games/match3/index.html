@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Match 3</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="main.css">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+</head>
+<body>
+    <div id="hideMe"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></div>
+    
+    <div id="leftBlocker" class="side-blocker"></div>
+    <div id="rightBlocker" class="side-blocker"></div>
+
+    <div id="feedback"></div>
+
+    <div id="loadingImage"></div>
+    <div id="loadingBack"></div>
+
+    <div id="fader"></div>
+    <div id="faderBlack"></div>
+
+    <div id="scoreTimeContainer">
+        <div id="scoreDisplay">0</div>
+        <div id="scoreTimeDivider">|</div>
+        <div id="timeDisplay">0:00</div>
+    </div>
+    
+    <div id="scoreMultDisplay">SCORE MULT: x1</div>
+
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/bigy/sweepsGame.png" alt="Market Match" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="memoryTitle">MARKET MATCH</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">match sets to score points</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">3 items = 100 points<br>4 items = 150 points<br>5 items = 200 points</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">match faster to raise your score multiplier</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">2:00 time limit</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">bonus boxes:</div>
+                
+                <div id="bonusInstructionsStart">
+                    <div class="bonusItem">
+                        <div class="bonusImage" style="font-size: 18px; display: flex; align-items: center; justify-content: center;">⭐</div>
+                        <div class="bonusDescription">Match 5 in a row.<br>Clears items of a single color.</div>
+                    </div>
+                    <div class="bonusItem">
+                        <div class="bonusImage" style="font-size: 18px; display: flex; align-items: center; justify-content: center;">💥</div>
+                        <div class="bonusDescription">Make an L or T shape match.<br>Creates an explosion.</div>
+                    </div>
+                </div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+
+    <div id="scorePopup">+100</div>
+
+    <script src="match3.js"></script>
+</body>
+</html>
+

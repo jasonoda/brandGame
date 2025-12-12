@@ -1,0 +1,286 @@
+
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 8000;
+    /* border: 2px solid red; */
+}
+
+#startMenuContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: opacity 0.5s ease-out;
+    margin: 0;
+    padding: 0;
+    /* border: 2px solid blue; */
+}
+
+#memoryTitle {
+    font-size: 32px;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#instructionsStartDiv {
+    background: white;
+    padding: 20px 30px 10px 30px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    width: 75%;
+    max-width: 400px;
+}
+
+.instructionLine {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    text-transform: lowercase;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+    color: #666;
+}
+
+#instructionsStartDiv > .instructionLine:last-of-type {
+    margin-bottom: 0;
+}
+
+.instructionDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 6px 0;
+    width: 100%;
+}
+
+#playButton {
+    height: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-align: center;
+    width: 55%;
+    max-width: 250px;
+    background: linear-gradient(to bottom, #df2b51, #c82a48);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin-top: 10px;
+}
+
+#playButton:hover {
+    box-shadow: 0 4px 12px rgba(223, 43, 81, 0.4);
+    transform: translateY(-1px);
+}
+
+#playButton:active {
+    transform: translateY(0);
+}
+
+#instructionsStartDiv .bonusDescription {
+    color: #666;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    line-height: 1.1;
+    margin: 0;
+    padding: 0;
+}
+
+#instructionsStartDiv .bonusDescription br {
+    line-height: 1.1;
+}
+
+#bonusInstructionsStart {
+    margin-top: 4px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+
+.bonusImage {
+    width: 25px;
+    height: 25px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.bonusItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    padding: 1px 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    line-height: 1;
+}
+
+.bonusItem:not(:last-child) {
+    margin-bottom: 4px;
+}
+
+.bonusItem:last-child {
+    margin-bottom: 0;
+}
+
+.bonusDescription {
+    font-size: 13px;
+    font-weight: 700;
+    color: #cccccc;
+    text-align: left;
+    flex: 1;
+}
+
+
+/* ----------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------------------------- */
+
+/* BARS */
+
+#topDiv{
+    display: none;
+}
+
+/* Top and Bonus Div Styles */
+
+#bonusDiv {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    #topDiv {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    #bonusDiv {
+        bottom: 0;
+        padding-bottom: env(safe-area-inset-bottom);
+        position: fixed;
+    }
+}
+
+@media (max-width: 768px) {
+    #bonusDiv {
+        bottom: 0;
+        padding-bottom: env(safe-area-inset-bottom);
+        position: fixed;
+    }
+}
+
+.finalScoreOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: white;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 16000;
+	opacity: 0;
+}
+
+.finalScoreContentContainer {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	opacity: 1;
+}
+
+.finalScoreText {
+	font-family: 'Fredoka', sans-serif;
+	font-size: 72px;
+	font-weight: bold;
+	color: #FFD700;
+	text-align: center;
+	text-shadow: none;
+	opacity: 0;
+	transform: scale(0.5);
+	position: relative;
+}
+
+.finalScoreStatsContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	opacity: 0;
+	margin-top: 20px;
+}
+
+.finalScoreStatItem {
+	font-family: 'Fredoka', sans-serif;
+	font-size: 13px;
+	color: black;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.finalScoreStatsHeader {
+    font-family: 'Fredoka', 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.finalScoreStatsSeparator {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, black, transparent);
+    margin-bottom: 15px;
+}
+
+.finalScoreStarDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 40px;
+    margin-bottom: 20px;
+    /* border: 1px solid red; */
+}
+
+.finalScoreStar {
+	font-size: 40px;
+	line-height: 1;
+	transition: color 0.3s ease;
+}
+
+

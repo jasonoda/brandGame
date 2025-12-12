@@ -2113,11 +2113,30 @@ function saveBlackjackGameResult(finalScore, starsEarned) {
         if (starDifference !== 0) {
     const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
     const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-            const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
     
             localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
             localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-            localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + starDifference));
+            
+            // Award stars, usable stars, and games played (1 point per game, only once per game)
+            // awardStars handles usable stars automatically
+            // Try parent window first (if in iframe), then current window
+            const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
+            if (awardFn) {
+                awardFn(starDifference, 'blackjack');
+            } else {
+                // Fallback if awardStars not available
+                const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+                localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+                // Also add usable stars
+                const addUsableFn = (window.parent && window.parent.addUsableStars) ? window.parent.addUsableStars : (window.addUsableStars || null);
+                if (addUsableFn) {
+                    addUsableFn(starDifference);
+                } else {
+                    const todayKey = getTodayKey();
+                    const currentMoveStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+                    localStorage.setItem(`usableStars_${todayKey}`, String(currentMoveStars + starDifference));
+                }
+            }
         }
         
         // Always save the new score and stars if better

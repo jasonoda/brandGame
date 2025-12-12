@@ -43,13 +43,17 @@ function updateCalendar() {
 // Make it globally accessible
 window.updateCalendar = updateCalendar;
 
-// Function to update header star counter
+// Function to update header star counter (shows usable stars ONLY)
 function updateHeaderStarCounter() {
-    const todayKey = getTodayKey();
-    const todayStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+    // Always use updateMoveStarsDisplay to show usable stars in header
+    if (window.updateMoveStarsDisplay) {
+        window.updateMoveStarsDisplay();
+    } else {
+        // If updateMoveStarsDisplay not available, set to 0 (don't show wrong value)
     const starCountElement = document.querySelector('.star-count');
     if (starCountElement) {
-        starCountElement.textContent = `x ${todayStars}`;
+            starCountElement.textContent = 'x 0';
+        }
     }
 }
 
@@ -167,34 +171,6 @@ function updateWalletStars2() {
     }
 }
 
-function updateLoyaltyStats() {
-    try {
-        const todayKey = getTodayKey();
-        
-        // Update daily stars
-        const todayStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-        const dailyStarsElement = document.getElementById('loyalty-daily-stars');
-        if (dailyStarsElement) {
-            dailyStarsElement.textContent = todayStars;
-        }
-        
-        // Update clocks (get from localStorage)
-        const clocks = parseInt(localStorage.getItem('clocks') || '0');
-        const clockCountElement = document.getElementById('loyalty-clock-count');
-        if (clockCountElement) {
-            clockCountElement.textContent = clocks;
-        }
-        
-        // Update extra seconds (daily stars + clocks)
-        const extraSeconds = todayStars + clocks;
-        const extraSecondsElement = document.getElementById('loyalty-extra-seconds');
-        if (extraSecondsElement) {
-            extraSecondsElement.textContent = extraSeconds;
-        }
-    } catch (error) {
-        console.error('[Loyalty] ERROR:', error);
-    }
-}
 
 // Set the current date in the header
 function setCurrentDate() {
@@ -208,13 +184,6 @@ function setCurrentDate() {
         weekHeaderBackground.remove();
     }
     
-    // Hide/remove standalone top-logo-box div when p=2
-    if (logoPlacement === '2') {
-        const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-        if (topLogoBoxStandalone) {
-            topLogoBoxStandalone.style.display = 'none';
-        }
-    }
     
     const dateElement = document.querySelector('.date');
     if (!dateElement) return;
@@ -385,15 +354,6 @@ window.updateBlackjackStars = updateBlackjackStars;
         if (weekHeaderBackground) {
             weekHeaderBackground.remove();
         }
-        // Hide/remove standalone top-logo-box div when p=2
-        const urlParams = new URLSearchParams(window.location.search);
-        const logoPlacement = urlParams.get('p');
-        if (logoPlacement === '2') {
-            const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-            if (topLogoBoxStandalone) {
-                topLogoBoxStandalone.style.display = 'none';
-            }
-        }
     }
     // Run immediately
     hideWeekHeaderBackground();
@@ -470,12 +430,12 @@ buttons.forEach(button => {
         const urlParams = new URLSearchParams(window.location.search);
         const mode = urlParams.get('mode')?.toLowerCase();
         
-        // If mode=b and clicking sweeps tab, show loyalty page instead
+        // If mode=b and clicking sweeps tab, show boost page instead
         if (targetPage === 'sweeps' && mode === 'b') {
-            const loyaltyPage = document.getElementById('loyalty-page');
+            const boostPage = document.getElementById('boost-page');
             const sweepsPage = document.getElementById('sweeps-page');
-            if (loyaltyPage) {
-                loyaltyPage.classList.add('active');
+            if (boostPage) {
+                boostPage.classList.add('active');
             }
             if (sweepsPage) {
                 sweepsPage.classList.remove('active');
@@ -485,11 +445,11 @@ buttons.forEach(button => {
             if (targetPageElement) {
                 targetPageElement.classList.add('active');
             }
-            // Make sure loyalty page is hidden if not in mode=b
+            // Make sure boost page is hidden if not in mode=b
             if (targetPage === 'sweeps' && mode !== 'b') {
-                const loyaltyPage = document.getElementById('loyalty-page');
-                if (loyaltyPage) {
-                    loyaltyPage.classList.remove('active');
+                const boostPage = document.getElementById('boost-page');
+                if (boostPage) {
+                    boostPage.classList.remove('active');
                 }
             }
         }
@@ -498,6 +458,10 @@ buttons.forEach(button => {
         if (targetPage === 'journey') {
             if (window.updateMoveStarsDisplay) {
                 window.updateMoveStarsDisplay();
+            }
+            // Update journey button state (games played count and button appearance)
+            if (window.updateJourneyButtonState) {
+                window.updateJourneyButtonState();
             }
             // Log current move stars
             const today = new Date();
@@ -515,9 +479,9 @@ buttons.forEach(button => {
             if (window.snapJourneyContainer) {
                 const journeyPage = document.getElementById('journey-page');
                 if (journeyPage && journeyPage.classList.contains('active')) {
-                    window.snapJourneyContainer();
+                                window.snapJourneyContainer();
+                    }
                 }
-            }
         } else {
             // Show help button on other pages (if close button is not showing)
             const helpButton = document.querySelector('.help-button');
@@ -526,17 +490,6 @@ buttons.forEach(button => {
             }
         }
         
-        // Hide top-logo-box when switching to games tab if p=2 is set
-        if (targetPage === 'games') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const logoPlacement = urlParams.get('p');
-            if (logoPlacement === '2') {
-                const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-                if (topLogoBoxStandalone) {
-                    topLogoBoxStandalone.style.display = 'none';
-                }
-            }
-        }
         
         // Trigger rival page animations
         if (targetPage === 'rival') {
@@ -562,14 +515,14 @@ buttons.forEach(button => {
             }, 50);
         }
         
-        // Update loyalty page stats when loyalty page is shown
+        // Update boost page stats when boost page is shown
         if (targetPage === 'sweeps' && mode === 'b') {
-            updateLoyaltyStats();
-            // Update loyalty page for bigy style if applicable
-            updateLoyaltyPageForBigy();
+            updateBoostStats();
+            // Update boost page for bigy style if applicable
+            updateBoostPageForBigy();
         }
         
-        // Initialize sweepstakes page when shown (only if not loyalty mode)
+        // Initialize sweepstakes page when shown (only if not boost mode)
         if (targetPage === 'sweeps' && mode !== 'b') {
             setTimeout(initSweepsPage, 100);
         }
@@ -676,14 +629,8 @@ function checkURLParameters() {
         
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
         
-        // Update loyalty page for bigy style
-        updateLoyaltyPageForBigy();
-        
-        // Hide regular top-logo-box when bigy is active
-        const topLogoBox = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-        if (topLogoBox) {
-            topLogoBox.style.display = 'none';
-        }
+    // Update boost page for bigy style
+    updateBoostPageForBigy();
         
         // Initialize carousel for bigy
         initBigyCarousel();
@@ -692,11 +639,6 @@ function checkURLParameters() {
         const carouselContainer = document.querySelector('.top-logo-carousel-container');
         if (carouselContainer) {
             carouselContainer.classList.remove('active');
-        }
-        // Show regular top-logo-box if not bigy
-        const topLogoBox = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-        if (topLogoBox) {
-            topLogoBox.style.display = 'block';
         }
     }
     
@@ -720,33 +662,6 @@ function initBigyCarousel() {
     
     const slides = carouselContainer.querySelectorAll('.carousel-slide');
     
-    // Set logo in first slide (index 0) and duplicate slide (index 3)
-    if (slides.length > 0) {
-        const firstSlide = slides[0];
-        const firstSlideLogo = firstSlide.querySelector('.top-logo-box-carousel');
-        if (firstSlideLogo) {
-            firstSlideLogo.style.backgroundImage = "url('src/img/bigy/bigy.png')";
-            firstSlideLogo.style.backgroundSize = 'contain';
-            firstSlideLogo.style.backgroundPosition = 'center';
-            firstSlideLogo.style.backgroundRepeat = 'no-repeat';
-            firstSlideLogo.style.border = 'none';
-            firstSlideLogo.style.backgroundColor = 'transparent';
-        }
-        
-        // Set logo in duplicate slide (index 3, which is slide 4)
-        if (slides.length > 3) {
-            const duplicateSlide = slides[3];
-            const duplicateSlideLogo = duplicateSlide.querySelector('.top-logo-box-carousel');
-            if (duplicateSlideLogo) {
-                duplicateSlideLogo.style.backgroundImage = "url('src/img/bigy/bigy.png')";
-                duplicateSlideLogo.style.backgroundSize = 'contain';
-                duplicateSlideLogo.style.backgroundPosition = 'center';
-                duplicateSlideLogo.style.backgroundRepeat = 'no-repeat';
-                duplicateSlideLogo.style.border = 'none';
-                duplicateSlideLogo.style.backgroundColor = 'transparent';
-            }
-        }
-    }
     const carousel = carouselContainer.querySelector('.top-logo-carousel');
     const leftArrow = carouselContainer.querySelector('.carousel-arrow-left');
     const rightArrow = carouselContainer.querySelector('.carousel-arrow-right');
@@ -899,18 +814,18 @@ function initBigyCarousel() {
     carouselInterval = setInterval(nextSlide, 3000);
 }
 
-// Update loyalty page for bigy style
-function updateLoyaltyPageForBigy() {
+// Update boost page for bigy style
+function updateBoostPageForBigy() {
     const urlParams = new URLSearchParams(window.location.search);
     const scheme = urlParams.get('s');
     
     if (scheme !== 'bigy') {
         // Reset to default if not bigy
-        const gameTitle = document.querySelector('#loyalty-page .game-title');
+        const gameTitle = document.querySelector('#boost-page .game-title');
         if (gameTitle) {
             gameTitle.textContent = 'DONUT MATCHER';
         }
-        const playColorBox = document.querySelector('#loyalty-page .play-color-box');
+        const playColorBox = document.querySelector('#boost-page .play-color-box');
         if (playColorBox) {
             playColorBox.style.background = 'linear-gradient(to bottom, #FF6B9D, #C44569)';
             // Remove image if it exists
@@ -958,13 +873,13 @@ function updateLoyaltyPageForBigy() {
     }
     
     // Change game title to Market Match
-    const gameTitle = document.querySelector('#loyalty-page .game-title');
+    const gameTitle = document.querySelector('#boost-page .game-title');
     if (gameTitle) {
         gameTitle.textContent = 'MARKET MATCH';
     }
     
     // Update play-color-box with image and red gradient
-    const playColorBox = document.querySelector('#loyalty-page .play-color-box');
+    const playColorBox = document.querySelector('#boost-page .play-color-box');
     if (playColorBox) {
         playColorBox.style.background = 'linear-gradient(to bottom, #e84066, #c82a48)';
         
@@ -1027,7 +942,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     });
     
     // Keep rival and profile containers light (unless dark mode)
-    const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container');
+    const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container, .boost-container');
     lightContainers.forEach(container => {
         if (backgroundColor === '#000000') {
             container.style.background = '#1a1a1a';
@@ -1073,7 +988,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     });
     
     // Hide borders on white boxes
-    const whiteBoxes = document.querySelectorAll('.play-box, .arcade-box, .bonus-box, .coupon-item, .on-this-day-container, .highlow-container, .profile-container');
+    const whiteBoxes = document.querySelectorAll('.play-box, .arcade-box, .bonus-box, .on-this-day-container, .highlow-container, .profile-container');
     whiteBoxes.forEach(box => {
         box.style.border = 'none';
     });
@@ -1161,8 +1076,14 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
             sweepsContainer.style.backgroundColor = darkGrey;
         }
         
+        const boostContainer = document.querySelector('.boost-container');
+        if (boostContainer) {
+            boostContainer.style.background = darkGrey;
+            boostContainer.style.backgroundColor = darkGrey;
+        }
+        
         // Change all small text to light grey (except date and game titles)
-        const smallTextSelectors = '.play-text, .subsection-title, .coupon-description, .coupon-cost, .week-day, .week-date, .bonus-text, .arcade-text, .on-this-day-text, .rival-name, .profile-name, .rival-stars, .profile-total-stars';
+        const smallTextSelectors = '.play-text, .subsection-title, .week-day, .week-date, .bonus-text, .arcade-text, .on-this-day-text, .rival-name, .profile-name, .rival-stars, .profile-total-stars';
         const smallTextElements = document.querySelectorAll(smallTextSelectors);
         smallTextElements.forEach(element => {
             element.style.color = lightGrey;
@@ -1206,46 +1127,11 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     
     // Check URL parameter for logo placement
     const urlParams = new URLSearchParams(window.location.search);
-    const logoPlacement = urlParams.get('p');
-    
     // Show and set logo
     const logo = document.querySelector('.logo-img');
-    const topLogoBox = document.querySelector('.top-logo-box');
     
     if (logoPath) {
         hasLogo = true;
-        
-        if (logoPlacement === '2') {
-            // Place logo in top-logo-box instead of header
-            if (logo) {
-                logo.style.display = 'none';
-            }
-            // Find top-logo-box (could be in carousel or standalone)
-            const topLogoBoxInCarousel = document.querySelector('.carousel-slide .top-logo-box-carousel');
-            const topLogoBoxStandalone = document.querySelector('.top-logo-box:not(.top-logo-box-carousel)');
-            const topLogoBox = topLogoBoxInCarousel || topLogoBoxStandalone;
-            
-            if (topLogoBox) {
-                topLogoBox.style.backgroundImage = `url('${logoPath}')`;
-                topLogoBox.style.backgroundSize = 'contain';
-                topLogoBox.style.backgroundPosition = 'center';
-                topLogoBox.style.backgroundRepeat = 'no-repeat';
-                topLogoBox.style.border = 'none';
-                topLogoBox.style.backgroundColor = 'transparent';
-                // Only show if close button is not showing
-                const closeButton = document.querySelector('.game-overlay-close');
-                if (closeButton && !closeButton.classList.contains('show')) {
-                    topLogoBox.style.display = 'block';
-                } else {
-                    topLogoBox.style.display = 'none';
-                }
-            }
-        } else {
-            // Default: place logo in header
-            if (topLogoBox) {
-                topLogoBox.style.display = 'block';
-                topLogoBox.style.border = '2px solid #000';
-            }
             if (logo) {
                 logo.src = logoPath;
                 // Only show logo if close button is not showing
@@ -1254,15 +1140,13 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
                     logo.style.display = 'block';
                 } else {
                     logo.style.display = 'none';
-                }
             }
         }
     } else {
+        if (logo) {
         logo.style.display = 'none';
-        hasLogo = false;
-        if (topLogoBox && logoPlacement !== '2') {
-            topLogoBox.style.border = '2px solid #000';
         }
+        hasLogo = false;
     }
     
     // Watch for dynamically added letter boxes
@@ -1272,11 +1156,8 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
 // Helper function to update logo visibility based on close button state
 function updateLogoVisibility() {
     const logo = document.querySelector('.logo-img');
-    const topLogoBox = document.querySelector('.top-logo-box');
     const closeButton = document.querySelector('.game-overlay-close');
     const helpButton = document.querySelector('.help-button');
-    const urlParams = new URLSearchParams(window.location.search);
-    const logoPlacement = urlParams.get('p');
     
     // Hide/show help button based on close button state
     if (helpButton) {
@@ -1288,23 +1169,12 @@ function updateLogoVisibility() {
     }
     
     if (hasLogo) {
-        if (logoPlacement === '2') {
-            // Logo is in top-logo-box
-            if (topLogoBox) {
-                if (closeButton && closeButton.classList.contains('show')) {
-                    topLogoBox.style.display = 'none';
-                } else {
-                    topLogoBox.style.display = 'block';
-                }
-            }
-        } else {
             // Logo is in header
             if (logo) {
                 if (closeButton && closeButton.classList.contains('show')) {
                     logo.style.display = 'none';
                 } else {
                     logo.style.display = 'block';
-                }
             }
         }
     }
@@ -1932,22 +1802,168 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode')?.toLowerCase();
     
-    // Check if sweeps page is active (and not loyalty mode)
+    // Check if sweeps page is active (and not boost mode)
     if (document.getElementById('sweeps-page')?.classList.contains('active') && mode !== 'b') {
         initSweepsPage();
     }
     
-    // If mode=b, ensure loyalty page shows when sweeps tab is clicked
+    // If mode=b, ensure boost page shows when sweeps tab is clicked
     // Also handle if sweeps tab is already active on page load
     if (mode === 'b') {
         const sweepsButton = document.querySelector('.tab-button[data-page="sweeps"]');
         const sweepsPage = document.getElementById('sweeps-page');
-        const loyaltyPage = document.getElementById('loyalty-page');
+        const boostPage = document.getElementById('boost-page');
         
         if (sweepsButton && sweepsButton.classList.contains('active')) {
             if (sweepsPage) sweepsPage.classList.remove('active');
-            if (loyaltyPage) loyaltyPage.classList.add('active');
+            if (boostPage) boostPage.classList.add('active');
         }
     }
 });
+
+// Reset all data function (called by Q key and reset button)
+function resetAllData() {
+    // Clear all progress
+    const todayKey = getTodayKey();
+    
+    console.log('[Reset] Resetting all data for:', todayKey);
+    console.log('[Reset] Before removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
+    
+    // Clear ALL highLow data (including old date formats)
+    console.log('[Reset] Clearing all highLow-related data...');
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
+                    key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
+                    key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction'))) {
+            keysToRemove.push(key);
+        }
+    }
+    keysToRemove.forEach(key => {
+        console.log('[Reset] Removing:', key);
+        localStorage.removeItem(key);
+    });
+    
+    console.log('[Reset] After removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
+    
+    // Reset mystery word completion and state
+    localStorage.removeItem(`mysteryWordComplete_${todayKey}`);
+    localStorage.removeItem(`mysteryWordState_${todayKey}`);
+    
+    // Reset beticle completion and state
+    localStorage.removeItem(`beticleComplete_${todayKey}`);
+    localStorage.removeItem(`beticleState_${todayKey}`);
+    
+    // Reset memory game completion and data
+    localStorage.removeItem(`memoryComplete_${todayKey}`);
+    localStorage.removeItem(`memoryScore_${todayKey}`);
+    localStorage.removeItem(`memoryStars_${todayKey}`);
+    localStorage.removeItem(`blackjackComplete_${todayKey}`);
+    localStorage.removeItem(`blackjackScore_${todayKey}`);
+    localStorage.removeItem(`blackjackStars_${todayKey}`);
+    localStorage.removeItem(`lostAndFoundComplete_${todayKey}`);
+    localStorage.removeItem(`lostAndFoundScore_${todayKey}`);
+    localStorage.removeItem(`lostAndFoundStars_${todayKey}`);
+    
+    // Reset daily stars to zero
+    localStorage.setItem(`dailyStars_${todayKey}`, '0');
+    
+    // Reset total stars to zero
+    localStorage.setItem('totalStars', '0');
+    
+    // Reset move stars to zero
+    localStorage.removeItem(`moveStars_${todayKey}`);
+    
+    // Reset usable stars to zero
+    localStorage.removeItem(`usableStars_${todayKey}`);
+    
+    // Reset games played
+    localStorage.setItem('gamesPlayed', '0');
+    localStorage.removeItem(`playedGames_${todayKey}`);
+    
+    // Reset prize tiles
+    localStorage.removeItem('prizeTiles');
+    
+    // Reset coins
+    localStorage.removeItem('goldCoins');
+    localStorage.removeItem('silverCoins');
+    localStorage.removeItem('bronzeCoins');
+    
+    // Reset journey progress
+    localStorage.removeItem('journeyLevel');
+    for (let i = 1; i <= 10; i++) {
+        localStorage.removeItem(`journeyPosition_level${i}`);
+    }
+    
+    console.log('[Reset] All data cleared, reloading page...');
+    
+    // Update displays immediately before reload
+    if (typeof updateStarDisplay === 'function') {
+        updateStarDisplay();
+    }
+    if (typeof updateWalletStars === 'function') {
+        updateWalletStars();
+    }
+    if (typeof updateRivalStars === 'function') {
+        updateRivalStars();
+    }
+    if (typeof updateMemoryDisplay === 'function') {
+        updateMemoryDisplay();
+    }
+    if (typeof updateBlackjackDisplay === 'function') {
+        updateBlackjackDisplay();
+    }
+    if (typeof loadGameScores === 'function') {
+        loadGameScores();
+    }
+    if (typeof updateMysteryWordStars === 'function') {
+        updateMysteryWordStars();
+    }
+    if (typeof updateBeticleStars === 'function') {
+        updateBeticleStars();
+    }
+    if (typeof updateCalendar === 'function') {
+        updateCalendar();
+    }
+    
+    // Update usable stars display
+    if (window.updateMoveStarsDisplay) {
+        window.updateMoveStarsDisplay();
+    }
+    
+    // Update journey button state
+    if (window.updateJourneyButtonState) {
+        window.updateJourneyButtonState();
+    }
+    
+    // Small delay to ensure display updates before reload
+    setTimeout(() => {
+        location.reload();
+    }, 100);
+}
+
+// Helper function to get today's key (if not already defined)
+function getTodayKey() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Add reset button click handler
+document.addEventListener('DOMContentLoaded', () => {
+    const resetButton = document.getElementById('reset-all-data-button');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+                resetAllData();
+            }
+        });
+    }
+});
+
+// Expose reset function globally for Q key handler
+window.resetAllData = resetAllData;
 

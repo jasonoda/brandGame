@@ -58,9 +58,14 @@ function mcAddStars(count) {
     // Update total stars
     localStorage.setItem('totalStars', String(currentTotalStars + count));
     
-    // Add move stars (same amount as regular stars)
-    const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-    localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + count));
+    // Award stars and games played (1 point per game, only once per game)
+    if (window.awardStars) {
+        window.awardStars(count, 'multipleChoice');
+    } else {
+        // Fallback if awardStars not available
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+    }
     
     // Update the display
     if (window.updateHeaderStarCounter) {

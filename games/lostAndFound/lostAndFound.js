@@ -3128,13 +3128,25 @@ function saveLostAndFoundGameResult(finalScore, starsEarned) {
     
         // Update daily and total stars if there's a difference
         if (starDifference !== 0) {
-    const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-    const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-            const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-    
+            const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+            const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
+            
             localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
             localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-            localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + starDifference));
+            
+            // Award games played (1 point per game, only once per game)
+            // Try parent window first (if in iframe), then current window
+            const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
+            if (awardFn) {
+                awardFn(starDifference, 'lostAndFound');
+            } else {
+                // Fallback if awardStars not available - manually add usable stars
+                const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+                localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+                // Also add usable stars manually
+                const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+                localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
+            }
         }
         
         // Always save the new score and stars if better

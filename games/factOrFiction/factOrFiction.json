@@ -88,23 +88,6 @@
         "set": 6,
         "statements": [
             {
-                "statement": "\"Spatchcock\" turkey prep predates the Thanksgiving turkey stereotype",
-                "isFact": true
-            },
-            {
-                "statement": "Thanksgiving has always been the 4th Thursday by law",
-                "isFact": false
-            },
-            {
-                "statement": "Pumpkin spice existed before canned pumpkin",
-                "isFact": false
-            }
-        ]
-    },
-    {
-        "set": 7,
-        "statements": [
-            {
                 "statement": "The Thanksgiving parade was first broadcast nationally on TV before WWII",
                 "isFact": false
             },
@@ -119,7 +102,7 @@
         ]
     },
     {
-        "set": 8,
+        "set": 7,
         "statements": [
             {
                 "statement": "Turkey replaced goose regionally before it replaced it symbolically",
@@ -136,7 +119,7 @@
         ]
     },
     {
-        "set": 9,
+        "set": 8,
         "statements": [
             {
                 "statement": "Thanksgiving leftovers are the origin of modern frozen convenience meals",
@@ -153,7 +136,7 @@
         ]
     },
     {
-        "set": 10,
+        "set": 9,
         "statements": [
             {
                 "statement": "The parade balloons are filled at ground level but inflated by internal blowers",

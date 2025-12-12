@@ -55,63 +55,124 @@ window.updateCoinDisplays = updateCoinDisplays;
 
 function getMoveStars() {
     const todayKey = getTodayKey();
-    const value = localStorage.getItem(`moveStars_${todayKey}`);
-    // console.log('[Journey] getTodayKey():', todayKey);
-    // console.log('[Journey] Looking for key: moveStars_' + todayKey);
-    // console.log('[Journey] Found value:', value);
-    return parseInt(value || '0');
+    const usableKey = `usableStars_${todayKey}`;
+    const legacyKey = `moveStars_${todayKey}`;
+    const val = localStorage.getItem(usableKey);
+    const legacy = localStorage.getItem(legacyKey);
+    const parsed = parseInt(val ?? legacy ?? '0');
+    const result = isNaN(parsed) ? 0 : parsed;
+    if (result > 0 && !val && !legacy) {
+        console.warn('[Journey] getMoveStars returning non-zero value but no localStorage found:', result);
+    }
+    return result;
 }
 
 function setMoveStars(amount) {
     const todayKey = getTodayKey();
-    localStorage.setItem(`moveStars_${todayKey}`, String(amount));
+    const usableKey = `usableStars_${todayKey}`;
+    const safe = Math.max(0, amount);
+    localStorage.setItem(usableKey, String(safe));
     updateMoveStarsDisplay();
 }
 
 function addMoveStars(amount) {
+    if (amount <= 0) {
+        console.warn('[Journey] addMoveStars called with non-positive amount:', amount);
+        return;
+    }
     const current = getMoveStars();
+    console.log('[Journey] addMoveStars: current=', current, 'amount=', amount, 'new total=', current + amount);
     setMoveStars(current + amount);
 }
 
 function removeMoveStars(amount) {
     const current = getMoveStars();
-    if (current >= amount) {
-        setMoveStars(current - amount);
-        return true;
-    }
-    return false;
+    const next = Math.max(0, current - amount);
+    setMoveStars(next);
+    return next >= 0;
 }
 
 function updateMoveStarsDisplay() {
     const moveStars = getMoveStars();
     const displayElement = document.querySelector('.journey-star-count');
-    console.log('[Journey] Move stars:', moveStars);
-    if (displayElement) {
-        displayElement.textContent = moveStars;
-        console.log('[Journey] Updated display to:', moveStars);
-    } else {
-        console.log('[Journey] ERROR: .journey-star-count element not found!');
-    }
+    const headerStars = document.querySelector('.star-count');
+    if (displayElement) displayElement.textContent = moveStars;
+    if (headerStars) headerStars.textContent = 'x ' + moveStars;
 }
 
 // Make updateMoveStarsDisplay globally accessible
 window.updateMoveStarsDisplay = updateMoveStarsDisplay;
 
-// Global function for games to award stars and move stars
-window.awardStars = function(amount) {
+// Helper function to check if a game has been played today
+function hasGameBeenPlayedToday(gameId) {
+    const todayKey = getTodayKey();
+    const playedGames = JSON.parse(localStorage.getItem(`playedGames_${todayKey}`) || '[]');
+    return playedGames.includes(gameId);
+}
+
+// Helper function to mark a game as played today
+function markGameAsPlayedToday(gameId) {
+    const todayKey = getTodayKey();
+    const playedGames = JSON.parse(localStorage.getItem(`playedGames_${todayKey}`) || '[]');
+    if (!playedGames.includes(gameId)) {
+        playedGames.push(gameId);
+        localStorage.setItem(`playedGames_${todayKey}`, JSON.stringify(playedGames));
+        return true; // Game was not played before
+    }
+    return false; // Game was already played
+}
+
+// Global function for games to award stars and games played
+window.awardStars = function(amount, gameId) {
+    console.log('[Journey] awardStars called: amount=', amount, 'gameId=', gameId, 'stack:', new Error().stack);
     // Add regular stars
     const currentStars = parseInt(localStorage.getItem('totalStars') || '0');
     localStorage.setItem('totalStars', String(currentStars + amount));
     
-    // Add same amount of move stars
+    // Add to usable stars (move stars) - equal to stars earned
     addMoveStars(amount);
     
-    // Update star counter in header
-    const starCountElement = document.querySelector('.star-count');
-    if (starCountElement) {
-        starCountElement.textContent = 'x ' + (currentStars + amount);
+    // Add to games played: 1 point per game, only once per game
+    if (gameId) {
+        const wasNewGame = markGameAsPlayedToday(gameId);
+        if (wasNewGame) {
+            const gamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+            setGamesPlayed(gamesPlayed + 1);
+        }
+    } else {
+        // Fallback: if no gameId provided, add amount (for backwards compatibility)
+        const gamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        setGamesPlayed(gamesPlayed + amount);
     }
+    
+    // Update star counter in header to show usable stars
+    updateMoveStarsDisplay();
 };
+
+// Expose helper function for games to check if they've been played
+window.hasGameBeenPlayedToday = hasGameBeenPlayedToday;
+window.markGameAsPlayedToday = markGameAsPlayedToday;
+
+// Expose usable stars helpers
+window.getUsableStars = getMoveStars;
+window.setUsableStars = setMoveStars;
+window.addUsableStars = addMoveStars;
+
+// Games played helper functions
+function getGamesPlayed() {
+    return parseInt(localStorage.getItem('gamesPlayed') || '0');
+}
+
+function setGamesPlayed(amount) {
+    localStorage.setItem('gamesPlayed', String(Math.max(0, amount)));
+}
+
+function subtractGamesPlayed(amount) {
+    const current = getGamesPlayed();
+    setGamesPlayed(current - amount);
+    return getGamesPlayed();
+}
+window.removeUsableStars = removeMoveStars;
 
 // Level data - each array represents a level with 50 platforms
 // Each number represents what's on that platform: 0 = empty, 1 = gold coin
@@ -314,11 +375,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const platformLeft = parseFloat(platform.style.left);
         const platformTop = parseFloat(platform.style.top);
         
-        // Coin colors - always gold
-        const fillColor = '#FFD700';
-        const strokeColor = '#DAA520';
-        const textColor = '#8B6914';
-        
         // Create coin container
         const coinContainer = document.createElement('div');
         coinContainer.className = 'journey-coin';
@@ -346,18 +402,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create coin graphic
         const coinGraphic = document.createElement('div');
         coinGraphic.style.position = 'absolute';
-        coinGraphic.style.left = '14px';
-        coinGraphic.style.bottom = '31px';
+        coinGraphic.style.left = '12px';
+        coinGraphic.style.bottom = '24px';
         coinGraphic.style.transform = 'translateY(-50%)';
-        // coinGraphic.style.width = '100%';
-        coinGraphic.style.height = '25px';
-        coinGraphic.innerHTML = `
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2.5"/>
-                <circle cx="12" cy="12" r="7" fill="none" stroke="${strokeColor}" stroke-width="1.8" opacity="0.9"/>
-                <text x="12" y="16" font-size="11" font-weight="bold" fill="${textColor}" text-anchor="middle">$</text>
-            </svg>
-        `;
+        coinGraphic.style.width = '40px';
+        coinGraphic.style.height = '40px';
+        coinGraphic.style.display = 'flex';
+        coinGraphic.style.alignItems = 'center';
+        coinGraphic.style.justifyContent = 'center';
+        coinGraphic.style.borderRadius = '6px';
+        coinGraphic.style.background = 'linear-gradient(to bottom, #df2b51, #c82a48)';
+        coinGraphic.style.border = '3px solid #ffffff';
+        coinGraphic.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
+        coinGraphic.style.color = '#ffffff';
+        coinGraphic.style.fontFamily = 'Spectral, serif';
+        coinGraphic.style.fontWeight = '800';
+        coinGraphic.style.fontSize = '18px';
+        coinGraphic.textContent = '?';
         
         // Assemble coin
         coinContainer.appendChild(coinShadow);
@@ -476,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Function to move player to a specific platform
+    // Returns true if a card was collected, false otherwise
     function movePlayerToPlatform(index) {
         if (index >= 0 && index < platforms.length) {
             const platform = platforms[index];
@@ -553,9 +615,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     addCoin();
                     coinElements[index] = null; // Remove reference
+                    
+                    // Switch to prizes tab and auto-draw a card
+                    const prizesTabBtn = document.querySelector('.tab-button[data-page="prizes"]');
+                    if (prizesTabBtn) {
+                        prizesTabBtn.click();
+                        setTimeout(() => {
+                            if (window.resetPrizesOverlay) {
+                                window.resetPrizesOverlay();
+                            } else {
+                                const overlay = document.getElementById('prizes-overlay');
+                                if (overlay) overlay.style.display = 'flex';
+                            }
+                            setTimeout(() => {
+                                const drawBtn = document.getElementById('prizes-draw-button');
+                                if (drawBtn) drawBtn.click();
+                            }, 200);
+                        }, 200);
+                    }
                 }, 2250);
+                
+                return true; // Card was collected
             }
+            
+            return false; // No card collected
         }
+        return false;
     }
     
     // Track if initial positioning is complete
@@ -599,28 +684,65 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track if button is active
     let isButtonActive = true;
     
+    // Function to update button state based on gamesPlayed
+    const updateGoButtonState = () => {
+        const goButton = document.querySelector('.journey-go-button');
+        if (!goButton) return;
+        
+        const gamesPlayed = getGamesPlayed();
+        
+        // Update button appearance (no opacity change, just grayscale)
+        if (gamesPlayed <= 0) {
+            goButton.style.cursor = 'not-allowed';
+            goButton.style.filter = 'grayscale(100%)';
+        } else {
+            goButton.style.cursor = 'pointer';
+            goButton.style.filter = 'none';
+        }
+        
+        // Update games played display
+        const gamesPlayedDisplay = document.getElementById('journey-games-played');
+        if (gamesPlayedDisplay) {
+            gamesPlayedDisplay.textContent = gamesPlayed;
+        }
+    };
+    
+    // Expose update function globally for tab switching
+    window.updateJourneyButtonState = updateGoButtonState;
+    
+    // Update button state on load
+    updateGoButtonState();
+    
     // Go button functionality
     const goButton = document.querySelector('.journey-go-button');
     const glowDiv = document.querySelector('.journey-button-glow');
     if (goButton) {
         goButton.addEventListener('click', function() {
             // Don't do anything if button is inactive
-            if (!isButtonActive) return;
+            if (!isButtonActive) {
+                console.log('[Journey] Button is inactive, ignoring click');
+                return;
+            }
             
-            // Check if player has move stars and isn't at the end
+            console.log('[Journey] GO button clicked');
+            
+            // Check if player has gamesPlayed and isn't at the end
+            const gamesPlayed = getGamesPlayed();
+            console.log('[Journey] Current gamesPlayed:', gamesPlayed);
+            
+            if (gamesPlayed <= 0) {
+                console.log('[Journey] No games played, button disabled');
+                return;
+            }
+            
             if (currentPlatformIndex < platforms.length - 1) {
-                if (removeMoveStars(1)) {
-                    // Save new position
-                    setPlayerPosition(currentPlatformIndex + 1);
-                    // Update level progress display
-                    if (typeof updateLevelProgress === 'function') {
-                        updateLevelProgress();
-                    }
-                    // Disable button during movement
+                if (gamesPlayed > 0) {
+                    // Disable button during movement sequence
                     isButtonActive = false;
                     goButton.style.cursor = 'not-allowed';
+                    goButton.style.pointerEvents = 'none';
                     
-                    // Create animation timeline
+                    // Create animation timeline for button
                     const buttonTimeline = gsap.timeline();
                     
                     // Button grows and brightens
@@ -654,16 +776,70 @@ document.addEventListener('DOMContentLoaded', function() {
                         );
                     }
                     
-                    // Move player
-                    movePlayerToPlatform(currentPlatformIndex + 1);
+                    // Loop through moves until gamesPlayed is 0 or a card is hit
+                    let moveIndex = 0;
+                    const performMove = () => {
+                        const currentGamesPlayed = getGamesPlayed();
+                        const isAtEnd = currentPlatformIndex >= platforms.length - 1;
+                        
+                        // Stop if no games left or at the end
+                        if (currentGamesPlayed <= 0 || isAtEnd) {
+                            isButtonActive = true;
+                            goButton.style.cursor = 'pointer';
+                            goButton.style.pointerEvents = 'auto';
+                            updateGoButtonState();
+                            console.log('[Journey] Movement sequence complete');
+                            return;
+                        }
+                        
+                        // Move to next platform
+                        const nextIndex = currentPlatformIndex + 1;
+                        if (nextIndex < platforms.length) {
+                            // Subtract 1 from gamesPlayed
+                            subtractGamesPlayed(1);
+                            
+                            // Save new position
+                            setPlayerPosition(nextIndex);
+                            
+                            // Update level progress display
+                            if (typeof updateLevelProgress === 'function') {
+                                updateLevelProgress();
+                            }
+                            
+                            // Move player and check if card was collected
+                            const cardCollected = movePlayerToPlatform(nextIndex);
+                            
+                            // If card was collected, stop the sequence
+                            if (cardCollected) {
+                                isButtonActive = true;
+                                goButton.style.cursor = 'pointer';
+                                goButton.style.pointerEvents = 'auto';
+                                updateGoButtonState();
+                                console.log('[Journey] Card collected, stopping movement');
+                                return;
+                            }
+                            
+                            // Continue to next move after animation completes (0.3s)
+                            moveIndex++;
+                            setTimeout(() => {
+                                // Update button state after movement animation completes
+                                updateGoButtonState();
+                                performMove();
+                            }, 300);
+                        } else {
+                            // At the end
+                            isButtonActive = true;
+                            goButton.style.cursor = 'pointer';
+                            goButton.style.pointerEvents = 'auto';
+                            updateGoButtonState();
+                            console.log('[Journey] At end of platforms');
+                        }
+                    };
                     
-                    // Re-enable button after movement completes (0.3s total duration)
-                    setTimeout(() => {
-                        isButtonActive = true;
-                        goButton.style.cursor = 'pointer';
-                    }, 300);
+                    // Start the move sequence
+                    performMove();
                 }
-                // If no move stars, do nothing (no alert)
+                // If no games played, do nothing (no alert)
             }
             // If at the end, do nothing (no alert)
         });
@@ -697,6 +873,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Cheat key: add 5 stars and 5 move stars
             window.awardStars(5);
             console.log('Cheat activated: +5 stars, +5 move stars');
+        } else if (event.key === '9') {
+            // Cheat key: add 10 gamesPlayed
+            const current = getGamesPlayed();
+            setGamesPlayed(current + 10);
+            console.log('Cheat activated: +10 gamesPlayed');
         }
     });
 });

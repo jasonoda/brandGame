@@ -45,9 +45,20 @@ function addStars(count) {
         // Update total stars
         localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
         
-        // Add move stars (same amount as regular stars)
-        const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-        localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + starDifference));
+        // Award games played (1 point per game, only once per game)
+        // Try parent window first (if in iframe), then current window
+        const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
+        if (awardFn) {
+            awardFn(starDifference, 'beticle');
+        } else {
+            // Fallback if awardStars not available - manually add usable stars
+            const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+            localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+            // Also add usable stars manually
+            const todayKey = getTodayKey();
+            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+            localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
+        }
     }
     
     // Always update beticle stars to the new count (even if no star difference)

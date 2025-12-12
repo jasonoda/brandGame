@@ -49,11 +49,14 @@ function hlAddStars(count) {
     // Update total stars
     localStorage.setItem('totalStars', String(currentTotalStars + count));
     
-    // Add move stars (same amount as regular stars)
-    const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-    //console.log('[HighLow] Current move stars:', currentMoveStars);
-    localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + count));
-    //console.log('[HighLow] New move stars:', currentMoveStars + count);
+    // Award stars and games played (1 point per game, only once per game)
+    if (window.awardStars) {
+        window.awardStars(count, 'highLow');
+    } else {
+        // Fallback if awardStars not available
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+    }
     
     hlUpdateStarDisplay();
     hlUpdateCalendar();
@@ -68,10 +71,10 @@ function hlAddStars(count) {
 }
 
 function hlUpdateStarDisplay() {
-    const stars = parseInt(localStorage.getItem('totalStars') || '0');
-    const starCountElement = document.querySelector('.star-count');
-    if (starCountElement) {
-        starCountElement.textContent = `x ${stars}`;
+    // Don't update .star-count here - it should only show usable stars via updateMoveStarsDisplay
+    // Update usable stars display if available
+    if (window.updateMoveStarsDisplay) {
+        window.updateMoveStarsDisplay();
     }
 }
 

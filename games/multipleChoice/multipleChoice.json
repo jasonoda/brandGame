@@ -30,10 +30,5 @@
         "question": "The modern cultural concept of 'Friendsgiving' was indirectly popularized before the term existed by Thanksgiving episodes of which iconic 90s sitcom?",
         "answers": ["Friends", "Seinfeld", "Frasier", "Full House"],
         "correct": 0
-    },
-    {
-        "question": "What alternative Thanksgiving observance, created in 1970 and still recognized today, centers on indigenous protest and is not a cheerful celebration?",
-        "answers": ["National Thanks Day", "Day of Mourning", "Freedom Feast", "November Vigil"],
-        "correct": 1
     }
 ]

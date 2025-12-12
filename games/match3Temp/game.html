@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Jewel Rush</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/shared.css">
+    <link rel="stylesheet" href="src/main.css">
+
+    <!--meta---------------------------------------------------------------------------------------------------------- -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-K8LPL4T9LY");
+    </script>
+
+    <script>
+      window.addEventListener("load", (event) => {
+        window.parent.postMessage(
+          JSON.stringify({
+            type: "GameLoaded",
+          }),
+          "*"
+        );
+      });
+
+      // Wait for DOM to be fully loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Game logic is now handled in scene.js
+      });
+    </script>
+
+</head>
+
+<body>
+
+    <div id="hideMe"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></div>
+    
+    <div id="leftBlocker" class="side-blocker"></div>
+    <div id="rightBlocker" class="side-blocker"></div>
+
+    <div id="feedback"></div>
+
+    <div id="loadingImage"></div>
+    <div id="loadingBack"></div>
+
+    <div id="fader"></div>
+    <div id="faderBlack"></div>
+
+    <div id="scoreTimeContainer">
+        <div id="circularTimer">
+            <svg id="timerSvg" width="32" height="32" viewBox="0 0 80 80">
+                <circle id="timerProgress" cx="40" cy="40" r="40" />
+            </svg>
+        </div>
+        <div id="scoreDisplay">0</div>
+    </div>
+    
+    <div id="scoreMultDisplay">SCORE MULT: x1</div>
+
+    <div id="startMenu">
+        <div id="playButton">PLAY</div>
+        <div id="instructionsButton">INSTRUCTIONS</div>
+    </div>
+
+    <div id="scorePopup">+100</div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructionsOverlay" style="display: none;">
+        <div id="instructionsContainer">
+            <div id="instructionsTitle">INSTRUCTIONS</div>
+            
+            <div id="instructionsText">
+                <div class="instructionTitle"><b>SCORING:</b></div>
+                <div class="instructionLine">3 donuts = 100 points<br>4 donuts = 150 points<br>5 donuts = 200 points</div>
+                
+                <!-- <div class="instructionDivider"></div> -->
+                
+                <div class="instructionTitle"><b>BONUS BOXES:</b></div>
+                
+                <div class="bonusItem">
+                    <img src="src/images/jewel_w.png" alt="White Bonus Box" class="bonusImage">
+                    <div class="bonusDescription">
+                        Match 5 in a row.<br>Clears donuts of a single color.
+                    </div>
+                </div>
+                
+                <div class="bonusItem">
+                    <img src="src/images/jewel_l.png" alt="Grey Bonus Box" class="bonusImage">
+                    <div class="bonusDescription">
+                        Make an L or T shape match.<br>Creates an explosion.
+                    </div>
+                </div>
+                
+                <!-- <div class="instructionDivider"></div> -->
+                <div class="instructionLine">2:00 time limit.</div>
+                <!-- <div class="instructionDivider"></div> -->
+                <div class="instructionLine">Match sets to score points.</div>
+                <!-- <div class="instructionDivider"></div> -->
+                <div class="instructionLine">Match faster to raise your score multiplier.</div>
+            </div>
+            
+            <div id="closeInstructionsButton">CLOSE</div>
+        </div>
+    </div>
+
+</body>
+</html>

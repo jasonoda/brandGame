@@ -35,9 +35,20 @@ function addStars(count) {
     // Update total stars
     localStorage.setItem('totalStars', String(currentTotalStars + count));
     
-    // Add move stars (same amount as regular stars)
-    const currentMoveStars = parseInt(localStorage.getItem(`moveStars_${todayKey}`) || '0');
-    localStorage.setItem(`moveStars_${todayKey}`, String(currentMoveStars + count));
+    // Award stars and games played (1 point per game, only once per game)
+    // Try parent window first (if in iframe), then current window
+    const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
+    if (awardFn) {
+        awardFn(count, 'mysteryWord');
+    } else {
+        // Fallback if awardStars not available - manually add usable stars
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+        // Also add usable stars manually
+        const todayKey = getTodayKey();
+        const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+        localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + count));
+    }
     
     // Update parent window star display if accessible
     if (window.parent && window.parent.updateStarDisplay) {
@@ -770,7 +781,7 @@ function updateGuessCounter() {
     }
     
     // Update stars (5 stars for first guess, 4 for second, etc.)
-    const starsEarned = 6 - currentRow;
+    const starsEarned = 5 - currentRow;
     const starElements = document.querySelectorAll('.guess-star');
     starElements.forEach((star, index) => {
         if (index < starsEarned) {
@@ -799,8 +810,8 @@ function celebrateWin() {
     
     // Mark as complete and award stars
     markMysteryWordComplete();
-    // Stars = 6 - currentRow (5 for first guess, 4 for second, etc.)
-    const starsEarned = 6 - currentRow;
+    // Stars = 5 - currentRow (5 for first guess, 4 for second, etc.)
+    const starsEarned = 5 - currentRow;
     addStars(starsEarned);
     
     // Save stars to local storage for display on main page
@@ -863,7 +874,7 @@ function showWinMessage() {
     message.style.marginBottom = '3px';
     
     // Create stars based on guesses used
-    const starsEarned = 6 - currentRow;
+    const starsEarned = 5 - currentRow;
     const stars = document.createElement('div');
     stars.style.fontSize = '18px';
     stars.style.letterSpacing = '0px';
