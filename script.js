@@ -370,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateWalletStars2();
     updateCalendar();
     loadGameScores2();
+    updateBoostHighScore();
     // console.log("loadGameScores called");
     
     // Initialize coin displays if function exists
@@ -644,6 +645,9 @@ function checkURLParameters() {
     
     // Update date display based on p parameter
     setCurrentDate();
+    
+    // Update boost high score on page load
+    updateBoostHighScore();
 }
 
 // Initialize bigy carousel
@@ -812,6 +816,26 @@ function initBigyCarousel() {
     // Auto-cycle every 3 seconds
     clearInterval(carouselInterval);
     carouselInterval = setInterval(nextSlide, 3000);
+}
+
+// Update boost high score from localStorage
+function updateBoostHighScore(score = null) {
+    const highScoreElement = document.getElementById('boost-high-score');
+    if (highScoreElement) {
+        if (score !== null) {
+            // If score is provided, use it (for real-time updates)
+            highScoreElement.textContent = score.toLocaleString();
+        } else {
+            // Otherwise, read from localStorage
+            const highScore = parseInt(localStorage.getItem('match3HighScore') || '0');
+            highScoreElement.textContent = highScore.toLocaleString();
+        }
+    }
+}
+
+// Update boost page stats
+function updateBoostStats() {
+    updateBoostHighScore();
 }
 
 // Update boost page for bigy style
@@ -1367,6 +1391,7 @@ if (closeButton) {
         const blackjackOverlay = document.getElementById('blackjackOverlay');
         const lostAndFoundOverlay = document.getElementById('lostAndFoundOverlay');
         const goldCaseOverlay = document.getElementById('goldCaseOverlay');
+        const match3Overlay = document.getElementById('match3Overlay');
         
         // Determine which overlay is active and only reload that iframe
         let activeOverlay = null;
@@ -1395,6 +1420,14 @@ if (closeButton) {
             activeOverlay = 'goldCase';
             goldCaseOverlay.classList.remove('active');
             iframeToUnload = document.getElementById('goldCaseIframe');
+        } else if (match3Overlay && match3Overlay.classList.contains('active')) {
+            activeOverlay = 'match3';
+            match3Overlay.classList.remove('active');
+            iframeToUnload = document.getElementById('match3Iframe');
+            // Update wallet stars when closing match3 game
+            setTimeout(() => {
+                updateWalletStars2();
+            }, 200);
         }
         
         // Unload the iframe by setting src to blank
@@ -1836,7 +1869,8 @@ function resetAllData() {
         const key = localStorage.key(i);
         if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
                     key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
-                    key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction'))) {
+                    key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction') ||
+                    key.includes('match3'))) {
             keysToRemove.push(key);
         }
     }
@@ -1917,6 +1951,9 @@ function resetAllData() {
     if (typeof loadGameScores === 'function') {
         loadGameScores();
     }
+    if (typeof updateBoostHighScore === 'function') {
+        updateBoostHighScore();
+    }
     if (typeof updateMysteryWordStars === 'function') {
         updateMysteryWordStars();
     }
@@ -1959,6 +1996,64 @@ document.addEventListener('DOMContentLoaded', () => {
         resetButton.addEventListener('click', () => {
             if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
                 resetAllData();
+            }
+        });
+    }
+    
+    // Add boost spend button handler for match3 game
+    const boostSpendButton = document.querySelector('.boost-spend-button');
+    if (boostSpendButton) {
+        boostSpendButton.addEventListener('click', () => {
+            const match3Overlay = document.getElementById('match3Overlay');
+            if (match3Overlay) {
+                match3Overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Show close button
+                const closeButton = document.querySelector('.game-overlay-close');
+                if (closeButton) closeButton.classList.add('show');
+                updateLogoVisibility();
+                
+                // Load match3 game in iframe
+                const urlParams = new URLSearchParams(window.location.search);
+                const scheme = urlParams.get('s');
+                const iframe = document.getElementById('match3Iframe');
+                if (iframe) {
+                    iframe.src = scheme ? `games/match3/index.html?s=${scheme}` : 'games/match3/index.html';
+                    console.log(`Loading match3 game iframe: ${iframe.src}`);
+                }
+            }
+        });
+    }
+    
+    // Add practice game button handler for match3 game
+    const practiceButton = document.querySelector('.boost-practice-button');
+    if (practiceButton) {
+        practiceButton.addEventListener('click', () => {
+            const match3Overlay = document.getElementById('match3Overlay');
+            if (match3Overlay) {
+                match3Overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Show close button
+                const closeButton = document.querySelector('.game-overlay-close');
+                if (closeButton) closeButton.classList.add('show');
+                updateLogoVisibility();
+                
+                // Load match3 game in iframe with practice parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const scheme = urlParams.get('s');
+                const iframe = document.getElementById('match3Iframe');
+                if (iframe) {
+                    let url = 'games/match3/index.html';
+                    if (scheme) {
+                        url += `?s=${scheme}&practice=true`;
+                    } else {
+                        url += '?practice=true';
+                    }
+                    iframe.src = url;
+                    console.log(`Loading match3 practice game iframe: ${iframe.src}`);
+                }
             }
         });
     }

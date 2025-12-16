@@ -58,6 +58,8 @@ class Input {
                 this.keyUp = true;
             } else if (event.key === "q" || event.key === "Q") {
                 this.e.scene.timeLeft = 3;
+            } else if (event.key === "u" || event.key === "U") {
+                this.e.scene.timeLeft = 5;
             } else if (event.key === "ArrowDown" || event.key === "s" || event.key === "S") {
                 this.keyDown = true;
             }
@@ -230,13 +232,13 @@ class EndScore {
         }
     }
 
-    createFinalScoreOverlay(scoreValue, statsArray = []) {
+    createFinalScoreOverlay(scoreValue, statsArray = [], isPracticeMode = false) {
         if (!this.starThresholds) {
             console.log('Star thresholds not loaded yet, using fallback values');
-            this.starThresholds = [0, 25000, 40000, 65000, 100000];
+            this.starThresholds = [0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000];
         }
         
-        console.log('Creating final score overlay with score:', scoreValue, 'and thresholds:', this.starThresholds);
+        console.log('Creating final score overlay with score:', scoreValue, 'and thresholds:', this.starThresholds, 'practice mode:', isPracticeMode);
         
         const overlay = document.createElement('div');
         overlay.className = 'finalScoreOverlay';
@@ -254,19 +256,51 @@ class EndScore {
         const starDiv = document.createElement('div');
         starDiv.className = 'finalScoreStarDiv';
         
-        for (let i = 0; i < 5; i++) {
+        // Calculate number of stars earned (minimum 5, maximum 15) - always calculate for display
+        let starsEarned = 5; // Minimum 5 stars
+        if (this.starThresholds && this.starThresholds.length > 0) {
+            for (let i = 0; i < this.starThresholds.length; i++) {
+                if (scoreValue >= this.starThresholds[i]) {
+                    starsEarned = 5 + i; // Start at 5, add 1 for each threshold met
+                } else {
+                    break;
+                }
+            }
+        }
+        starsEarned = Math.min(starsEarned, 15); // Cap at 15 stars
+        
+        // Create 15 stars in one row
+        for (let i = 0; i < 15; i++) {
             const star = document.createElement('div');
             star.className = 'finalScoreStar';
             star.innerHTML = '★';
             star.style.color = '#808080';
             
-            const threshold = this.starThresholds ? this.starThresholds[i] : 0;
-            const targetColor = (this.starThresholds && scoreValue >= threshold) ? '#FFD700' : '#808080';
-            
-            console.log(`Star ${i + 1}: Score ${scoreValue} >= Threshold ${threshold} = ${scoreValue >= threshold} -> ${targetColor}`);
-            
+            const targetColor = (i < starsEarned) ? '#FFD700' : '#808080';
             star.dataset.targetColor = targetColor;
             starDiv.appendChild(star);
+        }
+        
+        // Style the starDiv to display stars in one row
+        starDiv.style.flexDirection = 'row';
+        starDiv.style.gap = '3px';
+        
+        // Add practice game label above stars if in practice mode
+        if (isPracticeMode) {
+            const practiceLabel = document.createElement('div');
+            practiceLabel.className = 'finalScoreStatItem';
+            practiceLabel.textContent = 'Practice Game';
+            practiceLabel.style.fontWeight = 'bold';
+            practiceLabel.style.marginBottom = '4px';
+            statsContainer.appendChild(practiceLabel);
+            
+            const noStarsLabel = document.createElement('div');
+            noStarsLabel.className = 'finalScoreStatItem';
+            noStarsLabel.textContent = '(No stars rewarded)';
+            noStarsLabel.style.fontSize = '11px';
+            noStarsLabel.style.color = '#999';
+            noStarsLabel.style.marginBottom = '10px';
+            statsContainer.appendChild(noStarsLabel);
         }
         
         statsContainer.appendChild(starDiv);
@@ -600,6 +634,18 @@ class Scene {
         this.timeLeft = 120;
         this.gameStarted = false;
         this.gameOver = false;
+        
+        // Check if practice mode from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        this.isPracticeMode = urlParams.get('practice') === 'true';
+        
+        // Show practice game label if in practice mode
+        if (this.isPracticeMode) {
+            const practiceLabel = document.getElementById('practiceGameLabel');
+            if (practiceLabel) {
+                practiceLabel.style.display = 'block';
+            }
+        }
         this.gridOverlayVisible = false;
         this.frameCount = 0;
         this.lastFrameTime = new Date().getTime();
@@ -702,10 +748,10 @@ class Scene {
         
         if (playButton) {
             playButton.addEventListener('click', (e) => {
+                // Sound effect removed
                 e.preventDefault();
                 e.stopPropagation();
                 this.e.startGame();
-                this.e.s.p("jewel_start");
                 this.startGame();
             });
         }
@@ -1104,13 +1150,310 @@ class Scene {
             return;
         }
         
+        // Check if one of the swapped jewels is a bonus box (white/star or L/explosion)
+        const isBonusBox1 = jewel1.dataset.color === 'w' || jewel1.dataset.color === 'l';
+        const isBonusBox2 = jewel2.dataset.color === 'w' || jewel2.dataset.color === 'l';
+        
+        if (isBonusBox1 || isBonusBox2) {
+            // Save current multiplier for bonus box usage
+            this.savedMultiplier = this.scoreMultiplier;
+            // Reset the multiplier timer when using a bonus box
+            this.startMultiplierResetTimer();
+            
+            // Bonus box to bonus box interactions
+            if (isBonusBox1 && isBonusBox2) {
+                const bonusBox1Type = jewel1.dataset.color;
+                const bonusBox2Type = jewel2.dataset.color;
+                
+                // L-bonus to L-bonus (explosion + larger diamond clear)
+                if (bonusBox1Type === 'l' && bonusBox2Type === 'l') {
+                    this.explosionCount++;
+                    this.e.s.p("jewel_explosion");
+                    
+                    const jewelsToClear = [];
+                    const bonusBoxRow = row1;
+                    const bonusBoxCol = col1;
+                    
+                    // Larger diamond pattern (radius 4)
+                    for (let r = Math.max(0, bonusBoxRow - 4); r <= Math.min(this.GRID_SIZE - 1, bonusBoxRow + 4); r++) {
+                        for (let c = Math.max(0, bonusBoxCol - 4); c <= Math.min(this.GRID_SIZE - 1, bonusBoxCol + 4); c++) {
+                            const distance = Math.abs(r - bonusBoxRow) + Math.abs(c - bonusBoxCol);
+                            if (distance <= 4) {
+                                const jewelElement = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                                if (jewelElement) {
+                                    const jewelColor = jewelElement.dataset.color;
+                                    if (jewelColor !== 'w' && jewelColor !== 'l') {
+                                        jewelsToClear.push({ row: r, col: c });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (jewelsToClear.length > 0) {
+                        const finalScore = 1000 * this.savedMultiplier;
+                        this.score += finalScore;
+                        this.updateScoreDisplay();
+                        
+                        const centerX = (this.gridPadding + bonusBoxCol * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        const centerY = (this.gridPadding + bonusBoxRow * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        this.showScorePopup(finalScore, [{ x: centerX, y: centerY }]);
+                        
+                        this.createExplosionEffect(row2, col2, jewelsToClear);
+                        
+                        this.animateSwap(row1, col1, row2, col2, () => {
+                            this.clearAllJewelsOfColor(jewelsToClear, () => {
+                                this.handleBlockFallingAfterMatch([], []);
+                            });
+                        });
+                        
+                        this.increaseMultiplier();
+                        return;
+                    }
+                }
+                
+                // L-bonus to White bonus (small board clear)
+                if ((bonusBox1Type === 'l' && bonusBox2Type === 'w') || (bonusBox1Type === 'w' && bonusBox2Type === 'l')) {
+                    this.smallClearCount++;
+                    this.e.s.p("jewel_clear");
+                    
+                    const allJewels = document.querySelectorAll('.jewel');
+                    const jewelsToClear = [];
+                    
+                    allJewels.forEach(jewel => {
+                        const row = parseInt(jewel.dataset.row);
+                        const col = parseInt(jewel.dataset.col);
+                        if (row >= 0 && col >= 0) {
+                            jewelsToClear.push({ row, col });
+                        }
+                    });
+                    
+                    if (jewelsToClear.length > 0) {
+                        const finalScore = 1500 * this.savedMultiplier;
+                        this.score += finalScore;
+                        this.updateScoreDisplay();
+                        
+                        const centerX = (this.gridPadding + 3.5 * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        const centerY = (this.gridPadding + 3.5 * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        this.showScorePopup(finalScore, [{ x: centerX, y: centerY }]);
+                        
+                        this.createEpicBoardExplosion();
+                        
+                        this.animateSwap(row1, col1, row2, col2, () => {
+                            this.setAnimatingTrue();
+                            setTimeout(() => {
+                                this.clearAllJewelsOfColor(jewelsToClear, () => {
+                                    this.handleBlockFallingAfterMatch([], []);
+                                });
+                                this.setAnimatingFalse();
+                            }, 1000);
+                        });
+                        
+                        this.increaseMultiplier();
+                        return;
+                    }
+                }
+                
+                // White to White (full board clear, bigger)
+                if (bonusBox1Type === 'w' && bonusBox2Type === 'w') {
+                    this.bigClearCount++;
+                    this.e.s.p("jewel_clear");
+                    
+                    const allJewels = document.querySelectorAll('.jewel');
+                    const jewelsToClear = [];
+                    
+                    allJewels.forEach(jewel => {
+                        const row = parseInt(jewel.dataset.row);
+                        const col = parseInt(jewel.dataset.col);
+                        if (row >= 0 && col >= 0) {
+                            jewelsToClear.push({ row, col });
+                        }
+                    });
+                    
+                    if (jewelsToClear.length > 0) {
+                        const finalScore = 2000 * this.savedMultiplier;
+                        this.score += finalScore;
+                        this.updateScoreDisplay();
+                        
+                        const centerX = (this.gridPadding + 3.5 * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        const centerY = (this.gridPadding + 3.5 * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+                        this.showScorePopup(finalScore, [{ x: centerX, y: centerY }]);
+                        
+                        this.createEpicBoardExplosion();
+                        
+                        this.animateSwap(row1, col1, row2, col2, () => {
+                            this.setAnimatingTrue();
+                            setTimeout(() => {
+                                this.clearAllJewelsOfColor(jewelsToClear, () => {
+                                    this.handleBlockFallingAfterMatch([], []);
+                                });
+                                this.setAnimatingFalse();
+                            }, 1000);
+                        });
+                        
+                        this.increaseMultiplier();
+                        return;
+                    }
+                }
+            }
+            
+            // Single bonus box with regular jewel
+            const bonusBoxJewel = isBonusBox1 ? jewel1 : jewel2;
+            const bonusBoxType = bonusBoxJewel.dataset.color;
+            const bonusBoxRow = isBonusBox1 ? row1 : row2;
+            const bonusBoxCol = isBonusBox1 ? col1 : col2;
+            
+            if (bonusBoxType === 'l') {
+                // L-bonus diamond explosion around the bonus jewel
+                this.explosionCount++;
+                this.e.s.p("jewel_explosion");
+                
+                const jewelsToClear = [];
+                
+                for (let r = Math.max(0, bonusBoxRow - 3); r <= Math.min(this.GRID_SIZE - 1, bonusBoxRow + 3); r++) {
+                    for (let c = Math.max(0, bonusBoxCol - 3); c <= Math.min(this.GRID_SIZE - 1, bonusBoxCol + 3); c++) {
+                        const distance = Math.abs(r - bonusBoxRow) + Math.abs(c - bonusBoxCol);
+                        if (distance <= 3) {
+                            const jewelElement = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                            if (jewelElement) {
+                                const jewelColor = jewelElement.dataset.color;
+                                if (jewelColor !== 'w' && jewelColor !== 'l') {
+                                    jewelsToClear.push({ row: r, col: c });
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Always allow L-bonus swap, even if no jewels found initially
+                this.animateSwap(row1, col1, row2, col2, () => {
+                    if (jewelsToClear.length > 0) {
+                        const diamondMatches = jewelsToClear.map(pos => ({ row: pos.row, col: pos.col }));
+                        
+                        const finalScore = 300 * this.savedMultiplier;
+                        this.score += finalScore;
+                        this.updateScoreDisplay();
+                        
+                        let centerX = 0;
+                        let centerY = 0;
+                        let validPositions = 0;
+                        
+                        jewelsToClear.forEach(pos => {
+                            const jewelElement = document.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                            if (jewelElement) {
+                                const rect = jewelElement.getBoundingClientRect();
+                                centerX += rect.left + rect.width / 2;
+                                centerY += rect.top + rect.height / 2;
+                                validPositions++;
+                            }
+                        });
+                        
+                        if (validPositions > 0) {
+                            centerX /= validPositions;
+                            centerY /= validPositions;
+                            this.showScorePopup(finalScore, [{ x: centerX, y: centerY }]);
+                        }
+                        
+                        this.createExplosionEffect(row2, col2, jewelsToClear);
+                        
+                        this.animateClearMatches(diamondMatches, [], () => {
+                            this.handleBlockFallingAfterMatch(diamondMatches, []);
+                        });
+                        
+                        this.increaseMultiplier();
+                    } else {
+                        // If no jewels found, just complete the swap
+                        this.setAnimatingFalse();
+                    }
+                });
+                return;
+            } else {
+                // White bonus: clear all jewels of the color of the other jewel
+                const colorToClear = isBonusBox1 ? jewel2.dataset.color : jewel1.dataset.color;
+                this.bonusBoxCount++;
+                
+                this.e.s.p("jewel_white");
+                
+                if (colorToClear) {
+                    const jewelsToClear = [];
+                    const allJewels = document.querySelectorAll('.jewel');
+                    
+                    allJewels.forEach(jewel => {
+                        if (jewel.dataset.color === colorToClear) {
+                            const row = parseInt(jewel.dataset.row);
+                            const col = parseInt(jewel.dataset.col);
+                            if (row >= 0 && col >= 0) {
+                                jewelsToClear.push({ row, col });
+                            }
+                        }
+                    });
+                    
+                    jewelsToClear.push({ row: bonusBoxRow, col: bonusBoxCol });
+                    
+                    // Always allow white bonus swap, even if no jewels found initially
+                    if (jewelsToClear.length > 0) {
+                        const finalWhiteBonusScore = 500 * this.savedMultiplier;
+                        this.score += finalWhiteBonusScore;
+                        this.updateScoreDisplay();
+                        
+                        let centerX = 0;
+                        let centerY = 0;
+                        let validPositions = 0;
+                        
+                        jewelsToClear.slice(0, -1).forEach(pos => {
+                            const jewelElement = document.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                            if (jewelElement) {
+                                const rect = jewelElement.getBoundingClientRect();
+                                centerX += rect.left + rect.width / 2;
+                                centerY += rect.top + rect.height / 2;
+                                validPositions++;
+                            }
+                        });
+                        
+                        if (validPositions > 0) {
+                            centerX /= validPositions;
+                            centerY /= validPositions;
+                            this.showScorePopup(finalWhiteBonusScore, [{ x: centerX, y: centerY }]);
+                        }
+                        
+                        this.createWhiteBonusExplosion(row2, col2, colorToClear);
+                        
+                        this.animateSwap(row1, col1, row2, col2, () => {
+                            this.setAnimatingTrue();
+                            setTimeout(() => {
+                                this.clearAllJewelsOfColor(jewelsToClear, () => {
+                                    this.handleBlockFallingAfterMatch([], []);
+                                });
+                                this.setAnimatingFalse();
+                            }, 500);
+                        });
+                        
+                        this.increaseMultiplier();
+                    } else {
+                        // If no jewels found, just complete the swap
+                        this.animateSwap(row1, col1, row2, col2, () => {
+                            this.setAnimatingFalse();
+                        });
+                    }
+                    return;
+                } else {
+                    // If colorToClear is invalid, still allow the swap
+                    this.animateSwap(row1, col1, row2, col2, () => {
+                        this.setAnimatingFalse();
+                    });
+                    return;
+                }
+            }
+        }
+        
+        // Normal swap logic (no bonus boxes involved or no special pattern found)
         const color1 = jewel1.dataset.color;
         const color2 = jewel2.dataset.color;
         
         jewel1.dataset.color = color2;
         jewel2.dataset.color = color1;
         
-        const { matches } = this.findMatches(true);
+        const { matches, bonusBoxes } = this.findMatches(true);
         
         jewel1.dataset.color = color1;
         jewel2.dataset.color = color2;
@@ -1118,7 +1461,7 @@ class Scene {
         if (matches.length > 0) {
             this.savedMultiplier = this.scoreMultiplier;
             this.animateSwap(row1, col1, row2, col2, () => {
-                this.processMatches([], false);
+                this.processMatches(bonusBoxes, false);
             });
         } else {
             this.showInvalidMoveFeedback(row1, col1, row2, col2);
@@ -1718,6 +2061,310 @@ class Scene {
         this.animateAllBlocksToFinalPositions(allBlocksToMove);
     }
 
+    createExplosionEffect(centerRow, centerCol, jewelsToClear) {
+        const jewelElement = document.querySelector(`[data-row="${centerRow}"][data-col="${centerCol}"]`);
+        let centerX, centerY;
+        
+        if (jewelElement) {
+            const rect = jewelElement.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+        } else {
+            centerX = (this.gridPadding + centerCol * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+            centerY = (this.gridPadding + centerRow * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+        }
+        
+        const explosionContainer = document.createElement('div');
+        explosionContainer.className = 'explosion-container';
+        explosionContainer.style.position = 'fixed';
+        explosionContainer.style.left = `${centerX}px`;
+        explosionContainer.style.top = `${centerY}px`;
+        explosionContainer.style.transform = 'translate(-50%, -50%)';
+        explosionContainer.style.zIndex = '9999';
+        explosionContainer.style.pointerEvents = 'none';
+        
+        document.body.appendChild(explosionContainer);
+        
+        for (let ring = 0; ring < 3; ring++) {
+            const ringElement = document.createElement('div');
+            ringElement.className = 'explosion-ring';
+            ringElement.style.position = 'absolute';
+            ringElement.style.width = '0px';
+            ringElement.style.height = '0px';
+            ringElement.style.border = `2px solid #FFD700`;
+            ringElement.style.borderRadius = '50%';
+            ringElement.style.left = '50%';
+            ringElement.style.top = '50%';
+            ringElement.style.transform = 'translate(-50%, -50%)';
+            ringElement.style.opacity = '0.8';
+            
+            explosionContainer.appendChild(ringElement);
+            
+            gsap.to(ringElement, {
+                width: `${(ring + 1) * 80}px`,
+                height: `${(ring + 1) * 80}px`,
+                opacity: 0,
+                duration: 0.6,
+                delay: ring * 0.1,
+                ease: "power2.out"
+            });
+        }
+        
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'explosion-particle';
+            particle.style.position = 'absolute';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.backgroundColor = '#FFD700';
+            particle.style.borderRadius = '50%';
+            particle.style.left = '50%';
+            particle.style.top = '50%';
+            particle.style.transform = 'translate(-50%, -50%)';
+            
+            explosionContainer.appendChild(particle);
+            
+            const angle = (i / 20) * Math.PI * 2;
+            const distance = 60 + Math.random() * 40;
+            const endX = Math.cos(angle) * distance;
+            const endY = Math.sin(angle) * distance;
+            
+            gsap.to(particle, {
+                x: endX,
+                y: endY,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        }
+        
+        gsap.delayedCall(0.8, () => {
+            explosionContainer.remove();
+        });
+    }
+
+    createWhiteBonusExplosion(centerRow, centerCol, jewelColor) {
+        const jewelElement = document.querySelector(`[data-row="${centerRow}"][data-col="${centerCol}"]`);
+        let centerX, centerY;
+        
+        if (jewelElement) {
+            const rect = jewelElement.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+        } else {
+            centerX = (this.gridPadding + centerCol * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+            centerY = (this.gridPadding + centerRow * (this.jewelSize + this.jewelGap)) + (this.jewelSize / 2);
+        }
+        
+        const colorMap = {
+            'r': '#FF0000',
+            'g': '#00FF00',
+            'b': '#0080FF',
+            'o': '#FF8000',
+            'p': '#FF00FF'
+        };
+        
+        const explosionColor = colorMap[jewelColor] || '#FFFFFF';
+        
+        const explosionContainer = document.createElement('div');
+        explosionContainer.className = 'white-bonus-explosion';
+        explosionContainer.style.position = 'fixed';
+        explosionContainer.style.left = `${centerX}px`;
+        explosionContainer.style.top = `${centerY}px`;
+        explosionContainer.style.transform = 'translate(-50%, -50%)';
+        explosionContainer.style.zIndex = '9999';
+        explosionContainer.style.pointerEvents = 'none';
+        
+        document.body.appendChild(explosionContainer);
+        
+        for (let i = 0; i < 25; i++) {
+            const orb = document.createElement('div');
+            orb.className = 'floating-orb';
+            orb.style.position = 'absolute';
+            orb.style.width = '16px';
+            orb.style.height = '16px';
+            orb.style.backgroundColor = explosionColor;
+            orb.style.borderRadius = '50%';
+            orb.style.left = '50%';
+            orb.style.top = '50%';
+            orb.style.transform = 'translate(-50%, -50%)';
+            orb.style.boxShadow = `0 0 20px ${explosionColor}`;
+            
+            explosionContainer.appendChild(orb);
+            
+            const angle = (i / 25) * Math.PI * 2;
+            const distance = 120 + Math.random() * 100;
+            const endX = Math.cos(angle) * distance;
+            const endY = Math.sin(angle) * distance;
+            
+            gsap.to(orb, {
+                x: endX,
+                y: endY,
+                opacity: 0,
+                scale: 0,
+                duration: 1.2,
+                delay: Math.random() * 0.3,
+                ease: "power2.out"
+            });
+        }
+        
+        for (let wave = 0; wave < 4; wave++) {
+            const energyWave = document.createElement('div');
+            energyWave.className = 'energy-wave';
+            energyWave.style.position = 'absolute';
+            energyWave.style.width = '0px';
+            energyWave.style.height = '0px';
+            energyWave.style.border = `6px solid ${explosionColor}`;
+            energyWave.style.borderRadius = '50%';
+            energyWave.style.left = '50%';
+            energyWave.style.top = '50%';
+            energyWave.style.transform = 'translate(-50%, -50%)';
+            energyWave.style.filter = 'blur(3px)';
+            
+            explosionContainer.appendChild(energyWave);
+            
+            gsap.to(energyWave, {
+                width: `${400 + wave * 80}px`,
+                height: `${400 + wave * 80}px`,
+                opacity: 0,
+                duration: 1.5,
+                delay: wave * 0.2,
+                ease: "power2.out"
+            });
+        }
+        
+        const centralBurst = document.createElement('div');
+        centralBurst.className = 'central-burst';
+        centralBurst.style.position = 'absolute';
+        centralBurst.style.width = '250px';
+        centralBurst.style.height = '250px';
+        centralBurst.style.background = `radial-gradient(circle, ${explosionColor} 0%, transparent 60%)`;
+        centralBurst.style.borderRadius = '50%';
+        centralBurst.style.left = '50%';
+        centralBurst.style.top = '50%';
+        centralBurst.style.transform = 'translate(-50%, -50%)';
+        
+        explosionContainer.appendChild(centralBurst);
+        
+        gsap.to(centralBurst, {
+            scale: 4,
+            opacity: 0,
+            duration: 1.4,
+            ease: "power3.out"
+        });
+        
+        gsap.delayedCall(2.0, () => {
+            explosionContainer.remove();
+        });
+    }
+
+    createEpicBoardExplosion() {
+        const gameContainer = document.getElementById('jewelGameContainer');
+        if (!gameContainer) return;
+        
+        const rect = gameContainer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const epicContainer = document.createElement('div');
+        epicContainer.className = 'epic-board-explosion';
+        epicContainer.style.position = 'fixed';
+        epicContainer.style.left = `${centerX}px`;
+        epicContainer.style.top = `${centerY}px`;
+        epicContainer.style.transform = 'translate(-50%, -50%)';
+        epicContainer.style.zIndex = '10000';
+        epicContainer.style.pointerEvents = 'none';
+        
+        document.body.appendChild(epicContainer);
+        
+        for (let ring = 0; ring < 3; ring++) {
+            const massiveRing = document.createElement('div');
+            massiveRing.className = 'epic-ring';
+            massiveRing.style.position = 'absolute';
+            massiveRing.style.width = '0px';
+            massiveRing.style.height = '0px';
+            massiveRing.style.border = `4px solid #FFD700`;
+            massiveRing.style.borderRadius = '50%';
+            massiveRing.style.left = '50%';
+            massiveRing.style.top = '50%';
+            massiveRing.style.transform = 'translate(-50%, -50%)';
+            massiveRing.style.opacity = '1';
+            
+            epicContainer.appendChild(massiveRing);
+            
+            gsap.to(massiveRing, {
+                width: `${(ring + 1) * 150}px`,
+                height: `${(ring + 1) * 150}px`,
+                opacity: 0,
+                duration: 1.5,
+                delay: ring * 0.2,
+                ease: "power2.out"
+            });
+        }
+        
+        gsap.delayedCall(2.0, () => {
+            epicContainer.remove();
+        });
+    }
+    
+    clearAllJewelsOfColor(jewelsToClear, callback) {
+        const elements = [];
+        
+        const allJewels = document.querySelectorAll('.jewel');
+        allJewels.forEach(jewel => {
+            if ((jewel.dataset.color === 'w' || jewel.dataset.color === 'l') && jewel.dataset.bonusBox === 'true') {
+                const row = parseInt(jewel.dataset.row);
+                const col = parseInt(jewel.dataset.col);
+                if (row >= 0 && col >= 0) {
+                    elements.push(jewel);
+                    jewel.dataset.cleared = 'true';
+                    jewel.dataset.void = 'true';
+                    
+                    if (row >= 0 && row < this.GRID_SIZE && col >= 0 && col < this.GRID_SIZE) {
+                        this.grid[row][col] = -1;
+                    }
+                }
+            }
+        });
+        
+        jewelsToClear.forEach(jewelPos => {
+            const element = document.querySelector(`[data-row="${jewelPos.row}"][data-col="${jewelPos.col}"]`);
+            if (element) {
+                elements.push(element);
+                element.dataset.cleared = 'true';
+                element.dataset.void = 'true';
+                
+                if (jewelPos.row >= 0 && jewelPos.row < this.GRID_SIZE && jewelPos.col >= 0 && jewelPos.col < this.GRID_SIZE) {
+                    this.grid[jewelPos.row][jewelPos.col] = -1;
+                }
+            }
+        });
+        
+        if (elements.length > 0) {
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    if (callback) {
+                        callback();
+                    }
+                }
+            });
+            
+            tl.to(elements, {
+                rotation: 360,
+                scale: 0,
+                duration: 0.4,
+                ease: this.jewelEasing,
+                transformOrigin: "center center"
+            }).to(elements, {
+                opacity: 0,
+                duration: 0.2,
+                ease: this.jewelEasing
+            }, "-=0.2");
+        } else if (callback) {
+            callback();
+        }
+    }
+
     createGridSnapshot() {
         const snapshot = [];
         for (let row = 0; row < this.GRID_SIZE; row++) {
@@ -2004,16 +2651,13 @@ class Scene {
         this.gameOver = true;
         this.gameStarted = false;
         
-        this.e.s.p("jewel_result");
+        // Sound effect removed
         
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
         }
         
         const statsArray = [
-            ['MATCH 3', this.match3Count],
-            ['MATCH 4', this.match4Count],
-            ['MATCH 5', this.match5Count],
             ['EXPLOSIONS', this.explosionCount],
             ['BONUS BOX', this.bonusBoxCount],
             ['SMALL BOARD CLEAR', this.smallClearCount],
@@ -2035,7 +2679,91 @@ class Scene {
             : '1.0';
         statsArray.push(['AVERAGE MULTIPLIER', avgMultiplier]);
         
-        this.e.endScore.createFinalScoreOverlay(this.score, statsArray);
+        this.e.endScore.createFinalScoreOverlay(this.score, statsArray, this.isPracticeMode);
+        
+        // Save high score to localStorage (only if not in practice mode)
+        if (!this.isPracticeMode) {
+            const currentHighScore = parseInt(localStorage.getItem('match3HighScore') || '0');
+            if (this.score > currentHighScore) {
+                localStorage.setItem('match3HighScore', String(this.score));
+                // Notify parent window if in iframe
+                if (window.parent && window.parent !== window && window.parent.updateBoostHighScore) {
+                    window.parent.updateBoostHighScore(this.score);
+                }
+            }
+        }
+        
+        // Award stars only if not in practice mode
+        if (!this.isPracticeMode) {
+            // Calculate stars earned
+            let starsEarned = 5;
+            if (this.e.endScore.starThresholds && this.e.endScore.starThresholds.length > 0) {
+                for (let i = 0; i < this.e.endScore.starThresholds.length; i++) {
+                    if (this.score >= this.e.endScore.starThresholds[i]) {
+                        starsEarned = 5 + i;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            starsEarned = Math.min(starsEarned, 15);
+            
+            // Use same date format as main script (local timezone, not UTC)
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            
+            console.log('[Match3] Today key:', todayKey, 'Stars earned:', starsEarned);
+            
+            // Always save to localStorage directly (don't rely on awardStars function)
+            const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+            const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
+            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
+            const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+            
+            console.log('[Match3] Before - dailyStars:', currentDailyStars, 'totalStars:', currentTotalStars, 'usableStars:', currentUsableStars);
+            
+            const newDailyStars = currentDailyStars + starsEarned;
+            const newTotalStars = currentTotalStars + starsEarned;
+            const newUsableStars = currentUsableStars + starsEarned;
+            
+            localStorage.setItem(`dailyStars_${todayKey}`, String(newDailyStars));
+            localStorage.setItem('totalStars', String(newTotalStars));
+            localStorage.setItem(`usableStars_${todayKey}`, String(newUsableStars));
+            localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+            localStorage.setItem(`match3Score_${todayKey}`, String(this.score));
+            localStorage.setItem(`match3Stars_${todayKey}`, String(starsEarned));
+            localStorage.setItem(`match3Complete_${todayKey}`, 'true');
+            
+            console.log('[Match3] After - dailyStars:', newDailyStars, 'totalStars:', newTotalStars, 'usableStars:', newUsableStars);
+            console.log('[Match3] Verifying localStorage - dailyStars_' + todayKey + ':', localStorage.getItem(`dailyStars_${todayKey}`));
+            
+            // Also try calling awardStars if it exists (for other functionality)
+            if (window.parent && window.parent.awardStars) {
+                try {
+                    window.parent.awardStars(starsEarned, 'match3');
+                } catch (e) {
+                    console.log('[Match3] awardStars failed:', e);
+                }
+            }
+            
+            // Update parent window displays
+            if (window.parent && window.parent !== window) {
+                // Use setTimeout to ensure localStorage is written before reading
+                setTimeout(() => {
+                    if (window.parent.updateStarDisplay) window.parent.updateStarDisplay();
+                    if (window.parent.updateWalletStars) window.parent.updateWalletStars();
+                    if (window.parent.updateWalletStars2) window.parent.updateWalletStars2();
+                    if (window.parent.updateRivalStars) window.parent.updateRivalStars();
+                    if (window.parent.updateHeaderStarCounter) window.parent.updateHeaderStarCounter();
+                    if (window.parent.updateCalendar) window.parent.updateCalendar();
+                }, 100);
+            } else {
+                // If not in iframe, update current window displays
+                setTimeout(() => {
+                    if (typeof updateWalletStars2 === 'function') updateWalletStars2();
+                }, 100);
+            }
+        }
     }
 
     restartGame() {

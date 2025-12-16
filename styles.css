@@ -157,18 +157,20 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     text-align: center;
     box-shadow: none;
     width: 100%;
+    /* border: 1px solid blue; */
 }
 
 .profile-username {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 700;
     color: #333;
     font-family: 'Aleo', sans-serif;
     margin-bottom: 6px;
+    /* border: 1px solid blue; */
 }
 
 .profile-location-level {
@@ -269,10 +271,11 @@ body {
     border: 1px solid rgba(255, 140, 66, 0.4);
     border-radius: 16px;
     padding: 15px 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     box-shadow: 0 2px 8px rgba(255, 140, 66, 0.08);
     backdrop-filter: blur(10px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -282,6 +285,28 @@ body {
     gap: 30px;
     justify-content: center;
     align-items: center;
+}
+
+.profile-streak-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-family: 'Nunito', sans-serif;
+}
+
+.profile-streak-inline .stat-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 0;
+    font-weight: 400;
+}
+
+.profile-streak-inline .stat-value {
+    font-size: 13px;
+    color: #666;
+    font-weight: 400;
 }
 
 .profile-stat-small {
@@ -338,6 +363,89 @@ body {
     margin-bottom: 12px;
     font-family: 'Nunito', sans-serif;
     background-color: transparent;
+}
+
+.profile-challenges-container {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 0;
+    border: 1px solid #FF8C42;
+    border-radius: 16px;
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 184, 77, 0.03) 100%);
+    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+    overflow: hidden;
+}
+
+.challenges-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    padding: 16px 20px;
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    border-bottom: 2px solid rgba(255, 140, 66, 0.3);
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0px;
+    border-bottom: 1px solid rgba(255, 140, 66, 0.2);
+    /* border: 1px solid red; */
+    font-family: 'Nunito', sans-serif;
+    transition: background-color 0.2s ease;
+    position: relative;
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 184, 77, 0.04) 100%);
+}
+
+.challenge-item:hover {
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.08) 100%);
+}
+
+.challenge-item:last-child {
+    border-bottom: none;
+}
+
+.challenge-text {
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+    flex: 1;
+    font-weight: 500;
+    line-height: 1.4;
+    padding-left: 10px;
+}
+
+.challenge-reward {
+    font-size: 15px;
+    color: #FF8C42;
+    font-weight: 700;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.1) 100%);
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 20px;
+    margin-right: 10px;
+    box-shadow: 0 2px 4px rgba(255, 140, 66, 0.2);
+}
+
+.star-icon-inline {
+    color: #FF8C42;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    text-shadow: 0 1px 2px rgba(255, 140, 66, 0.3);
 }
 
 .reset-all-data-button {
@@ -1414,7 +1522,7 @@ body {
     flex-direction: column;
     padding-bottom: 20px;
     min-height: calc(100vh - 108px);
-    justify-content: center;
+    justify-content: flex-start;
     background: white;
 }
 
@@ -1804,7 +1912,7 @@ body {
     font-weight: 700;
 }
 
-#memoryIframe, #mysteryWordIframe, #beticleIframe, #blackjackIframe, #lostAndFoundIframe, #goldCaseIframe {
+#memoryIframe, #mysteryWordIframe, #beticleIframe, #blackjackIframe, #lostAndFoundIframe, #goldCaseIframe, #match3Iframe {
     width: 100%;
     height: 100%;
     border: none;
