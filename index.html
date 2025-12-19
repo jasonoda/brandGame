@@ -23,9 +23,6 @@
         <div class="header-bar">
             <div class="game-overlay-close">✕</div>
             <div class="help-button">?</div>
-            <div class="menu-icon">
-                <img src="src/img/jos/jos_logo.png" alt="Logo" class="logo-img">
-            </div>
             <div class="date-container">
                 <div class="date">NOVEMBER 26, 2025</div>
                 <div class="date-subtitle"></div>
@@ -42,9 +39,10 @@
                 <h2 class="help-popup-title">Daily Game Center</h2>
                 <div class="help-popup-text">
                     <p>Visit daily for new game content. Complete quizzes, arcade games, and bonus challenges to build your daily star collection.</p>
-                    <p><strong>Earn Stars:</strong> Each game rewards you with stars based on your performance. The better you play, the more stars you earn!</p>
-                    <p><strong>Progress in Journey:</strong> Use your stars to move forward in the Journey tab. Advance through levels and collect gold coins as you progress.</p>
-                    <p><strong>Enter Sweepstakes:</strong> User your daily stars and coins to earn time advantages in the Sweepstakes game. The more you play, the more entries you can earn!</p>
+                    <p><strong>Earn Stars:</strong> Stars allow you to win prizes. The better you play, the more stars you earn!</p>
+                    <p><strong>Boost:</strong> Earn unlimited stars by playing our featured game.</p>
+                    <p><strong>Journey:</strong> Play more games to move forward in the Journey tab. Advance through levels and earn free prize tiles.</p>
+                    <p><strong>Prizes:</strong> Trade in your stars to earn prize tiles. Fill in all the spaces to win the prize.</p>
                     <p>Stars reset daily, so come back every day to keep earning and progressing!</p>
                 </div>
             </div>
@@ -346,33 +344,37 @@
                     <img src="src/img/profile.png" alt="Profile" class="profile-image">
                 </div>
                 <div class="profile-actions">Change Avatar</div>
-                <div class="profile-stars-container">
-                    <div class="profile-stars-row">
-                        <div class="profile-stat-small">
-                            <div class="star-label-row">
-                                <span class="star-icon-small">★</span>
-                                <span class="stat-label-inline">Today</span>
+                <div class="profile-achievements-container">
+                    <div class="achievements-header">ACHIEVEMENTS</div>
+                    <div class="profile-stars-container">
+                        <div class="profile-stars-row">
+                            <div class="profile-stat-small">
+                                <div class="star-label-row">
+                                    <span class="star-icon-small">★</span>
+                                    <span class="stat-label-inline">Today</span>
+                                </div>
+                                <div class="stat-number">0</div>
                             </div>
-                            <div class="stat-number">0</div>
-                        </div>
-                        <div class="profile-stat-small">
-                            <div class="star-label-row">
-                                <span class="star-icon-small">★</span>
-                                <span class="stat-label-inline">Week</span>
+                            <div class="profile-stat-small">
+                                <div class="star-label-row">
+                                    <span class="star-icon-small">★</span>
+                                    <span class="stat-label-inline">Week</span>
+                                </div>
+                                <div class="stat-number">0</div>
                             </div>
-                            <div class="stat-number">0</div>
-                        </div>
-                        <div class="profile-stat-small">
-                            <div class="star-label-row">
-                                <span class="star-icon-small">★</span>
-                                <span class="stat-label-inline">Ever</span>
+                            <div class="profile-stat-small">
+                                <div class="star-label-row">
+                                    <span class="star-icon-small">★</span>
+                                    <span class="stat-label-inline">Ever</span>
+                                </div>
+                                <div class="stat-number">247</div>
                             </div>
-                            <div class="stat-number">247</div>
                         </div>
-                    </div>
-                    <div class="profile-streak-inline">
-                        <span class="stat-label">Longest streak:</span>
-                        <span class="stat-value" id="longestStreakValue">0 Days</span>
+                        <div class="profile-stats-divider"></div>
+                        <div class="profile-streak-inline">
+                            <span class="stat-label">Longest streak:</span>
+                            <span class="stat-value" id="longestStreakValue">0 Days</span>
+                        </div>
                     </div>
                 </div>
                 <div class="profile-challenges-container">
@@ -406,43 +408,7 @@
                         <span class="challenge-reward">10 <span class="star-icon-inline">★</span></span>
                     </div>
                     
-                    <div class="challenge-item">
-                        <span class="challenge-text">Play for 2 days in a row</span>
-                        <span class="challenge-reward">5 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Play for 10 days in a row</span>
-                        <span class="challenge-reward">10 <span class="star-icon-inline">★</span></span>
-                    </div>
                     
-                    <div class="challenge-item">
-                        <span class="challenge-text">Play 15 times in one month</span>
-                        <span class="challenge-reward">20 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Collect 10 Prize tiles</span>
-                        <span class="challenge-reward">10 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Collect 20 Prize tiles</span>
-                        <span class="challenge-reward">15 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Collect 50 Prize tiles</span>
-                        <span class="challenge-reward">30 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Complete the small prize tile puzzle</span>
-                        <span class="challenge-reward">5 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Complete the medium prize tile puzzle</span>
-                        <span class="challenge-reward">10 <span class="star-icon-inline">★</span></span>
-                    </div>
-                    <div class="challenge-item">
-                        <span class="challenge-text">Complete the medium big tile puzzle</span>
-                        <span class="challenge-reward">15 <span class="star-icon-inline">★</span></span>
-                    </div>
                 </div>
                 <button class="reset-all-data-button" id="reset-all-data-button">Reset all data</button>
             </div>
@@ -458,6 +424,77 @@
                 <button class="journey-go-button">
                     GO
                 </button>
+            </div>
+        </div>
+
+        <div id="deals-page" class="page">
+            <div class="profile-container">
+                <div class="boost-header">
+                    <h1 class="boost-title">DEALS</h1>
+                    <div class="boost-subtitle">Shop exclusive offers</div>
+                </div>
+                <div class="profile-deals-grid">
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/deal1.png" alt="Deal 1">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">Jones Dairy<br>Farm Meatballs</div>
+                            <div class="deal-description">Enjoy wholesome, flavorful meatballs crafted with real, simple ingredients.</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/deal2.png" alt="Deal 2">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">Taco Bell Crunchwrap Supreme Cravings Kit</div>
+                            <div class="deal-description">Recreate your favorite Crunchwrap at home - just add protein and fresh toppings!</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/deal3.png" alt="Deal 3">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">Capri Sun Single<br>Serve Bottles</div>
+                            <div class="deal-description">The same great taste kids know and love, now in a convenient 12 oz resealable bottle!</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/deal4.png" alt="Deal 4">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">Starbucks Iced<br>Energy Drink</div>
+                            <div class="deal-description">Sip on a hydrating, sparkling energy drink with 160 mg plant-based caffeine and zero sugar.</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/instacart.png" alt="Instacart">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">Get fast delivery<br>from instacart</div>
+                            <div class="deal-description">Get your groceries delivered right to your door with fast, convenient delivery.</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                    <div class="deal-item">
+                        <div class="deal-image">
+                            <img src="src/img/deals/recipe.png" alt="Recipe">
+                        </div>
+                        <div class="deal-content">
+                            <div class="deal-title">RECIPE:<br>Chicken Marsala</div>
+                            <div class="deal-description">A classic Italian-American dish featuring tender chicken in a rich Marsala wine sauce with mushrooms.</div>
+                        </div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -659,6 +696,14 @@
                 </svg>
             </div>
             <div class="label">Prizes</div>
+        </button>
+        <button class="tab-button" data-page="deals">
+            <div class="icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 18C5.9 18 5 17.1 5 16C5 14.9 5.9 14 7 14C8.1 14 9 14.9 9 16C9 17.1 8.1 18 7 18ZM1 2V4H3L6.6 11.59L5.25 14.04C5.09 14.32 5 14.65 5 15C5 16.1 5.9 17 7 17H19V15H7.42C7.28 15 7.17 14.89 7.17 14.75L7.2 14.66L8.1 13H15.55C16.3 13 16.96 12.59 17.3 11.97L20.88 6H22V4H20.54L19.18 6L15.55 12H8.53L7.47 10H19V8H6.58L5.25 4H1V2ZM17 18C15.9 18 15 17.1 15 16C15 14.9 15.9 14 17 14C18.1 14 19 14.9 19 16C19 17.1 18.1 18 17 18Z" fill="#555"/>
+                </svg>
+            </div>
+            <div class="label">Deals</div>
         </button>
         <button class="tab-button" data-page="wallet">
             <div class="icon">

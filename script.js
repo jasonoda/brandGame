@@ -453,7 +453,12 @@ buttons.forEach(button => {
                     boostPage.classList.remove('active');
                 }
             }
+            // Update logo visibility when switching pages
+            updateLogoVisibility();
         }
+        
+        // Ensure help button is visible when switching pages (if close button not showing)
+        updateLogoVisibility();
         
         // Update move stars display when switching to journey tab
         if (targetPage === 'journey') {
@@ -678,7 +683,7 @@ function initBigyCarousel() {
     
     // Initialize carousel wrapper for sliding
     carousel.style.display = 'flex';
-    carousel.style.transition = 'transform 0.5s ease';
+    carousel.style.transition = 'transform 1.2s ease';
     // Reset any existing transform - start at slide 0
     carousel.style.transform = 'translateX(0px)';
     carousel.style.left = '0';
@@ -719,7 +724,7 @@ function initBigyCarousel() {
         if (instant) {
             carousel.style.transition = 'none';
         } else {
-            carousel.style.transition = 'transform 0.5s ease';
+            carousel.style.transition = 'transform 1.2s ease';
         }
         
         // Calculate offset: move carousel left by index * containerWidth
@@ -745,7 +750,7 @@ function initBigyCarousel() {
             // After animation completes, instantly jump to slide 1
             setTimeout(() => {
                 showSlide(0, true);
-            }, 500); // Match the transition duration
+            }, 1200); // Match the transition duration (1.2s = 1200ms)
         } else {
             const next = currentSlide + 1;
             showSlide(next);
@@ -800,7 +805,7 @@ function initBigyCarousel() {
             prevSlide(); // Manual navigation - no wrap around
             // Reset auto-cycle timer
             clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 6000);
+            carouselInterval = setInterval(nextSlide, 10000);
         });
     }
     
@@ -809,13 +814,13 @@ function initBigyCarousel() {
             nextSlideManual(); // Manual navigation - no wrap around
             // Reset auto-cycle timer
             clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 6000);
+            carouselInterval = setInterval(nextSlide, 10000);
         });
     }
     
-    // Auto-cycle every 3 seconds
+    // Auto-cycle every 8 seconds (slower pace, longer linger)
     clearInterval(carouselInterval);
-    carouselInterval = setInterval(nextSlide, 3000);
+    carouselInterval = setInterval(nextSlide, 8000);
 }
 
 // Update boost high score from localStorage
@@ -1187,8 +1192,10 @@ function updateLogoVisibility() {
     if (helpButton) {
         if (closeButton && closeButton.classList.contains('show')) {
             helpButton.classList.add('hidden');
+            helpButton.style.display = 'none';
         } else {
             helpButton.classList.remove('hidden');
+            helpButton.style.display = 'inline-flex';
         }
     }
     
@@ -1199,9 +1206,9 @@ function updateLogoVisibility() {
                     logo.style.display = 'none';
                 } else {
                     logo.style.display = 'block';
+                }
             }
         }
-    }
 }
 
 // Function to observe and style dynamically added letter boxes

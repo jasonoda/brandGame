@@ -125,22 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         box.style.backgroundRepeat = 'no-repeat';
                         box.dataset.revealed = '1';
                         
-                        // Add yoyo brightness tween
-                        if (pieceTweens.has(box)) {
-                            pieceTweens.get(box).kill();
-                        }
-                        const tw = gsap.fromTo(
-                            box,
-                            { filter: 'brightness(1)' },
-                            {
-                                filter: 'brightness(1.3)',
-                                duration: 0.9,
-                                yoyo: true,
-                                repeat: -1,
-                                ease: 'sine.inOut',
-                            }
-                        );
-                        pieceTweens.set(box, tw);
+                        // Don't animate tiles loaded from localStorage - they're not new
+                        gsap.set(box, { filter: 'brightness(1)' });
                     } else {
                         box.style.backgroundImage = 'none';
                         box.dataset.revealed = '0';
@@ -323,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   },
               });
 
-            // Reveal corresponding prize tile and add yoyo brightness
+            // Reveal corresponding prize tile and add brightness animation (only for new tiles)
             if (pieceBox) {
                 pieceBox.style.backgroundImage = `url('${set.image}')`;
                 pieceBox.style.backgroundSize = bgSize;
@@ -333,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pieceTweens.has(pieceBox)) {
                     pieceTweens.get(pieceBox).kill();
                 }
+                // Animate only when tile is newly revealed - play a few times then stop
                 const tw = gsap.fromTo(
                     pieceBox,
                     { filter: 'brightness(1)' },
@@ -340,8 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         filter: 'brightness(1.3)',
                         duration: 0.9,
                         yoyo: true,
-                        repeat: -1,
+                        repeat: 4, // Play 5 times total (initial + 4 repeats), then stop
                         ease: 'sine.inOut',
+                        onComplete: () => {
+                            // Set to normal brightness when animation completes
+                            gsap.set(pieceBox, { filter: 'brightness(1)' });
+                            pieceTweens.delete(pieceBox);
+                        }
                     }
                 );
                 pieceTweens.set(pieceBox, tw);
