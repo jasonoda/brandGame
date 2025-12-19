@@ -19,8 +19,7 @@ function updateCalendar() {
     const dayOfWeek = today.getDay(); // 0 = Sunday
     const weekStart = getWeekStartDate();
     const weekBoxes = document.querySelectorAll('.week-box');
-    
-    
+
     weekBoxes.forEach((box, index) => {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + index);
@@ -28,6 +27,13 @@ function updateCalendar() {
         const dayNumberElement = box.querySelector('.day-number');
         
         if (!dayNumberElement) return;
+
+        // Highlight today
+        if (index === dayOfWeek) {
+            box.classList.add('today');
+        } else {
+            box.classList.remove('today');
+        }
         
         // If this day is in the past or today, show stars earned (without star icon)
         if (index <= dayOfWeek) {
@@ -174,10 +180,6 @@ function updateWalletStars2() {
 
 // Set the current date in the header
 function setCurrentDate() {
-    // Check if p=2 parameter is set first
-    const urlParams = new URLSearchParams(window.location.search);
-    const logoPlacement = urlParams.get('p');
-    
     // Always remove weekly background element entirely
     const weekHeaderBackground = document.querySelector('.week-header-background');
     if (weekHeaderBackground) {
@@ -190,39 +192,20 @@ function setCurrentDate() {
     
     const dateSubtitleElement = document.querySelector('.date-subtitle');
     
-    if (logoPlacement === '2') {
-        dateElement.textContent = 'DAILY GAME CENTER';
-        
-        // Set date in subtitle
-        if (dateSubtitleElement) {
-            const today = new Date();
-            const months = [
-                'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-            ];
-            const month = months[today.getMonth()];
-            const day = today.getDate();
-            const year = today.getFullYear();
-            dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
-        }
-    } else {
+    // Always show title in caps
+    dateElement.textContent = 'Daily Game Center'
+    
+    // Always show current date in subtitle, regardless of URL params
+    if (dateSubtitleElement) {
         const today = new Date();
-        
         const months = [
-            'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-            'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+            'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+            'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
         ];
-        
         const month = months[today.getMonth()];
         const day = today.getDate();
         const year = today.getFullYear();
-        
-        // dateElement.textContent = `${month} ${day}, ${year}`;
-        
-        // Hide subtitle when not p=2
-        if (dateSubtitleElement) {
-            dateSubtitleElement.textContent = '';
-        }
+        dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
     }
 }
 
@@ -427,37 +410,13 @@ buttons.forEach(button => {
         // Add active class to clicked button and corresponding page
         button.classList.add('active');
         
-        // Check for mode=B parameter (case-insensitive)
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode')?.toLowerCase();
-        
-        // If mode=b and clicking sweeps tab, show boost page instead
-        if (targetPage === 'sweeps' && mode === 'b') {
-            const boostPage = document.getElementById('boost-page');
-            const sweepsPage = document.getElementById('sweeps-page');
-            if (boostPage) {
-                boostPage.classList.add('active');
-            }
-            if (sweepsPage) {
-                sweepsPage.classList.remove('active');
-            }
-        } else {
-            const targetPageElement = document.getElementById(`${targetPage}-page`);
-            if (targetPageElement) {
-                targetPageElement.classList.add('active');
-            }
-            // Make sure boost page is hidden if not in mode=b
-            if (targetPage === 'sweeps' && mode !== 'b') {
-                const boostPage = document.getElementById('boost-page');
-                if (boostPage) {
-                    boostPage.classList.remove('active');
-                }
-            }
-            // Update logo visibility when switching pages
-            updateLogoVisibility();
+        // Show the target page
+        const targetPageElement = document.getElementById(`${targetPage}-page`);
+        if (targetPageElement) {
+            targetPageElement.classList.add('active');
         }
         
-        // Ensure help button is visible when switching pages (if close button not showing)
+        // Update logo visibility when switching pages
         updateLogoVisibility();
         
         // Update move stars display when switching to journey tab
@@ -635,18 +594,12 @@ function checkURLParameters() {
         
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
         
-    // Update boost page for bigy style
-    updateBoostPageForBigy();
-        
-        // Initialize carousel for bigy
-        initBigyCarousel();
-    } else {
-        // Hide carousel if not bigy
-        const carouselContainer = document.querySelector('.top-logo-carousel-container');
-        if (carouselContainer) {
-            carouselContainer.classList.remove('active');
-        }
+        // Update boost page for bigy style when using bigy scheme
+        updateBoostPageForBigy();
     }
+    
+    // Always initialize the top logo carousel (slides now generic, not brand-specific)
+    initBigyCarousel();
     
     // Update date display based on p parameter
     setCurrentDate();
@@ -848,8 +801,9 @@ function updateBoostPageForBigy() {
     const urlParams = new URLSearchParams(window.location.search);
     const scheme = urlParams.get('s');
     
-    if (scheme !== 'bigy') {
-        // Reset to default if not bigy
+    // Market Match is now the default, only show Donut Matcher if scheme is explicitly set to 'donut'
+    if (scheme === 'donut') {
+        // Show Donut Matcher only if explicitly requested
         const gameTitle = document.querySelector('#boost-page .game-title');
         if (gameTitle) {
             gameTitle.textContent = 'DONUT MATCHER';
@@ -901,7 +855,7 @@ function updateBoostPageForBigy() {
         return;
     }
     
-    // Change game title to Market Match
+    // Market Match is now the default - Change game title to Market Match
     const gameTitle = document.querySelector('#boost-page .game-title');
     if (gameTitle) {
         gameTitle.textContent = 'MARKET MATCH';
@@ -2021,12 +1975,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (closeButton) closeButton.classList.add('show');
                 updateLogoVisibility();
                 
-                // Load match3 game in iframe
+                // Load match3 game in iframe - Market Match is now default
                 const urlParams = new URLSearchParams(window.location.search);
                 const scheme = urlParams.get('s');
                 const iframe = document.getElementById('match3Iframe');
                 if (iframe) {
-                    iframe.src = scheme ? `games/match3/index.html?s=${scheme}` : 'games/match3/index.html';
+                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
+                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
+                    iframe.src = `games/match3/index.html?s=${gameScheme}`;
                     console.log(`Loading match3 game iframe: ${iframe.src}`);
                 }
             }
@@ -2047,18 +2003,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (closeButton) closeButton.classList.add('show');
                 updateLogoVisibility();
                 
-                // Load match3 game in iframe with practice parameter
+                // Load match3 game in iframe with practice parameter - Market Match is now default
                 const urlParams = new URLSearchParams(window.location.search);
                 const scheme = urlParams.get('s');
                 const iframe = document.getElementById('match3Iframe');
                 if (iframe) {
-                    let url = 'games/match3/index.html';
-                    if (scheme) {
-                        url += `?s=${scheme}&practice=true`;
-                    } else {
-                        url += '?practice=true';
-                    }
-                    iframe.src = url;
+                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
+                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
+                    iframe.src = `games/match3/index.html?s=${gameScheme}&practice=true`;
                     console.log(`Loading match3 practice game iframe: ${iframe.src}`);
                 }
             }

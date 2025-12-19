@@ -569,7 +569,9 @@ function initializeScramble() {
     
     // Update star display on load
     updateStarDisplay();
-    updateCalendar();
+    if (window.updateCalendar) {
+        window.updateCalendar();
+    }
     
     // Try to load saved word first, otherwise pick random
     const savedWordData = loadScrambleWord();
@@ -668,6 +670,9 @@ function initializeScramble() {
         });
         startAnimationLoop();
     }, 10);
+    
+    // Setup hint button after initialization
+    setupHintButton();
 }
 
 // Animation loop
@@ -820,7 +825,9 @@ function celebrateWin() {
     const starsEarned = hintUsed ? 1 : 2;
     markScrambleComplete();
     addStars(starsEarned);
-    updateCalendar();
+    if (window.updateCalendar) {
+        window.updateCalendar();
+    }
     
     // Save the stars earned for this scramble
     const todayKey = getTodayKey();
@@ -1033,59 +1040,39 @@ function showSuccessElements() {
 }
 
 // Add hint button functionality
-const hintButton = document.querySelector('.unscramble-hint-btn');
-if (hintButton) {
-    hintButton.addEventListener('click', function() {
-        // Change button to lighter grey gradient and disable it
-        hintButton.style.background = 'linear-gradient(to bottom, #e8e8e8, #d0d0d0)';
-        hintButton.style.cursor = 'not-allowed';
-        hintButton.disabled = true;
+function setupHintButton() {
+    const hintButton = document.querySelector('.unscramble-hint-btn');
+    if (hintButton) {
+        // Remove any existing listeners by cloning and replacing
+        const newHintButton = hintButton.cloneNode(true);
+        hintButton.parentNode.replaceChild(newHintButton, hintButton);
         
-        // Get the first letter of the correct word
-        const firstLetter = currentWord.charAt(0).toUpperCase();
-    
-        // Update the label text
-        const unscrambleLabel = document.querySelector('.unscramble-label');
-        if (unscrambleLabel) {
-            unscrambleLabel.textContent = `The first letter is ${firstLetter}`;
-        }
-    });
+        newHintButton.addEventListener('click', function() {
+            // Change button to lighter grey gradient and disable it
+            newHintButton.style.background = 'linear-gradient(to bottom, #e8e8e8, #d0d0d0)';
+            newHintButton.style.cursor = 'not-allowed';
+            newHintButton.disabled = true;
+            
+            // Get the first letter of the correct word
+            const firstLetter = currentWord.charAt(0).toUpperCase();
+        
+            // Update the label text
+            const unscrambleLabel = document.querySelector('.unscramble-label');
+            if (unscrambleLabel) {
+                unscrambleLabel.textContent = `Hint : First letter is ${firstLetter}`;
+            }
+        });
+    }
 }
 
-// Update calendar with star counts for the week
-function updateCalendar() {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-    
-    // Get all week boxes
-    const weekBoxes = document.querySelectorAll('.week-box');
-    
-    // Calculate the start of the week (Sunday)
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - dayOfWeek);
-    
-    
-    weekBoxes.forEach((box, index) => {
-        const dayDate = new Date(weekStart);
-        dayDate.setDate(weekStart.getDate() + index);
-        
-        const dayKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-        const dayNumberElement = box.querySelector('.day-number');
-        
-        if (index < dayOfWeek) {
-            // Past days
-            const stars = parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0');
-            dayNumberElement.textContent = stars;
-        } else if (index === dayOfWeek) {
-            // Today
-            const stars = getDailyStars();
-            dayNumberElement.textContent = stars;
-        } else {
-            // Future days
-            dayNumberElement.innerHTML = '&nbsp;';
-        }
-    });
+// Setup hint button when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupHintButton);
+} else {
+    setupHintButton();
 }
+
+// (Calendar updating is handled globally in script.js)
 
 // Reset progress (Q key)
 document.addEventListener('keydown', (e) => {
@@ -1180,7 +1167,9 @@ document.addEventListener('keydown', (e) => {
             }
             updateMysteryWordStars();
             updateBeticleStars();
-            updateCalendar();
+            if (window.updateCalendar) {
+                window.updateCalendar();
+            }
             
             // Update usable stars display
             if (window.updateMoveStarsDisplay) {

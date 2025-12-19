@@ -26,7 +26,7 @@ button:focus {
 body {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     padding-bottom: 60px;
-    background-color: #f5f5f5;
+    background-color: white;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -60,14 +60,15 @@ body {
     right: 0;
     width: 100%;
     height: 60px;
-    background: linear-gradient(to bottom, #f0f0f0, #d8d8d8);
+    background: white;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 100;
     max-width: 500px;
     margin: 0 auto;
+    border-top: 1px solid #e0e0e0;
 }
 
 .tab-button {
@@ -89,8 +90,15 @@ body {
 }
 
 .tab-button.active {
-    background: linear-gradient(to bottom, #fff, #e8e8e8);
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    background: transparent;
+}
+
+.tab-button.active .icon svg path {
+    fill: #dc3545;
+}
+
+.tab-button.active .label {
+    color: #dc3545;
 }
 
 .icon {
@@ -102,10 +110,15 @@ body {
     align-items: center;
 }
 
+.icon svg path {
+    fill: #555;
+    transition: fill 0.2s;
+}
+
 .label {
     font-size: 11px;
     color: #555;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 600;
     line-height: 1;
     margin-top: 2px;
@@ -116,7 +129,8 @@ body {
     max-width: 500px;
     margin: 0 auto;
     position: relative;
-    padding-top: 48px;
+    padding-top: 56px;
+    background-color: white;
 }
 
 .page {
@@ -131,7 +145,7 @@ body {
 .page-header {
     padding: 20px;
     text-align: center;
-    background-color: #f5f5f5;
+    background-color: white;
 }
 
 .page-header h1 {
@@ -144,7 +158,7 @@ body {
 .page-content {
     padding: 40px 20px;
     text-align: center;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #666;
 }
 
@@ -176,7 +190,7 @@ body {
 .profile-location-level {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-bottom: 25px;
     display: flex;
     gap: 15px;
@@ -185,7 +199,7 @@ body {
 .profile-picture {
     width: 130px;
     height: 130px;
-    background: linear-gradient(to bottom, #F093FB, #F5576C);
+    background: linear-gradient(to bottom, #758ed1, #283f7e);
     border: none;
     border-radius: 50%;
     margin-bottom: 10px;
@@ -215,7 +229,7 @@ body {
 .profile-actions {
     font-size: 11px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 10px;
     margin-bottom: 20px;
     text-align: center;
@@ -245,16 +259,16 @@ body {
 
 .profile-today-stars .star-icon {
     font-size: 16px;
-    color: #FF8C42;
+    color: #dc3545;
     transform: translateY(0);
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .profile-today-stars .stat-label-inline {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
 }
 
@@ -263,7 +277,7 @@ body {
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
     letter-spacing: -0.5px;
-    color: #FF8C42;
+    color: #dc3545;
 }
 
 .profile-stars-container {
@@ -302,7 +316,7 @@ body {
     gap: 6px;
     margin-top: 0;
     margin-bottom: 8px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .profile-streak-inline .stat-label {
@@ -332,30 +346,30 @@ body {
 
 .profile-stat-small .star-icon-small {
     font-size: 16px;
-    color: #FF8C42;
+    color: #dc3545;
     transform: translateY(-2px);
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .profile-stat-small .stat-label-inline {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
 }
 
 .profile-stat-small .stat-number {
     font-size: 18px;
     font-weight: 700;
-    color: #FF8C42;
+    color: #dc3545;
     font-family: 'DM Sans', sans-serif;
 }
 
 .star-icon {
-    color: #FF8C42;
+    color: #dc3545;
     font-size: 16px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
@@ -364,13 +378,13 @@ body {
 .rival-profile .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     font-weight: 700 !important;
 }
 
 .profile-stat {
     margin-bottom: 12px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: transparent;
 }
 
@@ -425,13 +439,13 @@ body {
     color: #333;
     font-size: 14px;
     margin-bottom: 4px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .deal-description {
     font-size: 12px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.3;
 }
 
@@ -442,7 +456,7 @@ body {
     padding: 10px;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     width: 100%;
     transition: background-color 0.2s ease;
@@ -458,10 +472,10 @@ body {
     margin-top: 10px;
     margin-bottom: 20px;
     padding: 0;
-    border: 1px solid #FF8C42;
+    border: 1px solid #dc3545;
     border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 184, 77, 0.03) 100%);
-    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+    background: linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
     overflow: hidden;
 }
 
@@ -471,10 +485,10 @@ body {
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 0;
-    border: 1px solid #FF8C42;
+    border: 1px solid #dc3545;
     border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 184, 77, 0.03) 100%);
-    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+    background: linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
     overflow: hidden;
 }
 
@@ -484,9 +498,9 @@ body {
     color: white;
     text-align: center;
     padding: 5px 20px;
-    background-color: #FF8C42;
-    border-bottom: 2px solid rgba(255, 140, 66, 0.3);
-    font-family: 'Nunito', sans-serif;
+    background-color: #dc3545;
+    border-bottom: 2px solid rgba(220, 53, 69, 0.3);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -497,9 +511,9 @@ body {
     color: white;
     text-align: center;
     padding:5px 20px;
-    background-color: #FF8C42;
-    border-bottom: 2px solid rgba(255, 140, 66, 0.3);
-    font-family: 'Nunito', sans-serif;
+    background-color: #dc3545;
+    border-bottom: 2px solid rgba(220, 53, 69, 0.3);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -509,16 +523,16 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0px;
-    border-bottom: 1px solid rgba(255, 140, 66, 0.2);
+    border-bottom: 1px solid rgba(220, 53, 69, 0.2);
     /* border: 1px solid red; */
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: background-color 0.2s ease;
     position: relative;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 184, 77, 0.04) 100%);
+    background: linear-gradient(to bottom, rgba(220, 53, 69, 0.08) 0%, rgba(220, 53, 69, 0.04) 100%);
 }
 
 .challenge-item:hover {
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.08) 100%);
+    background: linear-gradient(to bottom, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.08) 100%);
 }
 
 .challenge-item:last-child {
@@ -537,27 +551,27 @@ body {
 
 .challenge-reward {
     font-size: 15px;
-    color: #FF8C42;
+    color: #dc3545;
     font-weight: 700;
     text-align: right;
     display: flex;
     align-items: center;
     gap: 4px;
     white-space: nowrap;
-    background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.1) 100%);
     padding-left: 10px;
     padding-right: 10px;
     border-radius: 20px;
     margin-right: 10px;
-    box-shadow: 0 2px 4px rgba(255, 140, 66, 0.2);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
 .star-icon-inline {
-    color: #FF8C42;
+    color: #dc3545;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
-    text-shadow: 0 1px 2px rgba(255, 140, 66, 0.3);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-shadow: 0 1px 2px rgba(220, 53, 69, 0.3);
 }
 
 .reset-all-data-button {
@@ -569,7 +583,7 @@ body {
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -595,19 +609,19 @@ body {
     font-size: 13px;
     color: #666;
     margin-bottom: 4px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .stat-value {
     font-size: 13px;
     color: #666;
     font-weight: 400;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .stat-value .star-icon {
     font-size: 15px;
-    color: #FF8C42;
+    color: #dc3545;
 }
 
 .journey-coin-container {
@@ -659,7 +673,7 @@ body {
 
 .coin-x {
     font-size: 16px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #666;
     margin: 0 2px;
     line-height: 1;
@@ -669,7 +683,7 @@ body {
 .coin-count {
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #333;
     line-height: 1;
     /* transform: translateY(-2px); */
@@ -685,11 +699,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: white;
     z-index: 10001;
     max-width: 500px;
     margin: 0 auto;
     min-height: 56px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menu-icon {
@@ -698,15 +713,25 @@ body {
     cursor: pointer;
     position: relative;
     z-index: 1;
-    width: 60px;
-    margin-left: -8px;
+    width: 40px;
+    height: 40px;
+    margin-left: 0;
 }
 
 .logo-img {
-    height: 32px;
-    width: auto;
-    object-fit: contain;
-    display: none;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background: #dc3545;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    flex-shrink: 0;
 }
 
 .profile-icon-img {
@@ -726,7 +751,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FF8C42;
+    color: #dc3545;
     font-size: 16px;
     font-weight: bold;
     line-height: 1;
@@ -746,65 +771,122 @@ body {
 }
 
 .date {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    color: white;
+    color: #000;
     text-align: center;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.2;
+    /* text-transform: uppercase; */
+    /* letter-spacing: 0.5px; */
 }
 
 .date-subtitle {
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    font-weight: 900;
+    color: #000;
     text-align: center;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     line-height: 1.2;
+    /* margin-top: 2px; */
 }
 
 .star-counter {
-    background-color: white;
+    background-color: #dc3545;
     border-radius: 20px;
-    padding: 1px 12px;
+    padding: 6px 14px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    gap: 6px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     position: absolute;
     right: 10px;
     z-index: 1;
 }
 
 .star-counter .star-icon {
-    color: #FF8C42;
-    font-size: 16px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    color: #FFD700;
+    font-size: 18px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .star-counter .star-count {
-    color: #555;
+    color: white;
     font-size: 14px;
     font-weight: 700;
 }
 
-.top-logo-carousel-container {
+/* Promotional Banner with Blue Background */
+.promotional-banner {
     position: relative;
-    display: none;
-    margin: 0px auto 0 auto;
-    transform: translateY(8px);
     width: 100%;
-    height: 120px;
-    overflow: hidden;
-    z-index: 4;
-    padding-top: 10px;
-    background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
+    padding: 40px 20px;
+    background-image: url('src/img/topBackground.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-bottom: 1px solid #c2c2c2;
+    margin-top: 0;
+    overflow: hidden;
+}
+
+.promotional-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.promotional-banner-content {
+    position: relative;
+    z-index: 1;
+    text-align: left;
+}
+
+/* In the top carousel, text is aligned by the slide container */
+
+.promotional-banner-title {
+    font-size: 21px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    line-height: 1.2;
+}
+
+.promotional-banner-subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    color: white;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1.4;
+}
+
+.top-logo-carousel-container {
+    position: relative;
+    margin: 0px auto 0 auto;
+    transform: translateY(0);
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    z-index: 4;
+    padding-top: 0;
+    background-image: url('src/img/topBackground.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* border-bottom: 1px solid #c2c2c2; */
 }
 
 .top-logo-carousel-container.active {
@@ -813,22 +895,25 @@ body {
 
 .top-logo-carousel {
     position: relative;
-    height: 100px;
+    height: 125px;
     display: flex;
     transition: transform 0.5s ease;
     pointer-events: all;
     left: 0;
     top: 0;
+    /* border: 1px solid blue; */
 }
 
 .carousel-slide {
     position: relative;
     width: 100%;
-    height: 100px;
+    height: 100%;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* border: 1px solid red; */
+    padding-left: 25px;
 }
 
 .carousel-arrow {
@@ -909,7 +994,7 @@ body {
     color: #e84066;
     font-size: 18px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1;
 }
 
@@ -930,14 +1015,48 @@ body {
     z-index: 3;
 } */
 
-.week-section {
-    padding: 16px 20px 6px 20px;
-    background-color: transparent;
-    text-align: center;
+.week-combined-container {
+    margin: 20px;
+    margin-bottom: 0px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.week-theme-section {
+    background: #dc3545;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     position: relative;
-    z-index: 1;
-    margin-bottom: -2px;
-    /* margin-top: 10px; */
+    min-height: 100px;
+}
+
+.week-theme-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.week-calendar-section {
+    background: white;
+    padding: 12px 18px 16px 16px;
+    margin-bottom: 0px;
+    overflow: hidden;
+    /* border: 1px solid red; */
 }
 
 .week-header-background {
@@ -956,83 +1075,98 @@ body {
 }
 
 .section {
-    padding: 4px 20px;
-    background-color: #f5f5f5;
+    padding: 0px 20px;
+    margin: 0;
+    background-color: white;
+    /* border:1px solid green; */
 }
+
+/* Reduce bottom padding of first section to balance spacing above DAILY ARCADE */
+.section:first-of-type {
+    /* padding-bottom: 0px !important; */
+    /* border:1px solid red; */
+}
+
+/* Remove extra padding above DAILY ARCADE section and reduce space above title */
+.arcade-section {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    /* border:1px solid blue; */
+}
+
+.arcade-section .section-title {
+    /* margin-top: -10px !important; */
+}
+
 
 
 .week-subtitle {
-    font-size: 36px;
-    font-weight: 400;
-    /* color: rgb(48, 39, 39); */
-    /* color: white; */
-    color: rgb(54, 54, 54);
-    text-align: center;
-    margin-bottom: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    text-align: left;
+    margin-bottom: 0;
     margin-top: 0px;
-    font-family: 'Abril Fatface', serif;
-    letter-spacing: 1px;
-    /* text-shadow: 0 0 15px #eed5b7, 0 0 30px #eed5b7, 0 0 45px #eed5b7, 0 0 60px #eed5b7; */
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
 }
 
 .week-title {
-    font-size: 12px;
-    font-weight: 900;
-    margin-top: 5px;
-    margin-bottom: 0px;
-    /* color: white; */
-    color: rgb(54, 54, 54);
-    text-align: center;
-    font-family: 'Aleo', serif;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 0px;
+    /* margin-bottom: 2px; */
+    color: white;
+    text-align: left;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
-    /* text-shadow: 0 0 15px #eed5b7, 0 0 30px #eed5b7, 0 0 45px #eed5b7, 0 0 60px #eed5b7; */
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
 }
 
 .section-title {
     font-size: 16px;
     font-weight: 700;
-    margin-top: 0px;
-    margin-bottom: 5px;
-    color: #494949;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #000;
     text-align: center;
-    font-family: 'Aleo', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+    /* border:1px solid blue; */
 }
 
-.week-container {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    border: 1px solid #FFB84D;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(255, 140, 66, 0.2);
-}
 
-.week-record-box {
-    /* height: 40px; */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 2px 2px;
+
+
+.week-record-header {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    gap: 0;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 8px;
 }
 
 .week-record-text {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.9);
-    text-align: center;
+    font-size: 14px;
+    color: #000;
+    text-align: left;
     font-weight: 600;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .week-record-star {
-    color: #FF8C42;
-    font-size: 12px;
+    color: #FFD700;
+    font-size: 16px;
     display: inline-block;
+    font-weight: 700;
+    margin: 0 2px;
 }
 
 .week-record-value {
@@ -1040,58 +1174,99 @@ body {
     color: white;
     text-align: center;
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: none;
 }
 
 .week-days-container {
     display: flex;
+    gap: 5px;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    /* padding-right: 2px; */
+    /* border: 1px solid #000; */
 }
 
 .week-box {
-    flex: 1;
+    flex: 0 1 auto;
+    width: calc((100% - 18px) / 7);
+    max-width: 40px;
+    box-sizing: border-box;
     height: 60px;
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 5px;
+    border: 1px solid #000;
+    border-bottom: 2px solid black;
+    padding: 6px 2px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
+    position: relative;
+    background: #f5f5f5;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.week-box:last-child {
-    border-right: none;
+.week-box.today {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.week-box.today .day-initial,
+.week-box.today .day-number {
+    color: #ffffff;
 }
 
 .day-initial {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     text-align: center;
     font-weight: 600;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .day-number {
     white-space: nowrap;
-    font-size: 18px;
-    color: white;
+    font-size: 16px;
+    color: #000;
     text-align: center;
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .mc-container {
-    border: var(--box-border-width) solid var(--box-border-color);
-    padding: 15px;
+    border: none;
+    padding: 0;
     margin-bottom: 10px;
-    background-color: var(--box-background);
-    border-radius: var(--box-border-radius);
+    background-color: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-top-section {
+    background-color: #283f7e;
+    padding: 12px 20px;
+    flex: 0 0 auto;
+}
+
+.mc-bottom-section {
+    background-color: #3e528b;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .mc-question {
     font-size: 13px;
     font-weight: 400;
-    color: #666;
-    font-family: 'Nunito', sans-serif;
+    color: white;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-bottom: 12px;
     text-align: center;
 }
@@ -1110,7 +1285,7 @@ body {
     padding: 12px 16px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: filter 0.2s ease;
@@ -1127,39 +1302,83 @@ body {
 .mc-stars {
     font-size: 16px;
     text-align: center;
-    color: #FF8C42;
+    color: #dc3545;
     letter-spacing: 2px;
     margin-top: 0;
     opacity: 0;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s ease;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .on-this-day-container {
-    border: var(--box-border-width) solid var(--box-border-color);
-    padding: 15px 15px 10px 15px;
+    border: none;
+    padding: 0;
     margin-bottom: 10px;
-    background-color: var(--box-background);
-    border-radius: var(--box-border-radius);
+    background-color: transparent;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.scramble-top-section {
+    background-color: #283f7e;
+    padding: 12px 20px;
+    flex: 1;
+}
+
+.scramble-bottom-section {
+    background-color: #3d5188;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.on-this-day-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px, 40px 40px;
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .subsection-title {
-    font-size: 13px;
-    font-weight: 400;
-    margin-bottom: 8px;
-    color: #666;
-    text-align: center;
-    font-family: 'Nunito', serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: white;
+    text-align: left;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: 1;
 }
 
 .unscramble-boxes {
     position: relative;
     height: 55px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     overflow: visible;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    z-index: 1;
 }
 
 .unscramble-footer {
@@ -1169,31 +1388,38 @@ body {
 
 .unscramble-label {
     font-size: 13px;
-    color: #666;
-    font-family: 'Nunito', serif;
+    color: white;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
-    margin-left: 3px;
+    margin-left: 0px;
     text-align: left;
     line-height: normal;
     padding-top: 8px;
     transition: opacity 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
 .unscramble-hint-btn {
     position: absolute;
     right: 0;
     top: 0;
-    background: linear-gradient(to bottom, #6EDDD4, #4ECDC4);
-    color: white;
+    background: #FFD700;
+    color: #000;
     border: none;
     border-radius: 8px;
     padding: 8px 20px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .unscramble-hint-btn:not(:disabled):hover {
@@ -1209,12 +1435,12 @@ body {
 .unscramble-stars {
     font-size: 16px;
     text-align: center;
-    color: #FF8C42;
+    color: #dc3545;
     letter-spacing: 0px;
     margin-top: 3px;
     margin-bottom: 0px;
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .highlow-stars {
@@ -1224,11 +1450,11 @@ body {
     margin-top: -3px;
     margin-bottom: 0px;
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .highlow-stars .star.earned {
-    color: #FF8C42;
+    color: #dc3545;
 }
 
 .highlow-stars .star.unearned {
@@ -1237,11 +1463,29 @@ body {
 
 /* Fact or Fiction styles */
 .fof-container {
-    border: var(--box-border-width) solid var(--box-border-color);
-    padding: 15px;
-    margin-bottom: 10px;
-    background-color: var(--box-background);
-    border-radius: var(--box-border-radius);
+    border: none;
+    padding: 0;
+    margin-bottom: 0px;
+    background-color: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.fof-top-section {
+    background-color: #283f7e;
+    padding: 12px 20px;
+    flex: 0 0 auto;
+}
+
+.fof-bottom-section {
+    background-color: #3e528b;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .fof-buttons {
@@ -1259,7 +1503,7 @@ body {
     padding: 12px 16px;
     font-size: 13px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -1283,8 +1527,8 @@ body {
 
 .fof-instruction {
     font-size: 13px;
-    color: #666;
-    font-family: 'Nunito', serif;
+    color: white;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
     margin-left: 3px;
 }
@@ -1297,7 +1541,7 @@ body {
     color: white;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
 }
@@ -1316,28 +1560,31 @@ body {
 .fof-stars {
     font-size: 18px;
     text-align: center;
-    color: #FF8C42;
+    color: #dc3545;
     letter-spacing: 2px;
     margin-top: 8px;
     opacity: 0;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .letter-box {
-    width: 55px;
-    height: 55px;
-    background: linear-gradient(to bottom, #F093FB, #F5576C);
+    width: calc((100% - 36px) / 7);
+    max-width: 50px;
+    min-width: 40px;
+    height: 50px;
+    aspect-ratio: 1;
+    background: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 24px;
-    font-weight: 600;
-    box-shadow: none;
-    font-family: Arial, Helvetica, sans-serif;
+    color: #1a237e;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 0;
     cursor: grab;
     user-select: none;
@@ -1345,8 +1592,11 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     touch-action: none;
-    position: absolute;
-    top: 0;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 1;
+    flex-grow: 0;
+    box-sizing: border-box;
 }
 
 .letter-box.dragging {
@@ -1368,7 +1618,7 @@ body {
     margin-bottom: 12px;
     color: #666;
     text-align: center;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .highlow-items {
@@ -1388,7 +1638,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1409,7 +1659,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     user-select: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -1429,7 +1679,7 @@ body {
 .highlow-instruction {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
     margin-left: 3px;
 }
@@ -1442,7 +1692,7 @@ body {
     color: white;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
     transition: all 0.2s ease;
@@ -1461,6 +1711,7 @@ body {
 .play-boxes {
     display: flex;
     gap: 10px;
+    
 }
 
 .play-box {
@@ -1468,6 +1719,7 @@ body {
     border: var(--box-border-width) solid var(--box-border-color);
     display: flex;
     flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     background-color: var(--box-background);
     border-radius: var(--box-border-radius);
     overflow: hidden;
@@ -1495,7 +1747,7 @@ body {
     color: #444;
     text-align: center;
     padding: 10px;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
 }
 
@@ -1508,6 +1760,8 @@ body {
     display: flex;
     overflow: hidden;
     cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    /* border: 1px solid green; */
 }
 
 .arcade-box:hover {
@@ -1539,7 +1793,7 @@ body {
     color: #444;
     text-align: center;
     padding: 21px 15px 15px 15px;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
     gap: 8px;
 }
@@ -1556,14 +1810,14 @@ body {
     font-weight: 600;
     color: #666;
     letter-spacing: 1px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .score-text {
     font-size: 20px;
     font-weight: 700;
     color: #666;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .divider {
@@ -1573,7 +1827,7 @@ body {
 }
 
 .stars {
-    color: #FF8C42;
+    color: #dc3545;
     font-size: 18px;
     letter-spacing: 0px;
 }
@@ -1586,6 +1840,7 @@ body {
     margin-bottom: 20px;
     display: flex;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .bonus-color {
@@ -1619,7 +1874,7 @@ body {
     color: #666;
     text-align: center;
     padding: 15px;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
     gap: 8px;
 }
@@ -1667,7 +1922,7 @@ body {
 }
 
 #journey-page.active {
-    background: linear-gradient(to bottom, #4A148C, #2E0E5C);
+    background: linear-gradient(to bottom, #283f7e, #1a2d5c);
     position: fixed;
     top: 0;
     left: 0;
@@ -1715,7 +1970,7 @@ body {
     font-size: 12px;
     font-weight: 400;
     color: white;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
 }
@@ -1727,7 +1982,7 @@ body {
     transform: translate(-50%, -50%);   
     width: 100px;
     height: 100px;
-    background: radial-gradient(circle, rgba(255, 184, 77, 0) 0%, rgba(255, 180, 67, .7) 100%);
+    background: radial-gradient(circle, rgba(40, 63, 126, 0) 0%, rgba(40, 63, 126, .7) 100%);
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
@@ -1744,7 +1999,7 @@ body {
     padding: 12px 24px;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     display: flex;
@@ -1818,7 +2073,7 @@ body {
     font-size: 16px;
     font-weight: 600;
     color: #000;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .rival-avatar {
@@ -1833,13 +2088,13 @@ body {
     font-size: 14px;
     font-weight: 600;
     color: #000;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     font-weight: 700 !important;
 }
 
@@ -1848,7 +2103,7 @@ body {
 #rival-page .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     font-weight: 700 !important;
 }
 
@@ -1870,7 +2125,7 @@ body {
     color: #FFB84D;
     background-color: #f5f5f5;
     padding: 8px 12px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transform: rotate(-20deg);
 }
 
@@ -1878,7 +2133,7 @@ body {
     font-size: 14px;
     font-weight: 400;
     color: #000;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
     margin-top: -20px;
 }
@@ -1886,7 +2141,7 @@ body {
 .rival-challenge .star-icon {
     color: #FF8C42 !important;
     font-size: 16px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
@@ -1921,8 +2176,8 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
-    color: #555;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: #dc3545;
     font-size: 20px;
     cursor: pointer;
     font-weight: 400;
@@ -1946,10 +2201,10 @@ body {
     width: 22px;
     height: 22px;
     padding: 0;
-    border: 2px solid white;
+    border: 2px solid #dc3545;
     border-radius: 50%;
     background: transparent;
-    color: white;
+    color: #dc3545;
     font-size: 14px;
     font-weight: 700;
     display: inline-flex;
@@ -1962,13 +2217,13 @@ body {
     top: 50%;
     transform: translateY(-50%);
     z-index: 10002;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
 .help-button:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(220, 53, 69, 0.1);
 }
 
 .help-button.hidden {
@@ -2031,7 +2286,7 @@ body {
     font-weight: 700;
     color: #333;
     margin-bottom: 20px;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
 }
 
@@ -2039,7 +2294,7 @@ body {
     font-size: 14px;
     line-height: 1.6;
     color: #555;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .help-popup-text p {
@@ -2094,7 +2349,7 @@ body {
     font-size: 12px; /* match .week-subtitle / THANKSGIVING */
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
     /* border: 1px solid blue; */
@@ -2128,7 +2383,7 @@ body {
 .boost-stat-item .boost-daily-stars,
 .boost-stat-item .boost-clock-count {
     font-weight: 700;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .boost-stat-item .star-icon {
@@ -2146,6 +2401,7 @@ body {
     background-color: var(--box-background);
     border-radius: var(--box-border-radius);
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .boost-game-top {
@@ -2167,7 +2423,7 @@ body {
     font-size: 14px;
     font-weight: 700;
     color: white;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -2230,7 +2486,7 @@ body {
     border-radius: 8px;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     margin: 8px auto 0 auto;
@@ -2293,7 +2549,7 @@ body {
     border-radius: 18px;
     font-size: 12px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     margin: 0 auto;
@@ -2309,8 +2565,9 @@ body {
     max-width: 600px;
     margin: 10px auto 30px auto;
     padding: 10px 20px 0 20px;
-    background-color: #f8f8f8;
+    background-color: #ffffff;
     min-height: auto;
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
 }
 
 .boost-header {
@@ -2333,7 +2590,7 @@ body {
     font-size: 12px;
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
 }
@@ -2361,7 +2618,7 @@ body {
     justify-content: center;
     gap: 8px;
     /* margin: 8px 0; */
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .coin-icon {
@@ -2401,27 +2658,27 @@ body {
 
 .star-icon-large {
     font-size: 16px;
-    color: #FF8C42;
-    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    color: #dc3545;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
 
 .cost-text {
     font-size: 20px;
     font-weight: 600;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #000;
 }
 
 .current-balance {
     font-size: 16px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 #sweeps-balance {
     font-weight: 700;
-    color: #FF8C42;
+    color: #dc3545;
 }
 
 .entry-controls {
@@ -2439,18 +2696,18 @@ body {
     padding: 16px 40px;
     font-size: 18px;
     font-weight: 700;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     transition: all 0.2s ease;
 }
 
 .entry-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 184, 77, 0.4);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
 }
 
 .entry-button:active {
@@ -2464,12 +2721,12 @@ body {
 .entry-count {
     font-size: 16px;
     color: #666;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 #entry-count {
     font-weight: 700;
-    color: #FF8C42;
+    color: #dc3545;
 }
 
 .contest-rules {
@@ -2485,7 +2742,7 @@ body {
 .rules-title {
     font-size: 11px;
     color: #999;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
     font-weight: 600;
     margin-bottom: 8px;
@@ -2494,7 +2751,7 @@ body {
 .rules-content {
     font-size: 10px;
     color: #999;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
     line-height: 1.5;
 }
@@ -2543,7 +2800,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-size: 12px;
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 0;
     text-align: center;
     letter-spacing: 0.5px;
@@ -2558,7 +2815,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-size: 18px;
     font-weight: 700;
     color: #000;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-bottom: 12px;
     text-align: center;
 }
@@ -2676,7 +2933,7 @@ body[style*="background-color: #000000"] .cost-text {
 
 .prizes-overlay-title {
     color: #fff;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 12px;

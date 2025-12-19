@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
     levelProgress.style.left = '50%';
     levelProgress.style.top = '70px';
     levelProgress.style.transform = 'translateX(-50%)';
-    levelProgress.style.backgroundColor = '#3e1274';
+        levelProgress.style.backgroundColor = '#283f7e';
     levelProgress.style.color = 'white';
     levelProgress.style.fontFamily = "'Nunito', 'Helvetica Neue', sans-serif";
     levelProgress.style.fontSize = '12px';
