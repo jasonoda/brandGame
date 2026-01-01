@@ -18,22 +18,16 @@ function updateCalendar() {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Sunday
     const weekStart = getWeekStartDate();
+    const weekBoxes = document.querySelectorAll('.week-box');
     
-    // Helper function to update a single calendar box
-    const updateCalendarBox = (box, index, dayNumberSelector) => {
+    
+    weekBoxes.forEach((box, index) => {
         const dayDate = new Date(weekStart);
         dayDate.setDate(weekStart.getDate() + index);
         const dayKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-        const dayNumberElement = box.querySelector(dayNumberSelector);
+        const dayNumberElement = box.querySelector('.day-number');
         
         if (!dayNumberElement) return;
-
-        // Highlight today
-        if (index === dayOfWeek) {
-            box.classList.add('today');
-        } else {
-            box.classList.remove('today');
-        }
         
         // If this day is in the past or today, show stars earned (without star icon)
         if (index <= dayOfWeek) {
@@ -43,18 +37,6 @@ function updateCalendar() {
             // Future days show nothing
             dayNumberElement.innerHTML = '&nbsp;';
         }
-    };
-
-    // Update original calendar (header-type2)
-    const weekBoxes = document.querySelectorAll('.week-box');
-    weekBoxes.forEach((box, index) => {
-        updateCalendarBox(box, index, '.day-number');
-    });
-
-    // Update type1 calendar (header-type1)
-    const weekBoxesType1 = document.querySelectorAll('.week-box-type1');
-    weekBoxesType1.forEach((box, index) => {
-        updateCalendarBox(box, index, '.day-number-type1');
     });
 }
 
@@ -192,6 +174,10 @@ function updateWalletStars2() {
 
 // Set the current date in the header
 function setCurrentDate() {
+    // Check if p=2 parameter is set first
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoPlacement = urlParams.get('p');
+    
     // Always remove weekly background element entirely
     const weekHeaderBackground = document.querySelector('.week-header-background');
     if (weekHeaderBackground) {
@@ -204,20 +190,39 @@ function setCurrentDate() {
     
     const dateSubtitleElement = document.querySelector('.date-subtitle');
     
-    // Always show title in caps
-    dateElement.textContent = 'Daily Game Center'
-    
-    // Always show current date in subtitle, regardless of URL params
-    if (dateSubtitleElement) {
+    if (logoPlacement === '2') {
+        dateElement.textContent = 'DAILY GAME CENTER';
+        
+        // Set date in subtitle
+        if (dateSubtitleElement) {
+            const today = new Date();
+            const months = [
+                'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+            ];
+            const month = months[today.getMonth()];
+            const day = today.getDate();
+            const year = today.getFullYear();
+            dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
+        }
+    } else {
         const today = new Date();
+        
         const months = [
-            'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-            'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+            'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+            'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
         ];
+        
         const month = months[today.getMonth()];
         const day = today.getDate();
         const year = today.getFullYear();
-        dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
+        
+        // dateElement.textContent = `${month} ${day}, ${year}`;
+        
+        // Hide subtitle when not p=2
+        if (dateSubtitleElement) {
+            dateSubtitleElement.textContent = '';
+        }
     }
 }
 
@@ -321,52 +326,6 @@ function loadGameScores2() {
             goldCaseScoreText.style.display = 'none';
         }
     }
-    
-    // Load zoom stars (tilesStars element)
-    const zoomStars = parseInt(localStorage.getItem(`zoomStars_${todayKey}`) || '0');
-    const tilesStarsElement = document.getElementById('tilesStars');
-    if (tilesStarsElement) {
-        tilesStarsElement.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-            const star = document.createElement('span');
-            star.textContent = '★';
-            star.style.color = i < zoomStars ? '#FF8C42' : '#ddd';
-            tilesStarsElement.appendChild(star);
-        }
-    }
-    
-    // Load shift stars
-    const shiftStars = parseInt(localStorage.getItem(`shiftStars_${todayKey}`) || '0');
-    const shiftStarsElement = document.getElementById('shiftStars');
-    if (shiftStarsElement) {
-        shiftStarsElement.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-            const star = document.createElement('span');
-            star.textContent = '★';
-            star.style.color = i < shiftStars ? '#FF8C42' : '#ddd';
-            shiftStarsElement.appendChild(star);
-        }
-    }
-    
-    // Load quiz stars
-    const quizStars = parseInt(localStorage.getItem(`quizStars_${todayKey}`) || '0');
-    const quizStarsElement = document.querySelector('.quiz-stars');
-    if (quizStarsElement) {
-        quizStarsElement.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-            const star = document.createElement('span');
-            star.className = 'quiz-star';
-            star.textContent = '★';
-            star.style.color = i < quizStars ? '#FF8C42' : '#ddd';
-            if (i >= quizStars) {
-                star.classList.add('grey');
-            }
-            quizStarsElement.appendChild(star);
-        }
-        if (quizStars > 0) {
-            quizStarsElement.style.display = 'flex';
-        }
-    }
 }
 
 // Function to update blackjack stars display
@@ -449,8 +408,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Don't call updateLogoVisibility here - it will be called at the end of checkURLParameters
-    // after all styling is applied
+    // Update help button visibility on load
+    updateLogoVisibility();
 });
 
 // Tab button functionality
@@ -468,13 +427,37 @@ buttons.forEach(button => {
         // Add active class to clicked button and corresponding page
         button.classList.add('active');
         
-        // Show the target page
-        const targetPageElement = document.getElementById(`${targetPage}-page`);
-        if (targetPageElement) {
-            targetPageElement.classList.add('active');
+        // Check for mode=B parameter (case-insensitive)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode')?.toLowerCase();
+        
+        // If mode=b and clicking sweeps tab, show boost page instead
+        if (targetPage === 'sweeps' && mode === 'b') {
+            const boostPage = document.getElementById('boost-page');
+            const sweepsPage = document.getElementById('sweeps-page');
+            if (boostPage) {
+                boostPage.classList.add('active');
+            }
+            if (sweepsPage) {
+                sweepsPage.classList.remove('active');
+            }
+        } else {
+            const targetPageElement = document.getElementById(`${targetPage}-page`);
+            if (targetPageElement) {
+                targetPageElement.classList.add('active');
+            }
+            // Make sure boost page is hidden if not in mode=b
+            if (targetPage === 'sweeps' && mode !== 'b') {
+                const boostPage = document.getElementById('boost-page');
+                if (boostPage) {
+                    boostPage.classList.remove('active');
+                }
+            }
+            // Update logo visibility when switching pages
+            updateLogoVisibility();
         }
         
-        // Update logo visibility when switching pages
+        // Ensure help button is visible when switching pages (if close button not showing)
         updateLogoVisibility();
         
         // Update move stars display when switching to journey tab
@@ -614,53 +597,6 @@ function animateRivalPage() {
 function checkURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     const scheme = urlParams.get('s');
-    const headerType = urlParams.get('d');
-    
-    // Handle header type switching
-    const headerType1 = document.querySelector('.header-type1');
-    const headerType2 = document.querySelector('.header-type2');
-    
-    // Set logo based on header type
-    const headerLogo = document.querySelector('.header-logo');
-    const carouselLogos = document.querySelectorAll('.carousel-slide-type1 img');
-    
-    if (headerType === 'bigy') {
-        // Show header-type2, hide header-type1
-        if (headerType1) headerType1.style.display = 'none';
-        if (headerType2) headerType2.style.display = 'block';
-        
-        // Set bigy logo
-        if (headerLogo) {
-            headerLogo.src = 'src/img/bigy/bigy.png';
-        }
-        carouselLogos.forEach(logo => {
-            logo.src = 'src/img/bigy/bigy.png';
-        });
-        
-        // Apply DM Sans font to all elements except serif fonts and letter-box
-        applyFontScheme('DM Sans');
-        
-        // Apply blue styling and white text for scramble, MC, and FoF
-        applyBigyStyling();
-    } else {
-        // Default: show header-type1, hide header-type2
-        if (headerType1) headerType1.style.display = 'block';
-        if (headerType2) headerType2.style.display = 'none';
-        
-        // Set default temp logo
-        if (headerLogo) {
-            headerLogo.src = 'src/img/tempLogo.png';
-        }
-        carouselLogos.forEach(logo => {
-            logo.src = 'src/img/tempLogo.png';
-        });
-        
-        // Apply Nunito font (default)
-        applyFontScheme('Nunito');
-        
-        // Apply default grey/white styling
-        applyDefaultStyling();
-    }
     
     if (scheme === 'jos') {
         // Apply Jos color scheme
@@ -699,15 +635,17 @@ function checkURLParameters() {
         
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
         
-        // Update boost page for bigy style when using bigy scheme
-        updateBoostPageForBigy();
-    }
-    
-    // Initialize the appropriate carousel based on header type
-    if (headerType === 'bigy') {
+    // Update boost page for bigy style
+    updateBoostPageForBigy();
+        
+        // Initialize carousel for bigy
         initBigyCarousel();
     } else {
-        initType1Carousel();
+        // Hide carousel if not bigy
+        const carouselContainer = document.querySelector('.top-logo-carousel-container');
+        if (carouselContainer) {
+            carouselContainer.classList.remove('active');
+        }
     }
     
     // Update date display based on p parameter
@@ -715,548 +653,6 @@ function checkURLParameters() {
     
     // Update boost high score on page load
     updateBoostHighScore();
-    
-    // Ensure logo visibility is correct after all styling is applied
-    updateLogoVisibility();
-}
-
-// Function to apply font scheme (Nunito or DM Sans)
-function applyFontScheme(fontFamily) {
-    const dmSansFont = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    const nunitoFont = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    const targetFont = fontFamily === 'DM Sans' ? dmSansFont : nunitoFont;
-    
-    // Get all elements on the page
-    const allElements = document.querySelectorAll('*');
-    
-    allElements.forEach(element => {
-        // Skip elements that should keep their font (serif fonts, letter-box)
-        const computedStyle = window.getComputedStyle(element);
-        const currentFont = computedStyle.fontFamily;
-        
-        // Skip if it's a serif font (Abril Fatface, Aleo, Spectral)
-        if (currentFont.includes('Abril Fatface') || 
-            currentFont.includes('Aleo') || 
-            currentFont.includes('Spectral')) {
-            return;
-        }
-        
-        // Skip letter-box elements (scramble letter tiles)
-        if (element.classList.contains('letter-box')) {
-            return;
-        }
-        
-        // Apply the font
-        element.style.fontFamily = targetFont;
-    });
-}
-
-// Function to apply bigy styling (blue backgrounds, white text)
-function applyBigyStyling() {
-    // Change page background to white for bigy
-    document.body.style.backgroundColor = 'white';
-    
-    // Change all sections to white background
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.backgroundColor = 'white';
-    });
-    
-    // Scramble sections - blue for bigy
-    const scrambleTop = document.querySelector('.scramble-top-section');
-    const scrambleBottom = document.querySelector('.scramble-bottom-section');
-    if (scrambleTop) {
-        scrambleTop.style.background = '#283f7e';
-        scrambleTop.style.backgroundColor = '#283f7e';
-        scrambleTop.style.borderBottom = 'none';
-    }
-    if (scrambleBottom) {
-        scrambleBottom.style.background = '#3d5188';
-        scrambleBottom.style.backgroundColor = '#3d5188';
-    }
-    
-    // MC sections - blue for bigy
-    const mcTop = document.querySelector('.mc-top-section');
-    const mcBottom = document.querySelector('.mc-bottom-section');
-    if (mcTop) {
-        mcTop.style.background = '#283f7e';
-        mcTop.style.backgroundColor = '#283f7e';
-        mcTop.style.borderBottom = 'none';
-    }
-    if (mcBottom) {
-        mcBottom.style.background = '#3e528b';
-        mcBottom.style.backgroundColor = '#3e528b';
-    }
-    
-    // Quiz sections - blue for bigy (same as MC)
-    const quizTop = document.querySelector('.quiz-top-section');
-    const quizBottom = document.querySelector('.quiz-bottom-section');
-    if (quizTop) {
-        quizTop.style.background = '#283f7e';
-        quizTop.style.backgroundColor = '#283f7e';
-        quizTop.style.borderBottom = 'none';
-    }
-    if (quizBottom) {
-        quizBottom.style.background = '#3e528b';
-        quizBottom.style.backgroundColor = '#3e528b';
-    }
-    
-    // FoF sections - blue for bigy
-    const fofTop = document.querySelector('.fof-top-section');
-    const fofBottom = document.querySelector('.fof-bottom-section');
-    if (fofTop) {
-        fofTop.style.background = '#283f7e';
-        fofTop.style.backgroundColor = '#283f7e';
-        fofTop.style.borderBottom = 'none';
-    }
-    if (fofBottom) {
-        fofBottom.style.background = '#3e528b';
-        fofBottom.style.backgroundColor = '#3e528b';
-    }
-    
-    // Stars - red for bigy
-    const unscrambleStars = document.querySelectorAll('.unscramble-stars');
-    unscrambleStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const mcStars = document.querySelectorAll('.mc-stars');
-    mcStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const fofStars = document.querySelectorAll('.fof-stars');
-    fofStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const quizStars = document.querySelectorAll('.quiz-stars');
-    quizStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('.quiz-star');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    // Header bar - white for bigy
-    const headerBar = document.querySelector('.header-bar');
-    if (headerBar) {
-        headerBar.style.background = 'white';
-    }
-    
-    // Star counter - red background for bigy
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
-        starCounter.style.backgroundColor = '#dc3545';
-        const starCount = starCounter.querySelector('.star-count');
-        if (starCount) {
-            starCount.style.color = 'white';
-        }
-        const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FFD700';
-        }
-    }
-    
-    // Date text - black for bigy
-    const dateElement = document.querySelector('.date');
-    if (dateElement) {
-        dateElement.style.color = '#000';
-    }
-    const dateSubtitle = document.querySelector('.date-subtitle');
-    if (dateSubtitle) {
-        dateSubtitle.style.color = '#000';
-    }
-    
-    // Show Big Y logo for bigy
-    const headerLogo = document.querySelector('.header-logo');
-    if (headerLogo) {
-        headerLogo.style.display = 'block';
-    }
-    
-    // Question mark - white for bigy
-    const helpButton = document.querySelector('.help-button');
-    if (helpButton) {
-        helpButton.style.color = 'white';
-        helpButton.style.borderColor = 'white';
-    }
-    
-    // Profile picture - blue for bigy (chess piece background)
-    const profilePicture = document.querySelector('.profile-picture');
-    if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #758ed1, #283f7e)';
-        profilePicture.style.backgroundColor = '';
-    }
-    
-    // Profile container - white background for bigy
-    const profileContainer = document.querySelector('.profile-container');
-    if (profileContainer) {
-        profileContainer.style.background = 'white';
-        profileContainer.style.backgroundColor = 'white';
-    }
-    
-    // Profile page red elements - change to red for bigy
-    const dealEarnContainer = document.querySelector('.deal-earn-container');
-    if (dealEarnContainer) {
-        dealEarnContainer.style.backgroundColor = '#dc3545';
-    }
-    
-    // Deal button containers - red for bigy (already red by default, but ensure it)
-    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
-    dealButtonContainers.forEach(container => {
-        container.style.backgroundColor = '#dc3545';
-    });
-    
-    const challengesContainer = document.querySelector('.profile-challenges-container');
-    if (challengesContainer) {
-        challengesContainer.style.borderColor = '#dc3545';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
-    }
-    
-    const achievementsContainer = document.querySelector('.profile-achievements-container');
-    if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#dc3545';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
-    }
-    
-    const achievementsHeader = document.querySelector('.achievements-header');
-    if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#dc3545';
-        achievementsHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
-    }
-    
-    const challengesHeader = document.querySelector('.challenges-header');
-    if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#dc3545';
-        challengesHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
-    }
-    
-    // Challenge items - red for bigy
-    const challengeItems = document.querySelectorAll('.challenge-item');
-    challengeItems.forEach(item => {
-        item.style.borderBottomColor = 'rgba(220, 53, 69, 0.2)';
-        item.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.08) 0%, rgba(220, 53, 69, 0.04) 100%)';
-    });
-    
-    // Challenge rewards - red for bigy
-    const challengeRewards = document.querySelectorAll('.challenge-reward');
-    challengeRewards.forEach(reward => {
-        reward.style.color = '#dc3545';
-        reward.style.background = 'linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.1) 100%)';
-        reward.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.2)';
-    });
-    
-    // Star icons inline - red for bigy
-    const starIconsInline = document.querySelectorAll('.star-icon-inline');
-    starIconsInline.forEach(icon => {
-        icon.style.color = '#dc3545';
-        icon.style.textShadow = '0 1px 2px rgba(220, 53, 69, 0.3)';
-    });
-    
-    // Text colors - white for bigy (keep as is, no uppercase)
-    const subsectionTitles = document.querySelectorAll('.subsection-title');
-    subsectionTitles.forEach(title => {
-        title.style.color = 'white';
-        title.style.textTransform = 'none'; // Remove uppercase for bigy
-    });
-    
-    // Section titles - remove transform for bigy and change to Nunito
-    const sectionTitles = document.querySelectorAll('.section-title');
-    sectionTitles.forEach(title => {
-        title.style.transform = 'translateY(0)';
-        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    // Journey page - blue gradient for bigy
-    const journeyPage = document.getElementById('journey-page');
-    if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #283f7e, #1a2d5c)';
-    }
-    
-    // Apply gold styling to hint button for bigy
-    const hintButton = document.querySelector('.unscramble-hint-btn');
-    if (hintButton) {
-        hintButton.style.background = '#FFD700';
-        hintButton.style.color = '#000';
-        hintButton.style.borderRadius = '8px';
-        hintButton.style.padding = '8px 20px';
-        hintButton.style.fontWeight = '700';
-        hintButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-        // Add lightbulb emoji for bigy
-        const buttonText = hintButton.textContent.trim();
-        if (!buttonText.includes('💡')) {
-            hintButton.textContent = '💡 Hint';
-        }
-        // Override hover state for bigy
-        hintButton.addEventListener('mouseenter', function() {
-            if (!this.disabled) {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-            }
-        }, { once: false });
-        hintButton.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-        }, { once: false });
-    }
-    
-    const mcQuestions = document.querySelectorAll('.mc-question');
-    mcQuestions.forEach(question => {
-        question.style.color = 'white';
-    });
-    
-    // Quiz text elements - white for bigy
-    const quizQuestions = document.querySelectorAll('.quiz-question');
-    quizQuestions.forEach(question => {
-        question.style.color = 'white';
-    });
-    
-    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
-    quizDifficulties.forEach(difficulty => {
-        difficulty.style.color = 'white';
-    });
-    
-    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
-    quizQuestionNumbers.forEach(number => {
-        number.style.color = 'white';
-    });
-    
-    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
-    unscrambleLabels.forEach(label => {
-        label.style.color = 'white';
-    });
-    
-    const fofInstructions = document.querySelectorAll('.fof-instruction');
-    fofInstructions.forEach(instruction => {
-        instruction.style.color = 'white';
-    });
-    
-    // Change letter boxes to white background with blue text for bigy
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = 'white';
-        box.style.color = '#1a237e';
-    });
-    
-    // Also call the scramble.js function if it exists (for dynamically created boxes)
-    if (typeof applyLetterBoxStyling === 'function') {
-        applyLetterBoxStyling();
-    }
-    
-    // Remove drop shadow from quiz containers for bigy
-    const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
-    quizContainers.forEach(container => {
-        container.style.boxShadow = 'none';
-    });
-}
-
-// Function to apply default styling (grey/white backgrounds, grey text)
-function applyDefaultStyling() {
-    // Change page background to #f5f5f5 for default
-    document.body.style.backgroundColor = '#f5f5f5';
-    
-    // Change all sections to #f5f5f5 background
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.backgroundColor = '#f5f5f5';
-    });
-    
-    // Scramble sections - default styling now handled by CSS
-    
-    // MC and FoF sections - default styling now handled by CSS
-    
-    // Profile picture - pink gradient for default
-    const profilePicture = document.querySelector('.profile-picture');
-    if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #F093FB, #F5576C)';
-        profilePicture.style.backgroundColor = '';
-    }
-    
-    // Profile container - white background for default
-    const profileContainer = document.querySelector('.profile-container');
-    if (profileContainer) {
-        profileContainer.style.background = 'white';
-        profileContainer.style.backgroundColor = 'white';
-    }
-    
-    // Text colors - dark grey for default (on light grey background)
-    // Skip top sections which have green background and white text
-    const subsectionTitles = document.querySelectorAll('.subsection-title');
-    subsectionTitles.forEach(title => {
-        // Set white if it's inside a top section (which has green background and white text)
-        if (title.closest('.scramble-top-section') || 
-            title.closest('.mc-top-section') || 
-            title.closest('.fof-top-section') ||
-            title.closest('.quiz-top-section')) {
-            title.style.color = 'white';
-        } else {
-            title.style.color = '#666';
-        }
-        title.style.textTransform = 'uppercase'; // Ensure uppercase for default
-    });
-    
-    const mcQuestions = document.querySelectorAll('.mc-question');
-    mcQuestions.forEach(question => {
-        question.style.color = '#666';
-    });
-    
-    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
-    unscrambleLabels.forEach(label => {
-        label.style.color = '#666';
-    });
-    
-    const fofInstructions = document.querySelectorAll('.fof-instruction');
-    fofInstructions.forEach(instruction => {
-        instruction.style.color = '#666';
-    });
-    
-    // Quiz text elements - dark grey for default
-    const quizQuestions = document.querySelectorAll('.quiz-question');
-    quizQuestions.forEach(question => {
-        question.style.color = '#666';
-    });
-    
-    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
-    quizDifficulties.forEach(difficulty => {
-        difficulty.style.color = '#666';
-    });
-    
-    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
-    quizQuestionNumbers.forEach(number => {
-        number.style.color = '#999';
-    });
-    
-    // Change section titles to Aleo (default) - remove any inline styles
-    const sectionTitles = document.querySelectorAll('.section-title');
-    sectionTitles.forEach(title => {
-        title.style.fontFamily = "'Aleo', serif";
-        title.style.transform = 'translateY(2px)';
-    });
-    
-    // Journey page - purple gradient for default
-    const journeyPage = document.getElementById('journey-page');
-    if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
-    }
-    
-    // Remove any inline styles from letter boxes for default mode (let CSS handle it)
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = '';
-        box.style.color = '';
-    });
-    
-    // Also call the scramble.js function if it exists (for dynamically created boxes)
-    if (typeof applyLetterBoxStyling === 'function') {
-        applyLetterBoxStyling();
-    }
-    
-    // Profile page elements - ensure orange for default (remove any bigy overrides)
-    // Note: Deal button containers stay red for both default and bigy
-    const dealEarnContainer = document.querySelector('.deal-earn-container');
-    if (dealEarnContainer) {
-        dealEarnContainer.style.backgroundColor = '#FF8C42';
-    }
-    
-    // Deal button containers - red for default (not orange)
-    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
-    dealButtonContainers.forEach(container => {
-        container.style.backgroundColor = '#dc3545';
-    });
-    
-    const challengesContainer = document.querySelector('.profile-challenges-container');
-    if (challengesContainer) {
-        challengesContainer.style.borderColor = '#FF8C42';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.15)';
-    }
-    
-    const achievementsContainer = document.querySelector('.profile-achievements-container');
-    if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#FF8C42';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.15)';
-    }
-    
-    const achievementsHeader = document.querySelector('.achievements-header');
-    if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#FF8C42';
-        achievementsHeader.style.borderBottomColor = 'rgba(255, 140, 66, 0.3)';
-    }
-    
-    const challengesHeader = document.querySelector('.challenges-header');
-    if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#FF8C42';
-        challengesHeader.style.borderBottomColor = 'rgba(255, 140, 66, 0.3)';
-    }
-    
-    // Challenge items - orange for default (CSS already has orange, but ensure no bigy overrides)
-    const challengeItems = document.querySelectorAll('.challenge-item');
-    challengeItems.forEach(item => {
-        item.style.borderBottomColor = 'rgba(255, 140, 66, 0.2)';
-        item.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 140, 66, 0.04) 100%)';
-    });
-    
-    // Challenge rewards - orange for default
-    const challengeRewards = document.querySelectorAll('.challenge-reward');
-    challengeRewards.forEach(reward => {
-        reward.style.color = '#FF8C42';
-        reward.style.background = 'linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.1) 100%)';
-        reward.style.boxShadow = '0 2px 4px rgba(255, 140, 66, 0.2)';
-    });
-    
-    // Star icons inline - orange for default
-    const starIconsInline = document.querySelectorAll('.star-icon-inline');
-    starIconsInline.forEach(icon => {
-        icon.style.color = '#FF8C42';
-        icon.style.textShadow = '0 1px 2px rgba(255, 140, 66, 0.3)';
-    });
-    
-    // Restore drop shadow on quiz containers for default
-    const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
-    quizContainers.forEach(container => {
-        container.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-    });
-    
-    // Apply default teal styling to hint button (remove gold styling)
-    const hintButton = document.querySelector('.unscramble-hint-btn');
-    if (hintButton) {
-        hintButton.style.background = 'linear-gradient(to bottom, #6EDDD4, #4ECDC4)';
-        hintButton.style.color = 'white';
-        hintButton.style.borderRadius = '6px';
-        hintButton.style.padding = '8px 24px';
-        hintButton.style.fontWeight = '600';
-        hintButton.style.boxShadow = '0 2px 6px rgba(78, 205, 196, 0.3)';
-        // Remove lightbulb emoji for default
-        hintButton.textContent = hintButton.textContent.replace('💡 ', '').replace('💡', '');
-        if (hintButton.textContent.trim() === '') {
-            hintButton.textContent = 'Hint';
-        }
-    }
-    
-    // Star counter - set star icon to orange for default
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
-        const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FF8C42';
-        }
-    }
 }
 
 // Initialize bigy carousel
@@ -1427,175 +823,6 @@ function initBigyCarousel() {
     carouselInterval = setInterval(nextSlide, 8000);
 }
 
-// Initialize type 1 carousel
-let carouselIntervalType1 = null;
-
-function initType1Carousel() {
-    // Only initialize if header-type1 is visible
-    const headerType1 = document.querySelector('.header-type1');
-    if (!headerType1 || headerType1.style.display === 'none') {
-        return;
-    }
-    
-    const carouselContainer = document.querySelector('.top-logo-carousel-container-type1');
-    if (!carouselContainer) {
-        return;
-    }
-    
-    const slides = carouselContainer.querySelectorAll('.carousel-slide-type1');
-    const carousel = carouselContainer.querySelector('.top-logo-carousel-type1');
-    const leftArrow = carouselContainer.querySelector('.carousel-arrow-left-type1');
-    const rightArrow = carouselContainer.querySelector('.carousel-arrow-right-type1');
-    let currentSlide = 0;
-    
-    if (!carousel || slides.length === 0) {
-        return;
-    }
-    
-    // Initialize carousel wrapper for sliding
-    carousel.style.display = 'flex';
-    carousel.style.transition = 'transform 1.2s ease';
-    carousel.style.transform = 'translateX(0px)';
-    carousel.style.left = '0';
-    carousel.style.top = '0';
-    
-    // Function to update carousel width and slide positioning
-    function updateCarouselDimensions() {
-        const containerWidth = carouselContainer.offsetWidth || window.innerWidth;
-        if (containerWidth === 0) return;
-        
-        carousel.style.width = `${slides.length * containerWidth}px`;
-        
-        slides.forEach((slide, index) => {
-            slide.style.width = `${containerWidth}px`;
-            slide.style.flexShrink = '0';
-            slide.style.position = 'relative';
-        });
-    }
-    
-    // Function to show slide with horizontal movement
-    function showSlide(index, instant = false) {
-        if (index < 0 || index >= slides.length) {
-            return;
-        }
-        const containerWidth = carouselContainer.offsetWidth || window.innerWidth;
-        if (containerWidth === 0) {
-            requestAnimationFrame(() => showSlide(index, instant));
-            return;
-        }
-        
-        // Check if header-type1 is still visible before animating
-        if (headerType1.style.display === 'none') {
-            return;
-        }
-        
-        if (instant) {
-            carousel.style.transition = 'none';
-        } else {
-            carousel.style.transition = 'transform 1.2s ease';
-        }
-        
-        const offset = -index * containerWidth;
-        carousel.style.transform = `translateX(${offset}px)`;
-        currentSlide = index;
-        
-        if (instant) {
-            requestAnimationFrame(() => {
-                carousel.style.transition = 'transform 0.5s ease';
-            });
-        }
-    }
-    
-    // Function to go to next slide (for auto-cycling - loops around)
-    function nextSlide() {
-        // Check if header-type1 is still visible
-        if (headerType1.style.display === 'none') {
-            clearInterval(carouselIntervalType1);
-            return;
-        }
-        
-        if (currentSlide === 2) {
-            showSlide(3, false);
-            setTimeout(() => {
-                showSlide(0, true);
-            }, 1200);
-        } else {
-            const next = currentSlide + 1;
-            showSlide(next);
-        }
-    }
-    
-    // Function to go to next slide manually (no wrap around)
-    function nextSlideManual() {
-        if (headerType1.style.display === 'none') {
-            return;
-        }
-        if (currentSlide >= 2) {
-            return;
-        }
-        const next = currentSlide + 1;
-        showSlide(next);
-    }
-    
-    // Function to go to previous slide manually (no wrap around)
-    function prevSlide() {
-        if (headerType1.style.display === 'none') {
-            return;
-        }
-        if (currentSlide <= 0) {
-            return;
-        }
-        const prev = currentSlide - 1;
-        showSlide(prev);
-    }
-    
-    // Initialize dimensions and show first slide
-    requestAnimationFrame(() => {
-        updateCarouselDimensions();
-        currentSlide = 0;
-        carousel.style.transform = 'translateX(0px)';
-        
-        setTimeout(() => {
-            updateCarouselDimensions();
-            carousel.style.transform = 'translateX(0px)';
-            currentSlide = 0;
-        }, 10);
-    });
-    
-    // Update on window resize
-    window.addEventListener('resize', () => {
-        if (headerType1.style.display !== 'none') {
-            updateCarouselDimensions();
-            showSlide(currentSlide);
-        }
-    });
-    
-    // Arrow click handlers
-    if (leftArrow) {
-        leftArrow.addEventListener('click', () => {
-            if (headerType1.style.display !== 'none') {
-                prevSlide();
-                clearInterval(carouselIntervalType1);
-                carouselIntervalType1 = setInterval(nextSlide, 10000);
-            }
-        });
-    }
-    
-    if (rightArrow) {
-        rightArrow.addEventListener('click', () => {
-            if (headerType1.style.display !== 'none') {
-                nextSlideManual();
-                clearInterval(carouselIntervalType1);
-                carouselIntervalType1 = setInterval(nextSlide, 10000);
-            }
-        });
-    }
-    
-    // Auto-cycle every 8 seconds
-    clearInterval(carouselIntervalType1);
-    carouselIntervalType1 = setInterval(nextSlide, 8000);
-}
-
 // Update boost high score from localStorage
 function updateBoostHighScore(score = null) {
     const highScoreElement = document.getElementById('boost-high-score');
@@ -1621,9 +848,8 @@ function updateBoostPageForBigy() {
     const urlParams = new URLSearchParams(window.location.search);
     const scheme = urlParams.get('s');
     
-    // Market Match is now the default, only show Donut Matcher if scheme is explicitly set to 'donut'
-    if (scheme === 'donut') {
-        // Show Donut Matcher only if explicitly requested
+    if (scheme !== 'bigy') {
+        // Reset to default if not bigy
         const gameTitle = document.querySelector('#boost-page .game-title');
         if (gameTitle) {
             gameTitle.textContent = 'DONUT MATCHER';
@@ -1675,7 +901,7 @@ function updateBoostPageForBigy() {
         return;
     }
     
-    // Market Match is now the default - Change game title to Market Match
+    // Change game title to Market Match
     const gameTitle = document.querySelector('#boost-page .game-title');
     if (gameTitle) {
         gameTitle.textContent = 'MARKET MATCH';
@@ -1758,17 +984,10 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
         }
     });
     
-    // Only change header bar if we're not in default/bigy mode
-    const currentUrlParams = new URLSearchParams(window.location.search);
-    const currentHeaderType = currentUrlParams.get('d');
-    const currentScheme = currentUrlParams.get('s');
-    const shouldChangeHeader = currentScheme && currentScheme !== 'bigy' && !currentHeaderType;
-    
-    if (shouldChangeHeader) {
-        const headerBar = document.querySelector('.header-bar');
-        if (headerBar) {
-            headerBar.style.background = barColor;
-        }
+    // Change header bar
+    const headerBar = document.querySelector('.header-bar');
+    if (headerBar) {
+        headerBar.style.background = barColor;
     }
     
     // Change week container (calendar)
@@ -1791,16 +1010,11 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
         title.style.color = textColor;
     });
     
-    // Change scramble letter boxes to match top bar (only for custom schemes, not default)
-    // Default mode uses CSS red gradient, bigy mode is handled separately
-    const currentUrlParamsForBoxes = new URLSearchParams(window.location.search);
-    const currentSchemeForBoxes = currentUrlParamsForBoxes.get('s');
-    if (currentSchemeForBoxes && currentSchemeForBoxes !== 'bigy') {
-        const letterBoxes = document.querySelectorAll('.letter-box');
-        letterBoxes.forEach(box => {
-            box.style.background = barColor;
-        });
-    }
+    // Change scramble letter boxes to match top bar
+    const letterBoxes = document.querySelectorAll('.letter-box');
+    letterBoxes.forEach(box => {
+        box.style.background = barColor;
+    });
     
     // Hide borders on white boxes
     const whiteBoxes = document.querySelectorAll('.play-box, .arcade-box, .bonus-box, .on-this-day-container, .highlow-container, .profile-container');
@@ -1942,27 +1156,24 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     
     // Check URL parameter for logo placement
     const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
-    const isBigy = headerType === 'bigy';
-    
     // Show and set logo
-    const logo = document.querySelector('.header-logo');
+    const logo = document.querySelector('.logo-img');
     
     if (logoPath) {
         hasLogo = true;
-        if (logo) {
-            logo.src = logoPath;
-            // Only show logo if close button is not showing AND we're in bigy mode
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton && !closeButton.classList.contains('show') && isBigy) {
-                logo.style.display = 'block';
-            } else {
-                logo.style.display = 'none';
+            if (logo) {
+                logo.src = logoPath;
+                // Only show logo if close button is not showing
+                const closeButton = document.querySelector('.game-overlay-close');
+                if (closeButton && !closeButton.classList.contains('show')) {
+                    logo.style.display = 'block';
+                } else {
+                    logo.style.display = 'none';
             }
         }
     } else {
         if (logo) {
-            logo.style.display = 'none';
+        logo.style.display = 'none';
         }
         hasLogo = false;
     }
@@ -1973,14 +1184,9 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
 
 // Helper function to update logo visibility based on close button state
 function updateLogoVisibility() {
-    const logo = document.querySelector('.header-logo');
+    const logo = document.querySelector('.logo-img');
     const closeButton = document.querySelector('.game-overlay-close');
     const helpButton = document.querySelector('.help-button');
-    
-    // Check if we're in default or bigy mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
-    const isBigy = headerType === 'bigy';
     
     // Hide/show help button based on close button state
     if (helpButton) {
@@ -1990,38 +1196,25 @@ function updateLogoVisibility() {
         } else {
             helpButton.classList.remove('hidden');
             helpButton.style.display = 'inline-flex';
-            // Set help button color based on mode
-            if (isBigy) {
-                helpButton.style.color = 'white';
-                helpButton.style.borderColor = 'white';
-            } else {
-                helpButton.style.color = '#666';
-                helpButton.style.borderColor = '#666';
-            }
         }
     }
     
-    // Show/hide logo based on game overlay state and mode
-    if (logo) {
-        if (closeButton && closeButton.classList.contains('show')) {
-            // Game overlay is open - hide logo
-            logo.style.display = 'none';
-        } else {
-            // Game overlay is closed - show logo only for bigy
-            logo.style.display = isBigy ? 'block' : 'none';
+    if (hasLogo) {
+            // Logo is in header
+            if (logo) {
+                if (closeButton && closeButton.classList.contains('show')) {
+                    logo.style.display = 'none';
+                } else {
+                    logo.style.display = 'block';
+                }
+            }
         }
-    }
 }
 
 // Function to observe and style dynamically added letter boxes
 function observeLetterBoxes() {
     const unscrambleContainer = document.querySelector('.unscramble-boxes');
     if (!unscrambleContainer || !currentColorScheme) return;
-    
-    // Only observe for custom schemes, not default (default uses CSS)
-    const urlParams = new URLSearchParams(window.location.search);
-    const scheme = urlParams.get('s');
-    if (!scheme || scheme === 'bigy') return;
     
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -2092,22 +1285,7 @@ window.addEventListener('load', () => {
 
 // Keyboard shortcut to test color scheme
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'q' || e.key === 'Q') {
-        // Reset phrases data
-        const todayKey = getTodayKey();
-        localStorage.removeItem(`phrasesState_${todayKey}`);
-        localStorage.removeItem(`phrasesStars_${todayKey}`);
-        localStorage.removeItem(`phrasesComplete_${todayKey}`);
-        console.log('[MainPage] RESET: Cleared all phrases data for key:', todayKey);
-        
-        // Update the display
-        if (window.loadGameScores) {
-            window.loadGameScores();
-        }
-        if (window.updatePhrasesStars) {
-            window.updatePhrasesStars();
-        }
-    } else if (e.key === '1') {
+    if (e.key === '1') {
         // Debug: Show all data for today
         const today = new Date();
         const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -2220,9 +1398,6 @@ if (closeButton) {
         const blackjackOverlay = document.getElementById('blackjackOverlay');
         const lostAndFoundOverlay = document.getElementById('lostAndFoundOverlay');
         const goldCaseOverlay = document.getElementById('goldCaseOverlay');
-        const zoomOverlay = document.getElementById('zoomOverlay');
-        const shiftOverlay = document.getElementById('shiftOverlay');
-        const phrasesOverlay = document.getElementById('phrasesOverlay');
         const match3Overlay = document.getElementById('match3Overlay');
         
         // Determine which overlay is active and only reload that iframe
@@ -2252,18 +1427,6 @@ if (closeButton) {
             activeOverlay = 'goldCase';
             goldCaseOverlay.classList.remove('active');
             iframeToUnload = document.getElementById('goldCaseIframe');
-        } else if (zoomOverlay && zoomOverlay.classList.contains('active')) {
-            activeOverlay = 'zoom';
-            zoomOverlay.classList.remove('active');
-            iframeToUnload = document.getElementById('zoomIframe');
-        } else if (shiftOverlay && shiftOverlay.classList.contains('active')) {
-            activeOverlay = 'shift';
-            shiftOverlay.classList.remove('active');
-            iframeToUnload = document.getElementById('shiftIframe');
-        } else if (phrasesOverlay && phrasesOverlay.classList.contains('active')) {
-            activeOverlay = 'phrases';
-            phrasesOverlay.classList.remove('active');
-            iframeToUnload = document.getElementById('phrasesIframe');
         } else if (match3Overlay && match3Overlay.classList.contains('active')) {
             activeOverlay = 'match3';
             match3Overlay.classList.remove('active');
@@ -2509,116 +1672,9 @@ if (lostAndFoundBox) {
     });
 }
 
-// Zoom puzzle box (Daily Puzzles)
-const tilesBox = document.getElementById('tilesBox');
-const zoomOverlay = document.getElementById('zoomOverlay');
-
-if (tilesBox) {
-    tilesBox.addEventListener('click', () => {
-        if (zoomOverlay) {
-            zoomOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('zoomIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/zoom/index.html?s=${scheme}` : 'games/zoom/index.html';
-                console.log(`Reloading zoom game iframe: ${iframe.src}`);
-            }
-        }
-    });
-}
-
-// Shift puzzle box (Daily Puzzles)
-const shiftBox = document.getElementById('shiftBox');
-const shiftOverlay = document.getElementById('shiftOverlay');
-
-if (shiftBox) {
-    shiftBox.addEventListener('click', () => {
-        if (shiftOverlay) {
-            shiftOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('shiftIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/shift/index.html?s=${scheme}` : 'games/shift/index.html';
-                console.log(`Reloading shift game iframe: ${iframe.src}`);
-            }
-        }
-    });
-}
-
-// Phrases game box
-const phrasesBox = document.getElementById('phrasesBox');
-const phrasesOverlay = document.getElementById('phrasesOverlay');
-
-if (phrasesBox) {
-    phrasesBox.addEventListener('click', () => {
-        if (phrasesOverlay) {
-            phrasesOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const phrasesIframe = document.getElementById('phrasesIframe');
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            if (phrasesIframe) {
-                phrasesIframe.src = scheme ? `games/phrases/index.html?s=${scheme}` : 'games/phrases/index.html';
-                console.log(`Reloading phrases game iframe: ${phrasesIframe.src}`);
-            }
-        }
-    });
-}
-
-// Gold Case puzzle box (Daily Puzzles)
-const goldCasePuzzleBox = document.getElementById('goldCasePuzzleBox');
-const goldCaseOverlay = document.getElementById('goldCaseOverlay');
-
-if (goldCasePuzzleBox) {
-    goldCasePuzzleBox.addEventListener('click', () => {
-        if (goldCaseOverlay) {
-            goldCaseOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('goldCaseIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/goldCase/index.html?s=${scheme}` : 'games/goldCase/index.html';
-                console.log(`Reloading goldCase game iframe: ${iframe.src}`);
-            }
-        }
-    });
-}
-
 // Gold Case game overlay (Daily Bonus)
 const goldCaseBox = document.getElementById('goldCaseBox');
+const goldCaseOverlay = document.getElementById('goldCaseOverlay');
 
 if (goldCaseBox) {
     goldCaseBox.addEventListener('click', () => {
@@ -2636,8 +1692,8 @@ if (goldCaseBox) {
             const scheme = urlParams.get('s');
             const iframe = document.getElementById('goldCaseIframe');
             if (iframe) {
-                iframe.src = scheme ? `games/bonusSpin/index.html?s=${scheme}` : 'games/bonusSpin/index.html';
-                console.log(`Reloading bonusSpin game iframe: ${iframe.src}`);
+                iframe.src = scheme ? `games/goldCase/index.html?s=${scheme}` : 'games/goldCase/index.html';
+                console.log(`Reloading goldCase game iframe: ${iframe.src}`);
             }
         }
     });
@@ -2821,7 +1877,7 @@ function resetAllData() {
         if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
                     key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
                     key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction') ||
-                    key.includes('match3') || key.includes('zoom') || key.includes('shift') || key.includes('quiz'))) {
+                    key.includes('match3'))) {
             keysToRemove.push(key);
         }
     }
@@ -2850,24 +1906,6 @@ function resetAllData() {
     localStorage.removeItem(`lostAndFoundComplete_${todayKey}`);
     localStorage.removeItem(`lostAndFoundScore_${todayKey}`);
     localStorage.removeItem(`lostAndFoundStars_${todayKey}`);
-    
-    // Reset zoom game completion and data
-    localStorage.removeItem(`zoomComplete_${todayKey}`);
-    localStorage.removeItem(`zoomStars_${todayKey}`);
-    localStorage.removeItem(`zoomMoves_${todayKey}`);
-    
-    // Reset shift game completion and data
-    localStorage.removeItem(`shiftComplete_${todayKey}`);
-    localStorage.removeItem(`shiftStars_${todayKey}`);
-    localStorage.removeItem(`shiftFinalColor_${todayKey}`);
-    
-    // Reset quiz game completion and data
-    localStorage.removeItem(`quizComplete_${todayKey}`);
-    localStorage.removeItem(`quizStars_${todayKey}`);
-    localStorage.removeItem(`quizSet_${todayKey}`);
-    localStorage.removeItem(`quizQuestionIndex_${todayKey}`);
-    localStorage.removeItem(`quizCorrectCount_${todayKey}`);
-    localStorage.removeItem(`quizLastAnswer_${todayKey}`);
     
     // Reset daily stars to zero
     localStorage.setItem(`dailyStars_${todayKey}`, '0');
@@ -2919,9 +1957,6 @@ function resetAllData() {
     }
     if (typeof loadGameScores === 'function') {
         loadGameScores();
-    }
-    if (typeof loadGameScores2 === 'function') {
-        loadGameScores2();
     }
     if (typeof updateBoostHighScore === 'function') {
         updateBoostHighScore();
@@ -2986,14 +2021,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (closeButton) closeButton.classList.add('show');
                 updateLogoVisibility();
                 
-                // Load match3 game in iframe - Market Match is now default
+                // Load match3 game in iframe
                 const urlParams = new URLSearchParams(window.location.search);
                 const scheme = urlParams.get('s');
                 const iframe = document.getElementById('match3Iframe');
                 if (iframe) {
-                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
-                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-                    iframe.src = `games/match3/index.html?s=${gameScheme}`;
+                    iframe.src = scheme ? `games/match3/index.html?s=${scheme}` : 'games/match3/index.html';
                     console.log(`Loading match3 game iframe: ${iframe.src}`);
                 }
             }
@@ -3014,14 +2047,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (closeButton) closeButton.classList.add('show');
                 updateLogoVisibility();
                 
-                // Load match3 game in iframe with practice parameter - Market Match is now default
+                // Load match3 game in iframe with practice parameter
                 const urlParams = new URLSearchParams(window.location.search);
                 const scheme = urlParams.get('s');
                 const iframe = document.getElementById('match3Iframe');
                 if (iframe) {
-                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
-                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-                    iframe.src = `games/match3/index.html?s=${gameScheme}&practice=true`;
+                    let url = 'games/match3/index.html';
+                    if (scheme) {
+                        url += `?s=${scheme}&practice=true`;
+                    } else {
+                        url += '?practice=true';
+                    }
+                    iframe.src = url;
                     console.log(`Loading match3 practice game iframe: ${iframe.src}`);
                 }
             }

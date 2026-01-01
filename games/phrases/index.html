@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Phrases</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sanchez:ital,wght@0,400;1,400&family=Nunito:wght@600;700&family=Aleo:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/phrases2.svg" alt="Phrases" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="memoryTitle">PHRASES</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">select letters to reveal the hidden phrase</div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="game-content">
+            <div id="guessCounter">
+                <div class="guess-label">GUESSES</div>
+                <div class="guess-circle">
+                    <span id="guessNumber">15</span>
+                </div>
+                <div id="guessStars">
+                    <span class="guess-star">★</span>
+                    <span class="guess-star">★</span>
+                    <span class="guess-star">★</span>
+                    <span class="guess-star">★</span>
+                    <span class="guess-star">★</span>
+                </div>
+            </div>
+            <div id="shortGuessCounter" class="short-guess-counter">GUESSES: 15</div>
+            <div id="guessStars2">
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+                <span class="guess-star">★</span>
+            </div>
+            <div id="phraseTitle" class="phrase-title">THANKSGIVING PHRASE</div>
+            <div id="phraseDisplay" class="phrase-display"></div>
+            <div class="letter-selection-ui">
+            <div class="instruction-line">select your first letter</div>
+            <div class="letter-boxes-container">
+                <div class="selection-box"></div>
+                <div class="selection-box"></div>
+                <div class="selection-box"></div>
+            </div>
+            <div class="instruction-line">Letters uses: 2, 1, 0</div>
+            <div class="action-buttons">
+                <button class="action-btn next-letter-btn">next letter</button>
+                <button class="action-btn solve-btn">solve</button>
+            </div>
+        </div>
+        </div>
+        <div class="bottom-section">
+            <div class="solve-ui">
+                <div class="solve-ui-header">
+                    <button class="back-btn">← back</button>
+                    <div class="solve-title">SOLVE THE PUZZLE</div>
+                </div>
+                <div class="solve-input-container">
+                    <input type="text" class="solve-input" id="solveInput" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <button class="solve-ui-btn">solve</button>
+                </div>
+            </div>
+            <div class="keyboard">
+            <div class="keyboard-row">
+                <button class="key" data-key="Q">Q</button>
+                <button class="key" data-key="W">W</button>
+                <button class="key" data-key="E">E</button>
+                <button class="key" data-key="R">R</button>
+                <button class="key" data-key="T">T</button>
+                <button class="key" data-key="Y">Y</button>
+                <button class="key" data-key="U">U</button>
+                <button class="key" data-key="I">I</button>
+                <button class="key" data-key="O">O</button>
+                <button class="key" data-key="P">P</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key" data-key="A">A</button>
+                <button class="key" data-key="S">S</button>
+                <button class="key" data-key="D">D</button>
+                <button class="key" data-key="F">F</button>
+                <button class="key" data-key="G">G</button>
+                <button class="key" data-key="H">H</button>
+                <button class="key" data-key="J">J</button>
+                <button class="key" data-key="K">K</button>
+                <button class="key" data-key="L">L</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-large" data-key="SPACE">SPACE</button>
+                <button class="key" data-key="Z">Z</button>
+                <button class="key" data-key="X">X</button>
+                <button class="key" data-key="C">C</button>
+                <button class="key" data-key="V">V</button>
+                <button class="key" data-key="B">B</button>
+                <button class="key" data-key="N">N</button>
+                <button class="key" data-key="M">M</button>
+                <button class="key key-large" data-key="BACKSPACE">⌫</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

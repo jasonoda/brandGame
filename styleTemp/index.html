@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="games/multipleChoice/multipleChoice.js" defer></script>
-    <script src="games/quiz/quiz.js" defer></script>
     <script src="games/factOrFiction/factOrFiction.js" defer></script>
     <script src="prizes/prizes.js" defer></script>
 </head>
@@ -21,13 +20,25 @@
         <div id="splash-overlay" class="splash-overlay" style="display: none;">
         </div>
         
+        <div class="header-bar">
+            <div class="game-overlay-close">✕</div>
+            <div class="help-button">?</div>
+            <div class="date-container">
+                <div class="date">NOVEMBER 26, 2025</div>
+                <div class="date-subtitle"></div>
+            </div>
+            <div class="star-counter">
+                <span class="star-icon">★</span> <span class="star-count">x 0</span>
+            </div>
+        </div>
+        
         <!-- Help Popup -->
         <div id="help-popup-overlay" class="help-popup-overlay">
             <div class="help-popup-content">
                 <div class="help-popup-close">✕</div>
                 <h2 class="help-popup-title">Daily Game Center</h2>
                 <div class="help-popup-text">
-                    <p>Visit daily for new game content. Play games to build your daily star collection.</p>
+                    <p>Visit daily for new game content. Complete quizzes, arcade games, and bonus challenges to build your daily star collection.</p>
                     <p><strong>Earn Stars:</strong> Stars allow you to win prizes. The better you play, the more stars you earn!</p>
                     <p><strong>Boost:</strong> Earn unlimited stars by playing our featured game.</p>
                     <p><strong>Journey:</strong> Play more games to move forward in the Journey tab. Advance through levels and earn free prize tiles.</p>
@@ -37,138 +48,45 @@
             </div>
         </div>
 
-        <div class="help-button">?</div>
-
-        <div class="header-bar">
-            <div class="game-overlay-close">✕</div>
-            <img src="src/img/tempLogo.png" alt="Logo" class="header-logo">
-            <div class="date-container">
-                <div class="date">Daily Game Center</div>
-                <div class="date-subtitle">DEC 18, 2025</div>
-            </div>
-            <div class="star-counter">
-                <span class="star-icon">★</span> <span class="star-count">0</span>
-            </div>
-        </div>
-        
         <div id="games-page" class="page active">
-
-        <div class="header-type1">
-            <div class="top-logo-carousel-container-type1">
-                <div class="carousel-arrow-type1 carousel-arrow-left-type1">‹</div>
-                <div class="top-logo-carousel-type1">
-                    <div class="carousel-slide-type1 active">
-                        <img src="src/img/tempLogo.png" alt="Logo" style="max-width: 200px; max-height: 80px; width: auto; height: auto; object-fit: contain;">
-                    </div>
-                    <div class="carousel-slide-type1">
-                        <div class="carousel-content-type1">
-                            <div class="carousel-icon-type1">
-                                <div class="carousel-icon-circle-type1">
-                                    <span class="carousel-dollar-type1">$</span>
-                                </div>
-                            </div>
-                            <div class="carousel-text-type1">Black Friday<br>Sales</div>
-                        </div>
-                    </div>
-                    <div class="carousel-slide-type1">
-                        <div class="carousel-content-type1">
-                            <div class="carousel-icon-type1">
-                                <div class="carousel-icon-circle-type1">
-                                    <span class="carousel-dollar-type1">$</span>
-                                </div>
-                            </div>
-                            <div class="carousel-text-type1">View our<br>seasonal deals</div>
-                        </div>
-                    </div>
-                    <div class="carousel-slide-type1">
-                        <img src="src/img/tempLogo.png" alt="Logo" style="max-width: 200px; max-height: 80px; width: auto; height: auto; object-fit: contain;">
-                    </div>
-                </div>
-                <div class="carousel-arrow-type1 carousel-arrow-right-type1">›</div>
-            </div>
-            <div class="week-section-type1">
-                <div class="week-title-type1">THIS WEEK:</div>
-                <div class="week-subtitle-type1">THANKSGIVING</div>
-                <div class="week-container-type1">
-                    <div class="week-record-box-type1">
-                        <div class="week-record-text-type1">WEEKLY <span class="week-record-star-type1">★</span> RECORD</div>
-                    </div>
-                    <div class="week-days-container-type1">
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">S</div>
-                            <div class="day-number-type1">0</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">M</div>
-                            <div class="day-number-type1">2</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">T</div>
-                            <div class="day-number-type1">7</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">W</div>
-                            <div class="day-number-type1">4</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">T</div>
-                            <div class="day-number-type1">&nbsp;</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">F</div>
-                            <div class="day-number-type1">&nbsp;</div>
-                        </div>
-                        <div class="week-box-type1">
-                            <div class="day-initial-type1">S</div>
-                            <div class="day-number-type1">&nbsp;</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="header-type2">
-       
         <div class="top-logo-carousel-container">
-            <!-- <div class="carousel-arrow carousel-arrow-left">‹</div> -->
+            <div class="carousel-arrow carousel-arrow-left">‹</div>
             <div class="top-logo-carousel">
                 <div class="carousel-slide active">
-                    <div class="promotional-banner-content">
-                        <div class="promotional-banner-title">COLLECT STARS &<br>UNLOCK REWARDS</div>
-                        <div class="promotional-banner-subtitle">Cash prizes, gift cards, discounts & exclusive offers.</div>
+                    <img src="src/img/bigy/bigy.png" alt="Bigy Logo" style="max-width: 200px; max-height: 80px; width: auto; height: auto; object-fit: contain;">
+                </div>
+                <div class="carousel-slide">
+                    <div class="carousel-content">
+                        <div class="carousel-icon">
+                            <div class="carousel-icon-circle">
+                                <span class="carousel-dollar">$</span>
+                            </div>
+                        </div>
+                        <div class="carousel-text">More Perks<br>for My Points</div>
                     </div>
                 </div>
                 <div class="carousel-slide">
-                    <div class="promotional-banner-content">
-                        <div class="promotional-banner-title">DAILY GAMES,<br>DAILY FUN</div>
-                        <div class="promotional-banner-subtitle">Cash prizes, gift cards, discounts & exclusive offers.</div>
+                    <div class="carousel-content">
+                        <div class="carousel-icon">
+                            <div class="carousel-icon-circle">
+                                <span class="carousel-dollar">$</span>
+                            </div>
+                        </div>
+                        <div class="carousel-text">More Miles<br>for My Tank</div>
                     </div>
                 </div>
                 <div class="carousel-slide">
-                    <div class="promotional-banner-content">
-                        <div class="promotional-banner-title">GO UNLIMITED!</div>
-                        <div class="promotional-banner-subtitle">Cash prizes, gift cards, discounts & exclusive offers.</div>
-                    </div>
-                </div>
-                <div class="carousel-slide">
-                    <div class="promotional-banner-content">
-                        <div class="promotional-banner-title">COLLECT STARS &<br>UNLOCK REWARDS</div>
-                        <div class="promotional-banner-subtitle">Cash prizes, gift cards, discounts & exclusive offers.</div>
-                    </div>
+                    <img src="src/img/bigy/bigy.png" alt="Bigy Logo" style="max-width: 200px; max-height: 80px; width: auto; height: auto; object-fit: contain;">
                 </div>
             </div>
-            <!-- <div class="carousel-arrow carousel-arrow-right">›</div> -->
+            <div class="carousel-arrow carousel-arrow-right">›</div>
         </div>
-        <div class="week-combined-container">
-            <div class="week-theme-section">
-                <div class="week-title">THIS WEEK'S THEME</div>
-                <div class="week-subtitle">Thanksgiving</div>
-            </div>
-            <div class="week-calendar-section">
-                <div class="week-record-header">
-                    <span class="week-record-text">WEEKLY</span>
-                    <span class="week-record-star">★</span>
-                    <span class="week-record-text">RECORD</span>
+        <div class="week-section">
+            <div class="week-title">THIS WEEK:</div>
+            <div class="week-subtitle">THANKSGIVING</div>
+            <div class="week-container">
+                <div class="week-record-box">
+                    <div class="week-record-text">WEEKLY <span class="week-record-star">★</span> RECORD</div>
                 </div>
                 <div class="week-days-container">
                     <div class="week-box">
@@ -181,92 +99,55 @@
                     </div>
                     <div class="week-box">
                         <div class="day-initial">T</div>
-                        <div class="day-number">0</div>
+                        <div class="day-number">7</div>
                     </div>
-                    <div class="week-box active">
+                    <div class="week-box">
                         <div class="day-initial">W</div>
                         <div class="day-number">4</div>
                     </div>
                     <div class="week-box">
                         <div class="day-initial">T</div>
-                        <div class="day-number">-</div>
+                        <div class="day-number">&nbsp;</div>
                     </div>
                     <div class="week-box">
                         <div class="day-initial">F</div>
-                        <div class="day-number">-</div>
+                        <div class="day-number">&nbsp;</div>
                     </div>
                     <div class="week-box">
                         <div class="day-initial">S</div>
-                        <div class="day-number">-</div>
+                        <div class="day-number">&nbsp;</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        </div>
-        
-
-        <div class="section-title">DAILY QUIZ</div>
         <div class="section">
+            <div class="section-title">DAILY QUIZ</div>
             <div class="on-this-day-container">
-                <div class="scramble-top-section">
-                    <div class="subsection-title">On this day...</div>
+                <div class="subsection-title">On this day...</div>
+                <div class="unscramble-boxes">
+                    <div class="letter-box">A</div>
+                    <div class="letter-box">U</div>
+                    <div class="letter-box">T</div>
+                    <div class="letter-box">U</div>
+                    <div class="letter-box">M</div>
+                    <div class="letter-box">N</div>
                 </div>
-                <div class="scramble-bottom-section">
-                    <div class="unscramble-boxes">
-                        <div class="letter-box">A</div>
-                        <div class="letter-box">U</div>
-                        <div class="letter-box">T</div>
-                        <div class="letter-box">U</div>
-                        <div class="letter-box">M</div>
-                        <div class="letter-box">N</div>
-                    </div>
-                    <div class="unscramble-footer">
-                        <div class="unscramble-label">Unscramble the letters</div>
-                        <button class="unscramble-hint-btn">Hint</button>
-                    </div>
-                    <div class="unscramble-stars" style="display: none;">
-                        <span class="unscramble-star">★</span>
-                        <span class="unscramble-star">★</span>
-                    </div>
+                <div class="unscramble-footer">
+                    <div class="unscramble-label">Unscramble the letters</div>
+                    <button class="unscramble-hint-btn">Hint</button>
                 </div>
+                <div class="unscramble-stars" style="display: none;">★★</div>
             </div>
-            <div class="mc-container" style="display: none;">
-                <div class="mc-top-section">
-                    <div class="subsection-title">THANKSGIVING QUIZ</div>
+            <div class="mc-container">
+                <div class="mc-question"></div>
+                <div class="mc-buttons">
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
+                    <button class="mc-button"></button>
                 </div>
-                <div class="mc-bottom-section">
-                    <div class="mc-question"></div>
-                    <div class="mc-buttons">
-                        <button class="mc-button"></button>
-                        <button class="mc-button"></button>
-                        <button class="mc-button"></button>
-                        <button class="mc-button"></button>
-                    </div>
-                    <div class="mc-stars" style="display: none;">★★</div>
-                </div>
-            </div>
-            <div class="quiz-container">
-                <div class="quiz-top-section">
-                    <div class="subsection-title">THANKSGIVING QUIZ</div>
-                </div>
-                <div class="quiz-bottom-section">
-                    <div class="quiz-question"></div>
-                    <div class="quiz-buttons">
-                        <!-- Buttons will be created dynamically -->
-                    </div>
-                    <div class="quiz-difficulty-number">
-                        <span class="quiz-difficulty">DIFFICULTY: VERY EASY</span>
-                        <span class="quiz-question-number">1/5</span>
-                    </div>
-                    <div class="quiz-stars" style="display: none;">
-                        <span class="quiz-star">★</span>
-                        <span class="quiz-star">★</span>
-                        <span class="quiz-star">★</span>
-                        <span class="quiz-star">★</span>
-                        <span class="quiz-star">★</span>
-                    </div>
-                </div>
+                <div class="mc-stars" style="display: none;">★★</div>
             </div>
             <div class="highlow-container" style="display: none;">
                 <div class="highlow-question">Who has won the most Oscars?</div>
@@ -279,57 +160,23 @@
                     <span class="star earned">★</span><span class="star earned">★</span><span class="star earned">★</span>
                 </div>
             </div>
-            <div class="fof-container" style="display: none;">
-                <div class="fof-top-section">
-                    <div class="subsection-title">Fact or Fiction</div>
+            <div class="fof-container">
+                <div class="subsection-title">Fact or Fiction?</div>
+                <div class="fof-buttons">
+                    <button class="fof-button"></button>
+                    <button class="fof-button"></button>
+                    <button class="fof-button"></button>
                 </div>
-                <div class="fof-bottom-section">
-                    <div class="fof-buttons">
-                        <button class="fof-button"></button>
-                        <button class="fof-button"></button>
-                        <button class="fof-button"></button>
-                    </div>
-                    <div class="fof-footer">
-                        <div class="fof-instruction">Select the true statements</div>
-                        <button class="fof-guess-btn">Guess</button>
-                    </div>
-                    <div class="fof-stars" style="display: none;">★★★</div>
+                <div class="fof-footer">
+                    <div class="fof-instruction">Select the true statements</div>
+                    <button class="fof-guess-btn">Guess</button>
                 </div>
+                <div class="fof-stars" style="display: none;">★★★</div>
             </div>
-        </div>
-        <div class="section-title">DAILY PUZZLES</div>
-        <div class="section">
+            <div class="section-title">DAILY PUZZLES</div>
             <div class="play-boxes">
-                <div class="play-box" id="phrasesBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #26D7A4, #1DB88A);">
-                        <img src="src/img/phrases.svg" alt="Phrases" style="height: 30px; width: auto; margin-bottom: 1px;">
-                        <div class="game-title">PHRASES</div>
-                    </div>
-                    <div class="play-text" id="phrasesStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
-                </div>
-                <div class="play-box" id="tilesBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B6B, #D63645);">
-                        <img src="src/img/tiles.svg" alt="Tiles" style="height: 30px; width: auto; margin-bottom: 1px;">
-                        <div class="game-title">ZOOM</div>
-                    </div>
-                    <div class="play-text" id="tilesStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
-                </div>
-                <div class="play-box" id="goldCasePuzzleBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
-                        <img src="src/img/goldCase.svg" alt="Gold Case" style="height: 30px; width: auto; margin-bottom: 1px;">
-                        <div class="game-title">GOLD CASE</div>
-                    </div>
-                    <div class="play-text" id="goldCasePuzzleStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
-                </div>
-                <div class="play-box" id="shiftBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #00CED1, #00b4b4);">
-                        <img src="src/img/shift.svg" alt="Shift" style="height: 30px; width: auto; margin-bottom: 1px;">
-                        <div class="game-title">SHIFT</div>
-                    </div>
-                    <div class="play-text" id="shiftStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
-                </div>
                 <div class="play-box" id="mysteryWordBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #6B8FE8, #596fc2);">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #6B8FE8, #4A5FA8);">
                         <img src="src/img/mysteryWord.svg" alt="Mystery Word" style="height: 30px; width: auto; margin-bottom: 1px;">
                         <div class="game-title">MYSTERY WORD</div>
                     </div>
@@ -345,11 +192,10 @@
             </div>
         </div>
 
-        <div class="section-title">DAILY ARCADE</div>
-        <div class="section arcade-section">
-            
+        <div class="section">
+            <div class="section-title">DAILY ARCADE</div>
             <div class="arcade-box" id="memoryBox">
-                <div class="arcade-color" style="background: linear-gradient(to bottom, #00d4ff, #0099cc);">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BEFFF, #5BC5E0);">
                     <img src="src/img/memory.svg" alt="Memory" style="height: 30px; width: auto; margin-bottom: 1px;">
                     <div class="game-title">MEMORY</div>
                 </div>
@@ -363,7 +209,7 @@
                 </div>
             </div>
             <div class="arcade-box" id="speed21Box">
-                <div class="arcade-color" style="background: linear-gradient(to bottom, #52d077, #2aa04a);">
+                <div class="arcade-color" style="background: linear-gradient(to bottom, #7BED9A, #5BCA7A);">
                     <img src="src/img/speed21.svg" alt="Speed 21" style="height: 30px; width: auto; margin-bottom: 1px;">
                     <div class="game-title">SPEED 21</div>
                 </div>
@@ -392,16 +238,16 @@
             </div>
         </div>
 
-        <div class="section-title">DAILY BONUS</div>
         <div class="section">
+            <div class="section-title">DAILY BONUS</div>
             <div class="bonus-box" id="goldCaseBox">
                 <div class="bonus-color" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
-                    <div style="font-size: 24px; margin-bottom: 1px;">🎡</div>
-                    <div class="game-title">BONUS SPIN</div>
+                    <img src="src/img/goldCase.svg" alt="Gold Case" style="height: 30px; width: auto; margin-bottom: 1px;">
+                    <div class="game-title">GOLD CASE</div>
                 </div>
                 <div class="bonus-text" id="goldCaseLockText">
                     <div class="lock-icon">🔒</div>
-                    <div>Play 8 games to unlock your bonus reward</div>
+                    <div>Play all games to unlock your bonus reward</div>
                 </div>
                 <div class="arcade-text" id="goldCaseScoreText" style="display: none;">
                     <div class="score-section">
@@ -449,9 +295,13 @@
                 </div>
                 <div class="boost-game-box">
                     <div class="boost-game-top">
-                        <div class="play-color-box" style="background: linear-gradient(to bottom, #e84066, #c82a48);">
-                            <img src="src/img/bigy/sweepsGame.png" alt="Market Match" style="height: 100px; width: auto; margin-bottom: 4px; margin-top: 8px; object-fit: contain;">
-                            <div class="game-title">MARKET MATCH</div>
+                        <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B9D, #C44569);">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1px;">
+                                <circle cx="12" cy="12" r="10" fill="white" opacity="0.9"/>
+                                <circle cx="12" cy="12" r="6" fill="none" stroke="#FF6B9D" stroke-width="2"/>
+                                <circle cx="12" cy="12" r="3" fill="#FF6B9D"/>
+                            </svg>
+                            <div class="game-title">DONUT MATCHER</div>
                         </div>
                     </div>
                     <div class="boost-game-score">
@@ -592,10 +442,7 @@
                             <div class="deal-title">Jones Dairy<br>Farm Meatballs</div>
                             <div class="deal-description">Enjoy wholesome, flavorful meatballs crafted with real, simple ingredients.</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                     <div class="deal-item">
                         <div class="deal-image">
@@ -605,10 +452,7 @@
                             <div class="deal-title">Taco Bell Crunchwrap Supreme Cravings Kit</div>
                             <div class="deal-description">Recreate your favorite Crunchwrap at home - just add protein and fresh toppings!</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                     <div class="deal-item">
                         <div class="deal-image">
@@ -618,10 +462,7 @@
                             <div class="deal-title">Capri Sun Single<br>Serve Bottles</div>
                             <div class="deal-description">The same great taste kids know and love, now in a convenient 12 oz resealable bottle!</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                     <div class="deal-item">
                         <div class="deal-image">
@@ -631,10 +472,7 @@
                             <div class="deal-title">Starbucks Iced<br>Energy Drink</div>
                             <div class="deal-description">Sip on a hydrating, sparkling energy drink with 160 mg plant-based caffeine and zero sugar.</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                     <div class="deal-item">
                         <div class="deal-image">
@@ -644,10 +482,7 @@
                             <div class="deal-title">Get fast delivery<br>from instacart</div>
                             <div class="deal-description">Get your groceries delivered right to your door with fast, convenient delivery.</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                     <div class="deal-item">
                         <div class="deal-image">
@@ -657,10 +492,7 @@
                             <div class="deal-title">RECIPE:<br>Chicken Marsala</div>
                             <div class="deal-description">A classic Italian-American dish featuring tender chicken in a rich Marsala wine sauce with mushrooms.</div>
                         </div>
-                        <div class="deal-button-container">
-                            <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
-                            <button class="deal-shop-button">SHOP</button>
-                        </div>
+                        <button class="deal-shop-button">SHOP</button>
                     </div>
                 </div>
             </div>
@@ -827,21 +659,6 @@
         <iframe id="goldCaseIframe" scrolling="no"></iframe>
     </div>
 
-    <!-- Zoom Overlay -->
-    <div id="zoomOverlay" class="game-overlay">
-        <iframe id="zoomIframe" scrolling="no"></iframe>
-    </div>
-
-    <!-- Shift Overlay -->
-    <div id="shiftOverlay" class="game-overlay">
-        <iframe id="shiftIframe" scrolling="no"></iframe>
-    </div>
-
-    <!-- Phrases Overlay -->
-    <div id="phrasesOverlay" class="game-overlay">
-        <iframe id="phrasesIframe" scrolling="no"></iframe>
-    </div>
-
     <!-- Match 3 Overlay -->
     <div id="match3Overlay" class="game-overlay">
         <iframe id="match3Iframe" scrolling="no"></iframe>
@@ -856,7 +673,7 @@
             </div>
             <div class="label">Games</div>
         </button>
-        <button class="tab-button" data-page="boost">
+        <button class="tab-button" data-page="sweeps">
             <div class="icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#555"/>

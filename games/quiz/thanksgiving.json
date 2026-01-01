@@ -1,0 +1,92 @@
+[
+    {
+        "set": 1,
+        "questions": [
+            {
+                "question": "Which flavor blend became a defining modern Thanksgiving dessert profile in the 20th century?",
+                "answers": ["Pumpkin spice", "Apple spice", "Cinnamon sugar"],
+                "correct": 0
+            },
+            {
+                "question": "Which U.S. president moved Thanksgiving earlier to influence holiday shopping?",
+                "answers": ["Herbert Hoover", "F. D. Roosevelt", "Harry Truman"],
+                "correct": 1
+            },
+            {
+                "question": "Which medium most helped synchronize Thanksgiving celebrations nationwide by mid-century?",
+                "answers": ["Radio", "Newspapers", "Television"],
+                "correct": 2
+            },
+            {
+                "question": "Which convenience food resulted from surplus after a Thanksgiving season?",
+                "answers": ["Frozen pie", "TV dinner", "Canned gravy"],
+                "correct": 1
+            },
+            {
+                "question": "Which food was eaten at the 1621 harvest feast but rarely appears on modern Thanksgiving menus?",
+                "answers": ["Clams", "Goose", "Cornbread"],
+                "correct": 0
+            }
+        ]
+    },
+    {
+        "set": 2,
+        "questions": [
+            {
+                "question": "Which feature helped transform the New York Thanksgiving parade into a national spectacle?",
+                "answers": ["Marching bands", "Giant balloons", "Celebrity hosts"],
+                "correct": 1
+            },
+            {
+                "question": "Which department store originally organized the Thanksgiving parade?",
+                "answers": ["Macy’s", "Bloomingdale’s", "Sears"],
+                "correct": 0
+            },
+            {
+                "question": "Which factor most helped turkey replace other meats for Thanksgiving meals?",
+                "answers": ["Farm size", "Affordability", "Rail transport"],
+                "correct": 1
+            },
+            {
+                "question": "Which publication helped standardize Thanksgiving recipes nationally?",
+                "answers": ["Local newspapers", "Church bulletins", "Good Housekeeping"],
+                "correct": 2
+            },
+            {
+                "question": "Which ingredient spread nationally due to early food canning?",
+                "answers": ["Pumpkin puree", "Sweet corn", "Cranberries"],
+                "correct": 0
+            }
+        ]
+    },
+    {
+        "set": 3,
+        "questions": [
+            {
+                "question": "Which sport became closely associated with Thanksgiving broadcasts?",
+                "answers": ["Football", "Baseball", "Hockey"],
+                "correct": 0
+            },
+            {
+                "question": "Which team became a long-standing Thanksgiving football host?",
+                "answers": ["Chicago Bears", "Detroit Lions", "Green Bay Packers"],
+                "correct": 1
+            },
+            {
+                "question": "Which development most enabled nationwide Thanksgiving menu consistency?",
+                "answers": ["Recipe media", "Rail shipping", "Food canning"],
+                "correct": 2
+            },
+            {
+                "question": "Why did Thanksgiving resist becoming a weekend holiday in the U.S.?",
+                "answers": ["Work patterns", "Church customs", "Market timing"],
+                "correct": 0
+            },
+            {
+                "question": "Which 19th-century movement most pushed Thanksgiving as a moral tradition?",
+                "answers": ["Political unity", "Religious reform", "Public education"],
+                "correct": 1
+            }
+        ]
+    }
+]

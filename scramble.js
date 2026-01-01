@@ -423,6 +423,33 @@ function loadGameScores() {
             }
         }
     }
+    
+    // Load Phrases stars
+    const phrasesStars = document.getElementById('phrasesStars');
+    const savedPhrasesStars = localStorage.getItem(`phrasesStars_${todayKey}`);
+    
+    if (phrasesStars && savedPhrasesStars) {
+        const starsEarned = parseInt(savedPhrasesStars) || 0;
+        phrasesStars.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            if (i < starsEarned) {
+                star.style.color = '#FFB84D';
+            } else {
+                star.style.color = '#ddd';
+            }
+            phrasesStars.appendChild(star);
+        }
+    } else if (phrasesStars) {
+        phrasesStars.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = '#ddd';
+            phrasesStars.appendChild(star);
+        }
+    }
 }
 
 // Expose functions to window for iframe access
@@ -435,6 +462,29 @@ window.updateMysteryWordStars = updateMysteryWordStars;
 window.updateBeticleStars = updateBeticleStars;
 window.updateMemoryDisplay = updateMemoryDisplay;
 window.updateBlackjackDisplay = updateBlackjackDisplay;
+window.updatePhrasesStars = function() {
+    const todayKey = getTodayKey();
+    const phrasesStars = document.getElementById('phrasesStars');
+    const isPhrasesComplete = localStorage.getItem(`phrasesComplete_${todayKey}`) === 'true';
+    
+    if (isPhrasesComplete) {
+        const starsEarned = parseInt(localStorage.getItem(`phrasesStars_${todayKey}`) || '0');
+        
+        if (phrasesStars) {
+            phrasesStars.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                if (i < starsEarned) {
+                    star.style.color = '#FFB84D';
+                } else {
+                    star.style.color = '#ddd';
+                }
+                phrasesStars.appendChild(star);
+            }
+        }
+    }
+};
 
 // DOM elements
 let lettersContainer = null;
@@ -673,6 +723,9 @@ function initializeScramble() {
     
     // Setup hint button after initialization
     setupHintButton();
+    
+    // Apply letter box styling based on URL parameter
+    applyLetterBoxStyling();
 }
 
 // Animation loop
@@ -837,18 +890,19 @@ function celebrateWin() {
     saveScrambleWord();
     
     // Update star display to show earned (orange) and unearned (grey) stars
+    // But keep them hidden - they'll be shown in showSuccessElements()
     const starsElement = document.querySelector('.unscramble-stars');
     if (starsElement) {
-        const maxStars = 2;
-        let starsHTML = '';
-        for (let i = 0; i < maxStars; i++) {
-            if (i < starsEarned) {
-                starsHTML += '<span style="color: #FF8C42;">★</span>';
+        starsElement.style.display = 'none';
+        const starElements = starsElement.querySelectorAll('.unscramble-star');
+        starElements.forEach((star, index) => {
+            if (index < starsEarned) {
+                star.classList.remove('grey');
             } else {
-                starsHTML += '<span style="color: #ddd;">★</span>';
+                star.classList.add('grey');
             }
-        }
-        starsElement.innerHTML = starsHTML;
+        });
+        starsElement.style.opacity = '0';
     }
     
     // First, ensure all letters are properly positioned
@@ -906,16 +960,16 @@ function showCompletedScramble() {
     // Update star display to show earned (orange) and unearned (grey) stars
     const starsElementCompleted = document.querySelector('.unscramble-stars');
     if (starsElementCompleted) {
-        const maxStars = 2;
-        let starsHTML = '';
-        for (let i = 0; i < maxStars; i++) {
-            if (i < savedStarsEarned) {
-                starsHTML += '<span style="color: #FF8C42;">★</span>';
+        starsElementCompleted.style.display = 'flex';
+        const starElements = starsElementCompleted.querySelectorAll('.unscramble-star');
+        starElements.forEach((star, index) => {
+            if (index < savedStarsEarned) {
+                star.classList.remove('grey');
             } else {
-                starsHTML += '<span style="color: #ddd;">★</span>';
+                star.classList.add('grey');
             }
-        }
-        starsElementCompleted.innerHTML = starsHTML;
+        });
+        starsElementCompleted.style.opacity = '1';
     }
     
     // Clear existing letter boxes and create new ones with correct answer
@@ -961,13 +1015,35 @@ function showCompletedScramble() {
         });
     }, 10);
     
+    // Apply letter box styling based on URL parameter
+    applyLetterBoxStyling();
+    
     // Show the fact and stars immediately without animation
     unscrambleLabel.textContent = currentDayData.event;
     const starsElement = document.querySelector('.unscramble-stars');
     if (starsElement) {
-        starsElement.style.display = 'block';
+        starsElement.style.display = 'flex';
         starsElement.style.opacity = '1';
     }
+}
+
+// Apply letter box styling based on URL parameter
+function applyLetterBoxStyling() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const headerType = urlParams.get('d');
+    
+    const letterBoxes = document.querySelectorAll('.letter-box');
+    letterBoxes.forEach(box => {
+        if (headerType === 'bigy') {
+            // Bigy: white background with blue text
+            box.style.background = 'white';
+            box.style.color = '#1a237e';
+        } else {
+            // Default: let CSS handle it (red gradient)
+            box.style.background = '';
+            box.style.color = '';
+        }
+    });
 }
 
 // Show success message and historical fact
@@ -1000,9 +1076,10 @@ function showSuccessElements() {
                 unscrambleLabel.textContent = currentDayData.event;
                 unscrambleLabel.style.opacity = '0';
             
-                // Show stars temporarily to measure
-            starsElement.style.display = 'block';
+                // Show stars temporarily to measure (but keep hidden visually)
+            starsElement.style.display = 'flex';
             starsElement.style.opacity = '0';
+            starsElement.style.visibility = 'hidden';
             
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(() => {
@@ -1018,7 +1095,10 @@ function showSuccessElements() {
                             
                             // Step 5: Wait 0.2 seconds
                             setTimeout(() => {
-                                // Step 6: Fade in text and stars
+                                // Step 6: Show stars and fade in text and stars
+                                starsElement.style.visibility = 'visible';
+                                starsElement.style.display = 'flex';
+                                
                         gsap.to(unscrambleLabel, {
                             duration: 0.5,
                             opacity: 1,

@@ -24,7 +24,7 @@ button:focus {
 }
 
 body {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     padding-bottom: 60px;
     background-color: #f5f5f5;
     -webkit-user-select: none;
@@ -60,15 +60,14 @@ body {
     right: 0;
     width: 100%;
     height: 60px;
-    background: white;
+    background: linear-gradient(to bottom, #f0f0f0, #d8d8d8);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
     z-index: 100;
     max-width: 500px;
     margin: 0 auto;
-    border-top: 1px solid #e0e0e0;
 }
 
 .tab-button {
@@ -90,15 +89,8 @@ body {
 }
 
 .tab-button.active {
-    background: transparent;
-}
-
-.tab-button.active .icon svg path {
-    fill: #dc3545;
-}
-
-.tab-button.active .label {
-    color: #dc3545;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .icon {
@@ -110,15 +102,10 @@ body {
     align-items: center;
 }
 
-.icon svg path {
-    fill: #555;
-    transition: fill 0.2s;
-}
-
 .label {
     font-size: 11px;
     color: #555;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 600;
     line-height: 1;
     margin-top: 2px;
@@ -129,8 +116,7 @@ body {
     max-width: 500px;
     margin: 0 auto;
     position: relative;
-    padding-top: 56px;
-    background-color: transparent;
+    padding-top: 48px;
 }
 
 .page {
@@ -140,17 +126,12 @@ body {
 .page.active {
     display: block;
     position: relative;
-    background-color: transparent;
-}
-
-#games-page.active {
-    background-color: transparent;
 }
 
 .page-header {
     padding: 20px;
     text-align: center;
-    background-color: white;
+    background-color: #f5f5f5;
 }
 
 .page-header h1 {
@@ -163,7 +144,7 @@ body {
 .page-content {
     padding: 40px 20px;
     text-align: center;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     color: #666;
 }
 
@@ -195,7 +176,7 @@ body {
 .profile-location-level {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin-bottom: 25px;
     display: flex;
     gap: 15px;
@@ -234,7 +215,7 @@ body {
 .profile-actions {
     font-size: 11px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin-top: 10px;
     margin-bottom: 20px;
     text-align: center;
@@ -266,20 +247,20 @@ body {
     font-size: 16px;
     color: #FF8C42;
     transform: translateY(0);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
 .profile-today-stars .stat-label-inline {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-weight: 400;
 }
 
 .profile-today-stars .star-number {
     font-size: 36px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-weight: 600;
     letter-spacing: -0.5px;
     color: #FF8C42;
@@ -321,7 +302,7 @@ body {
     gap: 6px;
     margin-top: 0;
     margin-bottom: 8px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .profile-streak-inline .stat-label {
@@ -353,14 +334,14 @@ body {
     font-size: 16px;
     color: #FF8C42;
     transform: translateY(-2px);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
 .profile-stat-small .stat-label-inline {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-weight: 400;
 }
 
@@ -368,13 +349,13 @@ body {
     font-size: 18px;
     font-weight: 700;
     color: #FF8C42;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', sans-serif;
 }
 
 .star-icon {
-    color: #dc3545;
+    color: #FF8C42;
     font-size: 16px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
@@ -383,13 +364,13 @@ body {
 .rival-profile .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
     font-weight: 700 !important;
 }
 
 .profile-stat {
     margin-bottom: 12px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     background-color: transparent;
 }
 
@@ -444,54 +425,24 @@ body {
     color: #333;
     font-size: 14px;
     margin-bottom: 4px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .deal-description {
     font-size: 12px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     line-height: 1.3;
 }
 
-.deal-button-container {
-    background-color: #dc3545;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-.deal-earn-text {
-    background-color: transparent;
-    color: white;
-    text-align: center;
-    padding: 6px 10px 0 10px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    border: none;
-    margin: 0;
-}
-
-.deal-earn-star {
-    font-size: 13px;
-    color: #ffcf67;
-    transform: translate(1px, -1px);
-}
-
 .deal-shop-button {
-    background-color: transparent;
+    background-color: #dc3545;
     color: white;
     border: none;
-    padding: 0 10px 10px 10px;
-    margin: 0;
+    padding: 10px;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     width: 100%;
     transition: background-color 0.2s ease;
@@ -509,7 +460,7 @@ body {
     padding: 0;
     border: 1px solid #FF8C42;
     border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%);
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 184, 77, 0.03) 100%);
     box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
     overflow: hidden;
 }
@@ -522,7 +473,7 @@ body {
     padding: 0;
     border: 1px solid #FF8C42;
     border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%);
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 184, 77, 0.03) 100%);
     box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
     overflow: hidden;
 }
@@ -535,7 +486,7 @@ body {
     padding: 5px 20px;
     background-color: #FF8C42;
     border-bottom: 2px solid rgba(255, 140, 66, 0.3);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -548,7 +499,7 @@ body {
     padding:5px 20px;
     background-color: #FF8C42;
     border-bottom: 2px solid rgba(255, 140, 66, 0.3);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -560,14 +511,14 @@ body {
     padding: 12px 0px;
     border-bottom: 1px solid rgba(255, 140, 66, 0.2);
     /* border: 1px solid red; */
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     transition: background-color 0.2s ease;
     position: relative;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 140, 66, 0.04) 100%);
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 184, 77, 0.04) 100%);
 }
 
 .challenge-item:hover {
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.08) 100%);
+    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.08) 100%);
 }
 
 .challenge-item:last-child {
@@ -593,7 +544,7 @@ body {
     align-items: center;
     gap: 4px;
     white-space: nowrap;
-    background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 184, 77, 0.1) 100%);
     padding-left: 10px;
     padding-right: 10px;
     border-radius: 20px;
@@ -605,7 +556,7 @@ body {
     color: #FF8C42;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     text-shadow: 0 1px 2px rgba(255, 140, 66, 0.3);
 }
 
@@ -618,7 +569,7 @@ body {
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -644,19 +595,19 @@ body {
     font-size: 13px;
     color: #666;
     margin-bottom: 4px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .stat-value {
     font-size: 13px;
     color: #666;
     font-weight: 400;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .stat-value .star-icon {
     font-size: 15px;
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .journey-coin-container {
@@ -708,7 +659,7 @@ body {
 
 .coin-x {
     font-size: 16px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     color: #666;
     margin: 0 2px;
     line-height: 1;
@@ -718,7 +669,7 @@ body {
 .coin-count {
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     color: #333;
     line-height: 1;
     /* transform: translateY(-2px); */
@@ -739,7 +690,6 @@ body {
     max-width: 500px;
     margin: 0 auto;
     min-height: 56px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menu-icon {
@@ -748,25 +698,15 @@ body {
     cursor: pointer;
     position: relative;
     z-index: 1;
-    width: 40px;
-    height: 40px;
-    margin-left: 0;
+    width: 60px;
+    margin-left: -8px;
 }
 
 .logo-img {
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
-    background: #dc3545;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    flex-shrink: 0;
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    display: none;
 }
 
 .profile-icon-img {
@@ -786,7 +726,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #dc3545;
+    color: #FF8C42;
     font-size: 16px;
     font-weight: bold;
     line-height: 1;
@@ -806,35 +746,32 @@ body {
 }
 
 .date {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 700;
     color: white;
     text-align: center;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     line-height: 1.2;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .date-subtitle {
     font-size: 10px;
-    font-weight: 500;
-    color: white;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
     text-align: center;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     letter-spacing: 0.5px;
     line-height: 1.2;
-    margin-top: 2px;
 }
 
 .star-counter {
     background-color: white;
     border-radius: 20px;
-    padding: 6px 14px;
+    padding: 1px 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    gap: 4px;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     position: absolute;
     right: 10px;
     z-index: 1;
@@ -842,95 +779,32 @@ body {
 
 .star-counter .star-icon {
     color: #FF8C42;
-    font-size: 18px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
 .star-counter .star-count {
-    color: #666;
+    color: #555;
     font-size: 14px;
     font-weight: 700;
 }
 
-/* Promotional Banner with Blue Background */
-.promotional-banner {
-    position: relative;
-    width: 100%;
-    padding: 40px 20px;
-    background-image: url('src/img/topBackground.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    margin-top: 0;
-    overflow: hidden;
-}
-
-.promotional-banner::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.3;
-    pointer-events: none;
-}
-
-.promotional-banner-content {
-    position: relative;
-    z-index: 1;
-    text-align: left;
-}
-
-/* In the top carousel, text is aligned by the slide container */
-
-.promotional-banner-title {
-    font-size: 21px;
-    font-weight: 700;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    line-height: 1.2;
-}
-
-.promotional-banner-subtitle {
-    font-size: 12px;
-    font-weight: 400;
-    color: white;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    line-height: 1.4;
-}
-
-.header-type1 {
-    display: block;
-    background-color: transparent;
-}
-
-.header-type2 {
-    display: none;
-}
-
 .top-logo-carousel-container {
     position: relative;
+    display: none;
     margin: 0px auto 0 auto;
-    transform: translateY(0);
+    transform: translateY(8px);
     width: 100%;
-    height: 150px;
+    height: 120px;
     overflow: hidden;
     z-index: 4;
-    padding-top: 0;
-    background-image: url('src/img/topBackground.png');
+    padding-top: 10px;
+    background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* border-bottom: 1px solid #c2c2c2; */
+    border-bottom: 1px solid #c2c2c2;
 }
 
 .top-logo-carousel-container.active {
@@ -939,25 +813,22 @@ body {
 
 .top-logo-carousel {
     position: relative;
-    height: 125px;
+    height: 100px;
     display: flex;
     transition: transform 0.5s ease;
     pointer-events: all;
     left: 0;
     top: 0;
-    /* border: 1px solid blue; */
 }
 
 .carousel-slide {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 100px;
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    /* border: 1px solid red; */
-    padding-left: 25px;
+    align-items: center;
+    justify-content: center;
 }
 
 .carousel-arrow {
@@ -1038,7 +909,7 @@ body {
     color: #e84066;
     font-size: 18px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     line-height: 1;
 }
 
@@ -1059,161 +930,14 @@ body {
     z-index: 3;
 } */
 
-/* Type 1 Carousel Styles */
-.top-logo-carousel-container-type1 {
-    position: relative;
-    margin: 0px auto 0 auto;
-    transform: translateY(0);
-    width: 100%;
-    height: 120px;
-    overflow: hidden;
-    z-index: 4;
-    padding-top: 10px;
-    background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-bottom: 1px solid #c2c2c2;
-}
-
-.top-logo-carousel-type1 {
-    position: relative;
-    height: 100px;
-    display: flex;
-    transition: transform 0.5s ease;
-    pointer-events: all;
-    left: 0;
-    top: 0;
-}
-
-.carousel-slide-type1 {
-    position: relative;
-    width: 100%;
-    height: 100px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.carousel-arrow-type1 {
-    position: absolute;
-    color: #999;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
-    z-index: 10;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: all;
-}
-
-.carousel-arrow-left-type1 {
-    left: 20px;
-}
-
-.carousel-arrow-right-type1 {
-    right: 20px;
-}
-
-.carousel-content-type1 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 0;
-    background: linear-gradient(to bottom, #e84066, #c82a48);
-    border-radius: 8px;
-    padding: 20px;
-    margin: 0 auto;
-    width: calc(100% - 40px);
-    max-width: 120px;
-}
-
-.carousel-icon-type1 {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.carousel-icon-circle-type1 {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 4px;
-}
-
-.carousel-dollar-type1 {
-    color: #e84066;
-    font-size: 18px;
-    font-weight: 700;
-    font-family: 'Nunito', sans-serif;
-    line-height: 1;
-}
-
-.carousel-text-type1 {
-    font-size: 12px;
-    font-weight: 900;
-    color: #ffffff;
+.week-section {
+    padding: 16px 20px 6px 20px;
+    background-color: transparent;
     text-align: center;
-}
-
-.week-combined-container {
-    margin: 20px;
-    margin-bottom: 0px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-}
-
-.week-theme-section {
-    background: #dc3545;
-    padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
     position: relative;
-    min-height: 100px;
-}
-
-.week-theme-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.15;
-    pointer-events: none;
-}
-
-.week-calendar-section {
-    background: white;
-    padding: 12px 18px 16px 16px;
-    margin-bottom: 0px;
-    overflow: hidden;
-    /* border: 1px solid red; */
+    z-index: 1;
+    margin-bottom: -2px;
+    /* margin-top: 10px; */
 }
 
 .week-header-background {
@@ -1232,201 +956,50 @@ body {
 }
 
 .section {
-    padding: 0px 20px;
-    margin: 0;
+    padding: 4px 20px;
     background-color: #f5f5f5;
-    /* border:1px solid green; */
 }
-
-/* Reduce bottom padding of first section to balance spacing above DAILY ARCADE */
-.section:first-of-type {
-    /* padding-bottom: 0px !important; */
-    /* border:1px solid red; */
-}
-
-/* Remove extra padding above DAILY ARCADE section and reduce space above title */
-.arcade-section {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    /* border:1px solid blue; */
-}
-
-.arcade-section .section-title {
-    /* margin-top: -10px !important; */
-}
-
 
 
 .week-subtitle {
-    font-size: 22px;
-    font-weight: 700;
-    color: white;
-    text-align: left;
-    margin-bottom: 0;
-    margin-top: 0px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: 0.5px;
-    position: relative;
-    z-index: 1;
-}
-
-.week-title {
-    font-size: 10px;
-    font-weight: 700;
-    margin-top: 0px;
-    /* margin-bottom: 2px; */
-    color: white;
-    text-align: left;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    position: relative;
-    z-index: 1;
-}
-
-.section-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color: #555;
-    text-align: center;
-    font-family: 'Aleo', serif;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    transform: translateY(2px);
-    /* border:1px solid blue; */
-}
-
-
-
-
-.week-record-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    margin-bottom: 8px;
-}
-
-.week-record-text {
-    font-size: 14px;
-    color: #000;
-    text-align: left;
-    font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.week-record-star {
-    color: #FFD700;
-    font-size: 16px;
-    display: inline-block;
-    font-weight: 700;
-    margin: 0 2px;
-}
-
-.week-record-value {
-    font-size: 20px;
-    color: white;
-    text-align: center;
-    font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    display: none;
-}
-
-.week-days-container {
-    display: flex;
-    gap: 5px;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box;
-    /* padding-right: 2px; */
-    /* border: 1px solid #000; */
-}
-
-.week-box {
-    flex: 0 1 auto;
-    width: calc((100% - 18px) / 7);
-    max-width: 40px;
-    box-sizing: border-box;
-    height: 60px;
-    border: 1px solid #000;
-    border-bottom: 2px solid black;
-    padding: 6px 2px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 2px;
-    position: relative;
-    background: #f5f5f5;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.week-box.today {
-    background: #dc3545;
-    border-color: #dc3545;
-}
-
-.week-box.today .day-initial,
-.week-box.today .day-number {
-    color: #ffffff;
-}
-
-.day-initial {
-    font-size: 10px;
-    color: #666;
-    text-align: center;
-    font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.day-number {
-    white-space: nowrap;
-    font-size: 16px;
-    color: #000;
-    text-align: center;
-    font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Header Type 1 Calendar Styles (from styleTemp) */
-.week-section-type1 {
-    padding: 16px 20px 6px 20px;
-    /* background-color: red; */
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    margin-bottom: -2px;
-}
-
-.week-subtitle-type1 {
     font-size: 36px;
     font-weight: 400;
+    /* color: rgb(48, 39, 39); */
+    /* color: white; */
     color: rgb(54, 54, 54);
     text-align: center;
     margin-bottom: 8px;
     margin-top: 0px;
     font-family: 'Abril Fatface', serif;
     letter-spacing: 1px;
+    /* text-shadow: 0 0 15px #eed5b7, 0 0 30px #eed5b7, 0 0 45px #eed5b7, 0 0 60px #eed5b7; */
 }
 
-.week-title-type1 {
+.week-title {
     font-size: 12px;
     font-weight: 900;
     margin-top: 5px;
     margin-bottom: 0px;
+    /* color: white; */
     color: rgb(54, 54, 54);
+    text-align: center;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    /* text-shadow: 0 0 15px #eed5b7, 0 0 30px #eed5b7, 0 0 45px #eed5b7, 0 0 60px #eed5b7; */
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 0px;
+    margin-bottom: 5px;
+    color: #494949;
     text-align: center;
     font-family: 'Aleo', serif;
     letter-spacing: 0.5px;
 }
 
-.week-container-type1 {
+.week-container {
     display: flex;
     flex-direction: column;
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
@@ -1436,7 +1009,8 @@ body {
     box-shadow: 0 2px 8px rgba(255, 140, 66, 0.2);
 }
 
-.week-record-box-type1 {
+.week-record-box {
+    /* height: 40px; */
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding: 2px 2px;
     display: flex;
@@ -1446,7 +1020,7 @@ body {
     gap: 0;
 }
 
-.week-record-text-type1 {
+.week-record-text {
     font-size: 10px;
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
@@ -1455,17 +1029,25 @@ body {
     letter-spacing: 0.5px;
 }
 
-.week-record-star-type1 {
-    color: #ffec86;
+.week-record-star {
+    color: #FF8C42;
     font-size: 12px;
     display: inline-block;
 }
 
-.week-days-container-type1 {
+.week-record-value {
+    font-size: 20px;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+}
+
+.week-days-container {
     display: flex;
 }
 
-.week-box-type1 {
+.week-box {
     flex: 1;
     height: 60px;
     border-right: 1px solid rgba(255, 255, 255, 0.3);
@@ -1477,28 +1059,18 @@ body {
     gap: 4px;
 }
 
-.week-box-type1:last-child {
+.week-box:last-child {
     border-right: none;
 }
 
-.week-box-type1.today {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.week-box-type1.today .day-initial-type1,
-.week-box-type1.today .day-number-type1 {
-    color: #ffffff;
-    font-weight: 700;
-}
-
-.day-initial-type1 {
+.day-initial {
     font-size: 10px;
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
     font-weight: 600;
 }
 
-.day-number-type1 {
+.day-number {
     white-space: nowrap;
     font-size: 18px;
     color: white;
@@ -1508,42 +1080,18 @@ body {
 }
 
 .mc-container {
-    border: none;
-    padding: 0;
-    margin-bottom: 12px;
-    background-color: transparent;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.mc-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
-    flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
-}
-
-.mc-top-section .subsection-title {
-    color: white;
-}
-
-.mc-bottom-section {
-    background-color: white;
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    border: var(--box-border-width) solid var(--box-border-color);
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: var(--box-background);
+    border-radius: var(--box-border-radius);
 }
 
 .mc-question {
     font-size: 13px;
     font-weight: 400;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin-bottom: 12px;
     text-align: center;
 }
@@ -1562,7 +1110,7 @@ body {
     padding: 12px 16px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: filter 0.2s ease;
@@ -1578,208 +1126,40 @@ body {
 
 .mc-stars {
     font-size: 16px;
-}
-
-/* Quiz Game Styles */
-.quiz-container {
-    border: none;
-    padding: 0;
-    margin-bottom: 12px;
-    background-color: transparent;
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.quiz-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
-    flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
-}
-
-.quiz-top-section .subsection-title {
-    color: white;
-}
-
-.quiz-bottom-section {
-    background-color: white;
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: relative;
-}
-
-.quiz-difficulty-number {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-    /* margin-bottom: 2px; */
-    transform: translateY(3px);
-}
-
-.quiz-difficulty {
-    font-size: 11px;
-    font-weight: 700;
-    color: #666;
-    font-family: 'Nunito', sans-serif;
-    letter-spacing: 0.5px;
-}
-
-.quiz-question-number {
-    font-size: 11px;
-    font-weight: 600;
-    color: #999;
-    font-family: 'Nunito', sans-serif;
-}
-
-.quiz-question {
-    font-size: 13px;
-    font-weight: 400;
-    color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    margin-top: 4px;
-    margin-bottom: 8px;
     text-align: center;
-    line-height: 1.4;
-}
-
-.quiz-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: -2px;
-}
-
-.quiz-button {
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'Nunito', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    background: linear-gradient(to bottom, #6B9FF8, #3B5FA8);
-    position: relative;
-}
-
-.quiz-button:hover {
-    filter: brightness(1.1);
-}
-
-.quiz-button:active {
-    filter: brightness(0.95);
-}
-
-.quiz-button:disabled {
-    pointer-events: none;
-    opacity: 1;
-}
-
-.quiz-stars {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    margin-top: -2px;
-}
-
-.quiz-star {
-    font-size: 18px;
     color: #FF8C42;
-}
-
-.quiz-star.grey {
-    color: #ddd;
-}
-
-.mc-stars .star-icon,
-.mc-stars span {
-    color: white;
+    letter-spacing: 2px;
+    margin-top: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
+    font-weight: 700;
 }
 
 .on-this-day-container {
-    border: none;
-    padding: 0;
-    margin-bottom: 12px;
-    background-color: transparent;
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.scramble-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
-    flex: 1;
-    border-bottom: 1px solid #bbb;
-}
-
-.scramble-top-section .subsection-title {
-    color: white;
-}
-
-.scramble-bottom-section {
-    background-color: white;
-    padding: 16px 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.on-this-day-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 30px 30px, 40px 40px;
-    opacity: 0.5;
-    pointer-events: none;
+    border: var(--box-border-width) solid var(--box-border-color);
+    padding: 15px 15px 10px 15px;
+    margin-bottom: 10px;
+    background-color: var(--box-background);
+    border-radius: var(--box-border-radius);
 }
 
 .subsection-title {
-    font-size: 12px;
-    font-weight: 800;
-    /* margin-bottom: 12px; */
+    font-size: 13px;
+    font-weight: 400;
+    margin-bottom: 8px;
     color: #666;
-    text-align: left;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    position: relative;
-    z-index: 1;
-    text-transform: uppercase;
+    text-align: center;
+    font-family: 'Nunito', serif;
 }
 
 .unscramble-boxes {
     position: relative;
     height: 55px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     overflow: visible;
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: nowrap;
-    width: 100%;
-    z-index: 1;
 }
 
 .unscramble-footer {
@@ -1789,17 +1169,14 @@ body {
 
 .unscramble-label {
     font-size: 13px;
-    color: white;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #666;
+    font-family: 'Nunito', serif;
     font-weight: 400;
-    margin-left: 0px;
+    margin-left: 3px;
     text-align: left;
     line-height: normal;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 8px;
     transition: opacity 0.3s ease;
-    position: relative;
-    z-index: 1;
 }
 
 .unscramble-hint-btn {
@@ -1809,24 +1186,19 @@ body {
     background: linear-gradient(to bottom, #6EDDD4, #4ECDC4);
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 8px 24px;
+    border-radius: 8px;
+    padding: 8px 20px;
     font-size: 14px;
-    font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    z-index: 10;
-    pointer-events: auto;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .unscramble-hint-btn:not(:disabled):hover {
-    background: linear-gradient(to bottom, #7EEDE4, #5EDDD4);
-    box-shadow: 0 4px 8px rgba(78, 205, 196, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transition: all 0.2s ease;
 }
 
@@ -1835,19 +1207,14 @@ body {
 }
 
 .unscramble-stars {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    margin-top: -2px;
-}
-
-.unscramble-star {
-    font-size: 18px;
+    font-size: 16px;
+    text-align: center;
     color: #FF8C42;
-}
-
-.unscramble-star.grey {
-    color: #ddd;
+    letter-spacing: 0px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    font-weight: 700;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .highlow-stars {
@@ -1857,11 +1224,11 @@ body {
     margin-top: -3px;
     margin-bottom: 0px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .highlow-stars .star.earned {
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .highlow-stars .star.unearned {
@@ -1870,35 +1237,11 @@ body {
 
 /* Fact or Fiction styles */
 .fof-container {
-    border: none;
-    padding: 0;
-    margin-bottom: 0px;
-    background-color: transparent;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.fof-top-section {
-    background: linear-gradient(to bottom, #26D7A4, #1DB88A);
-    padding: 12px 20px;
-    flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
-}
-
-.fof-top-section .subsection-title {
-    color: white;
-}
-
-.fof-bottom-section {
-    background-color: white;
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    border: var(--box-border-width) solid var(--box-border-color);
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: var(--box-background);
+    border-radius: var(--box-border-radius);
 }
 
 .fof-buttons {
@@ -1916,7 +1259,7 @@ body {
     padding: 12px 16px;
     font-size: 13px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -1941,7 +1284,7 @@ body {
 .fof-instruction {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     font-weight: 400;
     margin-left: 3px;
 }
@@ -1954,7 +1297,7 @@ body {
     color: white;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
 }
@@ -1973,36 +1316,28 @@ body {
 .fof-stars {
     font-size: 18px;
     text-align: center;
-    color: #666;
+    color: #FF8C42;
     letter-spacing: 2px;
     margin-top: 8px;
     opacity: 0;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
-.fof-stars .star-icon,
-.fof-stars span {
-    color: white;
-}
-
 .letter-box {
-    width: calc((100% - 36px) / 7);
-    max-width: 50px;
-    min-width: 40px;
-    height: 50px;
-    aspect-ratio: 1;
-    background: linear-gradient(to bottom, #e84066, #c82a48);
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(to bottom, #F093FB, #F5576C);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 20px;
-    font-weight: 700;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: none;
+    font-family: Arial, Helvetica, sans-serif;
     line-height: 0;
     cursor: grab;
     user-select: none;
@@ -2010,11 +1345,8 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     touch-action: none;
-    position: relative;
-    z-index: 1;
-    flex-shrink: 1;
-    flex-grow: 0;
-    box-sizing: border-box;
+    position: absolute;
+    top: 0;
 }
 
 .letter-box.dragging {
@@ -2036,7 +1368,7 @@ body {
     margin-bottom: 12px;
     color: #666;
     text-align: center;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
 }
 
 .highlow-items {
@@ -2056,7 +1388,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -2077,7 +1409,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     user-select: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -2097,7 +1429,7 @@ body {
 .highlow-instruction {
     font-size: 13px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     font-weight: 400;
     margin-left: 3px;
 }
@@ -2110,7 +1442,7 @@ body {
     color: white;
     font-size: 14px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
     transition: all 0.2s ease;
@@ -2127,10 +1459,8 @@ body {
 }
 
 .play-boxes {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
     gap: 10px;
-    
 }
 
 .play-box {
@@ -2138,9 +1468,8 @@ body {
     border: var(--box-border-width) solid var(--box-border-color);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -2149,7 +1478,7 @@ body {
 
 .play-color-box {
     width: 100%;
-    aspect-ratio: 1 / 0.7;
+    aspect-ratio: 1 / 1;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -2166,7 +1495,7 @@ body {
     color: #444;
     text-align: center;
     padding: 10px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     font-weight: 400;
 }
 
@@ -2175,12 +1504,10 @@ body {
     border: var(--box-border-width) solid var(--box-border-color);
     margin-bottom: 8px;
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     display: flex;
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    /* border: 1px solid green; */
 }
 
 .arcade-box:hover {
@@ -2212,7 +1539,7 @@ body {
     color: #444;
     text-align: center;
     padding: 21px 15px 15px 15px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     font-weight: 400;
     gap: 8px;
 }
@@ -2229,14 +1556,14 @@ body {
     font-weight: 600;
     color: #666;
     letter-spacing: 1px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .score-text {
     font-size: 20px;
     font-weight: 700;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .divider {
@@ -2246,7 +1573,7 @@ body {
 }
 
 .stars {
-    color: #dc3545;
+    color: #FF8C42;
     font-size: 18px;
     letter-spacing: 0px;
 }
@@ -2255,11 +1582,10 @@ body {
     height: 140px;
     border: var(--box-border-width) solid var(--box-border-color);
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     margin-bottom: 20px;
     display: flex;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .bonus-color {
@@ -2293,7 +1619,7 @@ body {
     color: #666;
     text-align: center;
     padding: 15px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     font-weight: 400;
     gap: 8px;
 }
@@ -2389,7 +1715,7 @@ body {
     font-size: 12px;
     font-weight: 400;
     color: white;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     text-align: center;
     pointer-events: none;
 }
@@ -2401,7 +1727,7 @@ body {
     transform: translate(-50%, -50%);   
     width: 100px;
     height: 100px;
-    background: radial-gradient(circle, rgba(40, 63, 126, 0) 0%, rgba(40, 63, 126, .7) 100%);
+    background: radial-gradient(circle, rgba(255, 184, 77, 0) 0%, rgba(255, 180, 67, .7) 100%);
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
@@ -2418,7 +1744,7 @@ body {
     padding: 12px 24px;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     display: flex;
@@ -2492,7 +1818,7 @@ body {
     font-size: 16px;
     font-weight: 600;
     color: #000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .rival-avatar {
@@ -2507,13 +1833,13 @@ body {
     font-size: 14px;
     font-weight: 600;
     color: #000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
     font-weight: 700 !important;
 }
 
@@ -2522,7 +1848,7 @@ body {
 #rival-page .rival-stars .star-icon {
     color: #FF8C42 !important;
     font-size: 16px !important;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif !important;
     font-weight: 700 !important;
 }
 
@@ -2544,7 +1870,7 @@ body {
     color: #FFB84D;
     background-color: #f5f5f5;
     padding: 8px 12px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     transform: rotate(-20deg);
 }
 
@@ -2552,7 +1878,7 @@ body {
     font-size: 14px;
     font-weight: 400;
     color: #000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     text-align: center;
     margin-top: -20px;
 }
@@ -2560,7 +1886,7 @@ body {
 .rival-challenge .star-icon {
     color: #FF8C42 !important;
     font-size: 16px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
@@ -2582,9 +1908,6 @@ body {
 }
 
 .game-overlay iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
     touch-action: none;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
@@ -2598,18 +1921,16 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    color: #dc3545;
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+    color: #555;
     font-size: 20px;
     cursor: pointer;
     font-weight: 400;
     line-height: 1;
     transition: all 0.2s ease;
     position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10003;
+    left: 20px;
+    z-index: 1;
 }
 
 .game-overlay-close.show {
@@ -2621,32 +1942,14 @@ body {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
-.header-logo {
-    height: 45px;
-    width: auto;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    display: none;
-    visibility: visible;
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10002;
-    box-sizing: border-box;
-    object-fit: contain;
-}
-
 .help-button {
     width: 22px;
     height: 22px;
     padding: 0;
-    border: 2px solid #666;
+    border: 2px solid white;
     border-radius: 50%;
     background: transparent;
-    color: #666;
+    color: white;
     font-size: 14px;
     font-weight: 700;
     display: inline-flex;
@@ -2655,16 +1958,17 @@ body {
     justify-content: center;
     cursor: pointer;
     position: absolute;
-    right: 15px;
-    top: 68px;
-    z-index: 1000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10002;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
 .help-button:hover {
-    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .help-button.hidden {
@@ -2690,7 +1994,7 @@ body {
 
 .help-popup-content {
     background: white;
-    border-radius: 6px;
+    border-radius: 12px;
     padding: 30px;
     max-width: 500px;
     width: 90%;
@@ -2727,7 +2031,7 @@ body {
     font-weight: 700;
     color: #333;
     margin-bottom: 20px;
-    font-family: 'Aleo', serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     text-align: center;
 }
 
@@ -2735,7 +2039,7 @@ body {
     font-size: 14px;
     line-height: 1.6;
     color: #555;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .help-popup-text p {
@@ -2790,7 +2094,7 @@ body {
     font-size: 12px; /* match .week-subtitle / THANKSGIVING */
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
     /* border: 1px solid blue; */
@@ -2824,7 +2128,7 @@ body {
 .boost-stat-item .boost-daily-stars,
 .boost-stat-item .boost-clock-count {
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
 }
 
 .boost-stat-item .star-icon {
@@ -2842,7 +2146,6 @@ body {
     background-color: var(--box-background);
     border-radius: var(--box-border-radius);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .boost-game-top {
@@ -2864,7 +2167,7 @@ body {
     font-size: 14px;
     font-weight: 700;
     color: white;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -2927,7 +2230,7 @@ body {
     border-radius: 8px;
     font-size: 16px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     margin: 8px auto 0 auto;
@@ -2990,7 +2293,7 @@ body {
     border-radius: 18px;
     font-size: 12px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     margin: 0 auto;
@@ -3006,9 +2309,8 @@ body {
     max-width: 600px;
     margin: 10px auto 30px auto;
     padding: 10px 20px 0 20px;
-    background-color: transparent;
+    background-color: #f8f8f8;
     min-height: auto;
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
 }
 
 .boost-header {
@@ -3031,13 +2333,9 @@ body {
     font-size: 12px;
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
-}
-
-.boost-subtitle .star-icon {
-    color: #FF8C42;
 }
 
 @keyframes shine {
@@ -3063,7 +2361,7 @@ body {
     justify-content: center;
     gap: 8px;
     /* margin: 8px 0; */
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .coin-icon {
@@ -3103,27 +2401,27 @@ body {
 
 .star-icon-large {
     font-size: 16px;
-    color: #dc3545;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #FF8C42;
+    font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     font-weight: 700;
 }
 
 .cost-text {
     font-size: 20px;
     font-weight: 600;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     color: #000;
 }
 
 .current-balance {
     font-size: 16px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 #sweeps-balance {
     font-weight: 700;
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .entry-controls {
@@ -3141,18 +2439,18 @@ body {
     padding: 16px 40px;
     font-size: 18px;
     font-weight: 700;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);
     transition: all 0.2s ease;
 }
 
 .entry-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+    box-shadow: 0 6px 16px rgba(255, 184, 77, 0.4);
 }
 
 .entry-button:active {
@@ -3166,12 +2464,12 @@ body {
 .entry-count {
     font-size: 16px;
     color: #666;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 #entry-count {
     font-weight: 700;
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .contest-rules {
@@ -3187,7 +2485,7 @@ body {
 .rules-title {
     font-size: 11px;
     color: #999;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     text-align: center;
     font-weight: 600;
     margin-bottom: 8px;
@@ -3196,7 +2494,7 @@ body {
 .rules-content {
     font-size: 10px;
     color: #999;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     text-align: center;
     line-height: 1.5;
 }
@@ -3245,7 +2543,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-size: 12px;
     font-weight: 400;
     color: #444;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', serif;
     margin-top: 0;
     text-align: center;
     letter-spacing: 0.5px;
@@ -3260,7 +2558,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-size: 18px;
     font-weight: 700;
     color: #000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin-bottom: 12px;
     text-align: center;
 }
@@ -3378,7 +2676,7 @@ body[style*="background-color: #000000"] .cost-text {
 
 .prizes-overlay-title {
     color: #fff;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 12px;

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Sanchez&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/shift.svg" alt="Shift" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="memoryTitle">SHIFT</div>
+            <div id="instructionsStartDiv">
+                <div class="color-demo">
+                    <div class="color-box color-light"></div>
+                    <div class="color-arrow">→</div>
+                    <div class="color-box color-medium"></div>
+                    <div class="color-arrow">→</div>
+                    <div class="color-box color-dark"></div>
+                </div>
+                <div class="instructionLine">Drag blocks to the grid to shift colors</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">Goal: make all boxes the same color</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">Use all blocks to complete the puzzle</div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+
+    <div class="container" style="display: none;">
+        <button id="helpButton"></button>
+        <div class="game-area">
+            <div class="grid-container">
+                <div class="grid" id="grid"></div>
+            </div>
+            
+            <div class="blocks-container">
+                <div class="blocks-instruction">
+                    <span class="instruction-text">drag to shift colors</span>
+                    <div class="stars-display" id="starsDisplay" style="display: none;">
+                        <span class="shift-star">★</span>
+                        <span class="shift-star">★</span>
+                        <span class="shift-star">★</span>
+                        <span class="shift-star">★</span>
+                        <span class="shift-star">★</span>
+                    </div>
+                </div>
+                <div class="blocks-pool" id="blocksPool"></div>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-group">
+                    <button class="reset-button" id="undoButton">Undo</button>
+                    <button class="reset-button" id="resetButton">Reset</button>
+                    <button class="reset-button" id="hintButton">Hint</button>
+                </div>
+                <button class="give-up-button" id="giveUpButton">Give Up</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
+

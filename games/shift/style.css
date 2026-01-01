@@ -1,0 +1,475 @@
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f0f0f0;
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html {
+    height: 100vh;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    body {
+        padding: 0;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.game-area {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+}
+
+.button-group .reset-button {
+    flex: 1;
+    min-width: 70px;
+    max-width: 100px;
+}
+
+@media (min-width: 768px) {
+    .button-group {
+        gap: 10px;
+    }
+}
+
+.reset-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 44px;
+    box-shadow: none;
+}
+
+#resetButton {
+    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+}
+
+#undoButton {
+    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+}
+
+#hintButton {
+    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+    box-shadow: none;
+}
+
+.give-up-button {
+    background: none;
+    border: none;
+    color: #666;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: lowercase;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-top: 8px;
+    text-decoration: none;
+}
+
+@media (min-width: 768px) {
+    .reset-button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+}
+
+
+.reset-button:disabled {
+    background: linear-gradient(to bottom, #cccccc, #b3b3b3);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.button-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 4px;
+    /* background-color: #e4e4e4; */
+    padding: 4px;
+    /* border: 3px solid #333; */
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.grid-cell {
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border-radius: 4px;
+    position: relative;
+    touch-action: none;
+}
+
+@media (min-width: 768px) {
+    .grid-cell {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+.grid-cell.color-light {
+    background-color: #91c1e7;
+}
+
+.grid-cell.color-medium {
+    background-color: #5f93be;
+}
+
+.grid-cell.color-dark {
+    background-color: #274a83;
+}
+
+.grid-cell.drag-over {
+    background-color: #ffffcc;
+    border: 2px dashed #0066cc;
+}
+
+.grid-cell.highlight {
+    border: 3px solid #ffdd00;
+    /* box-shadow: 0 0 10px #ffdd00; */
+}
+
+.grid-cell.win-celebration {
+    animation: winPulse 0.8s ease-out forwards;
+}
+
+@keyframes winPulse {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(0.95);
+        filter: brightness(1.15);
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+.blocks-container {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+}
+
+.blocks-instruction {
+    margin-bottom: 15px;
+    color: #666;
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: lowercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+    justify-content: center;
+}
+
+.instruction-text {
+    display: block;
+}
+
+.stars-display {
+    display: flex;
+    gap: 0px;
+    align-items: center;
+    justify-content: center;
+}
+
+.shift-star {
+    font-size: 18px;
+    color: #FF8C42;
+}
+
+.shift-star.grey {
+    color: #999;
+}
+
+.blocks-pool {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    padding: 0;
+    /* background-color: #fff; */
+    /* border: 2px solid #333; */
+    border-radius: 8px;
+    justify-content: center;
+    width: fit-content;
+}
+
+@media (min-width: 768px) {
+    .blocks-pool {
+        gap: 20px;
+        padding: 0;
+    }
+}
+
+.block {
+    display: grid;
+    gap: 2px;
+    padding: 5px;
+    /* background-color: #ddd; */
+    border-radius: 4px;
+    cursor: grab;
+    align-content: start;
+    height: fit-content;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+
+.block.dragging {
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+.block.placed {
+    cursor: default;
+    opacity: 0.4;
+}
+
+.block-cell {
+    width: 20px;
+    height: 20px;
+    background-color: #a0b8d0;
+    border-radius: 2px;
+}
+
+@media (min-width: 768px) {
+    .block-cell {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+/* Reduce gap for L-shaped blocks - no row gap, keep column gap */
+.block.l-top-left,
+.block.l-top-right,
+.block.l-bottom-left,
+.block.l-bottom-right {
+    row-gap: 2;
+    column-gap: 2px;
+    align-content: start;
+}
+
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 8000;
+    background-color: rgba(245, 245, 245, 1);
+}
+
+#startMenuContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    max-width: 500px;
+}
+
+#memoryTitle {
+    font-size: 32px;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#instructionsStartDiv {
+    background: white;
+    padding: 30px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    width: 80%;
+    box-sizing: border-box;
+}
+
+#instructionsStartDiv .instructionLine {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+    font-family: 'Aleo', serif;
+    text-align: center;
+    color: #666;
+}
+
+#instructionsStartDiv .instructionDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 8px 0;
+    width: 100%;
+}
+
+#playButton {
+    height: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    width: 55%;
+    max-width: 250px;
+    background: linear-gradient(to bottom, #00CED1, #008B8B);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin-top: 10px;
+}
+
+
+#helpButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 15px;
+    height: 15px;
+    background: #707070;
+    border: 2px solid rgb(196, 196, 196);
+    outline: 2px solid #525252;
+    transform: rotate(45deg);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#helpButton::before {
+    content: '?';
+    transform: rotate(-45deg);
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    font-family: 'Georgia', serif;
+    line-height: 1;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+
+.color-demo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.color-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+}
+
+.color-box.color-light {
+    background-color: #91c1e7;
+}
+
+.color-box.color-medium {
+    background-color: #5f93be;
+}
+
+.color-box.color-dark {
+    background-color: #274a83;
+}
+
+.color-arrow {
+    font-size: 20px;
+    color: #666;
+    font-weight: bold;
+}

@@ -55,7 +55,7 @@ body {
 #instructionsStartDiv {
     background: white;
     padding: 30px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid #ccc;
     margin-bottom: 12px;
     max-width: 450px;
@@ -66,7 +66,7 @@ body {
 #instructionsStartDiv .instructionLine {
     color: #666;
     font-weight: 500;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Aleo', serif;
 }
 
 .instructionLine {
@@ -74,7 +74,7 @@ body {
     font-weight: 500;
     margin-bottom: 6px;
     text-transform: lowercase;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Aleo', serif;
     text-align: center;
 }
 
