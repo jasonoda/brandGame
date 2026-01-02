@@ -51,11 +51,24 @@ function updateCalendar() {
         updateCalendarBox(box, index, '.day-number');
     });
 
-    // Update type1 calendar (header-type1)
-    const weekBoxesType1 = document.querySelectorAll('.week-box-type1');
-    weekBoxesType1.forEach((box, index) => {
-        updateCalendarBox(box, index, '.day-number-type1');
-    });
+    // Update type1 calendars separately - each calendar container needs its own index
+    // Update header-type1 calendar
+    const headerType1Calendar = document.querySelector('.header-type1 .week-days-container-type1');
+    if (headerType1Calendar) {
+        const weekBoxesType1 = headerType1Calendar.querySelectorAll('.week-box-type1');
+        weekBoxesType1.forEach((box, index) => {
+            updateCalendarBox(box, index, '.day-number-type1');
+        });
+    }
+    
+    // Update container2B calendar (bigy2)
+    const container2BCalendar = document.querySelector('.week-combined-container2B .week-days-container-type1');
+    if (container2BCalendar) {
+        const weekBoxes2B = container2BCalendar.querySelectorAll('.week-box-type1');
+        weekBoxes2B.forEach((box, index) => {
+            updateCalendarBox(box, index, '.day-number-type1');
+        });
+    }
 }
 
 // Make it globally accessible
@@ -409,7 +422,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setCurrentDate();
     updateHeaderStarCounter();
     updateWalletStars2();
-    updateCalendar();
+    
+    // Update calendar after a short delay to ensure all containers are set up
+    setTimeout(() => {
+        updateCalendar();
+    }, 100);
+    
     loadGameScores2();
     updateBoostHighScore();
     // console.log("loadGameScores called");
@@ -624,10 +642,21 @@ function checkURLParameters() {
     const headerLogo = document.querySelector('.header-logo');
     const carouselLogos = document.querySelectorAll('.carousel-slide-type1 img');
     
+    // Handle calendar containers
+    const container2A = document.querySelector('.week-combined-container2A');
+    const container2B = document.querySelector('.week-combined-container2B');
+    
     if (headerType === 'bigy') {
+        // Remove bigy2 class if it exists
+        document.body.classList.remove('bigy2');
+        
         // Show header-type2, hide header-type1
         if (headerType1) headerType1.style.display = 'none';
         if (headerType2) headerType2.style.display = 'block';
+        
+        // Show container2A, hide container2B
+        if (container2A) container2A.style.display = 'flex';
+        if (container2B) container2B.style.display = 'none';
         
         // Set bigy logo
         if (headerLogo) {
@@ -642,10 +671,79 @@ function checkURLParameters() {
         
         // Apply blue styling and white text for scramble, MC, and FoF
         applyBigyStyling();
+    } else if (headerType === 'bigy2') {
+        // Show header-type2, hide header-type1
+        if (headerType1) headerType1.style.display = 'none';
+        if (headerType2) headerType2.style.display = 'block';
+        
+        // Show container2B, hide container2A
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'flex';
+        
+        // Set bigy logo
+        if (headerLogo) {
+            headerLogo.src = 'src/img/bigy/bigy.png';
+        }
+        carouselLogos.forEach(logo => {
+            logo.src = 'src/img/bigy/bigy.png';
+        });
+        
+        // Apply DM Sans font to all elements except serif fonts and letter-box
+        applyFontScheme('DM Sans');
+        
+        // Add body class for bigy2 styling
+        document.body.classList.add('bigy2');
+        
+        // Apply blue styling and white text for scramble, MC, and FoF
+        applyBigyStyling();
+        
+        // Show logo for bigy2 (same as bigy)
+        if (headerLogo) {
+            headerLogo.style.display = 'block';
+        }
+        
+        // For bigy2, use default hint button styling (no lightbulb)
+        const hintButton = document.querySelector('.unscramble-hint-btn');
+        if (hintButton) {
+            // Remove any existing event listeners by cloning and replacing
+            const newHintButton = hintButton.cloneNode(true);
+            hintButton.parentNode.replaceChild(newHintButton, hintButton);
+            
+            // Apply default teal styling
+            newHintButton.style.background = 'linear-gradient(to bottom, #6EDDD4, #4ECDC4)';
+            newHintButton.style.color = 'white';
+            newHintButton.style.borderRadius = '6px';
+            newHintButton.style.padding = '8px 24px';
+            newHintButton.style.fontWeight = '600';
+            newHintButton.style.boxShadow = '0 2px 6px rgba(78, 205, 196, 0.3)';
+            // Remove lightbulb emoji for bigy2
+            newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
+            if (newHintButton.textContent.trim() === '') {
+                newHintButton.textContent = 'Hint';
+            }
+        }
+        
+        // Update calendar for bigy2 after container is shown
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                if (typeof updateCalendar === 'function') {
+                    console.log('[Bigy2] Updating calendar after container shown');
+                    updateCalendar();
+                }
+            }, 50);
+        });
     } else {
+        // Remove bigy2 class if it exists
+        document.body.classList.remove('bigy2');
+        
         // Default: show header-type1, hide header-type2
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
+        
+        // Hide both containers for default
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'none';
         
         // Set default temp logo
         if (headerLogo) {
@@ -1944,6 +2042,8 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     const urlParams = new URLSearchParams(window.location.search);
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
+    const isBigy2 = headerType === 'bigy2';
+    const isBigyMode = isBigy || isBigy2;
     
     // Show and set logo
     const logo = document.querySelector('.header-logo');
@@ -1952,9 +2052,9 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
         hasLogo = true;
         if (logo) {
             logo.src = logoPath;
-            // Only show logo if close button is not showing AND we're in bigy mode
+            // Only show logo if close button is not showing AND we're in bigy or bigy2 mode
             const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton && !closeButton.classList.contains('show') && isBigy) {
+            if (closeButton && !closeButton.classList.contains('show') && isBigyMode) {
                 logo.style.display = 'block';
             } else {
                 logo.style.display = 'none';
@@ -1977,10 +2077,12 @@ function updateLogoVisibility() {
     const closeButton = document.querySelector('.game-overlay-close');
     const helpButton = document.querySelector('.help-button');
     
-    // Check if we're in default or bigy mode
+    // Check if we're in default, bigy, or bigy2 mode
     const urlParams = new URLSearchParams(window.location.search);
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
+    const isBigy2 = headerType === 'bigy2';
+    const isBigyMode = isBigy || isBigy2;
     
     // Hide/show help button based on close button state
     if (helpButton) {
@@ -1991,7 +2093,7 @@ function updateLogoVisibility() {
             helpButton.classList.remove('hidden');
             helpButton.style.display = 'inline-flex';
             // Set help button color based on mode
-            if (isBigy) {
+            if (isBigyMode) {
                 helpButton.style.color = 'white';
                 helpButton.style.borderColor = 'white';
             } else {
@@ -2007,8 +2109,8 @@ function updateLogoVisibility() {
             // Game overlay is open - hide logo
             logo.style.display = 'none';
         } else {
-            // Game overlay is closed - show logo only for bigy
-            logo.style.display = isBigy ? 'block' : 'none';
+            // Game overlay is closed - show logo for bigy and bigy2
+            logo.style.display = isBigyMode ? 'block' : 'none';
         }
     }
 }

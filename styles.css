@@ -1172,7 +1172,8 @@ body {
     text-align: center;
 }
 
-.week-combined-container {
+.week-combined-container,
+.week-combined-container2A {
     margin: 20px;
     margin-bottom: 0px;
     border-radius: 12px;
@@ -1180,6 +1181,107 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
+}
+
+.week-combined-container2A {
+    
+}
+
+.week-combined-container2A {
+    display: none; /* Hidden by default, shown for bigy */
+}
+
+.week-combined-container2B {
+    /* border: 1px solid #a8a8a8; */
+    margin: 20px;
+    margin-bottom: 0px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: none; /* Hidden by default, shown for bigy2 */
+    flex-direction: column;
+}
+
+/* Remove padding from week-section-type1 when inside container2B */
+.week-combined-container2B .week-section-type1 {
+    padding: 0;
+    margin: 0;
+}
+
+/* Blue background for inactive days, red for today in container2B */
+.week-combined-container2B .week-container-type1 {
+    background: transparent;
+    border: none; /* Remove all borders */
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+}
+
+/* White borders for container2B */
+.week-combined-container2B .week-record-box-type1 {
+    border-bottom: none !important;
+    background: #283f7e;
+    padding: 8px;
+    /* border-radius: 4px; */
+}
+
+/* White background for inactive day boxes */
+.week-combined-container2B .week-box-type1 {
+    border-right: 1px solid #cccccc;
+    border-top: none;
+    background: #ffffff;
+}
+
+/* Remove left border from first box and right border from last box */
+.week-combined-container2B .week-days-container-type1 .week-box-type1:first-child {
+    border-left: none;
+}
+
+.week-combined-container2B .week-days-container-type1 .week-box-type1:last-child {
+    border-right: none;
+}
+
+/* Remove all borders from the days container */
+.week-combined-container2B .week-days-container-type1 {
+    border-bottom: none;
+    border-top: none;
+}
+
+/* Remove top border from first day box */
+.week-combined-container2B .week-days-container-type1 .week-box-type1:first-child {
+    border-top: none;
+}
+
+/* Red text for container2B (but not the star) */
+/* White text for weekly record in container2B */
+.week-combined-container2B .week-record-text-type1 {
+    color: #ffffff;
+}
+
+/* Dark grey day letters and red numbers for inactive days in container2B */
+.week-combined-container2B .day-initial-type1 {
+    color: #505050;
+}
+
+.week-combined-container2B .day-number-type1 {
+    color: #e84066;
+}
+
+/* Keep star yellow in container2B */
+.week-combined-container2B .week-record-star-type1 {
+    color: #ffa551;
+}
+
+/* Today highlight for container2B - red background */
+.week-combined-container2B .week-box-type1.today {
+    background: linear-gradient(to bottom, #e84066, #c82a48) !important;
+    border-top: none !important;
+}
+
+.week-combined-container2B .week-box-type1.today .day-initial-type1,
+.week-combined-container2B .week-box-type1.today .day-number-type1 {
+    color: #ffffff;
+    font-weight: 700;
 }
 
 .week-theme-section {
@@ -2669,6 +2771,12 @@ body {
 
 .help-button.hidden {
     display: none;
+}
+
+/* White help button for bigy2 */
+body.bigy2 .help-button {
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
 }
 
 .help-popup-overlay {
