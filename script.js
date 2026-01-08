@@ -2200,7 +2200,11 @@ document.addEventListener('keydown', (e) => {
         localStorage.removeItem(`phrasesState_${todayKey}`);
         localStorage.removeItem(`phrasesStars_${todayKey}`);
         localStorage.removeItem(`phrasesComplete_${todayKey}`);
-        console.log('[MainPage] RESET: Cleared all phrases data for key:', todayKey);
+        localStorage.removeItem(`suspectState_${todayKey}`);
+        localStorage.removeItem(`suspectStars_${todayKey}`);
+        localStorage.removeItem(`suspectComplete_${todayKey}`);
+        localStorage.removeItem(`suspectWon_${todayKey}`);
+        console.log('[MainPage] RESET: Cleared all phrases and suspect data for key:', todayKey);
         
         // Update the display
         if (window.loadGameScores) {
@@ -2208,6 +2212,9 @@ document.addEventListener('keydown', (e) => {
         }
         if (window.updatePhrasesStars) {
             window.updatePhrasesStars();
+        }
+        if (window.updateSuspectStars) {
+            window.updateSuspectStars();
         }
     } else if (e.key === '1') {
         // Debug: Show all data for today
@@ -2325,6 +2332,8 @@ if (closeButton) {
         const zoomOverlay = document.getElementById('zoomOverlay');
         const shiftOverlay = document.getElementById('shiftOverlay');
         const phrasesOverlay = document.getElementById('phrasesOverlay');
+        const crossOverlay = document.getElementById('crossOverlay');
+        const suspectOverlay = document.getElementById('suspectOverlay');
         const match3Overlay = document.getElementById('match3Overlay');
         
         // Determine which overlay is active and only reload that iframe
@@ -2366,6 +2375,14 @@ if (closeButton) {
             activeOverlay = 'phrases';
             phrasesOverlay.classList.remove('active');
             iframeToUnload = document.getElementById('phrasesIframe');
+        } else if (crossOverlay && crossOverlay.classList.contains('active')) {
+            activeOverlay = 'cross';
+            crossOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('crossIframe');
+        } else if (suspectOverlay && suspectOverlay.classList.contains('active')) {
+            activeOverlay = 'suspect';
+            suspectOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('suspectIframe');
         } else if (match3Overlay && match3Overlay.classList.contains('active')) {
             activeOverlay = 'match3';
             match3Overlay.classList.remove('active');
@@ -2665,7 +2682,60 @@ if (shiftBox) {
     });
 }
 
-// Phrases game box
+// Cross game box
+const crossBox = document.getElementById('crossBox');
+const crossOverlay = document.getElementById('crossOverlay');
+
+if (crossBox) {
+    crossBox.addEventListener('click', () => {
+        if (crossOverlay) {
+            crossOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Show close button
+            const closeButton = document.querySelector('.game-overlay-close');
+            if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
+
+            // Reload iframe (it may have been unloaded to 'about:blank')
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const iframe = document.getElementById('crossIframe');
+            if (iframe) {
+                iframe.src = scheme ? `games/cross/index.html?s=${scheme}` : 'games/cross/index.html';
+                console.log(`Reloading cross game iframe: ${iframe.src}`);
+            }
+        }
+    });
+}
+
+// Suspect game box
+const suspectBox = document.getElementById('suspectBox');
+const suspectOverlay = document.getElementById('suspectOverlay');
+
+if (suspectBox) {
+    suspectBox.addEventListener('click', () => {
+        if (suspectOverlay) {
+            suspectOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Show close button
+            const closeButton = document.querySelector('.game-overlay-close');
+            if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
+
+            // Reload iframe (it may have been unloaded to 'about:blank')
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const iframe = document.getElementById('suspectIframe');
+            if (iframe) {
+                iframe.src = scheme ? `games/suspect/index.html?s=${scheme}` : 'games/suspect/index.html';
+                console.log(`Reloading suspect game iframe: ${iframe.src}`);
+            }
+        }
+    });
+}
+
 const phrasesBox = document.getElementById('phrasesBox');
 const phrasesOverlay = document.getElementById('phrasesOverlay');
 

@@ -450,6 +450,33 @@ function loadGameScores() {
             phrasesStars.appendChild(star);
         }
     }
+    
+    // Load Suspect stars
+    const suspectStars = document.getElementById('suspectStars');
+    const savedSuspectStars = localStorage.getItem(`suspectStars_${todayKey}`);
+    
+    if (suspectStars && savedSuspectStars) {
+        const starsEarned = parseInt(savedSuspectStars) || 0;
+        suspectStars.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            if (i < starsEarned) {
+                star.style.color = '#FFB84D';
+            } else {
+                star.style.color = '#ddd';
+            }
+            suspectStars.appendChild(star);
+        }
+    } else if (suspectStars) {
+        suspectStars.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = '#ddd';
+            suspectStars.appendChild(star);
+        }
+    }
 }
 
 // Expose functions to window for iframe access
@@ -481,6 +508,54 @@ window.updatePhrasesStars = function() {
                     star.style.color = '#ddd';
                 }
                 phrasesStars.appendChild(star);
+            }
+        }
+    }
+};
+
+window.updateSuspectStars = function() {
+    const todayKey = getTodayKey();
+    const suspectStars = document.getElementById('suspectStars');
+    const isSuspectComplete = localStorage.getItem(`suspectComplete_${todayKey}`) === 'true';
+    
+    if (isSuspectComplete) {
+        const starsEarned = parseInt(localStorage.getItem(`suspectStars_${todayKey}`) || '0');
+        
+        if (suspectStars) {
+            suspectStars.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                if (i < starsEarned) {
+                    star.style.color = '#FFB84D';
+                } else {
+                    star.style.color = '#ddd';
+                }
+                suspectStars.appendChild(star);
+            }
+        }
+    }
+};
+
+window.updateSuspectStars = function() {
+    const todayKey = getTodayKey();
+    const suspectStars = document.getElementById('suspectStars');
+    const isSuspectComplete = localStorage.getItem(`suspectComplete_${todayKey}`) === 'true';
+    
+    if (isSuspectComplete) {
+        const starsEarned = parseInt(localStorage.getItem(`suspectStars_${todayKey}`) || '0');
+        
+        if (suspectStars) {
+            suspectStars.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                if (i < starsEarned) {
+                    star.style.color = '#FFB84D';
+                } else {
+                    star.style.color = '#ddd';
+                }
+                suspectStars.appendChild(star);
             }
         }
     }

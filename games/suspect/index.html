@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suspect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Start Menu -->
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/suspect.svg" alt="Suspect" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="suspectTitle">SUSPECT</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">there is a killer among the 36 people</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">each person has<br>color, shape, and number</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">when questioned, a person will share how many traits they share with the killer</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">use deductive reasoning to<br>identify the killer in 4 turns</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">as you take more turns,<br>more people will be killed</div>
+                <div class="instructionDivider"></div>
+                
+                <div class="instructionLine">when you know the killer,<br>accuse them to end the game</div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+    
+    <div class="red-flash-overlay" id="redFlashOverlay"></div>
+    <button id="helpButton"></button>
+    <div class="container" id="gameContainer" style="display: none;">
+       
+        <div class="instruction" id="instruction">Click a person to question them</div>
+        <div class="game-area" id="gameArea"></div>
+        <div class="button-container">
+            <button class="next-button" id="nextButton">Next</button>
+            <button class="accuse-button" id="accuseButton">
+                Accuse
+                <div class="button-subtitle">(ends game)</div>
+            </button>
+        </div>
+        <button class="results-button" id="resultsButton">Results</button>
+    </div>
+    
+    <!-- Results Popup -->
+    <div class="popup-overlay" id="popupOverlay" style="display: none;">
+        <div class="popup">
+            <div class="popup-header">
+                <h2>Question Results</h2>
+                <button class="close-button" id="closeButton">×</button>
+            </div>
+            <div class="popup-content" id="popupContent"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

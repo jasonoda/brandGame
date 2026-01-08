@@ -351,12 +351,12 @@
                     </div>
                     <div class="play-text" id="phrasesStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
                 </div>
-                <div class="play-box" id="tilesBox">
-                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B6B, #D63645);">
-                        <img src="src/img/tiles.svg" alt="Tiles" style="height: 30px; width: auto; margin-bottom: 1px;">
-                        <div class="game-title">ZOOM</div>
+                <div class="play-box" id="crossBox">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FF69B4, #ee2c93);">
+                        <img src="src/img/cross.svg" alt="Cross" style="height: 30px; width: auto; margin-bottom: 1px;">
+                        <div class="game-title">CROSS</div>
                     </div>
-                    <div class="play-text" id="tilesStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
+                    <div class="play-text" id="crossStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
                 </div>
                 <div class="play-box" id="goldCasePuzzleBox">
                     <div class="play-color-box" style="background: linear-gradient(to bottom, #FFD700, #FFA500);">
@@ -364,6 +364,20 @@
                         <div class="game-title">GOLD CASE</div>
                     </div>
                     <div class="play-text" id="goldCasePuzzleStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
+                </div>
+                <div class="play-box" id="suspectBox">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FF6B6B, #D63645);">
+                        <img src="src/img/suspect.svg" alt="Suspect" style="height: 30px; width: auto; margin-bottom: 1px;">
+                        <div class="game-title">SUSPECT</div>
+                    </div>
+                    <div class="play-text" id="suspectStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
+                </div>
+                <div class="play-box" id="tilesBox">
+                    <div class="play-color-box" style="background: linear-gradient(to bottom, #FF8C42, #FF6B35);">
+                        <img src="src/img/tiles.svg" alt="Tiles" style="height: 30px; width: auto; margin-bottom: 1px;">
+                        <div class="game-title">ZOOM</div>
+                    </div>
+                    <div class="play-text" id="tilesStars" style="color: #ddd; font-size: 18px; letter-spacing: 0px;">★★★★★</div>
                 </div>
                 <div class="play-box" id="shiftBox">
                     <div class="play-color-box" style="background: linear-gradient(to bottom, #00CED1, #00b4b4);">
@@ -884,6 +898,16 @@
     <!-- Phrases Overlay -->
     <div id="phrasesOverlay" class="game-overlay">
         <iframe id="phrasesIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Cross Overlay -->
+    <div id="crossOverlay" class="game-overlay">
+        <iframe id="crossIframe" scrolling="no"></iframe>
+    </div>
+
+    <!-- Suspect Overlay -->
+    <div id="suspectOverlay" class="game-overlay">
+        <iframe id="suspectIframe" scrolling="no"></iframe>
     </div>
 
     <!-- Match 3 Overlay -->
