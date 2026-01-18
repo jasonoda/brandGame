@@ -72,11 +72,11 @@
     transition: all 0.2s ease;
     border: none;
     text-align: center;
-    width: 55%;
-    max-width: 250px;
-    background: linear-gradient(to bottom, #FFA751, #FF7E00);
+    width: 200px;
+    background: #FFA751;
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -87,7 +87,7 @@
 }
 
 #playButton:hover {
-    box-shadow: 0 4px 12px rgba(232, 93, 154, 0.35);
+    box-shadow: none;
     transform: translateY(-1px);
 }
 

@@ -1,0 +1,372 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    position: relative;
+}
+
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 8000;
+    background-color: rgba(245, 245, 245, 1);
+}
+
+#startMenuContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: opacity 0.5s ease-out;
+    width: 100%;
+    max-width: 500px;
+}
+
+#crossTitle {
+    font-size: 32px;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#instructionsStartDiv {
+    background: white;
+    padding: 30px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    width: 80%;
+    box-sizing: border-box;
+}
+
+#instructionsStartDiv .instructionLine {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+    font-family: 'Aleo', serif;
+    text-align: center;
+    color: #666;
+}
+
+#instructionsStartDiv .instructionDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 8px 0;
+    width: 100%;
+}
+
+.instructionImageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 12px 0;
+    width: 100%;
+}
+
+.instructionImage {
+    max-width: 100%;
+    height: auto;
+    width: 120px;
+}
+
+#playButton {
+    height: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-align: center;
+    width: 200px;
+    background: #2196f3;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    padding: 0;
+    margin-top: 10px;
+    box-shadow: none;
+}
+
+#playButton:hover {
+    box-shadow: none;
+    transform: translateY(-1px);
+}
+
+#playButton:active {
+    transform: translateY(0);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.instruction-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 10pt;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: .5px;
+    color: #333;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cross-star-container {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cross-star {
+    font-size: 18px;
+    color: #FF8C42;
+    line-height: 1;
+}
+
+.cross-star.grey {
+    color: #ccc;
+}
+
+.grid-wrapper {
+    position: relative;
+    width: 316px;
+    height: 316px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    grid-template-rows: repeat(5, 60px);
+    gap: 4px;
+    background-color: #ddd;
+    border: 1px solid #999;
+    padding: 0;
+    visibility: hidden;
+}
+
+.grid-cell {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border: 1px solid #999;
+}
+
+.cells-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 316px;
+    height: 316px;
+    pointer-events: auto;
+}
+
+.letter-cell {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.letter-cell.selected {
+    background-color: #4CAF50 !important;
+    color: #000 !important;
+}
+
+.letter-cell.selected-word1 {
+    background-color: var(--cell-bg, #4CAF50) !important; /* Green for word1 */
+    color: #fff !important;
+}
+
+/* Word1 green takes precedence over word2 blue */
+.letter-cell.selected-word1.selected-word2 {
+    background-color: var(--cell-bg, #4CAF50) !important; /* Green for word1 - always wins */
+    color: #fff !important;
+}
+
+.letter-cell.selected-word2 {
+    background-color: var(--cell-bg, #2196F3) !important; /* Blue for word2 */
+    color: #fff !important;
+}
+
+/* Blank cells - black background, no text */
+.letter-cell[data-blank="true"] {
+    background-color: #000;
+    color: transparent;
+}
+
+/* Letter cells - grey background, black text */
+.letter-cell:not([data-blank="true"]) {
+    background-color: #ccc;
+    color: #000;
+}
+
+.controls {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.button-group-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.button-label {
+    height: 20px;
+    width: auto;
+    margin-bottom: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.arrow-button {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    touch-action: manipulation; /* Prevent double-tap zoom and reduce click delay on mobile */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+#helpButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 15px;
+    height: 15px;
+    background: #707070;
+    border: 2px solid rgb(196, 196, 196);
+    outline: 2px solid #525252;
+    transform: rotate(45deg);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+#helpButton::before {
+    content: '?';
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    font-family: 'Georgia', serif;
+    line-height: 1;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+}
+/* 
+#helpButton:hover {
+    background: #606060;
+} */
+
+.hint-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    background: #2196f3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: none;
+}
+
+.hint-button:hover {
+    box-shadow: none;
+    transform: translateY(-1px);
+}
+
+.hint-button:active {
+    transform: translateY(0);
+}
+
+.hint-button:disabled {
+    background-color: #C0C0C0;
+    cursor: not-allowed;
+}
+
+.hint-button .star {
+    color: #ffe571;
+}
+
+.hint-answers {
+    margin-top: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}

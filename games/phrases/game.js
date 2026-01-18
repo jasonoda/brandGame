@@ -407,7 +407,7 @@ playButton.addEventListener('click', () => {
     };
     
     tryLoadState();
-});
+    });
 
 function initializeGame(phrase) {
     currentPhrase = phrase.toUpperCase();
@@ -1061,7 +1061,7 @@ function showSolveUI() {
         letterSelectionUI.style.pointerEvents = '';
         // Force reflow to ensure transition works
         void letterSelectionUI.offsetWidth;
-        letterSelectionUI.classList.add('faded');
+    letterSelectionUI.classList.add('faded');
     }
     
     // Fade in solve UI and keyboard

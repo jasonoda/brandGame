@@ -149,9 +149,9 @@ if (savedAssignments) {
 
 // Set killer's attributes (only if not already set from saved state)
 if (!savedAssignments) {
-    colorAssignments[killerIndex] = killerColor;
-    shapeAssignments[killerIndex] = killerShape;
-    dotAssignments[killerIndex] = killerDots;
+colorAssignments[killerIndex] = killerColor;
+shapeAssignments[killerIndex] = killerShape;
+dotAssignments[killerIndex] = killerDots;
 } else {
     // Verify killer's attributes match saved state
     if (colorAssignments[killerIndex] !== killerColor || 
@@ -242,8 +242,8 @@ if (!savedAssignments) {
     const killerCombinationKey = getCombinationKey(killerColor, killerShape, killerDots);
     usedCombinations.add(killerCombinationKey);
 
-    // Assign attributes based on constraints
-    let idx = 0;
+// Assign attributes based on constraints
+let idx = 0;
 
 // Assign 1 person with 2 traits in common
 if (numWith2Traits > 0 && idx < indices.length) {
@@ -325,9 +325,9 @@ for (let i = 0; i < numPeople; i++) {
     if (useEmojis) {
         // Thanksgiving variation: colored background, emoji instead of shape, horizontal dots
         personBox.style.backgroundColor = boxColor;
-        
+    
         // Add emoji instead of shape
-        const shapeIndex = shapeAssignments[i];
+    const shapeIndex = shapeAssignments[i];
         const emojiIndex = (shapeIndex - 1) % thanksgivingEmojis.length; // Map shape 1-5 to emoji 0-4
         const emoji = thanksgivingEmojis[emojiIndex];
         
@@ -397,11 +397,11 @@ for (let i = 0; i < numPeople; i++) {
                 })
                 .then(svgText => {
                     if (!svgText) return;
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = svgText;
-                    const svgElement = tempDiv.querySelector('svg');
-                    
-                    if (svgElement) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = svgText;
+            const svgElement = tempDiv.querySelector('svg');
+            
+            if (svgElement) {
                         // Make class names unique to prevent CSS conflicts between SVGs
                         // Each SVG gets its own unique ID so styles don't override each other
                         const uniqueId = `svg-${currentPersonIndex}`;
@@ -434,72 +434,72 @@ for (let i = 0; i < numPeople; i++) {
                             console.log(`Person ${currentPersonIndex}: Updated SVG classes with unique ID ${uniqueId}`);
                         }
                         
-                        svgElement.setAttribute('width', '50');
-                        svgElement.setAttribute('height', '50');
-                        svgElement.style.width = '71%';
-                        svgElement.style.height = '71%';
-                        svgElement.style.maxWidth = '50px';
-                        svgElement.style.maxHeight = '50px';
-                        svgElement.style.position = 'absolute';
-                        svgElement.style.top = '50%';
-                        svgElement.style.left = '50%';
-                        svgElement.style.transform = 'translate(-50%, -50%)';
-                        svgElement.style.zIndex = '1';
-                        
+                svgElement.setAttribute('width', '50');
+                svgElement.setAttribute('height', '50');
+                svgElement.style.width = '71%';
+                svgElement.style.height = '71%';
+                svgElement.style.maxWidth = '50px';
+                svgElement.style.maxHeight = '50px';
+                svgElement.style.position = 'absolute';
+                svgElement.style.top = '50%';
+                svgElement.style.left = '50%';
+                svgElement.style.transform = 'translate(-50%, -50%)';
+                svgElement.style.zIndex = '1';
+                
                         // Shape is pre-colored, no need to modify colors
                         // Use the captured box reference
                         currentPersonBox.appendChild(svgElement);
                         console.log(`Person ${currentPersonIndex}: Appended ${shapeFileName} to box`);
-                    }
+            }
                 })
                 .catch(error => {
                     console.error(`Person ${currentPersonIndex}: Error loading ${shapeFileName}:`, error);
                 });
         }
-        
+    
         // Add dots in stacked pattern
-        const numDots = dotAssignments[i];
-        const dotsContainer = document.createElement('div');
-        dotsContainer.style.position = 'absolute';
-        dotsContainer.style.top = '50%';
-        dotsContainer.style.left = '50%';
-        dotsContainer.style.transform = 'translate(-50%, -50%)';
-        dotsContainer.style.zIndex = '2';
-        dotsContainer.style.display = 'flex';
-        dotsContainer.style.flexDirection = 'column';
-        dotsContainer.style.alignItems = 'center';
-        dotsContainer.style.justifyContent = 'center';
-        dotsContainer.style.gap = '2px';
-        
-        // Define dot patterns (same as game1, but only up to numAttributes)
-        const dotPatterns = {
-            1: [1],
-            2: [2],
-            3: [3],
-            4: [2, 2],
-            5: [2, 1, 2]
-        };
-        
-        const pattern = dotPatterns[numDots];
-        if (pattern) {
-            pattern.forEach(rowDots => {
-                const dotRow = document.createElement('div');
-                dotRow.style.display = 'flex';
-                dotRow.style.gap = '2px';
-                dotRow.style.justifyContent = 'center';
-                for (let j = 0; j < rowDots; j++) {
-                    const dot = document.createElement('div');
-                    dot.style.width = '5px';
-                    dot.style.height = '5px';
-                    dot.style.backgroundColor = 'white';
-                    dot.style.borderRadius = '50%';
-                    dotRow.appendChild(dot);
-                }
-                dotsContainer.appendChild(dotRow);
-            });
-        }
-        
-        personBox.appendChild(dotsContainer);
+    const numDots = dotAssignments[i];
+    const dotsContainer = document.createElement('div');
+    dotsContainer.style.position = 'absolute';
+    dotsContainer.style.top = '50%';
+    dotsContainer.style.left = '50%';
+    dotsContainer.style.transform = 'translate(-50%, -50%)';
+    dotsContainer.style.zIndex = '2';
+    dotsContainer.style.display = 'flex';
+    dotsContainer.style.flexDirection = 'column';
+    dotsContainer.style.alignItems = 'center';
+    dotsContainer.style.justifyContent = 'center';
+    dotsContainer.style.gap = '2px';
+    
+    // Define dot patterns (same as game1, but only up to numAttributes)
+    const dotPatterns = {
+        1: [1],
+        2: [2],
+        3: [3],
+        4: [2, 2],
+        5: [2, 1, 2]
+    };
+    
+    const pattern = dotPatterns[numDots];
+    if (pattern) {
+        pattern.forEach(rowDots => {
+            const dotRow = document.createElement('div');
+            dotRow.style.display = 'flex';
+            dotRow.style.gap = '2px';
+            dotRow.style.justifyContent = 'center';
+            for (let j = 0; j < rowDots; j++) {
+                const dot = document.createElement('div');
+                dot.style.width = '5px';
+                dot.style.height = '5px';
+                dot.style.backgroundColor = 'white';
+                dot.style.borderRadius = '50%';
+                dotRow.appendChild(dot);
+            }
+            dotsContainer.appendChild(dotRow);
+        });
+    }
+    
+    personBox.appendChild(dotsContainer);
     }
     
     gameArea.appendChild(personBox);
@@ -1413,72 +1413,72 @@ async function createMiniPersonBox(person, commonTraits) {
         
         try {
             const response = await fetch(shapeFileName);
-            const svgText = await response.text();
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = svgText;
-            const svgElement = tempDiv.querySelector('svg');
+        const svgText = await response.text();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = svgText;
+        const svgElement = tempDiv.querySelector('svg');
+        
+        if (svgElement) {
+            // Clone the SVG to avoid affecting the original
+            const clonedSvg = svgElement.cloneNode(true);
+            clonedSvg.setAttribute('width', '40');
+            clonedSvg.setAttribute('height', '40');
+            clonedSvg.style.width = '40px';
+            clonedSvg.style.height = '40px';
+            clonedSvg.style.position = 'absolute';
+            clonedSvg.style.top = '50%';
+            clonedSvg.style.left = '50%';
+            clonedSvg.style.transform = 'translate(-50%, -50%)';
+            clonedSvg.style.zIndex = '1';
             
-            if (svgElement) {
-                // Clone the SVG to avoid affecting the original
-                const clonedSvg = svgElement.cloneNode(true);
-                clonedSvg.setAttribute('width', '40');
-                clonedSvg.setAttribute('height', '40');
-                clonedSvg.style.width = '40px';
-                clonedSvg.style.height = '40px';
-                clonedSvg.style.position = 'absolute';
-                clonedSvg.style.top = '50%';
-                clonedSvg.style.left = '50%';
-                clonedSvg.style.transform = 'translate(-50%, -50%)';
-                clonedSvg.style.zIndex = '1';
-                
                 // Shape is pre-colored, no need to modify colors
-                miniBox.appendChild(clonedSvg);
-            }
-        } catch (error) {
+            miniBox.appendChild(clonedSvg);
+        }
+    } catch (error) {
             console.error(`Error loading ${shapeFileName}:`, error);
-        }
-        
+    }
+    
         // Add dots in stacked pattern
-        const dotsContainer = document.createElement('div');
-        dotsContainer.style.position = 'absolute';
-        dotsContainer.style.top = '50%';
-        dotsContainer.style.left = '50%';
-        dotsContainer.style.transform = 'translate(-50%, -50%)';
-        dotsContainer.style.zIndex = '2';
-        dotsContainer.style.display = 'flex';
-        dotsContainer.style.flexDirection = 'column';
-        dotsContainer.style.alignItems = 'center';
-        dotsContainer.style.justifyContent = 'center';
-        dotsContainer.style.gap = '2px';
-        
-        const dotPatterns = {
-            1: [1],
-            2: [2],
-            3: [3],
-            4: [2, 2],
-            5: [2, 1, 2]
-        };
-        
-        const pattern = dotPatterns[person.dots];
-        if (pattern) {
-            pattern.forEach(rowDots => {
-                const dotRow = document.createElement('div');
-                dotRow.style.display = 'flex';
-                dotRow.style.gap = '2px';
-                dotRow.style.justifyContent = 'center';
-                for (let j = 0; j < rowDots; j++) {
-                    const dot = document.createElement('div');
-                    dot.style.width = '4px';
-                    dot.style.height = '4px';
-                    dot.style.backgroundColor = 'white';
-                    dot.style.borderRadius = '50%';
-                    dotRow.appendChild(dot);
-                }
-                dotsContainer.appendChild(dotRow);
-            });
-        }
-        
-        miniBox.appendChild(dotsContainer);
+    const dotsContainer = document.createElement('div');
+    dotsContainer.style.position = 'absolute';
+    dotsContainer.style.top = '50%';
+    dotsContainer.style.left = '50%';
+    dotsContainer.style.transform = 'translate(-50%, -50%)';
+    dotsContainer.style.zIndex = '2';
+    dotsContainer.style.display = 'flex';
+    dotsContainer.style.flexDirection = 'column';
+    dotsContainer.style.alignItems = 'center';
+    dotsContainer.style.justifyContent = 'center';
+    dotsContainer.style.gap = '2px';
+    
+    const dotPatterns = {
+        1: [1],
+        2: [2],
+        3: [3],
+        4: [2, 2],
+        5: [2, 1, 2]
+    };
+    
+    const pattern = dotPatterns[person.dots];
+    if (pattern) {
+        pattern.forEach(rowDots => {
+            const dotRow = document.createElement('div');
+            dotRow.style.display = 'flex';
+            dotRow.style.gap = '2px';
+            dotRow.style.justifyContent = 'center';
+            for (let j = 0; j < rowDots; j++) {
+                const dot = document.createElement('div');
+                dot.style.width = '4px';
+                dot.style.height = '4px';
+                dot.style.backgroundColor = 'white';
+                dot.style.borderRadius = '50%';
+                dotRow.appendChild(dot);
+            }
+            dotsContainer.appendChild(dotRow);
+        });
+    }
+    
+    miniBox.appendChild(dotsContainer);
     }
     
     // Text info
@@ -1669,11 +1669,11 @@ function startGame() {
         requestAnimationFrame(gameLoop);
     } else {
         // New game - reset game state
-        instructionDiv.textContent = "Killer's turn";
-        nextButton.style.opacity = '0.5';
-        nextButton.style.pointerEvents = 'none';
-        accuseButton.style.opacity = '0.5';
-        accuseButton.style.pointerEvents = 'none';
+instructionDiv.textContent = "Killer's turn";
+nextButton.style.opacity = '0.5';
+nextButton.style.pointerEvents = 'none';
+accuseButton.style.opacity = '0.5';
+accuseButton.style.pointerEvents = 'none';
         accuseMode = false;
         questionCount = 0;
         questionedPeople = [];
@@ -1684,10 +1684,10 @@ function startGame() {
         action = "enemy turn";
         
         // Start game with killer's turn
-        killerTurn();
-        
-        // Start game loop
-        requestAnimationFrame(gameLoop);
+killerTurn();
+
+// Start game loop
+requestAnimationFrame(gameLoop);
     }
 }
 

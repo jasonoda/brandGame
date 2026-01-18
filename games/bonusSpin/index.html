@@ -10,29 +10,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="startMenu">
-        <div id="startMenuContainer">
-            <div style="font-size: 40px; margin-bottom: 10px;">🎡</div>
-            <div id="memoryTitle">BONUS SPIN</div>
-            <div id="instructionsStartDiv">
-                <div class="instructionLine">Spin the wheel for bonus rewards</div>
-                <div class="instructionDivider"></div>
-                <div class="instructionLine">Complete daily games to unlock your bonus spin</div>
-                <div class="instructionDivider"></div>
-                <div class="instructionLine">Earn extra stars and rewards</div>
-            </div>
-            <div id="playButton">PLAY</div>
+    <div class="container">
+        <div class="wheel-container">
+            <canvas id="wheelCanvas" width="400" height="400"></canvas>
+            <div class="wheel-pointer"></div>
+            <div id="flashOverlay" class="flash-overlay"></div>
         </div>
-    </div>
-
-    <div class="container" style="display: none;">
-        <div id="underConstruction">
-            <h1>Under Construction</h1>
-            <p>This game is coming soon!</p>
-        </div>
+        <button id="spinButton" class="spin-button">SPIN</button>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
-

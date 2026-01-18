@@ -369,7 +369,7 @@ body{
 }
 
 #playButton {
-    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    background: #00d4ff;
     color: white;
 }
 
@@ -462,6 +462,8 @@ body{
     align-items: center;
     gap: 2px;
     transition: opacity 0.5s ease-out;
+    width: 100%;
+    max-width: 500px;
 }
 
 #memoryTitle {
@@ -510,11 +512,11 @@ body{
     transition: all 0.2s ease;
     border: none;
     text-align: center;
-    width: 55%;
-    max-width: 250px;
-    background: linear-gradient(to bottom, #00d4ff, #0099cc);
+    width: 200px;
+    background: #00d4ff;
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -525,7 +527,7 @@ body{
 }
 
 #playButton:hover {
-    box-shadow: 0 4px 12px rgba(0, 153, 204, 0.4);
+    box-shadow: none;
     transform: translateY(-1px);
 }
 

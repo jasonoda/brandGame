@@ -279,19 +279,8 @@ function checkQuizAnswer(selectedIndex) {
             }
         });
         
-        // Animate background green then fade to white (snap to green, fade to white)
-        if (bottomSection) {
-            // Snap to green immediately (no transition)
-            bottomSection.style.transition = 'none';
-            bottomSection.style.backgroundColor = '#B2F5EA';
-            // Force reflow
-            void bottomSection.offsetHeight;
-            // Then fade to white with transition
-            bottomSection.style.transition = 'background-color 0.5s ease';
-            setTimeout(() => {
-                bottomSection.style.backgroundColor = 'white';
-            }, 50);
-        }
+        // Remove background color animation to prevent flash
+        // Background stays as set by CSS (blue for bigy2)
         
         // Wait 1.5 seconds, then fade out and go to next question (unless it's the last question)
         setTimeout(() => {
@@ -331,6 +320,15 @@ function checkQuizAnswer(selectedIndex) {
                     quizCurrentQuestionIndex++;
                     saveQuizState();
                     displayQuestion();
+                    
+                    // Ensure opacity is reset for new question
+                    const questionElement = document.querySelector('.quiz-question');
+                    const buttonsContainer = document.querySelector('.quiz-buttons');
+                    const difficultyNumberContainer = document.querySelector('.quiz-difficulty-number');
+                    
+                    if (questionElement) questionElement.style.opacity = '';
+                    if (buttonsContainer) buttonsContainer.style.opacity = '';
+                    if (difficultyNumberContainer) difficultyNumberContainer.style.opacity = '';
                 }, 600);
             }
         }, 1500);
@@ -367,19 +365,8 @@ function checkQuizAnswer(selectedIndex) {
             }
         });
         
-        // Animate background red then fade to white (snap to red, fade to white)
-        if (bottomSection) {
-            // Snap to red immediately (no transition)
-            bottomSection.style.transition = 'none';
-            bottomSection.style.backgroundColor = '#FFCDD2';
-            // Force reflow
-            void bottomSection.offsetHeight;
-            // Then fade to white with transition
-            bottomSection.style.transition = 'background-color 0.5s ease';
-            setTimeout(() => {
-                bottomSection.style.backgroundColor = 'white';
-            }, 50);
-        }
+        // Remove background color animation to prevent flash
+        // Background stays as set by CSS (blue for bigy2)
         
         // End game and show stars
         setTimeout(() => {

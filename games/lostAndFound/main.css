@@ -524,7 +524,7 @@ canvas {
 }
 
 #playButton {
-    background: linear-gradient(to bottom, #FFA751, #FF7E00);
+    background: #FFA751;
     color: white;
 }
 

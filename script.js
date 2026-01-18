@@ -219,18 +219,18 @@ function setCurrentDate() {
     
     // Always show title in caps
     dateElement.textContent = 'Daily Game Center'
-    
+        
     // Always show current date in subtitle, regardless of URL params
-    if (dateSubtitleElement) {
-        const today = new Date();
-        const months = [
-            'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-            'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-        ];
-        const month = months[today.getMonth()];
-        const day = today.getDate();
-        const year = today.getFullYear();
-        dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
+        if (dateSubtitleElement) {
+            const today = new Date();
+            const months = [
+                'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+            ];
+            const month = months[today.getMonth()];
+            const day = today.getDate();
+            const year = today.getFullYear();
+            dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
     }
 }
 
@@ -269,6 +269,19 @@ function loadGameScores2() {
         // console.log('beticleStars element not found');
     }
     
+    // Load cross stars
+    const crossStars = parseInt(localStorage.getItem(`crossStars_${todayKey}`) || '0');
+    const crossStarsElement = document.getElementById('crossStars');
+    if (crossStarsElement) {
+        crossStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < crossStars ? '#FF8C42' : '#ddd';
+            crossStarsElement.appendChild(star);
+        }
+    }
+    
     // Load mystery word stars
     const mysteryWordStars = parseInt(localStorage.getItem(`mysteryWordStars_${todayKey}`) || '0');
     const mysteryWordStarsElement = document.getElementById('mysteryWordStars');
@@ -295,19 +308,19 @@ function loadGameScores2() {
         }
     }
     
-    // Load gold case score and stars
+    // Don't modify goldCaseLockText here - it's now managed by updateBonusSpinDisplay()
+    // The bonus spin game uses goldCaseLockText and goldCaseStars (the 10-star display)
+    // Only handle goldCaseScoreText if it exists (for backward compatibility with old Gold Case game)
     const goldCaseScore = parseInt(localStorage.getItem(`goldCaseScore_${todayKey}`) || '0');
     const goldCaseStars = parseInt(localStorage.getItem(`goldCaseStars_${todayKey}`) || '0');
     const goldCaseComplete = localStorage.getItem(`goldCaseComplete_${todayKey}`) === 'true';
     
-    const goldCaseLockText = document.getElementById('goldCaseLockText');
     const goldCaseScoreText = document.getElementById('goldCaseScoreText');
     const goldCaseScoreElement = document.getElementById('goldCaseScore');
     const goldCaseStarsElement = document.getElementById('goldCaseStars');
     
-    if (goldCaseComplete && goldCaseLockText && goldCaseScoreText) {
-        // Hide lock text and show score/stars
-        goldCaseLockText.style.display = 'none';
+    // Only handle goldCaseScoreText (old Gold Case game display), not goldCaseLockText
+    if (goldCaseComplete && goldCaseScoreText) {
         goldCaseScoreText.style.display = 'flex';
         
         // Update score
@@ -315,7 +328,7 @@ function loadGameScores2() {
             goldCaseScoreElement.textContent = goldCaseScore.toLocaleString();
         }
         
-        // Update stars
+        // Update stars (old 5-star display for Gold Case)
         if (goldCaseStarsElement) {
             goldCaseStarsElement.innerHTML = '';
             for (let i = 0; i < 5; i++) {
@@ -326,12 +339,21 @@ function loadGameScores2() {
             }
         }
     } else {
-        // Show lock text and hide score/stars
-        if (goldCaseLockText) {
-            goldCaseLockText.style.display = 'flex';
-        }
+        // Hide score/stars if not complete (but don't touch lock text - that's managed by updateBonusSpinDisplay)
         if (goldCaseScoreText) {
             goldCaseScoreText.style.display = 'none';
+        }
+    }
+    
+    // Load Gold Case puzzle stars (for the puzzle game display)
+    const goldCasePuzzleStarsElement = document.getElementById('goldCasePuzzleStars');
+    if (goldCasePuzzleStarsElement) {
+        goldCasePuzzleStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < goldCaseStars ? '#FF8C42' : '#ddd';
+            goldCasePuzzleStarsElement.appendChild(star);
         }
     }
     
@@ -401,6 +423,24 @@ function updateBlackjackStars() {
 // Make it globally accessible
 window.updateBlackjackStars = updateBlackjackStars;
 
+function updateCrossStars() {
+    const todayKey = getTodayKey();
+    const crossStars = parseInt(localStorage.getItem(`crossStars_${todayKey}`) || '0');
+    const crossStarsElement = document.getElementById('crossStars');
+    if (crossStarsElement) {
+        crossStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < crossStars ? '#FF8C42' : '#ddd';
+            crossStarsElement.appendChild(star);
+        }
+    }
+}
+
+// Make it globally accessible
+window.updateCrossStars = updateCrossStars;
+
 // Hide weekly background immediately - run multiple times to ensure it's hidden
 (function() {
     function hideWeekHeaderBackground() {
@@ -422,10 +462,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setCurrentDate();
     updateHeaderStarCounter();
     updateWalletStars2();
+    // Update bonus spin display - ensure it runs after DOM is ready
+    setTimeout(() => {
+        updateBonusSpinDisplay();
+    }, 0);
     
     // Update calendar after a short delay to ensure all containers are set up
     setTimeout(() => {
-        updateCalendar();
+    updateCalendar();
     }, 100);
     
     loadGameScores2();
@@ -798,9 +842,9 @@ function checkURLParameters() {
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
         
         // Update boost page for bigy style when using bigy scheme
-        updateBoostPageForBigy();
+    updateBoostPageForBigy();
     }
-    
+        
     // Initialize the appropriate carousel based on header type
     if (headerType === 'bigy') {
         initBigyCarousel();
@@ -1863,9 +1907,9 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     const shouldChangeHeader = currentScheme && currentScheme !== 'bigy' && !currentHeaderType;
     
     if (shouldChangeHeader) {
-        const headerBar = document.querySelector('.header-bar');
-        if (headerBar) {
-            headerBar.style.background = barColor;
+    const headerBar = document.querySelector('.header-bar');
+    if (headerBar) {
+        headerBar.style.background = barColor;
         }
     }
     
@@ -1894,10 +1938,10 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     const currentUrlParamsForBoxes = new URLSearchParams(window.location.search);
     const currentSchemeForBoxes = currentUrlParamsForBoxes.get('s');
     if (currentSchemeForBoxes && currentSchemeForBoxes !== 'bigy') {
-        const letterBoxes = document.querySelectorAll('.letter-box');
-        letterBoxes.forEach(box => {
-            box.style.background = barColor;
-        });
+    const letterBoxes = document.querySelectorAll('.letter-box');
+    letterBoxes.forEach(box => {
+        box.style.background = barColor;
+    });
     }
     
     // Hide borders on white boxes
@@ -2050,19 +2094,19 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     
     if (logoPath) {
         hasLogo = true;
-        if (logo) {
-            logo.src = logoPath;
+            if (logo) {
+                logo.src = logoPath;
             // Only show logo if close button is not showing AND we're in bigy or bigy2 mode
-            const closeButton = document.querySelector('.game-overlay-close');
+                const closeButton = document.querySelector('.game-overlay-close');
             if (closeButton && !closeButton.classList.contains('show') && isBigyMode) {
-                logo.style.display = 'block';
-            } else {
-                logo.style.display = 'none';
+                    logo.style.display = 'block';
+                } else {
+                    logo.style.display = 'none';
             }
         }
     } else {
         if (logo) {
-            logo.style.display = 'none';
+        logo.style.display = 'none';
         }
         hasLogo = false;
     }
@@ -2104,15 +2148,15 @@ function updateLogoVisibility() {
     }
     
     // Show/hide logo based on game overlay state and mode
-    if (logo) {
-        if (closeButton && closeButton.classList.contains('show')) {
+            if (logo) {
+                if (closeButton && closeButton.classList.contains('show')) {
             // Game overlay is open - hide logo
-            logo.style.display = 'none';
-        } else {
+                    logo.style.display = 'none';
+                } else {
             // Game overlay is closed - show logo for bigy and bigy2
             logo.style.display = isBigyMode ? 'block' : 'none';
+            }
         }
-    }
 }
 
 // Function to observe and style dynamically added letter boxes
@@ -2194,6 +2238,13 @@ window.addEventListener('load', () => {
 
 // Keyboard shortcut to test color scheme
 document.addEventListener('keydown', (e) => {
+    // '8' key cheat to unlock bonus spin
+    if (e.key === '8') {
+        localStorage.setItem('bonusSpinCheatUnlocked', 'true');
+        updateBonusSpinDisplay();
+        console.log('Bonus spin unlocked via cheat');
+    }
+    
     if (e.key === 'q' || e.key === 'Q') {
         // Reset phrases data
         const todayKey = getTodayKey();
@@ -2204,7 +2255,22 @@ document.addEventListener('keydown', (e) => {
         localStorage.removeItem(`suspectStars_${todayKey}`);
         localStorage.removeItem(`suspectComplete_${todayKey}`);
         localStorage.removeItem(`suspectWon_${todayKey}`);
-        console.log('[MainPage] RESET: Cleared all phrases and suspect data for key:', todayKey);
+        localStorage.removeItem(`crossState_${todayKey}`);
+        localStorage.removeItem(`crossStars_${todayKey}`);
+        localStorage.removeItem(`crossComplete_${todayKey}`);
+        // Reset bonus spin data
+        localStorage.removeItem(`bonusSpinSpun_${todayKey}`);
+        localStorage.removeItem(`bonusSpinStars_${todayKey}`);
+        localStorage.removeItem('bonusSpinCheatUnlocked');
+        console.log('[MainPage] RESET: Cleared all phrases, suspect, cross, and bonus spin data for key:', todayKey);
+        
+        // Update bonus spin display after reset
+        updateBonusSpinDisplay();
+        
+        // Update cross stars display
+        if (window.updateCrossStars) {
+            window.updateCrossStars();
+        }
         
         // Update the display
         if (window.loadGameScores) {
@@ -2215,6 +2281,9 @@ document.addEventListener('keydown', (e) => {
         }
         if (window.updateSuspectStars) {
             window.updateSuspectStars();
+        }
+        if (window.updateCrossStars) {
+            window.updateCrossStars();
         }
     } else if (e.key === '1') {
         // Debug: Show all data for today
@@ -2363,6 +2432,7 @@ if (closeButton) {
             activeOverlay = 'goldCase';
             goldCaseOverlay.classList.remove('active');
             iframeToUnload = document.getElementById('goldCaseIframe');
+            // Don't update display when closing - state hasn't changed
         } else if (zoomOverlay && zoomOverlay.classList.contains('active')) {
             activeOverlay = 'zoom';
             zoomOverlay.classList.remove('active');
@@ -2397,6 +2467,14 @@ if (closeButton) {
         if (iframeToUnload) {
             console.log(`Unloading ${activeOverlay} game iframe by setting src to 'about:blank'`);
             iframeToUnload.src = 'about:blank';
+        }
+        
+        // Update bonus spin display when closing other games (to check if unlock status changed)
+        // But NOT when closing the bonus spin game itself
+        if (activeOverlay !== 'goldCase') {
+            setTimeout(() => {
+                updateBonusSpinDisplay();
+            }, 200);
         }
         
         document.body.style.overflow = '';
@@ -2790,10 +2868,110 @@ if (goldCasePuzzleBox) {
 }
 
 // Gold Case game overlay (Daily Bonus)
+// Check if 8 games have been played today (games that awarded stars, even if 0)
+function checkBonusSpinUnlock() {
+    const todayKey = getTodayKey();
+    const playedGames = JSON.parse(localStorage.getItem(`playedGames_${todayKey}`) || '[]');
+    return playedGames.length >= 8;
+}
+
+// Initialize bonus spin display immediately (before DOMContentLoaded)
+(function() {
+    function initBonusSpinDisplay() {
+        const goldCaseLockText = document.getElementById('goldCaseLockText');
+        const goldCaseStars = document.getElementById('goldCaseStars');
+        
+        if (goldCaseLockText && goldCaseStars) {
+            // Start with both hidden to prevent flash, then immediately show the correct one
+            goldCaseLockText.style.display = 'none';
+            goldCaseStars.style.display = 'none';
+            
+            // Immediately call updateBonusSpinDisplay to show the correct state
+            updateBonusSpinDisplay();
+        }
+    }
+    
+    // Run immediately if DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBonusSpinDisplay);
+    } else {
+        initBonusSpinDisplay();
+    }
+})();
+
+// Update bonus spin display (lock/unlock and stars)
+function updateBonusSpinDisplay() {
+    const goldCaseBox = document.getElementById('goldCaseBox');
+    const goldCaseLockText = document.getElementById('goldCaseLockText');
+    const goldCaseStars = document.getElementById('goldCaseStars');
+    const todayKey = getTodayKey();
+    const starsWon = parseInt(localStorage.getItem(`bonusSpinStars_${todayKey}`) || '0');
+    const isUnlocked = checkBonusSpinUnlock() || localStorage.getItem('bonusSpinCheatUnlocked') === 'true';
+    const hasSpun = localStorage.getItem(`bonusSpinSpun_${todayKey}`) === 'true';
+    
+    if (!goldCaseBox || !goldCaseLockText || !goldCaseStars) return;
+    
+    // Always hide both first to prevent both showing at once
+    goldCaseLockText.style.display = 'none';
+    goldCaseStars.style.display = 'none';
+    
+    // If unlocked OR has spun (has stars), show stars. Otherwise show lock.
+    // Once unlocked, never show lock again.
+    if (isUnlocked || hasSpun || starsWon > 0) {
+        // Show stars, keep lock text hidden
+        goldCaseStars.style.display = 'flex';
+        
+        // Update star colors based on stars won (10 stars total, 5x2 layout)
+        const rows = goldCaseStars.querySelectorAll('.bonus-stars-row');
+        if (rows.length === 2) {
+            rows[0].innerHTML = '';
+            rows[1].innerHTML = '';
+            
+            // Ensure starsWon is a valid number and doesn't exceed 10
+            const validStarsWon = Math.min(Math.max(0, starsWon), 10);
+            
+            for (let i = 0; i < 10; i++) {
+                const star = document.createElement('span');
+                star.textContent = '★';
+                star.style.color = i < validStarsWon ? '#FF8C42' : '#ddd';
+                star.style.fontSize = '18px';
+                star.style.letterSpacing = '0px';
+                
+                // First 5 stars go in first row, next 5 in second row
+                if (i < 5) {
+                    rows[0].appendChild(star);
+                } else {
+                    rows[1].appendChild(star);
+                }
+            }
+        }
+        
+        // Make clickable
+        goldCaseBox.style.cursor = 'pointer';
+    } else {
+        // Show lock text only (stars already hidden above)
+        goldCaseLockText.style.display = 'flex';
+        
+        // Make clickable (don't grey out)
+        goldCaseBox.style.cursor = 'pointer';
+    }
+}
+
+// Function to update bonus spin stars (called from iframe)
+window.updateBonusSpinStars = function() {
+    updateBonusSpinDisplay();
+};
+
 const goldCaseBox = document.getElementById('goldCaseBox');
 
 if (goldCaseBox) {
     goldCaseBox.addEventListener('click', () => {
+        const isUnlocked = checkBonusSpinUnlock() || localStorage.getItem('bonusSpinCheatUnlocked') === 'true';
+        
+        if (!isUnlocked) {
+            return; // Don't open if locked
+        }
+        
         if (goldCaseOverlay) {
             goldCaseOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';

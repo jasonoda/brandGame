@@ -975,7 +975,7 @@ body{
 /* COLOR GRAPHICS  */
 
 #playButton {
-    background: linear-gradient(to bottom, #44bb63, #2b9346);
+    background: #44bb63;
 }
 
 #instructionsButton {
@@ -1038,6 +1038,8 @@ body{
     align-items: center;
     gap: 2px;
     transition: opacity 0.5s ease-out;
+    width: 100%;
+    max-width: 500px;
     /* border: 2px solid green; */
 }
 
@@ -1091,11 +1093,11 @@ body{
     transition: all 0.2s ease;
     border: none;
     text-align: center;
-    width: 55%;
-    max-width: 250px;
-    background: linear-gradient(to bottom, #44bb63, #2b9346);
+    width: 200px;
+    background: #44bb63;
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1106,7 +1108,7 @@ body{
 }
 
 #playButton:hover {
-    box-shadow: 0 4px 12px rgba(68, 187, 99, 0.35);
+    box-shadow: none;
     transform: translateY(-1px);
 }
 

@@ -1196,34 +1196,34 @@ function showSuccessElements() {
 
 // Add hint button functionality
 function setupHintButton() {
-    const hintButton = document.querySelector('.unscramble-hint-btn');
-    if (hintButton) {
+const hintButton = document.querySelector('.unscramble-hint-btn');
+if (hintButton) {
         // Remove any existing listeners by cloning and replacing
         const newHintButton = hintButton.cloneNode(true);
         hintButton.parentNode.replaceChild(newHintButton, hintButton);
         
         newHintButton.addEventListener('click', function() {
-            // Change button to lighter grey gradient and disable it
+        // Change button to lighter grey gradient and disable it
             newHintButton.style.background = 'linear-gradient(to bottom, #e8e8e8, #d0d0d0)';
             newHintButton.style.cursor = 'not-allowed';
             newHintButton.disabled = true;
-            
-            // Get the first letter of the correct word
-            const firstLetter = currentWord.charAt(0).toUpperCase();
         
-            // Update the label text
-            const unscrambleLabel = document.querySelector('.unscramble-label');
-            if (unscrambleLabel) {
+        // Get the first letter of the correct word
+        const firstLetter = currentWord.charAt(0).toUpperCase();
+    
+        // Update the label text
+        const unscrambleLabel = document.querySelector('.unscramble-label');
+        if (unscrambleLabel) {
                 unscrambleLabel.textContent = `Hint : First letter is ${firstLetter}`;
-            }
-        });
+        }
+    });
     }
 }
 
 // Setup hint button when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupHintButton);
-} else {
+        } else {
     setupHintButton();
 }
 

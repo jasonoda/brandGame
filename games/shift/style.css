@@ -95,15 +95,15 @@ html {
 }
 
 #resetButton {
-    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+    background: #3d63a1;
 }
 
 #undoButton {
-    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+    background: #3d63a1;
 }
 
 #hintButton {
-    background: linear-gradient(to bottom, #6B8FE8, #5A7FD8);
+    background: #3d63a1;
     box-shadow: none;
 }
 
@@ -393,11 +393,10 @@ html {
     cursor: pointer;
     border: none;
     text-align: center;
-    width: 55%;
-    max-width: 250px;
-    background: linear-gradient(to bottom, #00CED1, #008B8B);
+    width: 200px;
+    background: #6B8FE8;
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -405,8 +404,13 @@ html {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     padding: 0;
     margin-top: 10px;
+    transition: all 0.2s ease;
 }
 
+#playButton:hover {
+    box-shadow: none;
+    transform: translateY(-1px);
+}
 
 #helpButton {
     position: absolute;
