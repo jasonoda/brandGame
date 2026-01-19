@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Game 10</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Digital-7';
+            src: url('digital-7.ttf') format('truetype'),
+                 url('digital-7.woff') format('woff'),
+                 url('digital-7.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Digital-7-Mono';
+            src: url('digital-7 (mono).ttf') format('truetype');
+        }
+    </style>
+</head>
+<body>
+    <!-- Flash overlay for game over/win -->
+    <div id="flashOverlay" class="flash-overlay" style="display: none;"></div>
+    <!-- Pause overlay -->
+    <div id="pauseOverlay" class="pause-overlay" style="display: none;">
+        <div class="pause-text">PAUSED</div>
+    </div>
+    <!-- Start Menu -->
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/defuser.svg" alt="Defuser" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="defuserTitle">DEFUSER</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">Diffuse the bomb by<br>cutting 7 wires in 3 minutes.</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">Play the tutorial to learn the rules.</div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+
+    <!-- Start Menu 2 (shown after clicking PLAY) -->
+    <div id="startMenu2" style="display: none;">
+        <div class="start-menu-content">
+            <button class="start-menu-button" id="startButton">START</button>
+            <button class="start-menu-button" id="tutorialButton">TUTORIAL</button>
+        </div>
+    </div>
+    <!-- Tutorial overlay -->
+    <div id="tutorialOverlay" class="tutorial-overlay" style="display: none;">
+        <div class="tutorial-window">
+            <div class="tutorial-title" id="tutorialTitle"></div>
+            <div class="tutorial-content" id="tutorialContent"></div>
+        </div>
+        <button class="tutorial-next-button" id="tutorialNextButton">NEXT</button>
+    </div>
+    
+    <div class="container">
+        <div class="top-section">
+            <div class="rules-container">
+                <div class="rule-section-header" id="trueRulesHeader">THESE RULES ARE TRUE</div>
+                <div class="rule-box" id="trueRule1">The wire is dotted</div>
+                <div class="rule-box" id="trueRule2" style="display: none;">The wire is dotted</div>
+                <div class="rule-box" id="trueRule3" style="display: none;">The wire is dotted</div>
+                <div class="rule-section-header false-header" id="maybeRulesHeader" style="display: none;">ONE OF THESE RULES IS FALSE</div>
+                <div class="rule-box" id="falseRule1" style="display: none;">The wire is dotted</div>
+                <div class="rule-box" id="falseRule2" style="display: none;">The wire is dotted</div>
+                <div class="rule-box" id="falseRule3" style="display: none;">The wire is dotted</div>
+                <div class="rule-box" id="falseRule4" style="display: none;">The wire is dotted</div>
+            </div>
+            <!-- Color bars hidden for now, will be used later -->
+            <div class="key-container" style="display: none;">
+                <div class="key-group">
+                    <div class="key-group-label">COOL</div>
+                    <div class="key-boxes">
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                    </div>
+                    <div class="key-stats">
+                        <div>BOMB = ? #</div>
+                    </div>
+                </div>
+                <div class="key-group">
+                    <div class="key-group-label">WARM</div>
+                    <div class="key-boxes">
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                    </div>
+                    <div class="key-stats">
+                        <div>BOMB = ? #</div>
+                    </div>
+                </div>
+                <div class="key-group">
+                    <div class="key-group-label">NEUTRAL</div>
+                    <div class="key-boxes">
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                        <div class="key-box"></div>
+                    </div>
+                    <div class="key-stats">
+                        <div>BOMB = ? #</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-section-text" id="infoSectionText">
+                WIRE 1/7 - Drag to cut a wire
+            </div>
+        </div>
+        
+        <div class="middle-section">
+            <!-- Popup for CORRECT/WRONG messages -->
+            <div id="popupMessage" class="popup-message" style="display: none;">
+                <div id="popupMainText"></div>
+                <div id="popupSubText" class="popup-subtext"></div>
+            </div>
+            <!-- Round callout -->
+            <div id="roundCallout" class="round-callout" style="display: none;"></div>
+            <div class="top-boxes">
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+            </div>
+            <canvas id="linesCanvas"></canvas>
+            <div class="bottom-boxes">
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+                <div class="box">0</div>
+            </div>
+        </div>
+        <div class="bottom-section">
+            <div class="bottom-section-container">
+                <div class="bottom-section-left">
+                    <div class="bottom-label" style="display: none;">BOMB</div>
+                    <div class="battery-container" style="display: none;">
+                        <div class="battery-icon">
+                            <div class="battery-bar bar-1"></div>
+                            <div class="battery-bar bar-2"></div>
+                            <div class="battery-bar bar-3"></div>
+                        </div>
+                    </div>
+                    <button class="pause-button" id="pauseButton">PAUSE</button>
+                </div>
+                <div class="bottom-section-middle">
+                    <div class="bomb-container">
+                        <div class="bottom-label">BOMB</div>
+                        <div class="bomb-boxes">
+                            <div class="bomb-box">💣</div>
+                            <div class="bomb-box">💣</div>
+                            <div class="bomb-box">💣</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-section-right">
+                    <div class="bottom-label" style="display: none;">TIMER</div>
+                    <div class="timer-container">
+                        <div class="timer-display" id="timerDisplay">3:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

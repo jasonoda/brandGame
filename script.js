@@ -2404,6 +2404,8 @@ if (closeButton) {
         const crossOverlay = document.getElementById('crossOverlay');
         const suspectOverlay = document.getElementById('suspectOverlay');
         const match3Overlay = document.getElementById('match3Overlay');
+        const defuserOverlay = document.getElementById('defuserOverlay');
+        const tallyOverlay = document.getElementById('tallyOverlay');
         
         // Determine which overlay is active and only reload that iframe
         let activeOverlay = null;
@@ -2461,6 +2463,14 @@ if (closeButton) {
             setTimeout(() => {
                 updateWalletStars2();
             }, 200);
+        } else if (defuserOverlay && defuserOverlay.classList.contains('active')) {
+            activeOverlay = 'defuser';
+            defuserOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('defuserIframe');
+        } else if (tallyOverlay && tallyOverlay.classList.contains('active')) {
+            activeOverlay = 'tally';
+            tallyOverlay.classList.remove('active');
+            iframeToUnload = document.getElementById('tallyIframe');
         }
         
         // Unload the iframe by setting src to blank
@@ -2809,6 +2819,60 @@ if (suspectBox) {
             if (iframe) {
                 iframe.src = scheme ? `games/suspect/index.html?s=${scheme}` : 'games/suspect/index.html';
                 console.log(`Reloading suspect game iframe: ${iframe.src}`);
+            }
+        }
+    });
+}
+
+// Defuser game box
+const defuserBox = document.getElementById('defuserBox');
+const defuserOverlay = document.getElementById('defuserOverlay');
+
+if (defuserBox) {
+    defuserBox.addEventListener('click', () => {
+        if (defuserOverlay) {
+            defuserOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Show close button
+            const closeButton = document.querySelector('.game-overlay-close');
+            if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
+
+            // Reload iframe (it may have been unloaded to 'about:blank')
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const iframe = document.getElementById('defuserIframe');
+            if (iframe) {
+                iframe.src = scheme ? `games/defuser/index.html?s=${scheme}` : 'games/defuser/index.html';
+                console.log(`Reloading defuser game iframe: ${iframe.src}`);
+            }
+        }
+    });
+}
+
+// TALLY game box
+const tallyBox = document.getElementById('tallyBox');
+const tallyOverlay = document.getElementById('tallyOverlay');
+
+if (tallyBox) {
+    tallyBox.addEventListener('click', () => {
+        if (tallyOverlay) {
+            tallyOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Show close button
+            const closeButton = document.querySelector('.game-overlay-close');
+            if (closeButton) closeButton.classList.add('show');
+            updateLogoVisibility();
+
+            // Reload iframe (it may have been unloaded to 'about:blank')
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const iframe = document.getElementById('tallyIframe');
+            if (iframe) {
+                iframe.src = scheme ? `games/tally/index.html?s=${scheme}` : 'games/tally/index.html';
+                console.log(`Reloading tally game iframe: ${iframe.src}`);
             }
         }
     });
