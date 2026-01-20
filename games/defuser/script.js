@@ -91,6 +91,91 @@ let isCutting = false;
 let cutStartPos = null;
 let currentCutLine = null;
 
+// ----- Star + progress helpers -----
+function defuserGetTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function defuserGetDailyStars() {
+    const todayKey = defuserGetTodayKey();
+    return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+}
+
+function defuserAddStars(count) {
+    if (!count || count <= 0) return;
+    
+    const todayKey = defuserGetTodayKey();
+    const currentDailyStars = defuserGetDailyStars();
+    const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
+    
+    // Update daily stars
+    localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + count));
+    
+    // Update total stars
+    localStorage.setItem('totalStars', String(currentTotalStars + count));
+    
+    // Award stars and games played
+    if (window.parent && window.parent.awardStars) {
+        window.parent.awardStars(count, 'defuser');
+    } else {
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+    }
+    
+    // Update global displays if parent page is available
+    if (window.parent && window.parent.updateHeaderStarCounter) {
+        window.parent.updateHeaderStarCounter();
+    }
+    if (window.parent && window.parent.updateWalletStars2) {
+        window.parent.updateWalletStars2();
+    }
+    if (window.parent && window.parent.updateCalendar) {
+        window.parent.updateCalendar();
+    }
+}
+
+function defuserGetStarsForRoundsCompleted(roundsCompleted) {
+    if (!roundsCompleted || roundsCompleted <= 0) return 0;
+    if (roundsCompleted >= 7) return 5; // completed all levels
+    if (roundsCompleted === 6) return 4;
+    if (roundsCompleted === 5) return 3;
+    if (roundsCompleted === 4) return 2;
+    // 1–3 completed
+    return 1;
+}
+
+function defuserGetStarRowHTML(starCount) {
+    const total = 5;
+    let html = '';
+    for (let i = 0; i < total; i++) {
+        const earned = i < starCount;
+        const color = earned ? '#FF8C42' : '#ddd';
+        html += `<span style="color:${color}; font-size:18px;">★</span>`;
+    }
+    return html;
+}
+
+function defuserAwardStarsForCurrentRun() {
+    const todayKey = defuserGetTodayKey();
+    const existing = parseInt(localStorage.getItem(`defuserStars_${todayKey}`) || '0');
+    
+    // Rounds completed is wires successfully cut
+    const roundsCompleted = Math.max(0, gameState.currentRound - 1);
+    const starsThisRun = defuserGetStarsForRoundsCompleted(roundsCompleted);
+    if (starsThisRun <= 0) return { roundsCompleted, starsEarned: 0 };
+    
+    const newStars = Math.max(existing, starsThisRun);
+    const delta = newStars - existing;
+    
+    if (delta > 0) {
+        defuserAddStars(delta);
+        localStorage.setItem(`defuserStars_${todayKey}`, String(newStars));
+    }
+    
+    return { roundsCompleted, starsEarned: newStars };
+}
+
 // Draw connecting lines
 function drawConnectingLines(updatePositionsOnly = false) {
     const canvas = document.getElementById('linesCanvas');
@@ -2728,8 +2813,13 @@ function handleCorrectAnswer(cutWire) {
     const isFinalRound = gameState.currentRound >= 7;
     
     if (isFinalRound) {
+        // Game won - tally stars and show win message with stars
+        const result = defuserAwardStarsForCurrentRun();
+        const starRow = defuserGetStarRowHTML(result.starsEarned || 5);
+        const subText = `7 / 7 wires cut<br>${starRow}`;
+        
         // Game won - don't fade out, show win message
-        showPopup('YOU WON!', null, true);
+        showPopup('YOU WON!', null, true, subText);
         showFlashOverlay(true); // Green flash for win
         
         // Disable pause button
@@ -2788,7 +2878,8 @@ function showPopup(message, onComplete, isWin = false, subText = '') {
     
     // Set subtext if provided
     if (subText) {
-        popupSubText.textContent = subText;
+        // Allow basic HTML in subText (used for star row)
+        popupSubText.innerHTML = subText;
         popupSubText.style.display = 'block';
     } else {
         popupSubText.style.display = 'none';
@@ -2847,9 +2938,14 @@ function handleGameOver() {
         timerInterval = null;
     }
     
-    // Show game over popup with subtext
-    const roundsCompleted = gameState.currentRound - 1;
-    showPopup('GAME OVER', null, false, `${roundsCompleted} / 7 wires cut`);
+    // Tally stars based on rounds completed
+    const result = defuserAwardStarsForCurrentRun();
+    const roundsCompleted = result.roundsCompleted;
+    const starRow = defuserGetStarRowHTML(result.starsEarned);
+    const subText = `${roundsCompleted} / 7 wires cut<br>${starRow}`;
+    
+    // Show game over popup with subtext and stars
+    showPopup('GAME OVER', null, false, subText);
     
     // Show red flash
     showFlashOverlay(false); // false = red flash for game over

@@ -22,11 +22,197 @@ let touchOffsetX = 0;
 let touchOffsetY = 0;
 let touchClone = null;
 
+// ----- Daily key & save helpers -----
+function tallyGetTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function tallyLoadState() {
+    const todayKey = tallyGetTodayKey();
+    const raw = localStorage.getItem(`tallyState_${todayKey}`);
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        console.error('Error parsing tallyState', e);
+        return null;
+    }
+}
+
+function tallySaveState(isComplete) {
+    const todayKey = tallyGetTodayKey();
+    const state = {
+        numbers: gameState.numbers,
+        correctAnswer: gameState.correctAnswer,
+        equation: gameState.equation,
+        isComplete: !!isComplete
+    };
+    // Derive usedNumbers from equation if available
+    if (Array.isArray(gameState.equation) && gameState.equation.length === 5) {
+        const [n1, , n2, , n3] = gameState.equation;
+        state.usedNumbers = [n1, n2, n3];
+    } else if (Array.isArray(gameState.usedNumbers)) {
+        state.usedNumbers = gameState.usedNumbers;
+    }
+    localStorage.setItem(`tallyState_${todayKey}`, JSON.stringify(state));
+    if (isComplete) {
+        localStorage.setItem(`tallyComplete_${todayKey}`, 'true');
+    }
+}
+
+function tallyHasSavedPuzzle() {
+    const todayKey = tallyGetTodayKey();
+    return !!localStorage.getItem(`tallyState_${todayKey}`);
+}
+
+function tallyIsComplete() {
+    const todayKey = tallyGetTodayKey();
+    return localStorage.getItem(`tallyComplete_${todayKey}`) === 'true';
+}
+
+// Star helpers (copied pattern from quiz)
+function tallyGetDailyStars() {
+    const todayKey = tallyGetTodayKey();
+    return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+}
+
+function tallyAddStars(count) {
+    const todayKey = tallyGetTodayKey();
+    const currentDailyStars = tallyGetDailyStars();
+    const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
+    
+    // Update daily stars
+    localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + count));
+    
+    // Update total stars
+    localStorage.setItem('totalStars', String(currentTotalStars + count));
+    
+    // Award stars and games played
+    if (window.awardStars) {
+        window.awardStars(count, 'tally');
+    } else {
+        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
+    }
+    
+    // Update global displays if parent page is available
+    if (window.parent && window.parent.updateHeaderStarCounter) {
+        window.parent.updateHeaderStarCounter();
+    }
+    if (window.parent && window.parent.updateWalletStars2) {
+        window.parent.updateWalletStars2();
+    }
+    if (window.parent && window.parent.updateCalendar) {
+        window.parent.updateCalendar();
+    }
+}
+
+function tallyAwardWinStars() {
+    const todayKey = tallyGetTodayKey();
+    const existing = parseInt(localStorage.getItem(`tallyStars_${todayKey}`) || '0');
+    if (existing > 0) {
+        // Already awarded today
+        return;
+    }
+    
+    const starsEarned = 5; // Single-puzzle game: always 5 on win
+    tallyAddStars(starsEarned);
+    localStorage.setItem(`tallyStars_${todayKey}`, String(starsEarned));
+    tallySaveState(true);
+    
+    // Let main page refresh its stars row
+    if (window.parent && window.parent.loadGameScores2) {
+        window.parent.loadGameScores2();
+    }
+}
+
 // Initialize the game
 function initializeGame() {
-    generatePuzzle();
+    const saved = tallyLoadState();
+    
+    if (saved) {
+        // Restore saved puzzle instead of generating a new one
+        gameState.numbers = Array.isArray(saved.numbers) ? saved.numbers : [];
+        gameState.correctAnswer = saved.correctAnswer;
+        gameState.equation = Array.isArray(saved.equation) ? saved.equation : [];
+        if (Array.isArray(saved.usedNumbers) && saved.usedNumbers.length === 3) {
+            gameState.usedNumbers = saved.usedNumbers;
+        } else if (Array.isArray(saved.equation) && saved.equation.length === 5) {
+            const [n1, , n2, , n3] = saved.equation;
+            gameState.usedNumbers = [n1, n2, n3];
+        }
+    } else {
+        generatePuzzle();
+        // Save the newly generated puzzle for today
+        tallySaveState(false);
+    }
+    
     setupDragAndDrop();
     updateDisplay();
+    
+    // If this puzzle was already completed, show the solved state
+    if (saved && saved.isComplete) {
+        const equation = Array.isArray(saved.equation) ? saved.equation : gameState.equation;
+        if (equation && equation.length === 5) {
+            const [n1, op1, n2, op2, n3] = equation;
+            const slot1 = document.getElementById('slot1');
+            const slot2 = document.getElementById('slot2');
+            const slot3 = document.getElementById('slot3');
+            const opSlot1 = document.getElementById('opSlot1');
+            const opSlot2 = document.getElementById('opSlot2');
+            
+            if (slot1) {
+                slot1.textContent = String(n1);
+                slot1.classList.add('filled');
+            }
+            if (slot2) {
+                slot2.textContent = String(n2);
+                slot2.classList.add('filled');
+                slot2.draggable = false;
+                slot2.setAttribute('data-prefilled', 'true');
+            }
+            if (slot3) {
+                slot3.textContent = String(n3);
+                slot3.classList.add('filled');
+            }
+            if (opSlot1) {
+                opSlot1.textContent = op1;
+                opSlot1.classList.add('filled');
+            }
+            if (opSlot2) {
+                opSlot2.textContent = op2;
+                opSlot2.classList.add('filled');
+            }
+            
+            // Hide used number/operator boxes in the top rows
+            const numberBoxes = document.querySelectorAll('.number-box');
+            const operatorBoxes = document.querySelectorAll('.operator-box');
+            [n1, n2, n3].forEach(num => {
+                for (let box of numberBoxes) {
+                    if (Number(box.textContent) === num && box.style.display !== 'none') {
+                        box.style.display = 'none';
+                        break;
+                    }
+                }
+            });
+            [op1, op2].forEach(op => {
+                for (let box of operatorBoxes) {
+                    if (box.textContent.trim() === op && box.style.display !== 'none') {
+                        box.style.display = 'none';
+                        break;
+                    }
+                }
+            });
+            
+            // Show CORRECT state
+            const currentTotalDiv = document.getElementById('currentTotal');
+            if (currentTotalDiv) {
+                currentTotalDiv.textContent = 'CORRECT ★★★★★';
+                currentTotalDiv.classList.add('correct-total');
+            }
+        }
+    }
 }
 
 // Generate the puzzle
@@ -542,9 +728,10 @@ function updateSlots() {
     const opSlot1 = document.getElementById('opSlot1');
     const opSlot2 = document.getElementById('opSlot2');
     
-    gameState.slots.number1 = slot1.classList.contains('filled') ? parseInt(slot1.textContent) || parseFloat(slot1.textContent) : null;
-    gameState.slots.number2 = slot2.classList.contains('filled') ? parseInt(slot2.textContent) || parseFloat(slot2.textContent) : null;
-    gameState.slots.number3 = slot3.classList.contains('filled') ? parseInt(slot3.textContent) || parseFloat(slot3.textContent) : null;
+    // Use Number() instead of parseInt() to handle negative numbers correctly
+    gameState.slots.number1 = slot1.classList.contains('filled') ? Number(slot1.textContent) : null;
+    gameState.slots.number2 = slot2.classList.contains('filled') ? Number(slot2.textContent) : null;
+    gameState.slots.number3 = slot3.classList.contains('filled') ? Number(slot3.textContent) : null;
     
     // Normalize operators (convert Unicode minus to ASCII minus)
     let op1Text = opSlot1.classList.contains('filled') ? opSlot1.textContent.trim() : null;
@@ -561,26 +748,6 @@ function updateSlots() {
     checkAnswer();
 }
 
-function updateSlots() {
-    const slot1 = document.getElementById('slot1');
-    const slot2 = document.getElementById('slot2');
-    const slot3 = document.getElementById('slot3');
-    const opSlot1 = document.getElementById('opSlot1');
-    const opSlot2 = document.getElementById('opSlot2');
-    
-    gameState.slots.number1 = slot1.classList.contains('filled') ? parseInt(slot1.textContent) || parseFloat(slot1.textContent) : null;
-    gameState.slots.number2 = slot2.classList.contains('filled') ? parseInt(slot2.textContent) || parseFloat(slot2.textContent) : null;
-    gameState.slots.number3 = slot3.classList.contains('filled') ? parseInt(slot3.textContent) || parseFloat(slot3.textContent) : null;
-    
-    // Normalize operators (convert Unicode minus to ASCII minus)
-    let op1Text = opSlot1.classList.contains('filled') ? opSlot1.textContent.trim() : null;
-    let op2Text = opSlot2.classList.contains('filled') ? opSlot2.textContent.trim() : null;
-    gameState.slots.operator1 = op1Text === '−' ? '-' : op1Text;
-    gameState.slots.operator2 = op2Text === '−' ? '-' : op2Text;
-    
-    // Update current total display
-    updateCurrentTotal();
-}
 
 function updateCurrentTotal() {
     const num1 = gameState.slots.number1;
@@ -1032,6 +1199,9 @@ function showResult(isCorrect) {
         currentTotalDiv.textContent = 'CORRECT ★★★★★';
         currentTotalDiv.classList.add('correct-total');
         
+        // Save completed puzzle and award stars
+        tallyAwardWinStars();
+        
         setTimeout(() => {
             // Remove animation class
             slots.forEach(slot => {
@@ -1106,7 +1276,8 @@ function updateDisplay() {
     const slot2 = document.getElementById('slot2');
     if (slot2 && gameState.usedNumbers.length >= 2) {
         const num2 = gameState.usedNumbers[1];
-        slot2.textContent = num2;
+        // Ensure negative numbers are displayed correctly
+        slot2.textContent = String(num2);
         slot2.classList.add('filled');
         slot2.draggable = false; // Make it non-draggable - it's the given number
         slot2.setAttribute('data-prefilled', 'true'); // Mark as pre-filled
@@ -1114,7 +1285,9 @@ function updateDisplay() {
         // Hide the corresponding number box
         const numberBoxes = document.querySelectorAll('.number-box');
         for (let box of numberBoxes) {
-            if (parseInt(box.textContent) === num2 && box.style.display !== 'none') {
+            // Use Number() instead of parseInt() to handle negative numbers correctly
+            const boxValue = Number(box.textContent);
+            if (boxValue === num2 && box.style.display !== 'none') {
                 box.style.display = 'none';
                 break;
             }
@@ -1166,6 +1339,19 @@ function setupPlayButton() {
 // Initialize setup when page loads
 document.addEventListener('DOMContentLoaded', () => {
     setupPlayButton();
+    
+    // If there's a saved puzzle for today, skip the start screen and go straight to the game
+    if (tallyHasSavedPuzzle()) {
+        const startMenu = document.getElementById('startMenu');
+        const gameContainer = document.getElementById('gameContainer');
+        if (startMenu) {
+            startMenu.style.display = 'none';
+        }
+        if (gameContainer) {
+            gameContainer.style.display = 'flex';
+        }
+        initializeGame();
+    }
 });
 
 // Prevent default touch behavior on body to avoid scrolling while dragging

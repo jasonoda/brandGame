@@ -370,6 +370,32 @@ function loadGameScores2() {
         }
     }
     
+    // Load DEFUSER stars
+    const defuserStars = parseInt(localStorage.getItem(`defuserStars_${todayKey}`) || '0');
+    const defuserStarsElement = document.getElementById('defuserStars');
+    if (defuserStarsElement) {
+        defuserStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < defuserStars ? '#FF8C42' : '#ddd';
+            defuserStarsElement.appendChild(star);
+        }
+    }
+    
+    // Load TALLY stars
+    const tallyStars = parseInt(localStorage.getItem(`tallyStars_${todayKey}`) || '0');
+    const tallyStarsElement = document.getElementById('tallyStars');
+    if (tallyStarsElement) {
+        tallyStarsElement.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const star = document.createElement('span');
+            star.textContent = '★';
+            star.style.color = i < tallyStars ? '#FF8C42' : '#ddd';
+            tallyStarsElement.appendChild(star);
+        }
+    }
+    
     // Load shift stars
     const shiftStars = parseInt(localStorage.getItem(`shiftStars_${todayKey}`) || '0');
     const shiftStarsElement = document.getElementById('shiftStars');
