@@ -374,6 +374,11 @@ function showCompletedState() {
 
 // Start game when play button is clicked
 playButton.addEventListener('click', () => {
+    // Notify parent that Phrases has started (for quit warning logic)
+    if (window.parent) {
+        window.parent.postMessage('puzzleStarted:phrases', '*');
+    }
+
     // Hide start menu
     startMenu.style.display = 'none';
     // Show game container

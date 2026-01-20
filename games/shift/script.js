@@ -1176,7 +1176,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         const playButton = document.getElementById('playButton');
         if (playButton) {
-            playButton.addEventListener('click', startGame);
+            playButton.addEventListener('click', () => {
+                // Notify parent that Shift has started (for quit warning logic)
+                if (window.parent) {
+                    window.parent.postMessage('puzzleStarted:shift', '*');
+                }
+                startGame();
+            });
         }
     }
     

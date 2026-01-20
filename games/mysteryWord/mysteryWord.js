@@ -293,6 +293,11 @@ function setupPlayButton() {
     
     if (playButton) {
         playButton.addEventListener('click', () => {
+            // Notify parent that Mystery Word has started (for quit warning logic)
+            if (window.parent) {
+                window.parent.postMessage('puzzleStarted:mysteryWord', '*');
+            }
+
             const startMenu = document.getElementById('startMenu');
             const gameContainer = document.getElementById('gameContainer');
             

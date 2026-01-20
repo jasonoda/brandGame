@@ -1534,6 +1534,11 @@ const playButton = document.getElementById('playButton');
 const gameContainer = document.getElementById('gameContainer');
 
 function startGame() {
+    // Notify parent that Suspect has started (for quit warning logic)
+    if (window.parent) {
+        window.parent.postMessage('puzzleStarted:suspect', '*');
+    }
+
     console.log('[Suspect] startGame() called');
     startMenu.style.display = 'none';
     gameContainer.style.display = 'flex';

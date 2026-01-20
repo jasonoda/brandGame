@@ -1404,6 +1404,10 @@ class Scene {
             const playButton = document.getElementById('playButton');
             if (playButton) {
                 playButton.addEventListener('click', () => {
+                    // Notify parent that Gold Case has started (for quit warning logic)
+                    if (window.parent) {
+                        window.parent.postMessage('puzzleStarted:goldCase', '*');
+                    }
 
                     this.e.startGame();
   

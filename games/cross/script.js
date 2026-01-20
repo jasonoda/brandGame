@@ -2079,6 +2079,11 @@ const playButton = document.getElementById('playButton');
 const gameContainer = document.getElementById('gameContainer');
 
 function startGame() {
+    // Notify parent that Cross has started (for quit warning logic)
+    if (window.parent) {
+        window.parent.postMessage('puzzleStarted:cross', '*');
+    }
+
     startMenu.style.display = 'none';
     gameContainer.style.display = 'flex';
     

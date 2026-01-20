@@ -28,6 +28,27 @@ function tallyGetTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
+function tallyMarkStarted() {
+    const todayKey = tallyGetTodayKey();
+    localStorage.setItem(`tallyStarted_${todayKey}`, 'true');
+    
+    // Let parent page know this session has actually started
+    if (window.parent) {
+        window.parent.postMessage('tallyStarted', '*');
+        window.parent.postMessage('puzzleStarted:tally', '*');
+    }
+}
+
+// Listen for parent asking us to reset TALLY-specific localStorage
+window.addEventListener('message', (event) => {
+    if (event.data === 'resetTallyLocalStorage') {
+        const todayKey = tallyGetTodayKey();
+        localStorage.removeItem(`tallyStarted_${todayKey}`);
+        localStorage.removeItem(`tallyState_${todayKey}`);
+        localStorage.removeItem(`tallyComplete_${todayKey}`);
+    }
+});
+
 function tallyLoadState() {
     const todayKey = tallyGetTodayKey();
     const raw = localStorage.getItem(`tallyState_${todayKey}`);
@@ -1330,6 +1351,8 @@ function setupPlayButton() {
             
             if (gameContainer) {
                 gameContainer.style.display = 'flex';
+                // Mark this session as started for today (used by parent to decide on quit warning)
+                tallyMarkStarted();
                 initializeGame();
             }
         });
@@ -1350,6 +1373,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameContainer) {
             gameContainer.style.display = 'flex';
         }
+        // Saved puzzle implies the game has been started previously
+        tallyMarkStarted();
         initializeGame();
     }
 });

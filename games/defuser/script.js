@@ -91,6 +91,31 @@ let isCutting = false;
 let cutStartPos = null;
 let currentCutLine = null;
 
+function defuserGetTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function defuserMarkStarted() {
+    const todayKey = defuserGetTodayKey();
+    localStorage.setItem(`defuserStarted_${todayKey}`, 'true');
+    
+    // Let parent page know this session has actually started
+    if (window.parent) {
+        window.parent.postMessage('defuserStarted', '*');
+        window.parent.postMessage('puzzleStarted:defuser', '*');
+    }
+}
+
+// Listen for parent asking us to reset DEFUSER-specific localStorage
+window.addEventListener('message', (event) => {
+    if (event.data === 'resetDefuserLocalStorage') {
+        const todayKey = defuserGetTodayKey();
+        localStorage.removeItem(`defuserStarted_${todayKey}`);
+        // If additional defuser-specific state keys are added later, clear them here as well
+    }
+});
+
 // ----- Star + progress helpers -----
 function defuserGetTodayKey() {
     const today = new Date();
@@ -3234,6 +3259,9 @@ function startGame() {
     if (startMenu2) {
         startMenu2.style.display = 'none';
     }
+    
+    // Mark this session as started for today (used by parent to decide on quit warning)
+    defuserMarkStarted();
     
     // Select new rules for the game
     selectRules();

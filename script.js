@@ -142,6 +142,129 @@ function calculateLongestStreak() {
     return longestStreak;
 }
 
+// ----- Puzzle game helpers -----
+function getPuzzleStarsKey(gameId) {
+    const todayKey = getTodayKey();
+    switch (gameId) {
+        case 'beticle':
+            return `beticleStars_${todayKey}`;
+        case 'phrases':
+            return `phrasesStars_${todayKey}`;
+        case 'cross':
+            return `crossStars_${todayKey}`;
+        case 'mysteryWord':
+            return `mysteryWordStars_${todayKey}`;
+        case 'goldCase':
+            return `goldCaseStars_${todayKey}`;
+        case 'suspect':
+            return `suspectStars_${todayKey}`;
+        case 'defuser':
+            return `defuserStars_${todayKey}`;
+        case 'tally':
+            return `tallyStars_${todayKey}`;
+        case 'zoom':
+            return `zoomStars_${todayKey}`;
+        case 'shift':
+            return `shiftStars_${todayKey}`;
+        default:
+            return null;
+    }
+}
+
+function isPuzzleGameCompleted(gameId) {
+    const key = getPuzzleStarsKey(gameId);
+    if (!key) return false;
+    // Treat any saved value (including '0') as completed
+    return localStorage.getItem(key) !== null;
+}
+
+// Track puzzle sessions for current page load (not per-day) for puzzle games.
+// These are set to true when the game iframe sends a "puzzleStarted:<id>" message.
+const puzzleSessionStarted = {
+    defuser: false,
+    tally: false,
+    beticle: false,
+    cross: false,
+    mysteryWord: false,
+    phrases: false,
+    zoom: false,
+    shift: false,
+    suspect: false,
+    goldCase: false
+};
+
+// Listen for messages from iframes when games actually start
+window.addEventListener('message', (event) => {
+    if (typeof event.data === 'string') {
+        if (event.data === 'defuserStarted') {
+            puzzleSessionStarted.defuser = true;
+        } else if (event.data === 'tallyStarted') {
+            puzzleSessionStarted.tally = true;
+        } else if (event.data.startsWith('puzzleStarted:')) {
+            const gameId = event.data.split(':')[1];
+            if (gameId && Object.prototype.hasOwnProperty.call(puzzleSessionStarted, gameId)) {
+                puzzleSessionStarted[gameId] = true;
+            }
+        }
+    }
+});
+
+// Determine whether a puzzle has actually "started" (so we should warn on quit).
+// For ALL puzzle games this should be tied to their own PLAY/START behavior,
+// not just opening the iframe. For now, we have explicit signals only for
+// DEFUSER and TALLY, so we treat other puzzles as started as soon as the
+// iframe is opened (their internal PLAY is effectively "open and play").
+function isPuzzleSessionStarted(gameId) {
+    return !!puzzleSessionStarted[gameId];
+}
+
+function showCompletedBadge(boxElement) {
+    if (!boxElement) return;
+    if (boxElement.querySelector('.completed-overlay')) return;
+    
+    // Ensure the play box can position the overlay
+    if (!boxElement.style.position || boxElement.style.position === '') {
+        boxElement.style.position = 'relative';
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'completed-overlay';
+    overlay.textContent = 'COMPLETED';
+    overlay.style.position = 'absolute';
+    overlay.style.top = '50%';
+    overlay.style.left = '50%';
+    overlay.style.transform = 'translate(-50%, -50%)';
+    overlay.style.background = '#ffffff';
+    overlay.style.color = '#000000';
+    overlay.style.borderRadius = '5px';
+    overlay.style.padding = '3px 8px';
+    overlay.style.fontSize = '11px';
+    overlay.style.fontWeight = '600';
+    overlay.style.pointerEvents = 'none';
+    boxElement.appendChild(overlay);
+    
+    // Fade out after 2 seconds using GSAP, then remove
+    if (typeof gsap !== 'undefined') {
+        gsap.to(overlay, {
+            opacity: 0,
+            duration: 0.4,
+            delay: 2,
+            onComplete: () => {
+                if (overlay && overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }
+        });
+    } else {
+        // Fallback: simple timeout hide if GSAP is not available
+        setTimeout(() => {
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        }, 2000);
+    }
+}
+
 function updateWalletStars2() {
 
     try {
@@ -2272,23 +2395,62 @@ document.addEventListener('keydown', (e) => {
     }
     
     if (e.key === 'q' || e.key === 'Q') {
-        // Reset phrases data
+        // Reset daily game data for today
         const todayKey = getTodayKey();
+        
+        // Phrases
         localStorage.removeItem(`phrasesState_${todayKey}`);
         localStorage.removeItem(`phrasesStars_${todayKey}`);
         localStorage.removeItem(`phrasesComplete_${todayKey}`);
+        
+        // Suspect
         localStorage.removeItem(`suspectState_${todayKey}`);
         localStorage.removeItem(`suspectStars_${todayKey}`);
         localStorage.removeItem(`suspectComplete_${todayKey}`);
         localStorage.removeItem(`suspectWon_${todayKey}`);
+        
+        // Cross
         localStorage.removeItem(`crossState_${todayKey}`);
         localStorage.removeItem(`crossStars_${todayKey}`);
         localStorage.removeItem(`crossComplete_${todayKey}`);
+        
+        // Defuser
+        localStorage.removeItem(`defuserStars_${todayKey}`);
+        localStorage.removeItem(`defuserStarted_${todayKey}`);
+        if (window.defuserIframe) {
+            try {
+                const iframe = document.getElementById('defuserIframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
+                }
+            } catch (err) {
+                console.warn('Could not message defuser iframe to reset storage:', err);
+            }
+        }
+        
+        // Tally
+        localStorage.removeItem(`tallyStars_${todayKey}`);
+        localStorage.removeItem(`tallyStarted_${todayKey}`);
+        localStorage.removeItem(`tallyState_${todayKey}`);
+        localStorage.removeItem(`tallyComplete_${todayKey}`);
+        try {
+            const tallyIframe = document.getElementById('tallyIframe');
+            if (tallyIframe && tallyIframe.contentWindow) {
+                tallyIframe.contentWindow.postMessage('resetTallyLocalStorage', '*');
+            }
+        } catch (err) {
+            console.warn('Could not message tally iframe to reset storage:', err);
+        }
+        
+        // Gold Case (puzzle game)
+        localStorage.removeItem(`goldCaseStars_${todayKey}`);
+        localStorage.removeItem(`goldCaseComplete_${todayKey}`);
+        localStorage.removeItem(`goldCaseScore_${todayKey}`);
         // Reset bonus spin data
         localStorage.removeItem(`bonusSpinSpun_${todayKey}`);
         localStorage.removeItem(`bonusSpinStars_${todayKey}`);
         localStorage.removeItem('bonusSpinCheatUnlocked');
-        console.log('[MainPage] RESET: Cleared all phrases, suspect, cross, and bonus spin data for key:', todayKey);
+        console.log('[MainPage] RESET: Cleared puzzle and bonus spin data for key:', todayKey);
         
         // Update bonus spin display after reset
         updateBonusSpinDisplay();
@@ -2296,6 +2458,11 @@ document.addEventListener('keydown', (e) => {
         // Update cross stars display
         if (window.updateCrossStars) {
             window.updateCrossStars();
+        }
+        
+        // Reload main game scores so puzzle stars / cards refresh
+        if (window.loadGameScores2) {
+            window.loadGameScores2();
         }
         
         // Update the display
@@ -2408,6 +2575,33 @@ if (memoryBox) {
 
 // memoryClose removed - now using single close button
 
+let pendingCloseGameId = null;
+let pendingCloseOverlayElement = null;
+let pendingCloseIframeElement = null;
+
+function actuallyCloseOverlay(activeOverlay, overlayElement, iframeToUnload) {
+    if (overlayElement) {
+        overlayElement.classList.remove('active');
+    }
+    if (iframeToUnload) {
+        console.log(`Unloading ${activeOverlay} game iframe by setting src to 'about:blank'`);
+        iframeToUnload.src = 'about:blank';
+    }
+    
+    // Update bonus spin display when closing other games (to check if unlock status changed)
+    // But NOT when closing the bonus spin game itself
+    if (activeOverlay !== 'goldCase') {
+        setTimeout(() => {
+            updateBonusSpinDisplay();
+        }, 200);
+    }
+    
+    document.body.style.overflow = '';
+    
+    // Reload game scores to update stars
+    loadGameScores2();
+}
+
 // Main close button handler
 const closeButton = document.querySelector('.game-overlay-close');
 if (closeButton) {
@@ -2433,94 +2627,143 @@ if (closeButton) {
         const defuserOverlay = document.getElementById('defuserOverlay');
         const tallyOverlay = document.getElementById('tallyOverlay');
         
-        // Determine which overlay is active and only reload that iframe
+        // Determine which overlay is active
         let activeOverlay = null;
+        let overlayElement = null;
         let iframeToUnload = null;
         if (memoryOverlay && memoryOverlay.classList.contains('active')) {
             activeOverlay = 'memory';
-            memoryOverlay.classList.remove('active');
+            overlayElement = memoryOverlay;
             iframeToUnload = document.getElementById('memoryIframe');
         } else if (mysteryWordOverlay && mysteryWordOverlay.classList.contains('active')) {
             activeOverlay = 'mysteryWord';
-            mysteryWordOverlay.classList.remove('active');
+            overlayElement = mysteryWordOverlay;
             iframeToUnload = document.getElementById('mysteryWordIframe');
         } else if (beticleOverlay && beticleOverlay.classList.contains('active')) {
             activeOverlay = 'beticle';
-            beticleOverlay.classList.remove('active');
+            overlayElement = beticleOverlay;
             iframeToUnload = document.getElementById('beticleIframe');
         } else if (blackjackOverlay && blackjackOverlay.classList.contains('active')) {
             activeOverlay = 'blackjack';
-            blackjackOverlay.classList.remove('active');
+            overlayElement = blackjackOverlay;
             iframeToUnload = document.getElementById('blackjackIframe');
         } else if (lostAndFoundOverlay && lostAndFoundOverlay.classList.contains('active')) {
             activeOverlay = 'lostAndFound';
-            lostAndFoundOverlay.classList.remove('active');
+            overlayElement = lostAndFoundOverlay;
             iframeToUnload = document.getElementById('lostAndFoundIframe');
         } else if (goldCaseOverlay && goldCaseOverlay.classList.contains('active')) {
             activeOverlay = 'goldCase';
-            goldCaseOverlay.classList.remove('active');
+            overlayElement = goldCaseOverlay;
             iframeToUnload = document.getElementById('goldCaseIframe');
-            // Don't update display when closing - state hasn't changed
         } else if (zoomOverlay && zoomOverlay.classList.contains('active')) {
             activeOverlay = 'zoom';
-            zoomOverlay.classList.remove('active');
+            overlayElement = zoomOverlay;
             iframeToUnload = document.getElementById('zoomIframe');
         } else if (shiftOverlay && shiftOverlay.classList.contains('active')) {
             activeOverlay = 'shift';
-            shiftOverlay.classList.remove('active');
+            overlayElement = shiftOverlay;
             iframeToUnload = document.getElementById('shiftIframe');
         } else if (phrasesOverlay && phrasesOverlay.classList.contains('active')) {
             activeOverlay = 'phrases';
-            phrasesOverlay.classList.remove('active');
+            overlayElement = phrasesOverlay;
             iframeToUnload = document.getElementById('phrasesIframe');
         } else if (crossOverlay && crossOverlay.classList.contains('active')) {
             activeOverlay = 'cross';
-            crossOverlay.classList.remove('active');
+            overlayElement = crossOverlay;
             iframeToUnload = document.getElementById('crossIframe');
         } else if (suspectOverlay && suspectOverlay.classList.contains('active')) {
             activeOverlay = 'suspect';
-            suspectOverlay.classList.remove('active');
+            overlayElement = suspectOverlay;
             iframeToUnload = document.getElementById('suspectIframe');
         } else if (match3Overlay && match3Overlay.classList.contains('active')) {
             activeOverlay = 'match3';
-            match3Overlay.classList.remove('active');
+            overlayElement = match3Overlay;
             iframeToUnload = document.getElementById('match3Iframe');
-            // Update wallet stars when closing match3 game
-            setTimeout(() => {
-                updateWalletStars2();
-            }, 200);
         } else if (defuserOverlay && defuserOverlay.classList.contains('active')) {
             activeOverlay = 'defuser';
-            defuserOverlay.classList.remove('active');
+            overlayElement = defuserOverlay;
             iframeToUnload = document.getElementById('defuserIframe');
         } else if (tallyOverlay && tallyOverlay.classList.contains('active')) {
             activeOverlay = 'tally';
-            tallyOverlay.classList.remove('active');
+            overlayElement = tallyOverlay;
             iframeToUnload = document.getElementById('tallyIframe');
         }
         
-        // Unload the iframe by setting src to blank
-        if (iframeToUnload) {
-            console.log(`Unloading ${activeOverlay} game iframe by setting src to 'about:blank'`);
-            iframeToUnload.src = 'about:blank';
+        // For puzzle games that are not yet completed, show the "Game not complete" modal
+        const modal = document.getElementById('gameIncompleteModal');
+        const isPuzzle = activeOverlay && !!getPuzzleStarsKey(activeOverlay);
+        const hasStarted = isPuzzle && isPuzzleSessionStarted(activeOverlay);
+        if (modal && isPuzzle && hasStarted && !isPuzzleGameCompleted(activeOverlay)) {
+            pendingCloseGameId = activeOverlay;
+            pendingCloseOverlayElement = overlayElement;
+            pendingCloseIframeElement = iframeToUnload;
+            modal.style.display = 'flex';
+            return;
         }
         
-        // Update bonus spin display when closing other games (to check if unlock status changed)
-        // But NOT when closing the bonus spin game itself
-        if (activeOverlay !== 'goldCase') {
-            setTimeout(() => {
-                updateBonusSpinDisplay();
-            }, 200);
+        // Non-puzzle games or already-completed puzzles: close immediately
+        if (activeOverlay) {
+            actuallyCloseOverlay(activeOverlay, overlayElement, iframeToUnload);
         }
+    });
+}
+
+// Game incomplete modal buttons
+const gameIncompleteModal = document.getElementById('gameIncompleteModal');
+const gameQuitButton = document.getElementById('gameQuitButton');
+const gameKeepPlayingButton = document.getElementById('gameKeepPlayingButton');
+
+if (gameQuitButton && gameIncompleteModal) {
+    gameQuitButton.addEventListener('click', () => {
+        if (pendingCloseGameId) {
+            const key = getPuzzleStarsKey(pendingCloseGameId);
+            if (key) {
+                // Always mark game as completed with 0 stars (override any previous value)
+                localStorage.setItem(key, '0');
+            }
+            
+            // Reset per-game localStorage for DEFUSER and TALLY on quit
+            const todayKey = getTodayKey();
+            if (pendingCloseGameId === 'defuser') {
+                localStorage.removeItem(`defuserStarted_${todayKey}`);
+                // Ask defuser iframe to clear any of its own localStorage keys
+                const defuserIframe = document.getElementById('defuserIframe');
+                if (defuserIframe && defuserIframe.contentWindow) {
+                    defuserIframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
+                }
+            } else if (pendingCloseGameId === 'tally') {
+                localStorage.removeItem(`tallyStarted_${todayKey}`);
+                localStorage.removeItem(`tallyState_${todayKey}`);
+                localStorage.removeItem(`tallyComplete_${todayKey}`);
+                // Ask tally iframe to clear any of its own localStorage keys
+                const tallyIframe = document.getElementById('tallyIframe');
+                if (tallyIframe && tallyIframe.contentWindow) {
+                    tallyIframe.contentWindow.postMessage('resetTallyLocalStorage', '*');
+                }
+            }
+            
+            actuallyCloseOverlay(pendingCloseGameId, pendingCloseOverlayElement, pendingCloseIframeElement);
+        }
+        pendingCloseGameId = null;
+        pendingCloseOverlayElement = null;
+        pendingCloseIframeElement = null;
+        gameIncompleteModal.style.display = 'none';
+    });
+}
+
+if (gameKeepPlayingButton && gameIncompleteModal) {
+    gameKeepPlayingButton.addEventListener('click', () => {
+        pendingCloseGameId = null;
+        pendingCloseOverlayElement = null;
+        pendingCloseIframeElement = null;
+        gameIncompleteModal.style.display = 'none';
         
-        document.body.style.overflow = '';
-        
-        // Don't reload iframes when closing - just close the overlay
-        
-        // Reload game scores to update stars
-        // if (typeof loadGameScores === 'function') {
-            loadGameScores2();
-        // }
+        // Restore close button since overlay is still active
+        const closeButtonEl = document.querySelector('.game-overlay-close');
+        if (closeButtonEl) {
+            closeButtonEl.classList.add('show');
+            updateLogoVisibility();
+        }
     });
 }
 
@@ -2555,6 +2798,12 @@ const beticleOverlay = document.getElementById('beticleOverlay');
 
 if (mysteryWordBox) {
     mysteryWordBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('mysteryWord')) {
+            showCompletedBadge(mysteryWordBox);
+            return;
+        }
+        
         if (mysteryWordOverlay) {
             console.log('SHOWING mystery word game');
             mysteryWordOverlay.classList.add('active');
@@ -2611,6 +2860,12 @@ if (mysteryWordOverlay) {
 
 if (beticleBox) {
     beticleBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('beticle')) {
+            showCompletedBadge(beticleBox);
+            return;
+        }
+        
         if (beticleOverlay) {
             console.log('SHOWING beticle game');
             beticleOverlay.classList.add('active');
@@ -2748,6 +3003,12 @@ const zoomOverlay = document.getElementById('zoomOverlay');
 
 if (tilesBox) {
     tilesBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('zoom')) {
+            showCompletedBadge(tilesBox);
+            return;
+        }
+        
         if (zoomOverlay) {
             zoomOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2775,6 +3036,12 @@ const shiftOverlay = document.getElementById('shiftOverlay');
 
 if (shiftBox) {
     shiftBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('shift')) {
+            showCompletedBadge(shiftBox);
+            return;
+        }
+        
         if (shiftOverlay) {
             shiftOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2802,6 +3069,12 @@ const crossOverlay = document.getElementById('crossOverlay');
 
 if (crossBox) {
     crossBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('cross')) {
+            showCompletedBadge(crossBox);
+            return;
+        }
+        
         if (crossOverlay) {
             crossOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2829,6 +3102,12 @@ const suspectOverlay = document.getElementById('suspectOverlay');
 
 if (suspectBox) {
     suspectBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('suspect')) {
+            showCompletedBadge(suspectBox);
+            return;
+        }
+        
         if (suspectOverlay) {
             suspectOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2856,6 +3135,15 @@ const defuserOverlay = document.getElementById('defuserOverlay');
 
 if (defuserBox) {
     defuserBox.addEventListener('click', () => {
+        // Reset per-session started flag whenever opening the game
+        defuserSessionStarted = false;
+        
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('defuser')) {
+            showCompletedBadge(defuserBox);
+            return;
+        }
+        
         if (defuserOverlay) {
             defuserOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2883,6 +3171,15 @@ const tallyOverlay = document.getElementById('tallyOverlay');
 
 if (tallyBox) {
     tallyBox.addEventListener('click', () => {
+        // Reset per-session started flag whenever opening the game
+        tallySessionStarted = false;
+        
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('tally')) {
+            showCompletedBadge(tallyBox);
+            return;
+        }
+        
         if (tallyOverlay) {
             tallyOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2909,6 +3206,12 @@ const phrasesOverlay = document.getElementById('phrasesOverlay');
 
 if (phrasesBox) {
     phrasesBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('phrases')) {
+            showCompletedBadge(phrasesBox);
+            return;
+        }
+        
         if (phrasesOverlay) {
             phrasesOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2936,6 +3239,12 @@ const goldCaseOverlay = document.getElementById('goldCaseOverlay');
 
 if (goldCasePuzzleBox) {
     goldCasePuzzleBox.addEventListener('click', () => {
+        // If already completed today, show COMPLETED badge and don't reopen
+        if (isPuzzleGameCompleted('goldCase')) {
+            showCompletedBadge(goldCasePuzzleBox);
+            return;
+        }
+        
         if (goldCaseOverlay) {
             goldCaseOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
