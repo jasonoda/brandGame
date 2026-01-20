@@ -4,24 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TALLY</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            width: 100%;
-            height: 100vh;
-            background-color: #FF69B4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- TALLY game content will go here -->
+    <!-- Start Menu -->
+    <div id="startMenu">
+        <div id="startMenuContainer">
+            <img src="../../src/img/tally.svg" alt="Tally" style="height: 40px; width: auto; margin-bottom: 10px;">
+            <div id="tallyTitle">TALLY</div>
+            <div id="instructionsStartDiv">
+                <div class="instructionLine">you are given the answer to the problem</div>
+                <div class="instructionDivider"></div>
+                <div class="instructionLine">use the provided numbers and math symbols to create an amount equal to the answer</div>
+                <div class="instructionDivider"></div>
+                <div class="example-equation">
+                    <div class="example-box example-number">2</div>
+                    <div class="example-box example-operator">×</div>
+                    <div class="example-box example-number">3</div>
+                    <div class="example-box example-operator">+</div>
+                    <div class="example-box example-number">1</div>
+                    <div class="example-equals">=</div>
+                    <div class="example-answer">7</div>
+                </div>
+            </div>
+            <div id="playButton">PLAY</div>
+        </div>
+    </div>
+
+    <div class="container" id="gameContainer" style="display: none;">
+        <div class="top-section">
+            <div class="numbers-row" id="numbersRow">
+                <!-- 6 number boxes will be generated here -->
+            </div>
+        </div>
+        
+        <div class="operators-row">
+            <div class="operator-box" data-operator="+">+</div>
+            <div class="operator-box" data-operator="-">−</div>
+            <div class="operator-box" data-operator="×">×</div>
+            <div class="operator-box" data-operator="÷">÷</div>
+        </div>
+        
+        <div class="instruction-text" id="instructionText"></div>
+        
+        <div class="middle-section">
+            <div class="equation-row">
+                <div class="number-slot" id="slot1" data-slot="number"></div>
+                <div class="operator-slot" id="opSlot1" data-slot="operator"></div>
+                <div class="number-slot" id="slot2" data-slot="number"></div>
+                <div class="operator-slot" id="opSlot2" data-slot="operator"></div>
+                <div class="number-slot" id="slot3" data-slot="number"></div>
+            </div>
+        </div>
+        
+        <div class="current-total" id="currentTotal"></div>
+        <div class="bottom-section">
+            <div class="equals-label">EQUALS</div>
+            <div class="answer-display" id="answerDisplay">0</div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
