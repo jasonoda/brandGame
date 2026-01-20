@@ -61,169 +61,6 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Save game state to localStorage
-function saveGameState() {
-    if (!currentPhrase) return; // Don't save if no game started
-    
-    const todayKey = getTodayKey();
-    
-    // Get which letters are revealed
-    const revealedLetters = {};
-    
-    // If puzzle is solved, reveal ALL letters in the phrase
-    if (puzzleSolved) {
-        // Get all unique letters from the phrase
-        const allLettersInPhrase = new Set();
-        for (let char of currentPhrase) {
-            if (char >= 'A' && char <= 'Z') {
-                allLettersInPhrase.add(char);
-            }
-        }
-        // Mark all letters as revealed
-        allLettersInPhrase.forEach(letter => {
-            revealedLetters[letter] = true;
-        });
-    } else {
-        // Only save letters that are currently revealed
-        letterBoxes.forEach(box => {
-            if (box.textContent && box.textContent.trim() !== '') {
-                const letter = box.dataset.letter;
-                if (letter) {
-                    revealedLetters[letter] = true;
-                }
-            }
-        });
-    }
-    
-    const gameState = {
-        currentPhrase: currentPhrase,
-        currentTurn: currentTurn,
-        goodArray: [...goodArray], // Make a copy
-        zeroArray: [...zeroArray], // Make a copy
-        revealedLetters: revealedLetters,
-        puzzleSolved: puzzleSolved,
-        isFirstSelection: isFirstSelection
-    };
-    
-    localStorage.setItem(`phrasesState_${todayKey}`, JSON.stringify(gameState));
-    console.log('[Phrases] SAVED to localStorage:', {
-        key: `phrasesState_${todayKey}`,
-        phrase: currentPhrase,
-        turn: currentTurn,
-        solved: puzzleSolved,
-        goodArrayLength: goodArray.length,
-        zeroArrayLength: zeroArray.length,
-        revealedLetters: Object.keys(revealedLetters).length
-    });
-}
-
-// Load game state from localStorage
-function loadGameState() {
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`phrasesState_${todayKey}`);
-    
-    if (!savedState) {
-        console.log('[Phrases] LOADED from localStorage: No saved state found for key:', `phrasesState_${todayKey}`);
-        return false;
-    }
-    
-    try {
-        const gameState = JSON.parse(savedState);
-        console.log('[Phrases] LOADED from localStorage:', {
-            key: `phrasesState_${todayKey}`,
-            phrase: gameState.currentPhrase,
-            turn: gameState.currentTurn,
-            solved: gameState.puzzleSolved,
-            goodArrayLength: gameState.goodArray ? gameState.goodArray.length : 0,
-            zeroArrayLength: gameState.zeroArray ? gameState.zeroArray.length : 0,
-            revealedLettersCount: gameState.revealedLetters ? Object.keys(gameState.revealedLetters).length : 0
-        });
-        
-        // Verify the phrase matches (in case phrases.json changed)
-        // Check if phrases array is loaded and contains the phrase
-        // if (phrases.length > 0 && !phrases.includes(gameState.currentPhrase)) {
-        //     console.log('[Phrases] Phrase not in current list, clearing state');
-        //     localStorage.removeItem(`phrasesState_${todayKey}`);
-        //     return false;
-        // }
-        
-        // Restore state
-        currentPhrase = gameState.currentPhrase;
-        currentTurn = gameState.currentTurn || 0;
-        goodArray = gameState.goodArray ? [...gameState.goodArray] : [];
-        zeroArray = gameState.zeroArray ? [...gameState.zeroArray] : [];
-        puzzleSolved = gameState.puzzleSolved || false;
-        isFirstSelection = gameState.isFirstSelection !== undefined ? gameState.isFirstSelection : true;
-        
-        console.log('[Phrases] Restored state - phrase:', currentPhrase, 'turn:', currentTurn, 'solved:', puzzleSolved);
-        console.log('[Phrases] goodArray length:', goodArray.length, 'zeroArray length:', zeroArray.length);
-        
-        // Rebuild letter counts
-        letterCounts = {};
-        const lettersInPhrase = new Set();
-        for (let char of currentPhrase) {
-            if (char >= 'A' && char <= 'Z') {
-                letterCounts[char] = (letterCounts[char] || 0) + 1;
-                lettersInPhrase.add(char);
-            }
-        }
-        
-        // Restore revealed letters
-        displayPhrase(currentPhrase);
-        if (gameState.revealedLetters) {
-            Object.keys(gameState.revealedLetters).forEach(letter => {
-                const boxesToReveal = letterBoxes.filter(box => box.dataset.letter === letter);
-                boxesToReveal.forEach(box => {
-                    box.textContent = letter;
-                });
-            });
-        }
-        
-        // If puzzle is solved, make sure ALL letters are revealed
-        if (puzzleSolved) {
-            // Get all unique letters from the phrase
-            const allLettersInPhrase = new Set();
-            for (let char of currentPhrase) {
-                if (char >= 'A' && char <= 'Z') {
-                    allLettersInPhrase.add(char);
-                }
-            }
-            // Reveal all letters
-            allLettersInPhrase.forEach(letter => {
-                const boxesToReveal = letterBoxes.filter(box => box.dataset.letter === letter);
-                boxesToReveal.forEach(box => {
-                    box.textContent = letter;
-                });
-            });
-        }
-        
-        // Update display
-        updateGuessDisplay();
-        
-        // Restore letter selection UI visibility using opacity
-        if (letterSelectionUI) {
-            if (puzzleSolved) {
-                letterSelectionUI.style.opacity = '0';
-                letterSelectionUI.style.pointerEvents = 'none';
-            } else {
-                letterSelectionUI.style.opacity = '1';
-                letterSelectionUI.style.pointerEvents = 'auto';
-            }
-        }
-        
-        // If puzzle is already solved, show completed state
-        if (puzzleSolved) {
-            showCompletedState();
-        }
-        
-        console.log('[Phrases] Game state loaded successfully');
-        return true;
-    } catch (e) {
-        console.error('[Phrases] Error loading game state:', e);
-        localStorage.removeItem(`phrasesState_${todayKey}`);
-        return false;
-    }
-}
 
 // Load phrases from JSON
 fetch('phrases.json')
@@ -231,54 +68,11 @@ fetch('phrases.json')
     .then(data => {
         phrases = data.phrases;
         
-        // Check for saved game state after phrases load
-        checkForSavedGame();
     })
     .catch(error => {
         console.error('Error loading phrases:', error);
     });
 
-// Check for saved game state and load it if it exists
-function checkForSavedGame() {
-    if (phrases.length === 0) {
-        // Phrases not loaded yet, wait a bit
-        setTimeout(checkForSavedGame, 100);
-        return;
-    }
-    
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`phrasesState_${todayKey}`);
-    const savedStars = localStorage.getItem(`phrasesStars_${todayKey}`);
-    
-    console.log('[Phrases] CHECKING for saved data on load:', {
-        hasState: !!savedState,
-        hasStars: !!savedStars,
-        starsValue: savedStars,
-        key: todayKey
-    });
-    
-    if (savedState) {
-        // There's a saved game, skip start menu and load it
-        startMenu.style.display = 'none';
-        container.classList.add('gameStarted');
-        
-        const stateLoaded = loadGameState();
-        
-        if (stateLoaded) {
-            // State loaded successfully
-            if (puzzleSolved) {
-                // Game is already won, show completed state
-                showCompletedState();
-            } else {
-                // Game in progress, restore the game properly
-                restoreGameInProgress();
-            }
-        } else {
-            // Failed to load state, show start menu
-            startMenu.style.display = 'flex';
-        }
-    }
-}
 
 // Restore game in progress state
 function restoreGameInProgress() {
@@ -392,11 +186,7 @@ playButton.addEventListener('click', () => {
             return;
         }
         
-        // Try to load saved game state first
-        const stateLoaded = loadGameState();
-        
-        if (!stateLoaded) {
-            // No saved state, start new game
+        // Start new game
             const randomIndex = Math.floor(Math.random() * phrases.length);
             initializeGame(phrases[randomIndex]);
         } else {
@@ -465,9 +255,6 @@ function initializeGame(phrase) {
     updateGuessDisplay();
     updatePointerEvents(UI_STATE.GAMEPLAY);
     selectAndShowLetters();
-    
-    // Save initial game state immediately
-    saveGameState();
 }
 
 function updateGuessDisplay() {
@@ -932,9 +719,6 @@ function selectLetter(index) {
     
     // Animate letter reveals
     revealLetters();
-    
-    // Save game state after letter selection
-    saveGameState();
 }
 
 function revealLetters() {
@@ -991,8 +775,6 @@ function revealLetters() {
                 updateNextLetterButtonText();
             }
             
-            // Save game state after letters are revealed
-            saveGameState();
         }
     };
     
@@ -1040,9 +822,6 @@ nextLetterBtn.addEventListener('click', () => {
     
     setButtonsDisabled(true);
     selectAndShowLetters();
-    
-    // Save game state after turn increment
-    saveGameState();
 });
 
 solveBtn.addEventListener('click', () => {
@@ -1176,9 +955,6 @@ function checkSolve() {
             // Show completed state
             showCompletedState();
         }, 1500);
-        
-        // Save final game state
-        saveGameState();
     } else {
         // Incorrect - show error
         solveTitle.textContent = 'incorrect';
@@ -1285,7 +1061,6 @@ document.addEventListener('keydown', (e) => {
     // Reset phrases data when 'q' is pressed
     if (e.key === 'q' || e.key === 'Q') {
         const todayKey = getTodayKey();
-        localStorage.removeItem(`phrasesState_${todayKey}`);
         localStorage.removeItem(`phrasesStars_${todayKey}`);
         localStorage.removeItem(`phrasesComplete_${todayKey}`);
         console.log('[Phrases] RESET: Cleared all phrases data for key:', todayKey);
@@ -1316,7 +1091,6 @@ document.addEventListener('keydown', (e) => {
     // Reset phrases data when 'q' is pressed
     if (e.key === 'q' || e.key === 'Q') {
         const todayKey = getTodayKey();
-        localStorage.removeItem(`phrasesState_${todayKey}`);
         localStorage.removeItem(`phrasesStars_${todayKey}`);
         localStorage.removeItem(`phrasesComplete_${todayKey}`);
         console.log('[Phrases] RESET: Cleared all phrases data for key:', todayKey);

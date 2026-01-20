@@ -97,9 +97,6 @@ function defuserGetTodayKey() {
 }
 
 function defuserMarkStarted() {
-    const todayKey = defuserGetTodayKey();
-    localStorage.setItem(`defuserStarted_${todayKey}`, 'true');
-    
     // Let parent page know this session has actually started
     if (window.parent) {
         window.parent.postMessage('defuserStarted', '*');
@@ -110,9 +107,7 @@ function defuserMarkStarted() {
 // Listen for parent asking us to reset DEFUSER-specific localStorage
 window.addEventListener('message', (event) => {
     if (event.data === 'resetDefuserLocalStorage') {
-        const todayKey = defuserGetTodayKey();
-        localStorage.removeItem(`defuserStarted_${todayKey}`);
-        // If additional defuser-specific state keys are added later, clear them here as well
+        // State keys cleared by parent
     }
 });
 

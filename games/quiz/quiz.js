@@ -22,42 +22,6 @@ function markQuizComplete() {
     localStorage.setItem(`quizComplete_${todayKey}`, 'true');
 }
 
-// Save quiz state to localStorage
-function saveQuizState() {
-    const todayKey = quizGetTodayKey();
-    if (quizCurrentSet) {
-        localStorage.setItem(`quizSet_${todayKey}`, JSON.stringify(quizCurrentSet));
-        localStorage.setItem(`quizQuestionIndex_${todayKey}`, String(quizCurrentQuestionIndex));
-        localStorage.setItem(`quizCorrectCount_${todayKey}`, String(quizCorrectCount));
-    }
-}
-
-// Save last answer selected
-function saveLastAnswer(selectedIndex) {
-    const todayKey = quizGetTodayKey();
-    localStorage.setItem(`quizLastAnswer_${todayKey}`, String(selectedIndex));
-}
-
-// Load quiz state from localStorage
-function loadQuizState() {
-    const todayKey = quizGetTodayKey();
-    const savedSet = localStorage.getItem(`quizSet_${todayKey}`);
-    const savedIndex = localStorage.getItem(`quizQuestionIndex_${todayKey}`);
-    const savedCount = localStorage.getItem(`quizCorrectCount_${todayKey}`);
-    
-    if (savedSet && savedIndex !== null) {
-        try {
-            quizCurrentSet = JSON.parse(savedSet);
-            quizCurrentQuestionIndex = parseInt(savedIndex) || 0;
-            quizCorrectCount = parseInt(savedCount) || 0;
-            return true;
-        } catch (error) {
-            console.error('Error loading quiz state:', error);
-            return false;
-        }
-    }
-    return false;
-}
 
 function quizGetDailyStars() {
     const todayKey = quizGetTodayKey();
@@ -121,7 +85,7 @@ function initQuizGame() {
     if (!container) return;
     
     // Try to load saved state first
-    const hasSavedState = loadQuizState();
+    const hasSavedState = false;
     
     // Check if already complete
     if (isQuizComplete()) {
@@ -153,7 +117,6 @@ function initQuizGame() {
         quizCurrentQuestionIndex = 0;
         quizCorrectCount = 0;
         // Save the initial state
-        saveQuizState();
     }
     
     quizGameWon = false;
@@ -267,7 +230,6 @@ function checkQuizAnswer(selectedIndex) {
     if (isCorrect) {
         // Correct answer
         quizCorrectCount++;
-        saveQuizState();
         
         // Highlight correct answer in green (same as header)
         buttons[selectedIndex].style.background = 'linear-gradient(to bottom, #26D7A4, #1DB88A)';
@@ -286,8 +248,6 @@ function checkQuizAnswer(selectedIndex) {
         setTimeout(() => {
             if (quizCurrentQuestionIndex === 4) {
                 // Last question - don't fade out, just end the game
-                saveLastAnswer(selectedIndex);
-                saveQuizState();
                 quizGameWon = true;
                 endQuizGame(true);
             } else {
@@ -318,7 +278,6 @@ function checkQuizAnswer(selectedIndex) {
                 setTimeout(() => {
                     // Next question
                     quizCurrentQuestionIndex++;
-                    saveQuizState();
                     displayQuestion();
                     
                     // Ensure opacity is reset for new question
@@ -340,8 +299,6 @@ function checkQuizAnswer(selectedIndex) {
         const currentQuestion = quizCurrentSet.questions[quizCurrentQuestionIndex];
         
         // Save the wrong answer
-        saveLastAnswer(selectedIndex);
-        saveQuizState();
         
         // Highlight wrong answer in red (more vibrant)
         buttons[selectedIndex].style.background = 'linear-gradient(to bottom, #FF5252, #D32F2F)';
@@ -485,7 +442,7 @@ function showQuizStars() {
 // Show completed state
 function showCompletedQuiz() {
     // Load the saved state first
-    const hasSavedState = loadQuizState();
+    const hasSavedState = false;
     if (!hasSavedState || !quizCurrentSet) {
         console.error('No saved quiz state found');
         return;
@@ -527,7 +484,7 @@ function showCompletedQuiz() {
         buttonsContainer.innerHTML = '';
         
         const todayKey = quizGetTodayKey();
-        const lastAnswerIndex = parseInt(localStorage.getItem(`quizLastAnswer_${todayKey}`) || '-1');
+        const lastAnswerIndex = -1;
         
         currentQuestion.answers.forEach((answer, index) => {
             const button = document.createElement('button');

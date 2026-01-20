@@ -26,32 +26,6 @@ function setPlayerPosition(position) {
     localStorage.setItem(`journeyPosition_level${level}`, String(position));
 }
 
-// Coin inventory functions - only gold coins now
-function getCoins() {
-    return parseInt(localStorage.getItem('goldCoins') || '0');
-}
-
-function addCoin() {
-    const current = getCoins();
-    localStorage.setItem('goldCoins', String(current + 1));
-    updateCoinDisplays();
-}
-
-function updateCoinDisplays() {
-    // Update all coin displays across the site
-    const goldCount = getCoins();
-    
-    // Update wallet page
-    const walletGold = document.getElementById('gold-coin-count');
-    if (walletGold) walletGold.textContent = goldCount;
-    
-    // Update sweeps page
-    const sweepsGold = document.getElementById('sweeps-gold-coin-count');
-    if (sweepsGold) sweepsGold.textContent = goldCount;
-}
-
-// Make globally accessible
-window.updateCoinDisplays = updateCoinDisplays;
 
 function getMoveStars() {
     const todayKey = getTodayKey();
@@ -613,7 +587,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Add coin to inventory after full animation (0.3 delay + 0.7 up + 0.5 wait + 0.75 fade = 2.25s)
                 setTimeout(() => {
-                    addCoin();
                     coinElements[index] = null; // Remove reference
                     
                     // Switch to prizes tab and auto-draw a card

@@ -677,61 +677,8 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Load saved game state
-function loadGameState() {
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`crossState_${todayKey}`);
-    if (savedState) {
-        try {
-            return JSON.parse(savedState);
-        } catch (e) {
-            console.error('[Cross] Error parsing saved state:', e);
-            return null;
-        }
-    }
-    return null;
-}
-
-// Save game state to localStorage
-function saveGameState() {
-    const todayKey = getTodayKey();
-    const gameState = {
-        answerWord1: answerWord1,
-        answerWord2: answerWord2,
-        numberValues: numberValues,
-        letterValues: letterValues,
-        centerLetter: centerLetter,
-        word1Found: word1Found,
-        word2Found: word2Found,
-        hintCount: hintCount,
-        firstWordFound: firstWordFound,
-        word1Cells: word1Cells.map(cell => {
-            if (cell.dataset.numberIndex !== undefined) {
-                return { type: 'number', index: parseInt(cell.dataset.numberIndex) };
-            } else if (cell.dataset.letterIndex !== undefined) {
-                return { type: 'letter', index: parseInt(cell.dataset.letterIndex) };
-            } else if (cell.dataset.center === 'true') {
-                return { type: 'center' };
-            }
-            return null;
-        }).filter(c => c !== null),
-        word2Cells: word2Cells.map(cell => {
-            if (cell.dataset.numberIndex !== undefined) {
-                return { type: 'number', index: parseInt(cell.dataset.numberIndex) };
-            } else if (cell.dataset.letterIndex !== undefined) {
-                return { type: 'letter', index: parseInt(cell.dataset.letterIndex) };
-            } else if (cell.dataset.center === 'true') {
-                return { type: 'center' };
-            }
-            return null;
-        }).filter(c => c !== null)
-    };
-    localStorage.setItem(`crossState_${todayKey}`, JSON.stringify(gameState));
-    console.log('[Cross] Game state saved');
-}
-
-// Generate puzzle or load from saved state
-let savedState = loadGameState();
+// Generate puzzle
+let savedState = null;
 let puzzle;
 let numberValues, letterValues, centerLetter;
 
@@ -1042,7 +989,6 @@ addButtonHandlers(letterRightBtn, () => shiftLetters(1));
 // Hint functionality
 function handleHint() {
     hintCount++;
-    saveGameState();
     
     if (hintCount === 1) {
         // First hint: make 2 boxes blank (priority: boxes 6 and 10, then random)
@@ -1413,7 +1359,6 @@ function checkAnswer() {
             selectedPath = [];
             console.log(`WIN! You found ${answerWord1} (first word - GREEN)!`);
             celebrateWord(cellsToCelebrate);
-            saveGameState();
             
             // Check if both words are found - show win screen
             if (word1Found && word2Found) {
@@ -1448,7 +1393,6 @@ function checkAnswer() {
             selectedPath = [];
             console.log(`WIN! You found ${answerWord1} (second word - BLUE)!`);
             celebrateWord(cellsToCelebrate);
-            saveGameState();
             
             // Check if both words are found - show win screen
             if (word1Found && word2Found) {
@@ -1485,7 +1429,6 @@ function checkAnswer() {
             selectedPath = [];
             console.log(`WIN! You found ${answerWord2} (first word - GREEN)!`);
             celebrateWord(cellsToCelebrate);
-            saveGameState();
             
             // Check if both words are found - show win screen
             if (word1Found && word2Found) {
@@ -1520,7 +1463,6 @@ function checkAnswer() {
             selectedPath = [];
             console.log(`WIN! You found ${answerWord2} (second word - BLUE)!`);
             celebrateWord(cellsToCelebrate);
-            saveGameState();
             
             // Check if both words are found - show win screen
             if (word1Found && word2Found) {
@@ -2098,7 +2040,6 @@ init();
 (function() {
     const todayKey = getTodayKey();
     const isComplete = localStorage.getItem(`crossComplete_${todayKey}`) === 'true';
-    const savedState = loadGameState();
     const bothWordsFound = savedState && savedState.word1Found && savedState.word2Found;
     
     if (isComplete && bothWordsFound && startMenu && gameContainer) {

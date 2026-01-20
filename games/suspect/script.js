@@ -76,49 +76,9 @@ const colors = [
     '#8338ec'  // purple
 ].slice(0, numAttributes); // Use only the first numAttributes colors
 
-// Pick killer first - check if we have a saved killerIndex
-const todayKeyForKiller = getTodayKey();
-const savedKillerState = localStorage.getItem(`suspectState_${todayKeyForKiller}`);
-let killerIndex;
-if (savedKillerState) {
-    try {
-        const savedState = JSON.parse(savedKillerState);
-        if (savedState.killerIndex !== undefined) {
-            killerIndex = savedState.killerIndex;
-            console.log('[Suspect] Using saved killerIndex:', killerIndex);
-        } else {
-            killerIndex = Math.floor(Math.random() * numPeople);
-            console.log('[Suspect] No saved killerIndex, generating new:', killerIndex);
-        }
-    } catch (e) {
-        killerIndex = Math.floor(Math.random() * numPeople);
-        console.log('[Suspect] Error loading killerIndex, generating new:', killerIndex);
-    }
-} else {
-    killerIndex = Math.floor(Math.random() * numPeople);
-    console.log('[Suspect] No saved state, generating new killerIndex:', killerIndex);
-}
-
-// Check for saved assignments before generating new ones
+// Pick killer randomly
+let killerIndex = Math.floor(Math.random() * numPeople);
 let savedAssignments = null;
-if (savedKillerState) {
-    try {
-        const savedState = JSON.parse(savedKillerState);
-        if (savedState.colorAssignments && savedState.shapeAssignments && savedState.dotAssignments) {
-            savedAssignments = {
-                killerColor: savedState.killerColor,
-                killerShape: savedState.killerShape,
-                killerDots: savedState.killerDots,
-                colorAssignments: savedState.colorAssignments,
-                shapeAssignments: savedState.shapeAssignments,
-                dotAssignments: savedState.dotAssignments
-            };
-            console.log('[Suspect] Found saved assignments, will use them');
-        }
-    } catch (e) {
-        console.log('[Suspect] Error loading saved assignments:', e);
-    }
-}
 
 // Assign killer random attributes (or use saved)
 let killerColor, killerShape, killerDots;
@@ -526,103 +486,6 @@ function getTodayKey() {
 }
 
 // Save game state to localStorage
-function saveGameState() {
-    const todayKey = getTodayKey();
-    const gameState = {
-        killerIndex: killerIndex, // Save the killer index
-        killerColor: killerColor, // Save killer attributes
-        killerShape: killerShape,
-        killerDots: killerDots,
-        colorAssignments: [...colorAssignments], // Save all person attributes
-        shapeAssignments: [...shapeAssignments],
-        dotAssignments: [...dotAssignments],
-        questionCount: questionCount,
-        questionedPeople: [...questionedPeople],
-        deadPeople: [...deadPeople],
-        roundNumber: roundNumber,
-        totalKilled: totalKilled,
-        action: action,
-        accuseMode: accuseMode,
-        currentRoundVictims: [...currentRoundVictims],
-        questionResults: questionResults.map(r => ({...r})),
-        // Save people data state
-        peopleDataState: peopleData.map(p => ({
-            questioned: p.questioned,
-            dead: p.dead
-        }))
-    };
-    
-    localStorage.setItem(`suspectState_${todayKey}`, JSON.stringify(gameState));
-    console.log('[Suspect] SAVED game state:', gameState);
-    console.log('[Suspect] SAVED killerIndex:', killerIndex);
-    console.log('[Suspect] SAVED colorAssignments:', colorAssignments);
-    console.log('[Suspect] SAVED shapeAssignments:', shapeAssignments);
-    console.log('[Suspect] SAVED dotAssignments:', dotAssignments);
-    console.log('[Suspect] SAVED deadPeople array:', deadPeople);
-    console.log('[Suspect] SAVED peopleDataState with dead flags:', gameState.peopleDataState.filter((p, i) => p.dead).map((p, i) => i));
-}
-
-// Load game state from localStorage
-function loadGameState() {
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`suspectState_${todayKey}`);
-    
-    if (!savedState) {
-        console.log('[Suspect] LOADED: No saved state found');
-        return null;
-    }
-    
-    try {
-        const gameState = JSON.parse(savedState);
-        console.log('[Suspect] LOADED game state:', gameState);
-        console.log('[Suspect] Dead people array:', gameState.deadPeople);
-        
-        // Restore game state
-        if (gameState.killerIndex !== undefined) {
-            killerIndex = gameState.killerIndex;
-            console.log('[Suspect] LOADED killerIndex:', killerIndex);
-        }
-        questionCount = gameState.questionCount || 0;
-        questionedPeople = gameState.questionedPeople || [];
-        deadPeople = gameState.deadPeople || [];
-        roundNumber = gameState.roundNumber || 1;
-        totalKilled = gameState.totalKilled || 0;
-        action = gameState.action || 'enemy turn';
-        accuseMode = gameState.accuseMode || false;
-        currentRoundVictims = gameState.currentRoundVictims || [];
-        questionResults = gameState.questionResults || [];
-        
-        // Restore people data state (questioned status and indicators)
-        // Dead state is restored separately from deadPeople array to ensure opacity is set
-        if (gameState.peopleDataState && peopleData.length === gameState.peopleDataState.length) {
-            gameState.peopleDataState.forEach((state, i) => {
-                if (peopleData[i]) {
-                    peopleData[i].questioned = state.questioned;
-                    // dead state will be restored from deadPeople array in startGame()
-                    
-                    // Restore question indicators
-                    if (state.questioned) {
-                        const commonTraits = questionResults.find(r => r.person === i)?.commonTraits || 0;
-                        const indicator = document.createElement('div');
-                        indicator.className = 'question-indicator';
-                        indicator.textContent = commonTraits.toString();
-                        if (useEmojis) {
-                            indicator.style.bottom = 'auto';
-                            indicator.style.top = '2px';
-                        }
-                        peopleData[i].element.appendChild(indicator);
-                    }
-                }
-            });
-        }
-        
-        // Return gameState with peopleDataState for use in restoration
-        return gameState;
-    } catch (error) {
-        console.error('[Suspect] Error loading game state:', error);
-        return null;
-    }
-}
 
 // Check if game is complete
 function isGameComplete() {
@@ -634,11 +497,6 @@ function isGameComplete() {
 function showCompletedScreen() {
     console.log('[Suspect] showCompletedScreen() called');
     
-    // Load game state first to get dead people and other state
-    const savedState = loadGameState();
-    if (savedState) {
-        console.log('[Suspect] Loaded state in showCompletedScreen, deadPeople:', deadPeople);
-    }
     
     const todayKey = getTodayKey();
     const starsEarned = parseInt(localStorage.getItem(`suspectStars_${todayKey}`) || '0');
@@ -899,7 +757,6 @@ function questionPerson(personIndex) {
             // Save win state
             const todayKey = getTodayKey();
             localStorage.setItem(`suspectWon_${todayKey}`, 'true');
-            saveGameState();
             
             // Format final message with star display
             const turnNumber = questionCount; // Subtract 1 from display (was questionCount + 1)
@@ -944,7 +801,6 @@ function questionPerson(personIndex) {
             // Save loss state AFTER updating deadPeople array
             const todayKey = getTodayKey();
             localStorage.setItem(`suspectWon_${todayKey}`, 'false');
-            saveGameState();
             console.log('[Suspect] Wrong answer: All people except killer marked as dead. deadPeople array:', deadPeople);
             
             // Update instruction with fail message
@@ -1035,7 +891,6 @@ function questionPerson(personIndex) {
     questionCount++;
     
     // Save game state after questioning
-    saveGameState();
     
     // Create indicator circle (position depends on visual mode)
     const indicator = document.createElement('div');
@@ -1193,7 +1048,6 @@ function killerTurn() {
                     currentRoundVictims = [];
                     action = "my turn";
                     accuseMode = false;
-                    saveGameState();
                     const totalDead = deadPeople.length;
                     if (questionCount >= maxQuestions) {
                         instructionDiv.textContent = "No more questioning. Accuse someone.";
@@ -1270,7 +1124,6 @@ function gameLoop(currentTime) {
                     currentRoundVictims = [];
                     action = "my turn";
                     accuseMode = false;
-                    saveGameState();
                     if (questionCount >= maxQuestions) {
                         instructionDiv.textContent = "No more questioning. Accuse someone.";
                     } else {
@@ -1326,7 +1179,6 @@ nextButton.addEventListener('click', () => {
         currentRoundVictims = [];
         action = "my turn";
         accuseMode = false;
-        saveGameState();
         if (questionCount >= maxQuestions) {
             instructionDiv.textContent = "No more questioning. Accuse someone.";
         } else {
@@ -1544,7 +1396,6 @@ function startGame() {
     gameContainer.style.display = 'flex';
     
     // Always try to load saved game state first (even if complete)
-    const savedState = loadGameState();
     console.log('[Suspect] startGame: savedState loaded:', !!savedState);
     if (savedState) {
         console.log('[Suspect] startGame: deadPeople array:', deadPeople);

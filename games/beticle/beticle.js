@@ -126,82 +126,6 @@ function getTargetWord() {
     return selectedWord;
 }
 
-// Save game state to localStorage
-function saveGameState() {
-    const todayKey = getTodayKey();
-    
-    const gameState = {
-        targetWord: targetWord,
-        firstWord: firstWord,
-        lastWord: lastWord,
-        guesses: guesses,
-        gameOver: gameOver
-    };
-    
-    localStorage.setItem(`beticleState_${todayKey}`, JSON.stringify(gameState));
-}
-
-// Load game state from localStorage
-function loadGameState() {
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`beticleState_${todayKey}`);
-    
-    if (!savedState) return false;
-    
-    const gameState = JSON.parse(savedState);
-    
-    // Verify the target word matches
-    if (gameState.targetWord !== targetWord) {
-        // Clear invalid saved state
-        localStorage.removeItem(`beticleState_${todayKey}`);
-        return false;
-    }
-    
-    // Restore guesses
-    guesses = gameState.guesses || [];
-    gameOver = gameState.gameOver;
-    firstWord = gameState.firstWord || 'AAAAA';
-    lastWord = gameState.lastWord || 'ZZZZZ';
-    
-    // Update boundary words if they've changed from defaults
-    if (firstWord !== 'AAAAA') {
-        updateBoundaryWord('top', firstWord);
-    }
-    if (lastWord !== 'ZZZZZ') {
-        updateBoundaryWord('bottom', lastWord);
-    }
-    
-    // If game is over (won or lost), show the target word in the guess row
-    if (gameOver) {
-        const tiles = document.querySelectorAll('[data-row="guess"]');
-        tiles.forEach((tile, index) => {
-            tile.textContent = targetWord[index];
-            tile.classList.add('filled');
-        });
-        
-        // If game was lost (max guesses reached), update hint and stars
-        const won = guesses.some(g => g === targetWord);
-        if (!won) {
-            // Game was lost - show "out of guesses" and make all stars grey
-            const hintElement = document.getElementById('proximityHint');
-            if (hintElement) {
-                hintElement.textContent = 'out of guesses';
-                hintElement.style.opacity = '1';
-            }
-            
-            // Make all stars grey
-            const stars = document.querySelectorAll('.guess-star');
-            stars.forEach(star => star.classList.add('grey'));
-        }
-    }
-    
-    // Update guess counter with loaded state
-    updateGuessDisplay_Counter();
-    
-    // No longer rebuilding guess list
-    
-    return true;
-}
 
 // Load valid words list
 async function loadWordList() {
@@ -233,22 +157,8 @@ async function init() {
     setupPlayButton();
     handleResponsiveLayout();
     
-    // Check if game is complete (won) or over (lost) by checking saved state
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`beticleState_${todayKey}`);
+    // Check if game is complete (won)
     let gameIsDone = isBeticleComplete(); // Check if won
-    if (!gameIsDone && savedState) {
-        // Check if game is over (lost) by parsing saved state
-        try {
-            const gameState = JSON.parse(savedState);
-            // Verify target word matches before checking gameOver
-            if (gameState.targetWord === targetWord && gameState.gameOver === true) {
-                gameIsDone = true;
-            }
-        } catch (e) {
-            // Ignore parse errors
-        }
-    }
     
     // If game is done (won or lost), skip start menu and go straight to game
     if (gameIsDone) {
@@ -267,28 +177,6 @@ async function init() {
             }, 100);
         }
         
-        // Load saved game state
-        const hasLoadedState = loadGameState();
-        
-        // If game is over (won or lost), fade out keyboard and show appropriate message
-        if (hasLoadedState && gameOver) {
-            const keyboard = document.querySelector('.keyboard');
-            if (keyboard) {
-                keyboard.style.transition = 'opacity 0.5s ease';
-                keyboard.style.opacity = '0';
-            }
-            // Check if game was won or lost
-            const won = guesses.some(g => g === targetWord);
-            if (won) {
-                // Show win message after a delay and mark as shown
-                setTimeout(() => {
-                    console.log("1");
-                    showWinMessage();
-                    winMessageShownOnLoad = true;
-                }, 600);
-            }
-            // If lost, the correct answer is already shown in loadGameState
-        }
     }
 }
 
@@ -318,28 +206,6 @@ function setupPlayButton() {
                 }, 100);
             }
             
-            // Load saved game state
-            const hasLoadedState = loadGameState();
-            
-            // If game is over (won or lost), fade out keyboard and show appropriate message
-            if (hasLoadedState && gameOver) {
-                const keyboard = document.querySelector('.keyboard');
-                if (keyboard) {
-                    keyboard.style.transition = 'opacity 0.5s ease';
-                    keyboard.style.opacity = '0';
-                }
-                // Check if game was won or lost
-                const won = guesses.some(g => g === targetWord);
-                if (won && isBeticleComplete()) {
-                    // Show win message after a delay to ensure rendering is complete
-                    setTimeout(() => {
-                        console.log("2");
-                        showWinMessage();
-                        winMessageShownOnLoad = true;
-                    }, 300);
-                }
-                // If lost, the correct answer is already shown in loadGameState
-            }
         });
     }
 }
@@ -551,7 +417,6 @@ function submitGuess() {
         gameOver = true;
         // Show the correct word in the guess row
         updateGuessDisplay();
-        saveGameState();
         setTimeout(() => {
             celebrateWin();
         }, 500);
@@ -577,7 +442,6 @@ function submitGuess() {
     // Check if max guesses reached
     if (guesses.length >= MAX_GUESSES) {
         gameOver = true;
-        saveGameState();
         
         // Show the correct answer in the middle row
         const guessTiles = document.querySelectorAll('[data-row="guess"]');
@@ -596,9 +460,6 @@ function submitGuess() {
         // Make all stars grey
         const stars = document.querySelectorAll('.guess-star');
         stars.forEach(star => star.classList.add('grey'));
-    } else {
-        // Save state after each guess
-        saveGameState();
     }
     
     // Note: currentGuess is cleared in animateGuessToRow

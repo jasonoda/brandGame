@@ -920,7 +920,6 @@ function animateWin() {
         
         localStorage.setItem(`shiftStars_${todayKey}`, String(stars));
         localStorage.setItem(`shiftComplete_${todayKey}`, 'true');
-        localStorage.setItem(`shiftFinalColor_${todayKey}`, targetColor);
         
         // Update parent window star display
         if (window.parent && window.parent.loadGameScores2) {
@@ -1052,7 +1051,7 @@ function startGame() {
         }
         
         // Restore completed state
-        const savedColor = localStorage.getItem(`shiftFinalColor_${todayKey}`);
+        const savedColor = null;
         const savedStars = parseInt(localStorage.getItem(`shiftStars_${todayKey}`) || '0');
         
         if (savedColor) {
@@ -1234,7 +1233,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const todayKey = getTodayKey();
                 localStorage.removeItem(`shiftStars_${todayKey}`);
                 localStorage.removeItem(`shiftComplete_${todayKey}`);
-                localStorage.removeItem(`shiftFinalColor_${todayKey}`);
                 // Reload the page to show start menu
                 location.reload();
             }

@@ -374,9 +374,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // console.log("loadGameScores called");
     
     // Initialize coin displays if function exists
-    if (window.updateCoinDisplays) {
-        window.updateCoinDisplays();
-    }
     
     // Initialize help button
     const helpButton = document.querySelector('.help-button');
@@ -1927,9 +1924,6 @@ function resetAllData() {
     localStorage.removeItem('prizeTiles');
     
     // Reset coins
-    localStorage.removeItem('goldCoins');
-    localStorage.removeItem('silverCoins');
-    localStorage.removeItem('bronzeCoins');
     
     // Reset journey progress
     localStorage.removeItem('journeyLevel');

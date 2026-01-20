@@ -30,7 +30,6 @@ function tallyGetTodayKey() {
 
 function tallyMarkStarted() {
     const todayKey = tallyGetTodayKey();
-    localStorage.setItem(`tallyStarted_${todayKey}`, 'true');
     
     // Let parent page know this session has actually started
     if (window.parent) {
@@ -43,49 +42,10 @@ function tallyMarkStarted() {
 window.addEventListener('message', (event) => {
     if (event.data === 'resetTallyLocalStorage') {
         const todayKey = tallyGetTodayKey();
-        localStorage.removeItem(`tallyStarted_${todayKey}`);
-        localStorage.removeItem(`tallyState_${todayKey}`);
         localStorage.removeItem(`tallyComplete_${todayKey}`);
     }
 });
 
-function tallyLoadState() {
-    const todayKey = tallyGetTodayKey();
-    const raw = localStorage.getItem(`tallyState_${todayKey}`);
-    if (!raw) return null;
-    try {
-        return JSON.parse(raw);
-    } catch (e) {
-        console.error('Error parsing tallyState', e);
-        return null;
-    }
-}
-
-function tallySaveState(isComplete) {
-    const todayKey = tallyGetTodayKey();
-    const state = {
-        numbers: gameState.numbers,
-        correctAnswer: gameState.correctAnswer,
-        equation: gameState.equation,
-        isComplete: !!isComplete
-    };
-    // Derive usedNumbers from equation if available
-    if (Array.isArray(gameState.equation) && gameState.equation.length === 5) {
-        const [n1, , n2, , n3] = gameState.equation;
-        state.usedNumbers = [n1, n2, n3];
-    } else if (Array.isArray(gameState.usedNumbers)) {
-        state.usedNumbers = gameState.usedNumbers;
-    }
-    localStorage.setItem(`tallyState_${todayKey}`, JSON.stringify(state));
-    if (isComplete) {
-        localStorage.setItem(`tallyComplete_${todayKey}`, 'true');
-    }
-}
-
-function tallyHasSavedPuzzle() {
-    const todayKey = tallyGetTodayKey();
-    return !!localStorage.getItem(`tallyState_${todayKey}`);
-}
 
 function tallyIsComplete() {
     const todayKey = tallyGetTodayKey();
@@ -140,7 +100,7 @@ function tallyAwardWinStars() {
     const starsEarned = 5; // Single-puzzle game: always 5 on win
     tallyAddStars(starsEarned);
     localStorage.setItem(`tallyStars_${todayKey}`, String(starsEarned));
-    tallySaveState(true);
+    localStorage.setItem(`tallyComplete_${todayKey}`, 'true');
     
     // Let main page refresh its stars row
     if (window.parent && window.parent.loadGameScores2) {
@@ -150,7 +110,7 @@ function tallyAwardWinStars() {
 
 // Initialize the game
 function initializeGame() {
-    const saved = tallyLoadState();
+    const saved = null;
     
     if (saved) {
         // Restore saved puzzle instead of generating a new one
@@ -166,7 +126,6 @@ function initializeGame() {
     } else {
         generatePuzzle();
         // Save the newly generated puzzle for today
-        tallySaveState(false);
     }
     
     setupDragAndDrop();
@@ -1364,7 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPlayButton();
     
     // If there's a saved puzzle for today, skip the start screen and go straight to the game
-    if (tallyHasSavedPuzzle()) {
+    if (false) {
         const startMenu = document.getElementById('startMenu');
         const gameContainer = document.getElementById('gameContainer');
         if (startMenu) {

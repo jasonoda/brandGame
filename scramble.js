@@ -1299,9 +1299,6 @@ document.addEventListener('keydown', (e) => {
             localStorage.removeItem('prizeTiles');
             
             // Reset coins
-            localStorage.removeItem('goldCoins');
-            localStorage.removeItem('silverCoins');
-            localStorage.removeItem('bronzeCoins');
             
             // Reset journey progress
             localStorage.removeItem('journeyLevel');

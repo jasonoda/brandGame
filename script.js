@@ -626,9 +626,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // console.log("loadGameScores called");
     
     // Initialize coin displays if function exists
-    if (window.updateCoinDisplays) {
-        window.updateCoinDisplays();
-    }
     
     // Initialize help button
     const helpButton = document.querySelector('.help-button');
@@ -2399,24 +2396,20 @@ document.addEventListener('keydown', (e) => {
         const todayKey = getTodayKey();
         
         // Phrases
-        localStorage.removeItem(`phrasesState_${todayKey}`);
         localStorage.removeItem(`phrasesStars_${todayKey}`);
         localStorage.removeItem(`phrasesComplete_${todayKey}`);
         
         // Suspect
-        localStorage.removeItem(`suspectState_${todayKey}`);
         localStorage.removeItem(`suspectStars_${todayKey}`);
         localStorage.removeItem(`suspectComplete_${todayKey}`);
         localStorage.removeItem(`suspectWon_${todayKey}`);
         
         // Cross
-        localStorage.removeItem(`crossState_${todayKey}`);
         localStorage.removeItem(`crossStars_${todayKey}`);
         localStorage.removeItem(`crossComplete_${todayKey}`);
         
         // Defuser
         localStorage.removeItem(`defuserStars_${todayKey}`);
-        localStorage.removeItem(`defuserStarted_${todayKey}`);
         if (window.defuserIframe) {
             try {
                 const iframe = document.getElementById('defuserIframe');
@@ -2430,8 +2423,6 @@ document.addEventListener('keydown', (e) => {
         
         // Tally
         localStorage.removeItem(`tallyStars_${todayKey}`);
-        localStorage.removeItem(`tallyStarted_${todayKey}`);
-        localStorage.removeItem(`tallyState_${todayKey}`);
         localStorage.removeItem(`tallyComplete_${todayKey}`);
         try {
             const tallyIframe = document.getElementById('tallyIframe');
@@ -2725,15 +2716,12 @@ if (gameQuitButton && gameIncompleteModal) {
             // Reset per-game localStorage for DEFUSER and TALLY on quit
             const todayKey = getTodayKey();
             if (pendingCloseGameId === 'defuser') {
-                localStorage.removeItem(`defuserStarted_${todayKey}`);
                 // Ask defuser iframe to clear any of its own localStorage keys
                 const defuserIframe = document.getElementById('defuserIframe');
                 if (defuserIframe && defuserIframe.contentWindow) {
                     defuserIframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
                 }
             } else if (pendingCloseGameId === 'tally') {
-                localStorage.removeItem(`tallyStarted_${todayKey}`);
-                localStorage.removeItem(`tallyState_${todayKey}`);
                 localStorage.removeItem(`tallyComplete_${todayKey}`);
                 // Ask tally iframe to clear any of its own localStorage keys
                 const tallyIframe = document.getElementById('tallyIframe');
@@ -3583,11 +3571,9 @@ function resetAllData() {
     
     // Reset mystery word completion and state
     localStorage.removeItem(`mysteryWordComplete_${todayKey}`);
-    localStorage.removeItem(`mysteryWordState_${todayKey}`);
     
     // Reset beticle completion and state
     localStorage.removeItem(`beticleComplete_${todayKey}`);
-    localStorage.removeItem(`beticleState_${todayKey}`);
     
     // Reset memory game completion and data
     localStorage.removeItem(`memoryComplete_${todayKey}`);
@@ -3603,20 +3589,14 @@ function resetAllData() {
     // Reset zoom game completion and data
     localStorage.removeItem(`zoomComplete_${todayKey}`);
     localStorage.removeItem(`zoomStars_${todayKey}`);
-    localStorage.removeItem(`zoomMoves_${todayKey}`);
     
     // Reset shift game completion and data
     localStorage.removeItem(`shiftComplete_${todayKey}`);
     localStorage.removeItem(`shiftStars_${todayKey}`);
-    localStorage.removeItem(`shiftFinalColor_${todayKey}`);
     
     // Reset quiz game completion and data
     localStorage.removeItem(`quizComplete_${todayKey}`);
     localStorage.removeItem(`quizStars_${todayKey}`);
-    localStorage.removeItem(`quizSet_${todayKey}`);
-    localStorage.removeItem(`quizQuestionIndex_${todayKey}`);
-    localStorage.removeItem(`quizCorrectCount_${todayKey}`);
-    localStorage.removeItem(`quizLastAnswer_${todayKey}`);
     
     // Reset daily stars to zero
     localStorage.setItem(`dailyStars_${todayKey}`, '0');
@@ -3637,10 +3617,6 @@ function resetAllData() {
     // Reset prize tiles
     localStorage.removeItem('prizeTiles');
     
-    // Reset coins
-    localStorage.removeItem('goldCoins');
-    localStorage.removeItem('silverCoins');
-    localStorage.removeItem('bronzeCoins');
     
     // Reset journey progress
     localStorage.removeItem('journeyLevel');

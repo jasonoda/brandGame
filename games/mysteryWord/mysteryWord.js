@@ -110,75 +110,6 @@ function getTargetWord() {
     return selectedWord;
 }
 
-// Save game state to localStorage
-function saveGameState() {
-    const todayKey = getTodayKey();
-    const guesses = [];
-    
-    // Collect all guesses from the grid
-    // Include currentRow in the loop to capture the last guess if game is over
-    const rowsToSave = gameOver ? currentRow + 1 : currentRow;
-    for (let row = 0; row < rowsToSave; row++) {
-        let guess = '';
-        for (let col = 0; col < WORD_LENGTH; col++) {
-            const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            guess += tile.textContent;
-        }
-        guesses.push(guess);
-    }
-    
-    const gameState = {
-        targetWord: targetWord,
-        guesses: guesses,
-        currentRow: currentRow,
-        gameOver: gameOver
-    };
-    
-    localStorage.setItem(`mysteryWordState_${todayKey}`, JSON.stringify(gameState));
-}
-
-// Load game state from localStorage
-function loadGameState() {
-    const todayKey = getTodayKey();
-    const savedState = localStorage.getItem(`mysteryWordState_${todayKey}`);
-    
-    if (!savedState) return false;
-    
-    const gameState = JSON.parse(savedState);
-    
-    // Verify the target word matches
-    if (gameState.targetWord !== targetWord) {
-        // Clear invalid saved state
-        localStorage.removeItem(`mysteryWordState_${todayKey}`);
-        return false;
-    }
-    
-    // Reset letter statuses before loading
-    letterStatuses = {};
-    
-    // Restore guesses
-    gameState.guesses.forEach((guess, rowIndex) => {
-        // Fill in the letters
-        for (let col = 0; col < WORD_LENGTH; col++) {
-            const tile = document.querySelector(`[data-row="${rowIndex}"][data-col="${col}"]`);
-            tile.textContent = guess[col];
-            tile.classList.add('filled');
-        }
-        
-        // Check and color the guess without animation
-        checkGuess(guess, rowIndex, true);
-    });
-    
-    // Restore game state
-    currentRow = gameState.currentRow;
-    currentTile = 0;
-    gameOver = gameState.gameOver;
-    
-    // Update guess counter after loading state
-    updateGuessCounter();
-    
-    return true;
-}
 
 // Load valid words list
 async function loadWordList() {
@@ -223,12 +154,8 @@ async function init() {
     updateGuessCounter();
     handleResponsiveLayout();
     
-    // Load saved game state to check if game is over (won or lost)
-    const hasLoadedState = loadGameState();
-    const gameIsOver = hasLoadedState && gameOver;
-    
-    // If game is already complete (won) or over (lost), skip start menu and go straight to game
-    if (isMysteryWordComplete() || gameIsOver) {
+    // If game is already complete (won), skip start menu and go straight to game
+    if (isMysteryWordComplete()) {
         const startMenu = document.getElementById('startMenu');
         const gameContainer = document.getElementById('gameContainer');
         
@@ -258,8 +185,8 @@ async function init() {
             }, 100);
         }
         
-        // If game is over (won or lost), hide keyboard and guess counter completely
-        if (gameIsOver) {
+        // If game is complete (won), hide keyboard and guess counter completely
+        if (isMysteryWordComplete()) {
             const keyboard = document.querySelector('.keyboard');
             const guessCounter = document.getElementById('guessCounter');
             if (keyboard) {
@@ -272,15 +199,9 @@ async function init() {
                 // Hide it completely
                 guessCounter.style.display = 'none';
             }
-            // Show appropriate message after a delay
+            // Show win message after a delay
             setTimeout(() => {
-                if (isMysteryWordComplete()) {
-                    // Game was won
-                    showWinMessage();
-                } else {
-                    // Game was lost
-                    showGameOver();
-                }
+                showWinMessage();
                 winMessageShownOnLoad = true;
             }, 600);
         }
@@ -507,7 +428,6 @@ function submitGuess() {
     // Check if game is won or lost BEFORE moving to next row
     if (guess === targetWord) {
         gameOver = true;
-        saveGameState();
         setTimeout(() => {
             celebrateWin();
         }, WORD_LENGTH * 400 + 300); // Wait for all flips to complete
@@ -516,16 +436,12 @@ function submitGuess() {
     } else if (currentRow === MAX_GUESSES - 1) {
         // This was the last guess (5th guess at row index 4)
         gameOver = true;
-        saveGameState();
         setTimeout(() => {
             showGameOver();
         }, WORD_LENGTH * 400 + 300); // Wait for all flips to complete
         // Don't increment row or update counter - game is over
         return;
     }
-    
-    // Save state after each guess (only if game is not over)
-    saveGameState();
     
     // Move to next row
     currentRow++;
@@ -669,20 +585,10 @@ function handleResponsiveLayout() {
     const keyboard = document.querySelector('.keyboard');
     const windowHeight = window.innerHeight;
     
-    // Check if game is done (won or lost)
+    // Check if game is done (won)
     const todayKey = getTodayKey();
     const isComplete = localStorage.getItem(`mysteryWordComplete_${todayKey}`) === 'true';
-    const savedState = localStorage.getItem(`mysteryWordState_${todayKey}`);
-    let gameIsOver = false;
-    if (savedState) {
-        try {
-            const state = JSON.parse(savedState);
-            gameIsOver = state.gameOver === true;
-        } catch (e) {
-            // Ignore parse errors
-        }
-    }
-    const gameDone = isComplete || gameIsOver;
+    const gameDone = isComplete;
     
     if (windowHeight < 750) {
         // Hide guess counter
