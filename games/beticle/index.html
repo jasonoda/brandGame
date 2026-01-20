@@ -7,10 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@600;700&family=Aleo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="beticle.css">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 </head>
-<body>
+<body data-game="beticle">
     <!-- Start Menu -->
     <div id="startMenu">
         <div id="startMenuContainer">
@@ -25,7 +26,7 @@
                 <div class="instructionDivider"></div>
                 <div class="instructionLine">Guess more to narrow down the answer.</div>
             </div>
-            <div id="playButton">PLAY</div>
+            <div id="playButton" data-game="beticle">PLAY</div>
         </div>
     </div>
 

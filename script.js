@@ -2720,7 +2720,7 @@ if (gameQuitButton && gameIncompleteModal) {
                 const defuserIframe = document.getElementById('defuserIframe');
                 if (defuserIframe && defuserIframe.contentWindow) {
                     defuserIframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
-                }
+        }
             } else if (pendingCloseGameId === 'tally') {
                 localStorage.removeItem(`tallyComplete_${todayKey}`);
                 // Ask tally iframe to clear any of its own localStorage keys

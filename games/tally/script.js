@@ -124,7 +124,7 @@ function initializeGame() {
             gameState.usedNumbers = [n1, n2, n3];
         }
     } else {
-        generatePuzzle();
+    generatePuzzle();
         // Save the newly generated puzzle for today
     }
     

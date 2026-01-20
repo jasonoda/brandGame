@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Game 10</title>
+    <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +23,7 @@
         }
     </style>
 </head>
-<body>
+<body data-game="defuser">
     <!-- Flash overlay for game over/win -->
     <div id="flashOverlay" class="flash-overlay" style="display: none;"></div>
     <!-- Pause overlay -->
@@ -39,7 +40,7 @@
                 <div class="instructionDivider"></div>
                 <div class="instructionLine">Play the tutorial to learn the rules.</div>
             </div>
-            <div id="playButton">PLAY</div>
+            <div id="playButton" data-game="defuser">PLAY</div>
         </div>
     </div>
 

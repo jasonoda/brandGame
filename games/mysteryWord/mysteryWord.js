@@ -201,7 +201,7 @@ async function init() {
             }
             // Show win message after a delay
             setTimeout(() => {
-                showWinMessage();
+                    showWinMessage();
                 winMessageShownOnLoad = true;
             }, 600);
         }

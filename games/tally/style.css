@@ -25,84 +25,21 @@ body {
     height: 100%;
 }
 
-/* Start Menu Styles */
-#startMenu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 8000;
-    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
-}
-
-#startMenuContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    transition: opacity 0.5s ease-out;
-}
-
-#tallyTitle {
-    font-size: 32px;
-    font-weight: 400;
-    color: #000;
-    font-family: 'Aleo', serif;
-    letter-spacing: 0.5px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-#instructionsStartDiv {
-    background: white;
-    padding: 30px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-bottom: 12px;
-    max-width: 450px;
-    margin-left: 20px;
-    margin-right: 20px;
-}
-
-#instructionsStartDiv .instructionLine {
-    color: #666;
-    font-weight: 500;
-    font-family: 'Aleo', serif;
-}
-
-.instructionLine {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    text-transform: lowercase;
-    font-family: 'Aleo', serif;
-    text-align: center;
-}
-
-.instructionDivider {
-    height: 1px;
-    background: rgba(0, 0, 0, 0.15);
-    margin: 8px 0;
-    width: 100%;
-}
+/* Start Menu Styles - Now in main styles.css */
 
 .example-equation {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 3px;
     margin: 15px 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .example-box {
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -113,56 +50,30 @@ body {
 .example-number {
     background: linear-gradient(to bottom, #4dcfa8, #3eb994);
     color: #ffffff;
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .example-operator {
     background: #1cbec4;
     color: #ffffff;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .example-equals {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: #333;
-    margin: 0 4px;
+    margin: 0 2px;
 }
 
 .example-answer {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: #333;
-    margin: 0 4px;
+    margin: 0 2px;
 }
 
-#playButton {
-    height: 50px;
-    font-size: 18px;
-    font-weight: 700;
-    font-family: 'Nunito', sans-serif;
-    letter-spacing: 2px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-    text-align: center;
-    width: 200px;
-    background: #FF69B4;
-    color: white;
-    box-shadow: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    margin-top: 10px;
-}
-
-#playButton:hover {
-    transform: translateY(-1px);
-    box-shadow: none;
-}
+/* Play Button Styles - Now in main styles.css */
 
 .container {
     display: flex;

@@ -3569,3 +3569,211 @@ body[style*="background-color: #000000"] .cost-text {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
+/* ============================================================================
+   UNIFIED START MENU STYLES - Used by all 14 puzzle games
+   ============================================================================ */
+
+/* Start Menu Container */
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 8000;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+}
+
+#startMenuContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: opacity 0.5s ease-out;
+    width: 100%;
+    max-width: 500px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+/* Game Title - All games use same styling */
+#beticleTitle,
+#mysteryWordTitle,
+#crossTitle,
+#phrasesTitle,
+#tallyTitle,
+#defuserTitle,
+#suspectTitle,
+#zoomTitle,
+#shiftTitle,
+#goldCaseTitle,
+#blackjackTitle,
+#lostAndFoundTitle,
+#memoryTitle {
+    font-size: 32px;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Aleo', serif;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-align: center;
+    width: auto;
+    white-space: nowrap;
+}
+
+/* Instructions Container - Consistent width */
+#instructionsStartDiv {
+    background: white;
+    padding: 30px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    width: auto;
+    min-width: 240px;
+    max-width: 450px;
+    margin-left: 20px;
+    margin-right: 20px;
+    box-sizing: border-box;
+}
+
+#instructionsStartDiv .instructionLine {
+    color: #666;
+    font-weight: 500;
+    font-family: 'Aleo', serif;
+    font-size: 14px;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+    text-align: center;
+}
+
+.instructionLine {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+    font-family: 'Aleo', serif;
+    text-align: center;
+}
+
+.instructionDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.15);
+    margin: 8px 0;
+    width: 100%;
+}
+
+/* Play Button - Base Styles */
+#playButton {
+    height: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-align: center;
+    width: 200px;
+    color: white;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    padding: 0;
+}
+
+#playButton:hover {
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+#playButton:active {
+    transform: translateY(0);
+}
+
+/* Play Button Colors - Use data attribute or class for each game */
+/* Beticle - Purple */
+#playButton[data-game="beticle"],
+body[data-game="beticle"] #playButton {
+    background: #B47FE0;
+}
+
+/* Mystery Word - Cyan */
+#playButton[data-game="mysteryWord"],
+body[data-game="mysteryWord"] #playButton {
+    background: #00CED1;
+}
+
+/* Cross - Blue */
+#playButton[data-game="cross"],
+body[data-game="cross"] #playButton {
+    background: #2196f3;
+}
+
+/* Phrases - Teal/Green */
+#playButton[data-game="phrases"],
+body[data-game="phrases"] #playButton {
+    background: #4dd0a8;
+}
+
+/* Tally - Pink */
+#playButton[data-game="tally"],
+body[data-game="tally"] #playButton {
+    background: #FF69B4;
+}
+
+/* Defuser - Grey Gradient */
+#playButton[data-game="defuser"],
+body[data-game="defuser"] #playButton {
+    background: linear-gradient(to bottom, #808080, #404040);
+}
+
+/* Suspect - Red/Pink */
+#playButton[data-game="suspect"],
+body[data-game="suspect"] #playButton {
+    background: #e84066;
+}
+
+/* Zoom - Orange Gradient */
+#playButton[data-game="zoom"],
+body[data-game="zoom"] #playButton {
+    background: linear-gradient(to bottom, #FF8C42, #FF6B35);
+}
+
+/* Shift - Blue */
+#playButton[data-game="shift"],
+body[data-game="shift"] #playButton {
+    background: #6B8FE8;
+}
+
+/* Gold Case - Yellow/Orange Gradient */
+#playButton[data-game="goldCase"],
+body[data-game="goldCase"] #playButton {
+    background: linear-gradient(to bottom, #ffe259, #ffa751);
+}
+
+/* Blackjack - Green */
+#playButton[data-game="blackjack"],
+body[data-game="blackjack"] #playButton {
+    background: #44bb63;
+}
+
+/* Lost and Found - Orange */
+#playButton[data-game="lostAndFound"],
+body[data-game="lostAndFound"] #playButton {
+    background: #FFA751;
+}
+
+/* Memory - Teal/Green (same as Phrases) */
+#playButton[data-game="memory"],
+body[data-game="memory"] #playButton {
+    background: #4dd0a8;
+}
+
