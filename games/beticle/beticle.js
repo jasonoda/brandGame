@@ -56,7 +56,7 @@ function addStars(count) {
             localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
             // Also add usable stars manually
             const todayKey = getTodayKey();
-            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
             localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
         }
     }
@@ -103,24 +103,21 @@ const commonWords = [
     'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 
 ];
 
-// Get today's target word - uses same word as Mystery Word
+// Get today's target word - deterministic based on date
 function getTargetWord() {
     const todayKey = getTodayKey();
-    // Use a separate localStorage key from Mystery Word so they have different words
-    const storedWord = localStorage.getItem(`beticleTarget_${todayKey}`);
+    // Use date as seed for deterministic word selection (same word each day)
+    const dateSeed = todayKey.split('-').join('');
+    const seed = parseInt(dateSeed) || 0;
     
-    // If we already have a word for today, use it
-    if (storedWord) {
-        console.log('Beticle using stored target word:', storedWord);
-        return storedWord;
-    }
+    // Use seeded random to pick a word (deterministic per day)
+    const seededRandom = (seed) => {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    };
     
-    // Otherwise, pick a random word from common words
-    const randomIndex = Math.floor(Math.random() * commonWords.length);
+    const randomIndex = Math.floor(seededRandom(seed) * commonWords.length);
     const selectedWord = commonWords[randomIndex];
-    
-    // Store it for today (using separate key from Mystery Word)
-    localStorage.setItem(`beticleTarget_${todayKey}`, selectedWord);
     
     console.log('Beticle answer:', selectedWord);
     return selectedWord;

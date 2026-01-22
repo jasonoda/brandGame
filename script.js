@@ -193,6 +193,87 @@ const puzzleSessionStarted = {
     goldCase: false
 };
 
+// Game configuration mapping
+const gameConfig = {
+    'memory': { path: 'games/memory/index.html', specialAttrs: {} },
+    'mysteryWord': { path: 'games/mysteryWord/index.html', specialAttrs: {} },
+    'beticle': { path: 'games/beticle/index.html', specialAttrs: {} },
+    'blackjack': { path: 'games/blackjack/index.html', specialAttrs: {} },
+    'lostAndFound': { path: 'games/lostAndFound/index.html', specialAttrs: { allow: 'touch', sandbox: 'allow-scripts allow-same-origin allow-pointer-lock', style: 'touch-action: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%; border: none;' } },
+    'goldCase': { path: 'games/goldCase/index.html', specialAttrs: {} },
+    'zoom': { path: 'games/zoom/index.html', specialAttrs: {} },
+    'shift': { path: 'games/shift/index.html', specialAttrs: {} },
+    'phrases': { path: 'games/phrases/index.html', specialAttrs: {} },
+    'cross': { path: 'games/cross/index.html', specialAttrs: {} },
+    'suspect': { path: 'games/suspect/index.html', specialAttrs: {} },
+    'defuser': { path: 'games/defuser/index.html', specialAttrs: { style: 'width: 100%; height: 100%; border: none;' } },
+    'tally': { path: 'games/tally/index.html', specialAttrs: {} },
+    'match3': { path: 'games/match3/index.html', specialAttrs: {} },
+    'bonusSpin': { path: 'games/bonusSpin/index.html', specialAttrs: {} }
+};
+
+// Track current active game
+let currentGameId = null;
+
+// Unified function to open a game
+function openGame(gameId) {
+    const config = gameConfig[gameId];
+    if (!config) {
+        console.error(`Unknown game ID: ${gameId}`);
+        return;
+    }
+    
+    const overlay = document.getElementById('gameOverlay');
+    const iframe = document.getElementById('gameIframe');
+    
+    if (!overlay || !iframe) {
+        console.error('Game overlay or iframe not found');
+        return;
+    }
+    
+    // Reset session started flag for puzzle games
+    if (puzzleSessionStarted.hasOwnProperty(gameId)) {
+        puzzleSessionStarted[gameId] = false;
+    }
+    
+    // Set current game ID
+    currentGameId = gameId;
+    
+    // Apply special attributes if needed
+    if (config.specialAttrs) {
+        Object.keys(config.specialAttrs).forEach(attr => {
+            if (attr === 'style') {
+                iframe.setAttribute('style', config.specialAttrs[attr]);
+            } else {
+                iframe.setAttribute(attr, config.specialAttrs[attr]);
+            }
+        });
+    } else {
+        // Reset to default attributes
+        iframe.removeAttribute('allow');
+        iframe.removeAttribute('sandbox');
+        iframe.setAttribute('style', 'width: 100%; height: 100%; border: none;');
+    }
+    
+    // Build URL with scheme parameter if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const scheme = urlParams.get('s');
+    const gameUrl = scheme ? `${config.path}?s=${scheme}` : config.path;
+    
+    // Load the game
+    iframe.src = gameUrl;
+    console.log(`Loading game ${gameId}: ${gameUrl}`);
+    
+    // Show overlay
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Show close button
+    const closeButton = document.querySelector('.game-overlay-close');
+    if (closeButton) closeButton.classList.add('show');
+    updateLogoVisibility();
+}
+
 // Listen for messages from iframes when games actually start
 window.addEventListener('message', (event) => {
     if (typeof event.data === 'string') {
@@ -697,7 +778,7 @@ buttons.forEach(button => {
             // Log current move stars
             const today = new Date();
             const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            const moveStars = localStorage.getItem(`moveStars_${todayKey}`);
+            const moveStars = localStorage.getItem(`usableStars_${todayKey}`);
             console.log('[Journey Tab] Current move stars:', moveStars);
             
             // Hide help button on journey page
@@ -2539,28 +2620,9 @@ document.addEventListener('keydown', (e) => {
 
 // Memory game overlay
 const memoryBox = document.getElementById('memoryBox');
-const memoryOverlay = document.getElementById('memoryOverlay');
-
 if (memoryBox) {
     memoryBox.addEventListener('click', () => {
-        if (memoryOverlay) {
-            memoryOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-            
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('memoryIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/memory/index.html?s=${scheme}` : 'games/memory/index.html';
-                console.log(`Reloading memory game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('memory');
     });
 }
 
@@ -2570,18 +2632,21 @@ let pendingCloseGameId = null;
 let pendingCloseOverlayElement = null;
 let pendingCloseIframeElement = null;
 
-function actuallyCloseOverlay(activeOverlay, overlayElement, iframeToUnload) {
+function actuallyCloseOverlay(gameId, overlayElement, iframeToUnload) {
     if (overlayElement) {
         overlayElement.classList.remove('active');
     }
     if (iframeToUnload) {
-        console.log(`Unloading ${activeOverlay} game iframe by setting src to 'about:blank'`);
+        console.log(`Unloading ${gameId} game iframe by setting src to 'about:blank'`);
         iframeToUnload.src = 'about:blank';
     }
     
+    // Clear current game ID
+    currentGameId = null;
+    
     // Update bonus spin display when closing other games (to check if unlock status changed)
     // But NOT when closing the bonus spin game itself
-    if (activeOverlay !== 'goldCase') {
+    if (gameId !== 'goldCase') {
         setTimeout(() => {
             updateBonusSpinDisplay();
         }, 200);
@@ -2597,105 +2662,29 @@ function actuallyCloseOverlay(activeOverlay, overlayElement, iframeToUnload) {
 const closeButton = document.querySelector('.game-overlay-close');
 if (closeButton) {
     closeButton.addEventListener('click', () => {
+        if (!currentGameId) return;
         
         // Hide close button
         closeButton.classList.remove('show');
         updateLogoVisibility();
         
-        // Find which overlay is currently active
-        const memoryOverlay = document.getElementById('memoryOverlay');
-        const mysteryWordOverlay = document.getElementById('mysteryWordOverlay');
-        const beticleOverlay = document.getElementById('beticleOverlay');
-        const blackjackOverlay = document.getElementById('blackjackOverlay');
-        const lostAndFoundOverlay = document.getElementById('lostAndFoundOverlay');
-        const goldCaseOverlay = document.getElementById('goldCaseOverlay');
-        const zoomOverlay = document.getElementById('zoomOverlay');
-        const shiftOverlay = document.getElementById('shiftOverlay');
-        const phrasesOverlay = document.getElementById('phrasesOverlay');
-        const crossOverlay = document.getElementById('crossOverlay');
-        const suspectOverlay = document.getElementById('suspectOverlay');
-        const match3Overlay = document.getElementById('match3Overlay');
-        const defuserOverlay = document.getElementById('defuserOverlay');
-        const tallyOverlay = document.getElementById('tallyOverlay');
-        
-        // Determine which overlay is active
-        let activeOverlay = null;
-        let overlayElement = null;
-        let iframeToUnload = null;
-        if (memoryOverlay && memoryOverlay.classList.contains('active')) {
-            activeOverlay = 'memory';
-            overlayElement = memoryOverlay;
-            iframeToUnload = document.getElementById('memoryIframe');
-        } else if (mysteryWordOverlay && mysteryWordOverlay.classList.contains('active')) {
-            activeOverlay = 'mysteryWord';
-            overlayElement = mysteryWordOverlay;
-            iframeToUnload = document.getElementById('mysteryWordIframe');
-        } else if (beticleOverlay && beticleOverlay.classList.contains('active')) {
-            activeOverlay = 'beticle';
-            overlayElement = beticleOverlay;
-            iframeToUnload = document.getElementById('beticleIframe');
-        } else if (blackjackOverlay && blackjackOverlay.classList.contains('active')) {
-            activeOverlay = 'blackjack';
-            overlayElement = blackjackOverlay;
-            iframeToUnload = document.getElementById('blackjackIframe');
-        } else if (lostAndFoundOverlay && lostAndFoundOverlay.classList.contains('active')) {
-            activeOverlay = 'lostAndFound';
-            overlayElement = lostAndFoundOverlay;
-            iframeToUnload = document.getElementById('lostAndFoundIframe');
-        } else if (goldCaseOverlay && goldCaseOverlay.classList.contains('active')) {
-            activeOverlay = 'goldCase';
-            overlayElement = goldCaseOverlay;
-            iframeToUnload = document.getElementById('goldCaseIframe');
-        } else if (zoomOverlay && zoomOverlay.classList.contains('active')) {
-            activeOverlay = 'zoom';
-            overlayElement = zoomOverlay;
-            iframeToUnload = document.getElementById('zoomIframe');
-        } else if (shiftOverlay && shiftOverlay.classList.contains('active')) {
-            activeOverlay = 'shift';
-            overlayElement = shiftOverlay;
-            iframeToUnload = document.getElementById('shiftIframe');
-        } else if (phrasesOverlay && phrasesOverlay.classList.contains('active')) {
-            activeOverlay = 'phrases';
-            overlayElement = phrasesOverlay;
-            iframeToUnload = document.getElementById('phrasesIframe');
-        } else if (crossOverlay && crossOverlay.classList.contains('active')) {
-            activeOverlay = 'cross';
-            overlayElement = crossOverlay;
-            iframeToUnload = document.getElementById('crossIframe');
-        } else if (suspectOverlay && suspectOverlay.classList.contains('active')) {
-            activeOverlay = 'suspect';
-            overlayElement = suspectOverlay;
-            iframeToUnload = document.getElementById('suspectIframe');
-        } else if (match3Overlay && match3Overlay.classList.contains('active')) {
-            activeOverlay = 'match3';
-            overlayElement = match3Overlay;
-            iframeToUnload = document.getElementById('match3Iframe');
-        } else if (defuserOverlay && defuserOverlay.classList.contains('active')) {
-            activeOverlay = 'defuser';
-            overlayElement = defuserOverlay;
-            iframeToUnload = document.getElementById('defuserIframe');
-        } else if (tallyOverlay && tallyOverlay.classList.contains('active')) {
-            activeOverlay = 'tally';
-            overlayElement = tallyOverlay;
-            iframeToUnload = document.getElementById('tallyIframe');
-        }
+        const overlay = document.getElementById('gameOverlay');
+        const iframe = document.getElementById('gameIframe');
         
         // For puzzle games that are not yet completed, show the "Game not complete" modal
         const modal = document.getElementById('gameIncompleteModal');
-        const isPuzzle = activeOverlay && !!getPuzzleStarsKey(activeOverlay);
-        const hasStarted = isPuzzle && isPuzzleSessionStarted(activeOverlay);
-        if (modal && isPuzzle && hasStarted && !isPuzzleGameCompleted(activeOverlay)) {
-            pendingCloseGameId = activeOverlay;
-            pendingCloseOverlayElement = overlayElement;
-            pendingCloseIframeElement = iframeToUnload;
+        const isPuzzle = !!getPuzzleStarsKey(currentGameId);
+        const hasStarted = isPuzzle && isPuzzleSessionStarted(currentGameId);
+        if (modal && isPuzzle && hasStarted && !isPuzzleGameCompleted(currentGameId)) {
+            pendingCloseGameId = currentGameId;
+            pendingCloseOverlayElement = overlay;
+            pendingCloseIframeElement = iframe;
             modal.style.display = 'flex';
             return;
         }
         
         // Non-puzzle games or already-completed puzzles: close immediately
-        if (activeOverlay) {
-            actuallyCloseOverlay(activeOverlay, overlayElement, iframeToUnload);
-        }
+        actuallyCloseOverlay(currentGameId, overlay, iframe);
     });
 }
 
@@ -2715,18 +2704,17 @@ if (gameQuitButton && gameIncompleteModal) {
             
             // Reset per-game localStorage for DEFUSER and TALLY on quit
             const todayKey = getTodayKey();
+            const iframe = document.getElementById('gameIframe');
             if (pendingCloseGameId === 'defuser') {
                 // Ask defuser iframe to clear any of its own localStorage keys
-                const defuserIframe = document.getElementById('defuserIframe');
-                if (defuserIframe && defuserIframe.contentWindow) {
-                    defuserIframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
-        }
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
+                }
             } else if (pendingCloseGameId === 'tally') {
                 localStorage.removeItem(`tallyComplete_${todayKey}`);
                 // Ask tally iframe to clear any of its own localStorage keys
-                const tallyIframe = document.getElementById('tallyIframe');
-                if (tallyIframe && tallyIframe.contentWindow) {
-                    tallyIframe.contentWindow.postMessage('resetTallyLocalStorage', '*');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage('resetTallyLocalStorage', '*');
                 }
             }
             
@@ -2755,34 +2743,37 @@ if (gameKeepPlayingButton && gameIncompleteModal) {
     });
 }
 
-// Close overlay when clicking outside
-if (memoryOverlay) {
-    memoryOverlay.addEventListener('click', (e) => {
-        if (e.target === memoryOverlay) {
-            memoryOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+// Unified click-outside handler for game overlay
+const gameOverlay = document.getElementById('gameOverlay');
+if (gameOverlay) {
+    gameOverlay.addEventListener('click', (e) => {
+        if (e.target === gameOverlay && currentGameId) {
+            const overlay = document.getElementById('gameOverlay');
+            const iframe = document.getElementById('gameIframe');
             
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('memoryIframe');
-            if (iframe) {
-                console.log("Unloading memory game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
+            // For puzzle games that are not yet completed, show the "Game not complete" modal
+            const modal = document.getElementById('gameIncompleteModal');
+            const isPuzzle = !!getPuzzleStarsKey(currentGameId);
+            const hasStarted = isPuzzle && isPuzzleSessionStarted(currentGameId);
+            if (modal && isPuzzle && hasStarted && !isPuzzleGameCompleted(currentGameId)) {
+                pendingCloseGameId = currentGameId;
+                pendingCloseOverlayElement = overlay;
+                pendingCloseIframeElement = iframe;
+                modal.style.display = 'flex';
+                return;
             }
+            
+            // Non-puzzle games or already-completed puzzles: close immediately
+            actuallyCloseOverlay(currentGameId, overlay, iframe);
         }
     });
 }
 
 // Mystery Word game overlay
 const mysteryWordBox = document.getElementById('mysteryWordBox');
-const mysteryWordOverlay = document.getElementById('mysteryWordOverlay');
 
 // Beticle game overlay
 const beticleBox = document.getElementById('beticleBox');
-const beticleOverlay = document.getElementById('beticleOverlay');
 
 if (mysteryWordBox) {
     mysteryWordBox.addEventListener('click', () => {
@@ -2791,60 +2782,19 @@ if (mysteryWordBox) {
             showCompletedBadge(mysteryWordBox);
             return;
         }
-        
-        if (mysteryWordOverlay) {
-            console.log('SHOWING mystery word game');
-            mysteryWordOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-            
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const mysteryIframe = document.getElementById('mysteryWordIframe');
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            if (mysteryIframe) {
-                mysteryIframe.src = scheme ? `games/mysteryWord/index.html?s=${scheme}` : 'games/mysteryWord/index.html';
-                console.log(`Reloading mysteryWord game iframe: ${mysteryIframe.src}`);
+        openGame('mysteryWord');
+        // Tell iframe it's now visible - call positioning win message
+        setTimeout(() => {
+            const iframe = document.getElementById('gameIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage('mysteryWordShown', '*');
             }
-            
-            // Tell iframe it's now visible - call positioning win message
-            setTimeout(() => {
-                if (mysteryIframe && mysteryIframe.contentWindow) {
-                    // console.log('Sending mysteryWordShown message to iframe');
-                    mysteryIframe.contentWindow.postMessage('mysteryWordShown', '*');
-                }
-            }, 100);
-        }
+        }, 100);
     });
 }
 
 // This code was moved up to closeButton handler
 
-// Close mystery word overlay when clicking outside
-if (mysteryWordOverlay) {
-    mysteryWordOverlay.addEventListener('click', (e) => {
-        if (e.target === mysteryWordOverlay) {
-            console.log('HIDING mystery word game (click outside)');
-            mysteryWordOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('mysteryWordIframe');
-            if (iframe) {
-                console.log("Unloading mysteryWord game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
-            }
-        }
-    });
-}
 
 if (beticleBox) {
     beticleBox.addEventListener('click', () => {
@@ -2853,141 +2803,38 @@ if (beticleBox) {
             showCompletedBadge(beticleBox);
             return;
         }
-        
-        if (beticleOverlay) {
-            console.log('SHOWING beticle game');
-            beticleOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-            
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const beticleIframe = document.getElementById('beticleIframe');
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            if (beticleIframe) {
-                beticleIframe.src = scheme ? `games/beticle/index.html?s=${scheme}` : 'games/beticle/index.html';
-                console.log(`Reloading beticle game iframe: ${beticleIframe.src}`);
+        openGame('beticle');
+        // Tell iframe it's now visible
+        setTimeout(() => {
+            const iframe = document.getElementById('gameIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage('beticleShown', '*');
             }
-            
-            // Tell iframe it's now visible
-            setTimeout(() => {
-                if (beticleIframe && beticleIframe.contentWindow) {
-                    console.log('Sending beticleShown message to iframe');
-                    beticleIframe.contentWindow.postMessage('beticleShown', '*');
-                }
-            }, 100);
-        }
+        }, 100);
     });
 }
 
-// Close beticle overlay when clicking outside
-if (beticleOverlay) {
-    beticleOverlay.addEventListener('click', (e) => {
-        if (e.target === beticleOverlay) {
-            console.log('HIDING beticle game (click outside)');
-            beticleOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('beticleIframe');
-            if (iframe) {
-                console.log("Unloading beticle game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
-            }
-        }
-    });
-}
 
 // Blackjack (Speed 21) game overlay
 const speed21Box = document.getElementById('speed21Box');
-const blackjackOverlay = document.getElementById('blackjackOverlay');
-
 if (speed21Box) {
     speed21Box.addEventListener('click', () => {
-        if (blackjackOverlay) {
-            blackjackOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-            
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('blackjackIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/blackjack/index.html?s=${scheme}` : 'games/blackjack/index.html';
-                console.log(`Reloading blackjack game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('blackjack');
     });
 }
 
-// Close blackjack overlay when clicking outside
-if (blackjackOverlay) {
-    blackjackOverlay.addEventListener('click', (e) => {
-        if (e.target === blackjackOverlay) {
-            blackjackOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('blackjackIframe');
-            if (iframe) {
-                console.log("Unloading blackjack game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
-            }
-        }
-    });
-}
 
 // Lost and Found game overlay
 const lostAndFoundBox = document.getElementById('lostAndFoundBox');
-const lostAndFoundOverlay = document.getElementById('lostAndFoundOverlay');
 
 if (lostAndFoundBox) {
     lostAndFoundBox.addEventListener('click', () => {
-        if (lostAndFoundOverlay) {
-            lostAndFoundOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-            
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('lostAndFoundIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/lostAndFound/index.html?s=${scheme}` : 'games/lostAndFound/index.html';
-                // Set iOS-specific attributes for touch handling
-                iframe.setAttribute('allow', 'touch');
-                iframe.style.touchAction = 'none';
-                iframe.style.webkitOverflowScrolling = 'touch';
-                console.log(`Reloading lostAndFound game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('lostAndFound');
     });
 }
 
 // Zoom puzzle box (Daily Puzzles)
 const tilesBox = document.getElementById('tilesBox');
-const zoomOverlay = document.getElementById('zoomOverlay');
 
 if (tilesBox) {
     tilesBox.addEventListener('click', () => {
@@ -2996,31 +2843,12 @@ if (tilesBox) {
             showCompletedBadge(tilesBox);
             return;
         }
-        
-        if (zoomOverlay) {
-            zoomOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('zoomIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/zoom/index.html?s=${scheme}` : 'games/zoom/index.html';
-                console.log(`Reloading zoom game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('zoom');
     });
 }
 
 // Shift puzzle box (Daily Puzzles)
 const shiftBox = document.getElementById('shiftBox');
-const shiftOverlay = document.getElementById('shiftOverlay');
 
 if (shiftBox) {
     shiftBox.addEventListener('click', () => {
@@ -3029,31 +2857,12 @@ if (shiftBox) {
             showCompletedBadge(shiftBox);
             return;
         }
-        
-        if (shiftOverlay) {
-            shiftOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('shiftIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/shift/index.html?s=${scheme}` : 'games/shift/index.html';
-                console.log(`Reloading shift game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('shift');
     });
 }
 
 // Cross game box
 const crossBox = document.getElementById('crossBox');
-const crossOverlay = document.getElementById('crossOverlay');
 
 if (crossBox) {
     crossBox.addEventListener('click', () => {
@@ -3062,31 +2871,12 @@ if (crossBox) {
             showCompletedBadge(crossBox);
             return;
         }
-        
-        if (crossOverlay) {
-            crossOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('crossIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/cross/index.html?s=${scheme}` : 'games/cross/index.html';
-                console.log(`Reloading cross game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('cross');
     });
 }
 
 // Suspect game box
 const suspectBox = document.getElementById('suspectBox');
-const suspectOverlay = document.getElementById('suspectOverlay');
 
 if (suspectBox) {
     suspectBox.addEventListener('click', () => {
@@ -3095,102 +2885,39 @@ if (suspectBox) {
             showCompletedBadge(suspectBox);
             return;
         }
-        
-        if (suspectOverlay) {
-            suspectOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('suspectIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/suspect/index.html?s=${scheme}` : 'games/suspect/index.html';
-                console.log(`Reloading suspect game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('suspect');
     });
 }
 
 // Defuser game box
 const defuserBox = document.getElementById('defuserBox');
-const defuserOverlay = document.getElementById('defuserOverlay');
 
 if (defuserBox) {
     defuserBox.addEventListener('click', () => {
-        // Reset per-session started flag whenever opening the game
-        defuserSessionStarted = false;
-        
         // If already completed today, show COMPLETED badge and don't reopen
         if (isPuzzleGameCompleted('defuser')) {
             showCompletedBadge(defuserBox);
             return;
         }
-        
-        if (defuserOverlay) {
-            defuserOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('defuserIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/defuser/index.html?s=${scheme}` : 'games/defuser/index.html';
-                console.log(`Reloading defuser game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('defuser');
     });
 }
 
 // TALLY game box
 const tallyBox = document.getElementById('tallyBox');
-const tallyOverlay = document.getElementById('tallyOverlay');
 
 if (tallyBox) {
     tallyBox.addEventListener('click', () => {
-        // Reset per-session started flag whenever opening the game
-        tallySessionStarted = false;
-        
         // If already completed today, show COMPLETED badge and don't reopen
         if (isPuzzleGameCompleted('tally')) {
             showCompletedBadge(tallyBox);
             return;
         }
-        
-        if (tallyOverlay) {
-            tallyOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('tallyIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/tally/index.html?s=${scheme}` : 'games/tally/index.html';
-                console.log(`Reloading tally game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('tally');
     });
 }
 
 const phrasesBox = document.getElementById('phrasesBox');
-const phrasesOverlay = document.getElementById('phrasesOverlay');
 
 if (phrasesBox) {
     phrasesBox.addEventListener('click', () => {
@@ -3200,30 +2927,12 @@ if (phrasesBox) {
             return;
         }
         
-        if (phrasesOverlay) {
-            phrasesOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const phrasesIframe = document.getElementById('phrasesIframe');
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            if (phrasesIframe) {
-                phrasesIframe.src = scheme ? `games/phrases/index.html?s=${scheme}` : 'games/phrases/index.html';
-                console.log(`Reloading phrases game iframe: ${phrasesIframe.src}`);
-            }
-        }
+        openGame('phrases');
     });
 }
 
 // Gold Case puzzle box (Daily Puzzles)
 const goldCasePuzzleBox = document.getElementById('goldCasePuzzleBox');
-const goldCaseOverlay = document.getElementById('goldCaseOverlay');
 
 if (goldCasePuzzleBox) {
     goldCasePuzzleBox.addEventListener('click', () => {
@@ -3233,24 +2942,7 @@ if (goldCasePuzzleBox) {
             return;
         }
         
-        if (goldCaseOverlay) {
-            goldCaseOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('goldCaseIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/goldCase/index.html?s=${scheme}` : 'games/goldCase/index.html';
-                console.log(`Reloading goldCase game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('goldCase');
     });
 }
 
@@ -3358,73 +3050,10 @@ if (goldCaseBox) {
         if (!isUnlocked) {
             return; // Don't open if locked
         }
-        
-        if (goldCaseOverlay) {
-            goldCaseOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Show close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.add('show');
-            updateLogoVisibility();
-
-            // Reload iframe (it may have been unloaded to 'about:blank')
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const iframe = document.getElementById('goldCaseIframe');
-            if (iframe) {
-                iframe.src = scheme ? `games/bonusSpin/index.html?s=${scheme}` : 'games/bonusSpin/index.html';
-                console.log(`Reloading bonusSpin game iframe: ${iframe.src}`);
-            }
-        }
+        openGame('bonusSpin');
     });
 }
 
-// Close Gold Case overlay when clicking outside
-if (goldCaseOverlay) {
-    goldCaseOverlay.addEventListener('click', (e) => {
-        if (e.target === goldCaseOverlay) {
-            goldCaseOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('goldCaseIframe');
-            if (iframe) {
-                console.log("Unloading goldCase game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
-            }
-        }
-    });
-}
-
-// Close Gold Case overlay when clicking close button
-// goldCaseClose and lostAndFoundClose removed - now using single close button
-
-// Close lost and found overlay when clicking outside
-if (lostAndFoundOverlay) {
-    lostAndFoundOverlay.addEventListener('click', (e) => {
-        if (e.target === lostAndFoundOverlay) {
-            lostAndFoundOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Hide close button
-            const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton) closeButton.classList.remove('show');
-            updateLogoVisibility();
-            
-            const iframe = document.getElementById('lostAndFoundIframe');
-            if (iframe) {
-                console.log("Unloading lostAndFound game iframe by setting src to 'about:blank' (click outside)");
-                iframe.src = 'about:blank';
-            }
-            loadGameScores2();
-        }
-    });
-}
 
 // Removed duplicate - moved to top of file
 
@@ -3604,9 +3233,6 @@ function resetAllData() {
     // Reset total stars to zero
     localStorage.setItem('totalStars', '0');
     
-    // Reset move stars to zero
-    localStorage.removeItem(`moveStars_${todayKey}`);
-    
     // Reset usable stars to zero
     localStorage.removeItem(`usableStars_${todayKey}`);
     
@@ -3701,27 +3327,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const boostSpendButton = document.querySelector('.boost-spend-button');
     if (boostSpendButton) {
         boostSpendButton.addEventListener('click', () => {
-            const match3Overlay = document.getElementById('match3Overlay');
-            if (match3Overlay) {
-                match3Overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                
-                // Show close button
-                const closeButton = document.querySelector('.game-overlay-close');
-                if (closeButton) closeButton.classList.add('show');
-                updateLogoVisibility();
-                
-                // Load match3 game in iframe - Market Match is now default
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                const iframe = document.getElementById('match3Iframe');
-                if (iframe) {
-                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
-                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-                    iframe.src = `games/match3/index.html?s=${gameScheme}`;
-                    console.log(`Loading match3 game iframe: ${iframe.src}`);
-                }
-            }
+            // Load match3 game - Market Match is now default
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
+            // Temporarily override match3 path
+            const originalPath = gameConfig['match3'].path;
+            gameConfig['match3'].path = `games/match3/index.html?s=${gameScheme}`;
+            openGame('match3');
+            gameConfig['match3'].path = originalPath;
         });
     }
     
@@ -3729,27 +3343,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const practiceButton = document.querySelector('.boost-practice-button');
     if (practiceButton) {
         practiceButton.addEventListener('click', () => {
-            const match3Overlay = document.getElementById('match3Overlay');
-            if (match3Overlay) {
-                match3Overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                
-                // Show close button
-                const closeButton = document.querySelector('.game-overlay-close');
-                if (closeButton) closeButton.classList.add('show');
-                updateLogoVisibility();
-                
-                // Load match3 game in iframe with practice parameter - Market Match is now default
-                const urlParams = new URLSearchParams(window.location.search);
-                const scheme = urlParams.get('s');
-                const iframe = document.getElementById('match3Iframe');
-                if (iframe) {
-                    // Use 'bigy' scheme (Market Match) as default, unless explicitly set to 'donut'
-                    const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-                    iframe.src = `games/match3/index.html?s=${gameScheme}&practice=true`;
-                    console.log(`Loading match3 practice game iframe: ${iframe.src}`);
-                }
-            }
+            // Load match3 practice game - Market Match is now default
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheme = urlParams.get('s');
+            const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
+            // Temporarily override match3 path
+            const originalPath = gameConfig['match3'].path;
+            gameConfig['match3'].path = `games/match3/index.html?s=${gameScheme}&practice=true`;
+            openGame('match3');
+            gameConfig['match3'].path = originalPath;
         });
     }
 });

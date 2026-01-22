@@ -14,21 +14,15 @@
 - **Example**: `dailyStars_2024-01-15`
 
 ### `gamesPlayed`
-- **Description**: Tracks the total number of games played across all days
+- **Description**: Journey stuff
 - **Type**: String (number)
 - **Format**: Integer as string (e.g., "42")
 
 ### `playedGames_<YYYY-MM-DD>`
-- **Description**: Stores an array of game IDs that have been played on a specific day
+- **Description**: Stores an array of game IDs that have been played on a specific day (used to unlock bonus spin when 8 unique games are played)
 - **Type**: String (JSON array)
 - **Format**: JSON string (e.g., '["beticle", "mysteryWord", "cross"]')
 - **Example**: `playedGames_2024-01-15`
-
-### `moveStars_<YYYY-MM-DD>`
-- **Description**: Stores stars earned from move-based games (like Match3) for a specific day
-- **Type**: String (number)
-- **Format**: Integer as string (e.g., "10")
-- **Example**: `moveStars_2024-01-15`
 
 ### `usableStars_<YYYY-MM-DD>`
 - **Description**: Stores stars that can be used for special features (like bonus spin) for a specific day
@@ -52,11 +46,6 @@
 - **Format**: Integer as string (e.g., "150")
 - **Example**: `journeyPosition_level1`, `journeyPosition_level2`
 
-### `match3HighScore`
-- **Description**: Stores the all-time high score for the Match3 game
-- **Type**: String (number)
-- **Format**: Integer as string (e.g., "5000")
-
 ---
 
 ## Puzzle Game Variables (Daily Completion & Stars)
@@ -64,7 +53,6 @@
 ### Beticle
 - **`beticleStars_<YYYY-MM-DD>`**: Stars earned for Beticle on a specific day (0-5)
 - **`beticleComplete_<YYYY-MM-DD>`**: Boolean string ("true"/"false") indicating if Beticle was completed
-- **`beticleTarget_<YYYY-MM-DD>`**: The target word for Beticle on a specific day
 
 ### Mystery Word
 - **`mysteryWordStars_<YYYY-MM-DD>`**: Stars earned for Mystery Word on a specific day (0-5)
@@ -84,11 +72,11 @@
 
 ### Defuser
 - **`defuserStars_<YYYY-MM-DD>`**: Stars earned for Defuser on a specific day (0-5, based on rounds completed)
+- **`defuserComplete_<YYYY-MM-DD>`**: Boolean string indicating if Defuser was completed
 
 ### Suspect
 - **`suspectStars_<YYYY-MM-DD>`**: Stars earned for Suspect on a specific day (0-5)
 - **`suspectComplete_<YYYY-MM-DD>`**: Boolean string indicating if Suspect was completed
-- **`suspectWon_<YYYY-MM-DD>`**: Boolean string indicating if the player won Suspect ("true"/"false")
 
 ### Zoom
 - **`zoomStars_<YYYY-MM-DD>`**: Stars earned for Zoom on a specific day (0-5)
@@ -126,10 +114,10 @@
 - **`lostAndFoundComplete_<YYYY-MM-DD>`**: Boolean string indicating if Lost and Found was completed
 - **`lostAndFoundScore_<YYYY-MM-DD>`**: Final score achieved in Lost and Found on a specific day
 
-### High Low / Scramble
-- **`highLowComplete_<YYYY-MM-DD>`**: Boolean string indicating if High Low/Scramble was completed
-- **`highLowStars_<YYYY-MM-DD>`**: Stars earned for High Low/Scramble on a specific day
-- **`highLowWrongCount_<YYYY-MM-DD>`**: Number of wrong moves in High Low/Scramble
+### `match3HighScore`
+- **Description**: Stores the all-time high score for the Match3 game
+- **Type**: String (number)
+- **Format**: Integer as string (e.g., "5000")
 
 ---
 
@@ -139,10 +127,6 @@
 - **`bonusSpinSpun_<YYYY-MM-DD>`**: Boolean string indicating if the bonus spin was used today
 - **`bonusSpinStars_<YYYY-MM-DD>`**: Stars won from the bonus spin on a specific day
 - **`bonusSpinCheatUnlocked`**: Boolean string indicating if cheat mode is unlocked (persists across days)
-
-### Sweepstakes
-- **`sweepsEntries_<YYYY-MM-DD>`**: Number of sweepstakes entries made on a specific day
-- **Format**: Integer as string (e.g., "3")
 
 ---
 

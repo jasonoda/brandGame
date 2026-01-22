@@ -30,12 +30,10 @@ function setPlayerPosition(position) {
 function getMoveStars() {
     const todayKey = getTodayKey();
     const usableKey = `usableStars_${todayKey}`;
-    const legacyKey = `moveStars_${todayKey}`;
     const val = localStorage.getItem(usableKey);
-    const legacy = localStorage.getItem(legacyKey);
-    const parsed = parseInt(val ?? legacy ?? '0');
+    const parsed = parseInt(val ?? '0');
     const result = isNaN(parsed) ? 0 : parsed;
-    if (result > 0 && !val && !legacy) {
+    if (result > 0 && !val) {
         console.warn('[Journey] getMoveStars returning non-zero value but no localStorage found:', result);
     }
     return result;

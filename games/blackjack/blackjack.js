@@ -2133,7 +2133,7 @@ function saveBlackjackGameResult(finalScore, starsEarned) {
                     addUsableFn(starDifference);
                 } else {
                     const todayKey = getTodayKey();
-                    const currentMoveStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+                    const currentMoveStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
                     localStorage.setItem(`usableStars_${todayKey}`, String(currentMoveStars + starDifference));
                 }
             }

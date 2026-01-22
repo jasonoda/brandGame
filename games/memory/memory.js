@@ -1056,7 +1056,7 @@ function saveMemoryGameResult(finalScore, starsEarned) {
                 const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
                 localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
                 // Also add usable stars manually
-                const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+                const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
                 localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
             }
         }

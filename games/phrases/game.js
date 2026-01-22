@@ -986,7 +986,7 @@ function awardStars(starsEarned) {
             // Fallback if awardStars not available
             const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
             localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || localStorage.getItem(`moveStars_${todayKey}`) || '0');
+            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
             localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
         }
     }
