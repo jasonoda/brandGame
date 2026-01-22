@@ -74,40 +74,11 @@ function addStars(count) {
     }
 }
 
-// Common 5-letter words that people would know
-const commonWords = [
-    'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
-    'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
-    'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
-    'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
-    'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
-    'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
-    'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
-    'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
-    'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
-    'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
-    'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 'ZONAL'
-];
-
-// Get target word - random common word stored per day
+// Get target word from gameVars
 function getTargetWord() {
-    const todayKey = getTodayKey();
-    const storedWord = localStorage.getItem(`mysteryWordTarget_${todayKey}`);
-    
-    if (storedWord) {
-        console.log('Mystery Word answer:', storedWord);
-        return storedWord;
-    }
-    
-    // Pick a random word from common words
-    const randomIndex = Math.floor(Math.random() * commonWords.length);
-    const selectedWord = commonWords[randomIndex];
-    
-    // Store it for today
-    localStorage.setItem(`mysteryWordTarget_${todayKey}`, selectedWord);
-    
-    console.log('Mystery Word answer:', selectedWord);
-    return selectedWord;
+    const word = getMysteryWordTargetWord();
+    console.log('Mystery Word answer:', word);
+    return word;
 }
 
 

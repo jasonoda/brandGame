@@ -88,39 +88,11 @@ function addStars(count) {
     }
 }
 
-// Common 5-letter words that people would know (same as Mystery Word)
-const commonWords = [
-    'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
-    'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
-    'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
-    'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
-    'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
-    'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
-    'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
-    'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
-    'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
-    'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
-    'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 
-];
-
-// Get today's target word - deterministic based on date
+// Get target word from gameVars
 function getTargetWord() {
-    const todayKey = getTodayKey();
-    // Use date as seed for deterministic word selection (same word each day)
-    const dateSeed = todayKey.split('-').join('');
-    const seed = parseInt(dateSeed) || 0;
-    
-    // Use seeded random to pick a word (deterministic per day)
-    const seededRandom = (seed) => {
-        const x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    };
-    
-    const randomIndex = Math.floor(seededRandom(seed) * commonWords.length);
-    const selectedWord = commonWords[randomIndex];
-    
-    console.log('Beticle answer:', selectedWord);
-    return selectedWord;
+    const word = getBeticleTargetWord();
+    console.log('Beticle answer:', word);
+    return word;
 }
 
 

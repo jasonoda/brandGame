@@ -22,6 +22,54 @@ function markQuizComplete() {
     localStorage.setItem(`quizComplete_${todayKey}`, 'true');
 }
 
+function saveQuizState() {
+    const todayKey = quizGetTodayKey();
+    const state = {
+        setIndex: quizGameData.findIndex(set => set === quizCurrentSet),
+        questionIndex: quizCurrentQuestionIndex,
+        correctCount: quizCorrectCount,
+        gameWon: quizGameWon,
+        gameEnded: quizGameEnded
+    };
+    localStorage.setItem(`quizState_${todayKey}`, JSON.stringify(state));
+}
+
+function loadQuizState() {
+    const todayKey = quizGetTodayKey();
+    const savedState = localStorage.getItem(`quizState_${todayKey}`);
+    
+    if (!savedState) {
+        return false;
+    }
+    
+    // Make sure quiz data is loaded
+    if (!quizGameData || quizGameData.length === 0) {
+        return false;
+    }
+    
+    try {
+        const state = JSON.parse(savedState);
+        
+        // Restore the quiz set
+        if (state.setIndex >= 0 && state.setIndex < quizGameData.length) {
+            quizCurrentSet = quizGameData[state.setIndex];
+        } else {
+            return false;
+        }
+        
+        // Restore game state
+        quizCurrentQuestionIndex = state.questionIndex || 0;
+        quizCorrectCount = state.correctCount || 0;
+        quizGameWon = state.gameWon || false;
+        quizGameEnded = state.gameEnded || false;
+        
+        return true;
+    } catch (error) {
+        console.error('Error loading quiz state:', error);
+        return false;
+    }
+}
+
 
 function quizGetDailyStars() {
     const todayKey = quizGetTodayKey();
@@ -59,11 +107,10 @@ function quizAddStars(count) {
     }
 }
 
-// Load game data from JSON
-async function loadQuizData() {
+// Load game data from gameVars
+function loadQuizData() {
     try {
-        const response = await fetch('games/quiz/thanksgiving.json');
-        quizGameData = await response.json();
+        quizGameData = getQuizData();
         initQuizGame();
     } catch (error) {
         console.error('Error loading quiz data:', error);
@@ -84,8 +131,15 @@ function initQuizGame() {
     const container = document.querySelector('.quiz-container');
     if (!container) return;
     
+    // Reset game state variables
+    quizCurrentSet = null;
+    quizCurrentQuestionIndex = 0;
+    quizCorrectCount = 0;
+    quizGameWon = false;
+    quizGameEnded = false;
+    
     // Try to load saved state first
-    const hasSavedState = false;
+    const hasSavedState = loadQuizState();
     
     // Check if already complete
     if (isQuizComplete()) {
@@ -117,6 +171,7 @@ function initQuizGame() {
         quizCurrentQuestionIndex = 0;
         quizCorrectCount = 0;
         // Save the initial state
+        saveQuizState();
     }
     
     quizGameWon = false;
@@ -278,6 +333,7 @@ function checkQuizAnswer(selectedIndex) {
                 setTimeout(() => {
                     // Next question
                     quizCurrentQuestionIndex++;
+                    saveQuizState(); // Save state after moving to next question
                     displayQuestion();
                     
                     // Ensure opacity is reset for new question
@@ -442,7 +498,7 @@ function showQuizStars() {
 // Show completed state
 function showCompletedQuiz() {
     // Load the saved state first
-    const hasSavedState = false;
+    const hasSavedState = loadQuizState();
     if (!hasSavedState || !quizCurrentSet) {
         console.error('No saved quiz state found');
         return;
@@ -520,6 +576,30 @@ function showCompletedQuiz() {
     // Show stars
     showQuizStars();
 }
+
+// Make reset function globally accessible for 'q' key handler
+window.resetQuizGame = function() {
+    // Clear saved state
+    const todayKey = quizGetTodayKey();
+    localStorage.removeItem(`quizState_${todayKey}`);
+    localStorage.removeItem(`quizComplete_${todayKey}`);
+    localStorage.removeItem(`quizStars_${todayKey}`);
+    
+    // Reset game state
+    quizCurrentSet = null;
+    quizCurrentQuestionIndex = 0;
+    quizCorrectCount = 0;
+    quizGameWon = false;
+    quizGameEnded = false;
+    
+    // Reinitialize if data is loaded
+    if (quizGameData && quizGameData.length > 0) {
+        initQuizGame();
+    } else {
+        // Reload data if not loaded yet
+        loadQuizData();
+    }
+};
 
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {

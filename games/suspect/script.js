@@ -18,7 +18,8 @@ if (suspectModeParam === 'classic') {
     useEmojis = true;
 }
 
-const thanksgivingEmojis = ['🦃', '🥧', '🍂', '🌽', '🍁']; // 5 emojis
+// Get emojis from gameVars
+const thanksgivingEmojis = getSuspectEmojis();
 
 // Helper function to get color letter from hex
 function getColorLetter(colorHex) {

@@ -21,7 +21,6 @@ const startMenu = document.getElementById('startMenu');
 const playButton = document.getElementById('playButton');
 const container = document.querySelector('.container');
 
-let phrases = [];
 let currentPhrase = '';
 let letterBoxes = [];
 let letterCounts = {}; // Map of letter to count
@@ -62,16 +61,6 @@ function getTodayKey() {
 }
 
 
-// Load phrases from JSON
-fetch('phrases.json')
-    .then(response => response.json())
-    .then(data => {
-        phrases = data.phrases;
-        
-    })
-    .catch(error => {
-        console.error('Error loading phrases:', error);
-    });
 
 
 // Restore game in progress state
@@ -178,30 +167,9 @@ playButton.addEventListener('click', () => {
     // Show game container
     container.classList.add('gameStarted');
     
-    // Wait for phrases to load, then try to load saved game state
-    const tryLoadState = () => {
-        if (phrases.length === 0) {
-            // Phrases not loaded yet, wait a bit
-            setTimeout(tryLoadState, 100);
-            return;
-        }
-        
-        // Start new game
-            const randomIndex = Math.floor(Math.random() * phrases.length);
-            initializeGame(phrases[randomIndex]);
-        } else {
-            // State loaded, continue from where we left off
-            if (puzzleSolved) {
-                // Game is already won, show completed state
-                showCompletedState();
-            } else {
-                // Game in progress, restore properly
-                restoreGameInProgress();
-            }
-        }
-    };
-    
-    tryLoadState();
+    // Get random phrase from gameVars
+    const randomPhrase = getRandomPhrase();
+    initializeGame(randomPhrase);
     });
 
 function initializeGame(phrase) {

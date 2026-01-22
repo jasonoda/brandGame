@@ -1,0 +1,381 @@
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Scramble -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getRandomScrambleDay() {
+    const gameData = [
+        {
+            "date": "Jan 1",
+            "event": "On this day in 1892, Ellis Island opened in New York Harbor as an immigration station. Millions of hopeful travelers would pass through its halls.",
+            "word": "island"
+        },
+        {
+            "date": "Jan 2",
+            "event": "On this day in 1839, Louis Daguerre took the first photo of the Moon. It marked an early milestone in photography.",
+            "word": "camera"
+        },
+        {
+            "date": "Jan 3",
+            "event": "On this day in 1959, Alaska became the 49th state of the United States. It is the largest state by area.",
+            "word": "alaska"
+        },
+        {
+            "date": "Jan 4",
+            "event": "On this day in 1809, Louis Braille, the inventor of the Braille reading system, was born in France.",
+            "word": "braille"
+        },
+        {
+            "date": "Jan 5",
+            "event": "On this day in 1933, construction of the Golden Gate Bridge in San Francisco began. It later became one of the most famous bridges in the world.",
+            "word": "bridge"
+        },
+        {
+            "date": "Jan 6",
+            "event": "On this day in 1850, the safety razor was first patented in the United States, changing daily grooming habits.",
+            "word": "razors"
+        },
+        {
+            "date": "Jan 8",
+            "event": "On this day in 1935, Elvis Presley, who would become the King of Rock and Roll, was born in Mississippi.",
+            "word": "elvis"
+        },
+        {
+            "date": "Jan 9",
+            "event": "On this day in 2007, Apple introduced the first iPhone, revolutionizing mobile technology.",
+            "word": "iphone"
+        },
+        {
+            "date": "Jan 10",
+            "event": "On this day in 1863, the world's first underground railway opened in London, now part of the famous Tube system.",
+            "word": "subway"
+        },
+        {
+            "date": "Jan 11",
+            "event": "On this day in 1935, Amelia Earhart became the first person to fly solo from Hawaii to California.",
+            "word": "flight"
+        },
+        {
+            "date": "Jan 12",
+            "event": "On this day in 1969, Led Zeppelin released their debut album, helping to define rock music of the era.",
+            "word": "rocker"
+        },
+        {
+            "date": "Jan 13",
+            "event": "On this day in 1968, Johnny Cash recorded his legendary live album at Folsom Prison.",
+            "word": "guitar"
+        },
+        {
+            "date": "Jan 14",
+            "event": "On this day in 1973, the Miami Dolphins completed the only perfect season in NFL history by winning the Super Bowl.",
+            "word": "dolphin"
+        },
+        {
+            "date": "Jan 17",
+            "event": "On this day in 1706, Benjamin Franklin, inventor and statesman, was born in Boston.",
+            "word": "frank"
+        },
+        {
+            "date": "Jan 18",
+            "event": "On this day in 1919, Bentley Motors was founded in London, becoming known for luxury cars.",
+            "word": "bentley"
+        },
+        {
+            "date": "Jan 19",
+            "event": "On this day in 1809, Edgar Allan Poe, the American poet and writer, was born in Boston.",
+            "word": "poetry"
+        },
+        {
+            "date": "Jan 20",
+            "event": "On this day in 1885, the roller coaster was patented, later becoming a favorite amusement park ride.",
+            "word": "coaster"
+        },
+        {
+            "date": "Jan 23",
+            "event": "On this day in 1849, Elizabeth Blackwell became the first woman to earn a medical degree in the United States.",
+            "word": "doctor"
+        },
+        {
+            "date": "Jan 24",
+            "event": "On this day in 1935, the first canned beer was sold in the United States.",
+            "word": "beers"
+        },
+        {
+            "date": "Jan 25",
+            "event": "On this day in 1924, the first Winter Olympics opened in Chamonix, France.",
+            "word": "winter"
+        },
+        {
+            "date": "Jan 26",
+            "event": "On this day in 1905, the world's largest diamond, the Cullinan, was discovered in South Africa.",
+            "word": "diamond"
+        },
+        {
+            "date": "Jan 27",
+            "event": "On this day in 1880, Thomas Edison patented the electric light bulb, transforming everyday life.",
+            "word": "light"
+        },
+        {
+            "date": "Jan 29",
+            "event": "On this day in 1886, Karl Benz patented the first automobile powered by a gas engine.",
+            "word": "engine"
+        },
+        {
+            "date": "Jan 30",
+            "event": "On this day in 1969, The Beatles performed together for the last time in their rooftop concert in London.",
+            "word": "beatle"
+        },
+        {
+            "date": "Jan 31",
+            "event": "On this day in 1958, the United States launched Explorer 1, its first satellite, into space.",
+            "word": "rocket"
+        }
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * gameData.length);
+    return gameData[randomIndex];
+}
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Quiz -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getQuizData() {
+    return [
+        {
+            "set": 1,
+            "questions": [
+                {
+                    "question": "Which flavor blend became a defining modern Thanksgiving dessert profile in the 20th century?",
+                    "answers": ["Pumpkin spice", "Apple spice", "Cinnamon sugar"],
+                    "correct": 0
+                },
+                {
+                    "question": "Which U.S. president moved Thanksgiving earlier to influence holiday shopping?",
+                    "answers": ["Herbert Hoover", "F. D. Roosevelt", "Harry Truman"],
+                    "correct": 1
+                },
+                {
+                    "question": "Which medium most helped synchronize Thanksgiving celebrations nationwide by mid-century?",
+                    "answers": ["Radio", "Newspapers", "Television"],
+                    "correct": 2
+                },
+                {
+                    "question": "Which convenience food resulted from surplus after a Thanksgiving season?",
+                    "answers": ["Frozen pie", "TV dinner", "Canned gravy"],
+                    "correct": 1
+                },
+                {
+                    "question": "Which food was eaten at the 1621 harvest feast but rarely appears on modern Thanksgiving menus?",
+                    "answers": ["Clams", "Goose", "Cornbread"],
+                    "correct": 0
+                }
+            ]
+        },
+        {
+            "set": 2,
+            "questions": [
+                {
+                    "question": "Which feature helped transform the New York Thanksgiving parade into a national spectacle?",
+                    "answers": ["Marching bands", "Giant balloons", "Celebrity hosts"],
+                    "correct": 1
+                },
+                {
+                    "question": "Which department store originally organized the Thanksgiving parade?",
+                    "answers": ["Macy's", "Bloomingdale's", "Sears"],
+                    "correct": 0
+                },
+                {
+                    "question": "Which factor most helped turkey replace other meats for Thanksgiving meals?",
+                    "answers": ["Farm size", "Affordability", "Rail transport"],
+                    "correct": 1
+                },
+                {
+                    "question": "Which publication helped standardize Thanksgiving recipes nationally?",
+                    "answers": ["Local newspapers", "Church bulletins", "Good Housekeeping"],
+                    "correct": 2
+                },
+                {
+                    "question": "Which ingredient spread nationally due to early food canning?",
+                    "answers": ["Pumpkin puree", "Sweet corn", "Cranberries"],
+                    "correct": 0
+                }
+            ]
+        },
+        {
+            "set": 3,
+            "questions": [
+                {
+                    "question": "Which sport became closely associated with Thanksgiving broadcasts?",
+                    "answers": ["Football", "Baseball", "Hockey"],
+                    "correct": 0
+                },
+                {
+                    "question": "Which team became a long-standing Thanksgiving football host?",
+                    "answers": ["Chicago Bears", "Detroit Lions", "Green Bay Packers"],
+                    "correct": 1
+                },
+                {
+                    "question": "Which development most enabled nationwide Thanksgiving menu consistency?",
+                    "answers": ["Recipe media", "Rail shipping", "Food canning"],
+                    "correct": 2
+                },
+                {
+                    "question": "Why did Thanksgiving resist becoming a weekend holiday in the U.S.?",
+                    "answers": ["Work patterns", "Church customs", "Market timing"],
+                    "correct": 0
+                },
+                {
+                    "question": "Which 19th-century movement most pushed Thanksgiving as a moral tradition?",
+                    "answers": ["Political unity", "Religious reform", "Public education"],
+                    "correct": 1
+                }
+            ]
+        }
+    ];
+}
+
+// Puzzle Games:
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Phrases -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getRandomPhrase() {
+    const phrases = [
+        "Saving room for pumpkin pie",
+        "Thankful for the little things",
+        "Eat first ask questions later",
+        "Leftover Turkey sandwiches all week",
+        "Just leave me to my food coma",
+        "Grateful hearts and full bellies",
+        "Count your blessings not calories",
+        "Stuffed with gratitude and love",
+        "Autumn leaves and pumpkin please",
+        "Family food fun and football",
+        "Pumpkin spice and everything nice",
+        "Thankful thoughts and warm wishes",
+        "Together is the best place to be",
+        "Gratitude is the best attitude",
+        "Countless reasons to be grateful"
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * phrases.length);
+    return phrases[randomIndex];
+}
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Cross -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getRandomCrossWords(count = 2) {
+    const words = [
+        'TURKEY', 'GRAVY', 'FEAST', 'FAMILY', 'PUMPKIN', 'HARVEST', 
+        'THANKS', 'CANDLE', 'LEAVES', 'AUTUMN', 'PILGRIM', 
+        'SQUASH', 'APPLES', 'BREAD', 'FRIENDS', 'ROAST'
+    ].filter(word => word.length >= 5 && word.length <= 7);
+    
+    const shuffled = [...words].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Gold Case -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Suspect -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getSuspectEmojis() {
+    return ['🦃', '🥧', '🍂', '🌽', '🍁']; // 5 emojis
+}
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Defuser -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Tally -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Zoom -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Shift -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Beticle -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getBeticleTargetWord() {
+    const commonWords = [
+        'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
+        'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
+        'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
+        'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
+        'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
+        'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
+        'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
+        'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
+        'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
+        'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
+        'WRITE', 'YACHT', 'YOUTH', 'ZEBRA'
+    ];
+    
+    // Use date as seed for deterministic word selection (same word each day)
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const dateSeed = todayKey.split('-').join('');
+    const seed = parseInt(dateSeed) || 0;
+    
+    // Use seeded random to pick a word (deterministic per day)
+    const seededRandom = (seed) => {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    };
+    
+    const randomIndex = Math.floor(seededRandom(seed) * commonWords.length);
+    return commonWords[randomIndex];
+}
+
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Mystery Word -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+function getMysteryWordTargetWord() {
+    const commonWords = [
+        'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
+        'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
+        'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
+        'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
+        'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
+        'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
+        'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
+        'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
+        'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
+        'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
+        'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 'ZONAL'
+    ];
+    
+    // Get today's key for localStorage
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const storedWord = localStorage.getItem(`mysteryWordTarget_${todayKey}`);
+    
+    if (storedWord) {
+        return storedWord;
+    }
+    
+    // Pick a random word from common words
+    const randomIndex = Math.floor(Math.random() * commonWords.length);
+    const selectedWord = commonWords[randomIndex];
+    
+    // Store it for today
+    localStorage.setItem(`mysteryWordTarget_${todayKey}`, selectedWord);
+    
+    return selectedWord;
+}

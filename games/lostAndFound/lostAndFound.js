@@ -99,11 +99,6 @@ class Loader {
         this.textureArray.push("blackTemp");
         this.e.blackTemp = new THREE.TextureLoader().load('./images/black.png', () => this.loadTexture(this));
 
-        this.textureArray.push("background");
-        this.e.background = new THREE.TextureLoader().load('./images/background.png', () => this.loadTexture(this));
-        this.e.background.repeat.set(0.5, 1.0);
-        this.e.background.offset.set(0.25, 0);
-
         this.textureArray.push("ped1");
         this.e.ped1 = new THREE.TextureLoader().load('./images/ped1.png', () => this.loadTexture(this));
         this.e.ped1.flipY = false;

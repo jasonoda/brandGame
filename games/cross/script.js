@@ -30,20 +30,8 @@ const letterPositions = [
     [2,1]                  // Left: B
 ];
 
-// Thanksgiving-themed words (5-7 letters only)
-const thanksgivingWords = [
-    'TURKEY', 'GRAVY', 'FEAST', 'FAMILY', 'PUMPKIN', 'HARVEST', 
-    'THANKS', 'CANDLE', 'LEAVES', 'AUTUMN', 'PILGRIM', 
-    'SQUASH', 'APPLES', 'BREAD', 'FRIENDS', 'ROAST'
-].filter(word => word.length >= 5 && word.length <= 7);
-
-// Pick two random words (already filtered to 5-7 letters)
-function getRandomWords(count) {
-    const shuffled = [...thanksgivingWords].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(count, shuffled.length));
-}
-
-const answerWords = getRandomWords(2);
+// Get random words from gameVars
+const answerWords = getRandomCrossWords(2);
 let answerWord1 = answerWords[0];
 let answerWord2 = answerWords[1];
 const answerWord = answerWord1; // For backwards compatibility

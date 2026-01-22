@@ -2514,6 +2514,21 @@ document.addEventListener('keydown', (e) => {
             console.warn('Could not message tally iframe to reset storage:', err);
         }
         
+        // Quiz
+        localStorage.removeItem(`quizComplete_${todayKey}`);
+        localStorage.removeItem(`quizStars_${todayKey}`);
+        localStorage.removeItem(`quizState_${todayKey}`);
+        // Reload quiz game
+        if (window.resetQuizGame) {
+            window.resetQuizGame();
+        }
+        
+        // Scramble
+        // Reload scramble game
+        if (window.resetScrambleGame) {
+            window.resetScrambleGame();
+        }
+        
         // Gold Case (puzzle game)
         localStorage.removeItem(`goldCaseStars_${todayKey}`);
         localStorage.removeItem(`goldCaseComplete_${todayKey}`);
