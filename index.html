@@ -67,7 +67,7 @@
                                     <span class="carousel-dollar-type1">$</span>
                                 </div>
                             </div>
-                            <div class="carousel-text-type1">Black Friday<br>Sales</div>
+                            <div class="carousel-text-type1">Collect Stars<br>Unlock Rewards</div>
                         </div>
                     </div>
                     <div class="carousel-slide-type1">
@@ -250,7 +250,6 @@
         </div>
         
 
-            <div class="section-title">DAILY QUIZ</div>
         <div class="section">
             <div class="on-this-day-container">
                 <div class="scramble-top-section">
@@ -277,7 +276,7 @@
             </div>
             <div class="mc-container" style="display: none;">
                 <div class="mc-top-section">
-                    <div class="subsection-title">THANKSGIVING QUIZ</div>
+                    <div class="subsection-title">DAILY THANKSGIVING QUIZ</div>
                 </div>
                 <div class="mc-bottom-section">
                 <div class="mc-question"></div>
@@ -292,7 +291,7 @@
             </div>
             <div class="quiz-container">
                 <div class="quiz-top-section">
-                    <div class="subsection-title">THANKSGIVING QUIZ</div>
+                    <div class="subsection-title">DAILY THANKSGIVING QUIZ</div>
                 </div>
                 <div class="quiz-bottom-section">
                     <div class="quiz-question"></div>
@@ -514,7 +513,7 @@
                 <div class="boost-game-box">
                     <div class="boost-game-top">
                         <div class="play-color-box" style="background: linear-gradient(to bottom, #e84066, #c82a48);">
-                            <img src="src/img/bigy/sweepsGame.png" alt="Market Match" style="height: 100px; width: auto; margin-bottom: 4px; margin-top: 8px; object-fit: contain;">
+                            <img id="boost-sweeps-game-img" src="src/img/bigy/sweepsGame.png" alt="Market Match" style="height: 100px; width: auto; margin-bottom: 4px; margin-top: 8px; object-fit: contain;">
                             <div class="game-title">MARKET MATCH</div>
                         </div>
                     </div>
@@ -651,14 +650,13 @@
                     <h1 class="boost-title">DEALS</h1>
                     <div class="boost-subtitle">Shop exclusive offers</div>
                 </div>
-                <div class="profile-deals-grid">
+                <div class="profile-deals-grid" id="regular-deals">
                     <div class="deal-item">
                         <div class="deal-image">
                             <img src="src/img/deals/deal1.png" alt="Deal 1">
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">Jones Dairy<br>Farm Meatballs</div>
-                            <div class="deal-description">Enjoy wholesome, flavorful meatballs crafted with real, simple ingredients.</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -671,7 +669,6 @@
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">Taco Bell Crunchwrap Supreme Cravings Kit</div>
-                            <div class="deal-description">Recreate your favorite Crunchwrap at home - just add protein and fresh toppings!</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -684,7 +681,6 @@
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">Capri Sun Single<br>Serve Bottles</div>
-                            <div class="deal-description">The same great taste kids know and love, now in a convenient 12 oz resealable bottle!</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -697,7 +693,6 @@
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">Starbucks Iced<br>Energy Drink</div>
-                            <div class="deal-description">Sip on a hydrating, sparkling energy drink with 160 mg plant-based caffeine and zero sugar.</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -710,7 +705,6 @@
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">Get fast delivery<br>from instacart</div>
-                            <div class="deal-description">Get your groceries delivered right to your door with fast, convenient delivery.</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -723,7 +717,6 @@
                         </div>
                         <div class="deal-content">
                             <div class="deal-title">RECIPE:<br>Chicken Marsala</div>
-                            <div class="deal-description">A classic Italian-American dish featuring tender chicken in a rich Marsala wine sauce with mushrooms.</div>
                         </div>
                         <div class="deal-button-container">
                             <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
@@ -731,7 +724,60 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Firehouse Deals Section -->
+            <div class="profile-deals-grid" id="dealsFirehouse" style="display: none;">
+                <div class="deal-item firehouse-deal">
+                    <div class="deal-image">
+                        <img src="src/img/deals/fh1.png" alt="Texas Buy One Get One">
+                    </div>
+                    <div class="deal-content">
+                        <div class="deal-title">Texas Buy One Get One Medium Sub</div>
+                    </div>
+                    <div class="deal-button-container">
+                        <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                </div>
+                <div class="deal-item firehouse-deal">
+                    <div class="deal-image">
+                        <img src="src/img/deals/fh2.png" alt="2 Subs Deal">
+                    </div>
+                    <div class="deal-content">
+                        <div class="deal-title">2 Medium Subs for $14 or 2 Large for $20</div>
+                    </div>
+                    <div class="deal-button-container">
+                        <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                </div>
+                <div class="deal-item firehouse-deal">
+                    <div class="deal-image">
+                        <img src="src/img/deals/fh3.png" alt="25% Off Any Sub">
+                    </div>
+                    <div class="deal-content">
+                        <div class="deal-title">25% Off Any Sub</div>
+                    </div>
+                    <div class="deal-button-container">
+                        <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                </div>
+                <div class="deal-item firehouse-deal">
+                    <div class="deal-image">
+                        <img src="src/img/deals/fh4.png" alt="25% Off Orders $25+">
+                    </div>
+                    <div class="deal-content">
+                        <div class="deal-title">25% Off Orders $25+</div>
+                    </div>
+                    <div class="deal-button-container">
+                        <div class="deal-earn-text">EARN<span class="deal-earn-star">★</span></div>
+                        <button class="deal-shop-button">SHOP</button>
+                    </div>
+                </div>
             </div>
+            </div>
+            
         </div>
 
         <!-- PAGE 6 -->

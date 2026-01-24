@@ -260,6 +260,7 @@ body {
 
 .next-letter-btn .button-star {
     color: #ffdf75;
+    font-size: 0.87em;
 }
 
 .solve-btn {
@@ -290,6 +291,10 @@ body {
 .letter-box {
     width: 50px;
     height: 50px;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    max-height: none !important;
     background: linear-gradient(to bottom, #4dd0a8 0%, #3db893 100%);
     /* background: #4dd0a8; */
     display: flex;

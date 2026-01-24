@@ -18,8 +18,8 @@ if (suspectModeParam === 'classic') {
     useEmojis = true;
 }
 
-// Get emojis from gameVars
-const thanksgivingEmojis = getSuspectEmojis();
+// Get emojis from gameVars - will be called dynamically to get current theme
+// Note: getSuspectEmojis() is called each time emojis are needed to ensure current theme
 
 // Helper function to get color letter from hex
 function getColorLetter(colorHex) {
@@ -287,10 +287,11 @@ for (let i = 0; i < numPeople; i++) {
         // Thanksgiving variation: colored background, emoji instead of shape, horizontal dots
         personBox.style.backgroundColor = boxColor;
     
-        // Add emoji instead of shape
+        // Add emoji instead of shape - get current emojis from theme
+        const currentEmojis = getSuspectEmojis();
     const shapeIndex = shapeAssignments[i];
-        const emojiIndex = (shapeIndex - 1) % thanksgivingEmojis.length; // Map shape 1-5 to emoji 0-4
-        const emoji = thanksgivingEmojis[emojiIndex];
+        const emojiIndex = (shapeIndex - 1) % currentEmojis.length; // Map shape 1-5 to emoji 0-4
+        const emoji = currentEmojis[emojiIndex];
         
         const emojiElement = document.createElement('div');
         emojiElement.textContent = emoji;
@@ -1217,9 +1218,10 @@ async function createMiniPersonBox(person, commonTraits) {
         // Thanksgiving variation: colored background, emoji instead of shape, horizontal dots
         miniBox.style.backgroundColor = person.color;
         
-        // Add emoji instead of shape
-        const emojiIndex = (person.shape - 1) % thanksgivingEmojis.length;
-        const emoji = thanksgivingEmojis[emojiIndex];
+        // Add emoji instead of shape - get current emojis from theme
+        const currentEmojis = getSuspectEmojis();
+        const emojiIndex = (person.shape - 1) % currentEmojis.length;
+        const emoji = currentEmojis[emojiIndex];
         
         const emojiElement = document.createElement('div');
         emojiElement.textContent = emoji;
@@ -1397,6 +1399,9 @@ function startGame() {
     gameContainer.style.display = 'flex';
     
     // Always try to load saved game state first (even if complete)
+    const todayKey = getTodayKey();
+    const savedStateString = localStorage.getItem(`suspectState_${todayKey}`);
+    const savedState = savedStateString ? JSON.parse(savedStateString) : null;
     console.log('[Suspect] startGame: savedState loaded:', !!savedState);
     if (savedState) {
         console.log('[Suspect] startGame: deadPeople array:', deadPeople);

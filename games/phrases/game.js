@@ -167,6 +167,13 @@ playButton.addEventListener('click', () => {
     // Show game container
     container.classList.add('gameStarted');
     
+    // Update phrase title based on current theme
+    const phraseTitle = document.getElementById('phraseTitle');
+    if (phraseTitle && typeof getCurrentTheme === 'function') {
+        const theme = getCurrentTheme();
+        phraseTitle.textContent = `${theme.name.toUpperCase()} PHRASE`;
+    }
+    
     // Get random phrase from gameVars
     const randomPhrase = getRandomPhrase();
     initializeGame(randomPhrase);
@@ -329,15 +336,28 @@ function displayPhrase(phrase) {
     // Check if any word has 9+ letters and adjust letter box sizes if needed
     const hasLongWord = words.some(word => word.length >= 9);
     const hasVeryLongWord = words.some(word => word.length >= 10);
-    adjustLetterBoxSizes(hasLongWord, hasVeryLongWord);
+    
+    // Add/remove CSS class for responsive styles
+    if (hasLongWord) {
+        phraseDisplay.classList.add('has-long-word');
+    } else {
+        phraseDisplay.classList.remove('has-long-word');
+    }
+    
+    // Adjust letter box sizes after a brief delay to ensure DOM is ready
+    requestAnimationFrame(() => {
+        adjustLetterBoxSizes(hasLongWord, hasVeryLongWord);
+    });
 }
 
 function adjustLetterBoxSizes(hasLongWord, hasVeryLongWord = false) {
-    const wordContainers = document.querySelectorAll('.word-container');
+    // Query letter boxes directly from DOM to ensure we have the current elements
+    const allLetterBoxes = document.querySelectorAll('.phrase-display .letter-box');
+    const wordContainers = document.querySelectorAll('.phrase-display .word-container');
     
-    if (!hasLongWord) {
+    if (!hasLongWord || allLetterBoxes.length === 0) {
         // Reset to default size
-        letterBoxes.forEach(box => {
+        allLetterBoxes.forEach(box => {
             box.style.width = '';
             box.style.height = '';
             box.style.fontSize = '';
@@ -348,99 +368,98 @@ function adjustLetterBoxSizes(hasLongWord, hasVeryLongWord = false) {
         return;
     }
     
-    // Get window width
-    const windowWidth = window.innerWidth;
+    // Get the phrase display container
+    const phraseDisplayEl = document.querySelector('.phrase-display');
+    if (!phraseDisplayEl) {
+        console.log('[Phrases] phraseDisplayEl not found');
+        return;
+    }
     
-    // If there's a 10+ letter word, use even smaller sizes
-    if (hasVeryLongWord) {
-        // Extra small sizes for 10+ letter words
-        if (windowWidth <= 360) {
-            letterBoxes.forEach(box => {
-                box.style.width = '24px';
-                box.style.height = '24px';
-                box.style.fontSize = '13px';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '4px';
-            });
-        } else if (windowWidth <= 400) {
-            letterBoxes.forEach(box => {
-                box.style.width = '28px';
-                box.style.height = '28px';
-                box.style.fontSize = '15px';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '4px';
-            });
-        } else if (windowWidth <= 480) {
-            letterBoxes.forEach(box => {
-                box.style.width = '32px';
-                box.style.height = '32px';
-                box.style.fontSize = '17px';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '5px';
-            });
-        } else if (windowWidth <= 600) {
-            letterBoxes.forEach(box => {
-                box.style.width = '36px';
-                box.style.height = '36px';
-                box.style.fontSize = '19px';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '6px';
-            });
-        } else {
-            letterBoxes.forEach(box => {
-                box.style.width = '40px';
-                box.style.height = '40px';
-                box.style.fontSize = '21px';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '7px';
+    // Get the actual available width considering all padding and margins
+    const computedStyle = window.getComputedStyle(phraseDisplayEl);
+    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+    const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+    const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
+    const marginRight = parseFloat(computedStyle.marginRight) || 0;
+    
+    const containerWidth = phraseDisplayEl.offsetWidth;
+    const availableLineWidth = containerWidth - paddingLeft - paddingRight - marginLeft - marginRight;
+    
+    // Get the default box size and gap from CSS
+    const defaultBoxSize = 50; // From CSS
+    const defaultGap = 8; // From CSS .word-container gap
+    
+    // Find the longest word
+    const words = currentPhrase ? currentPhrase.split(' ') : [];
+    const longestWordLength = words.length > 0 ? Math.max(...words.map(w => w.length)) : 9;
+    
+    // Calculate the total width needed for the longest word with default sizes
+    // Total width = (number of boxes * box width) + (number of gaps * gap width)
+    const totalWidthNeeded = (longestWordLength * defaultBoxSize) + ((longestWordLength - 1) * defaultGap);
+    
+    let targetBoxSize = defaultBoxSize;
+    let targetFontSize = 24; // Default from CSS
+    let targetGap = defaultGap;
+    
+    // If the word doesn't fit, calculate the required box size
+    if (totalWidthNeeded > availableLineWidth) {
+        // Calculate: availableWidth = (N * boxSize) + ((N-1) * gap)
+        // Solve for boxSize: boxSize = (availableWidth - ((N-1) * gap)) / N
+        // Use a smaller gap for long words to fit better
+        targetGap = hasVeryLongWord ? 5 : 6;
+        targetBoxSize = Math.floor((availableLineWidth - ((longestWordLength - 1) * targetGap)) / longestWordLength);
+        
+        // Calculate font size proportionally (default is 24px for 50px box)
+        targetFontSize = Math.floor((targetBoxSize / defaultBoxSize) * 24);
+        
+        // Ensure minimum sizes for readability
+        targetBoxSize = Math.max(28, targetBoxSize);
+        targetFontSize = Math.max(14, targetFontSize);
+    }
+    
+    console.log('[Phrases] Adjusting letter boxes:', {
+        hasLongWord,
+        hasVeryLongWord,
+        longestWordLength,
+        containerWidth,
+        availableLineWidth,
+        totalWidthNeeded,
+        targetBoxSize,
+        targetFontSize,
+        targetGap,
+        boxesFound: allLetterBoxes.length
+    });
+    
+    // Apply sizes to all letter boxes using setProperty with important
+    allLetterBoxes.forEach((box, index) => {
+        box.style.setProperty('width', `${targetBoxSize}px`, 'important');
+        box.style.setProperty('height', `${targetBoxSize}px`, 'important');
+        box.style.setProperty('font-size', `${targetFontSize}px`, 'important');
+        
+        // Log first box to verify
+        if (index === 0) {
+            const computed = window.getComputedStyle(box);
+            console.log('[Phrases] Applied to first box:', {
+                inlineWidth: box.style.width,
+                inlineHeight: box.style.height,
+                inlineFontSize: box.style.fontSize,
+                computedWidth: computed.width,
+                computedHeight: computed.height,
+                computedFontSize: computed.fontSize,
+                element: box
             });
         }
+    });
+    
+    // Apply gap to word containers if we're using a custom gap
+    if (targetGap !== defaultGap) {
+        wordContainers.forEach(container => {
+            container.style.gap = `${targetGap}px`;
+        });
     } else {
-        // Normal small sizes for 9 letter words - don't change gap, keep CSS default
-        if (windowWidth <= 360) {
-            letterBoxes.forEach(box => {
-                box.style.width = '28px';
-                box.style.height = '28px';
-                box.style.fontSize = '15px';
-            });
-            // Don't set gap - let CSS default handle it
-        } else if (windowWidth <= 400) {
-            letterBoxes.forEach(box => {
-                box.style.width = '32px';
-                box.style.height = '32px';
-                box.style.fontSize = '17px';
-            });
-            // Don't set gap - let CSS default handle it
-        } else if (windowWidth <= 480) {
-            letterBoxes.forEach(box => {
-                box.style.width = '36px';
-                box.style.height = '36px';
-                box.style.fontSize = '19px';
-            });
-            // Don't set gap - let CSS default handle it
-        } else if (windowWidth <= 600) {
-            letterBoxes.forEach(box => {
-                box.style.width = '42px';
-                box.style.height = '42px';
-                box.style.fontSize = '21px';
-            });
-            // Don't set gap - let CSS default handle it
-        } else {
-            // Reset to default size if width is above threshold
-            letterBoxes.forEach(box => {
-                box.style.width = '';
-                box.style.height = '';
-                box.style.fontSize = '';
-            });
-            wordContainers.forEach(container => {
-                container.style.gap = '';
-            });
-        }
+        wordContainers.forEach(container => {
+            container.style.gap = '';
+        });
     }
 }
 
@@ -1049,6 +1068,13 @@ function toggleKeyboard(show) {
 }
 
 toggleKeyboard(false);
+
+// Update phrase title based on current theme on page load
+const phraseTitle = document.getElementById('phraseTitle');
+if (phraseTitle && typeof getCurrentTheme === 'function') {
+    const theme = getCurrentTheme();
+    phraseTitle.textContent = `${theme.name.toUpperCase()} PHRASE`;
+}
 
 // Keyboard event listener
 document.addEventListener('keydown', (e) => {

@@ -182,7 +182,11 @@ function defuserAwardStarsForCurrentRun() {
     
     // Rounds completed is wires successfully cut
     const roundsCompleted = Math.max(0, gameState.currentRound - 1);
-    const starsThisRun = defuserGetStarsForRoundsCompleted(roundsCompleted);
+    
+    // Check if game is won (all 7 rounds completed) - always give 5 stars for winning
+    const isGameWon = gameState.currentRound >= 7;
+    const starsThisRun = isGameWon ? 5 : defuserGetStarsForRoundsCompleted(roundsCompleted);
+    
     if (starsThisRun <= 0) return { roundsCompleted, starsEarned: 0 };
     
     const newStars = Math.max(existing, starsThisRun);

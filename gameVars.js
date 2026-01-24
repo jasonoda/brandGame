@@ -1,3 +1,99 @@
+// -------------------------------------------------------------------------------------------
+// ----------------------------------------- Theme Configuration -----------------------------------------
+// -------------------------------------------------------------------------------------------
+
+// Current theme - get from URL parameter, default to 'thanksgiving'
+// URL parameter: ?theme=thanksgiving or ?theme=july4th
+function getCurrentThemeFromURL() {
+    // Check current window URL first
+    const urlParams = new URLSearchParams(window.location.search);
+    let themeParam = urlParams.get('theme');
+    
+    // If not found and we're in an iframe, check parent window
+    if (!themeParam && window.parent && window.parent !== window) {
+        try {
+            const parentUrlParams = new URLSearchParams(window.parent.location.search);
+            themeParam = parentUrlParams.get('theme');
+        } catch (e) {
+            // Cross-origin or other error, ignore
+        }
+    }
+    
+    // Valid themes: 'thanksgiving' or 'july4th'
+    if (themeParam === 'july4th') {
+        return 'july4th';
+    }
+    // Default to thanksgiving
+    return 'thanksgiving';
+}
+
+const CURRENT_THEME = getCurrentThemeFromURL();
+
+const THEMES = {
+    thanksgiving: {
+        name: 'Thanksgiving',
+        quizTitle: 'DAILY THANKSGIVING QUIZ',
+        backgroundPattern: 'weeklyBackgrounds/thanksgiving_pattern.jpg',
+        puzzleBackground: 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg',
+        zoomImage: 'weeklyBackgrounds/thanksgiving_zoom.jpg',
+        phrases: [
+            "Saving room for pumpkin pie",
+            "Thankful for the little things",
+            "Eat first ask questions later",
+            "Leftover Turkey sandwiches all week",
+            "Just leave me to my food coma",
+            "Grateful hearts and full bellies",
+            "Count your blessings not calories",
+            "Stuffed with gratitude and love",
+            "Autumn leaves and pumpkin please",
+            "Family food fun and football",
+            "Pumpkin spice and everything nice",
+            "Thankful thoughts and warm wishes",
+            "Together is the best place to be",
+            "Gratitude is the best attitude",
+            "Countless reasons to be grateful"
+        ],
+        crossWords: [
+            'TURKEY', 'GRAVY', 'FEAST', 'FAMILY', 'PUMPKIN', 'HARVEST', 
+            'THANKS', 'CANDLE', 'LEAVES', 'AUTUMN', 'PILGRIM', 
+            'SQUASH', 'APPLES', 'BREAD', 'FRIENDS', 'ROAST'
+        ],
+        suspectEmojis: ['🦃', '🥧', '🍂', '🌽', '🍁'],
+        beticleWords: ['GRAVY', 'FEAST', 'BREAD', 'ROAST', 'STUFF', 'CRUST', 'SPICE', 'SWEET', 'TREAT', 'TABLE', 'PLATE', 'SERVE', 'SLICE', 'TASTE', 'SAVOR', 'GRACE', 'BLESS', 'GIVEN', 'SHARE', 'CARVE', 'APPLE'],
+        mysteryWords: ['GRAVY', 'FEAST', 'BREAD', 'ROAST', 'STUFF', 'CRUST', 'SPICE', 'SWEET', 'TREAT', 'TABLE', 'PLATE', 'SERVE', 'SLICE', 'TASTE', 'SAVOR', 'GRACE', 'BLESS', 'GIVEN', 'SHARE', 'CARVE', 'APPLE']
+    },
+    july4th: {
+        name: '4th of July',
+        quizTitle: 'DAILY 4TH OF JULY QUIZ',
+        backgroundPattern: 'weeklyBackgrounds/forthOfJuly_pattern.png',
+        puzzleBackground: 'weeklyBackgrounds/fourthOfJuly_puzzleBig.jpg',
+        puzzleMedium: 'weeklyBackgrounds/fourthOfJuly_puzzleMedium.jpg',
+        puzzleSmall: 'weeklyBackgrounds/fourthOfJuly_puzzleSmall.jpg',
+        zoomImage: 'weeklyBackgrounds/forthOfJuly_zoom.jpg',
+        phrases: [
+            "Land of the free home of the brave",
+            "Red white and blue all the way through",
+            "Enjoy the Fireworks show",
+            "Stars stripes and sparklers",
+            "Grill master at the party",
+            
+        ],
+       
+        crossWords: [
+            'FREEDOM', 'PATRIOT', 'LIBERTY', 'AMERICA', 'STARS', 'STRIPES', 
+            'FLAG', 'JULY', 'FOURTH', 
+            'NATION', 'UNITED', 'STATES', 'BRAVE', 'FREE'
+        ],
+        suspectEmojis: ['🇺🇸', '🧨', '🦅', '⭐', '🔥'],
+        beticleWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE', ],
+        mysteryWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE', ]
+    }
+};
+
+// Get current theme
+function getCurrentTheme() {
+    return THEMES[CURRENT_THEME] || THEMES.thanksgiving;
+}
 
 // -------------------------------------------------------------------------------------------
 // ----------------------------------------- Scramble -----------------------------------------
@@ -141,98 +237,141 @@ function getRandomScrambleDay() {
 // -------------------------------------------------------------------------------------------
 
 function getQuizData() {
-    return [
-        {
-            "set": 1,
-            "questions": [
-                {
-                    "question": "Which flavor blend became a defining modern Thanksgiving dessert profile in the 20th century?",
-                    "answers": ["Pumpkin spice", "Apple spice", "Cinnamon sugar"],
-                    "correct": 0
-                },
-                {
-                    "question": "Which U.S. president moved Thanksgiving earlier to influence holiday shopping?",
-                    "answers": ["Herbert Hoover", "F. D. Roosevelt", "Harry Truman"],
-                    "correct": 1
-                },
-                {
-                    "question": "Which medium most helped synchronize Thanksgiving celebrations nationwide by mid-century?",
-                    "answers": ["Radio", "Newspapers", "Television"],
-                    "correct": 2
-                },
-                {
-                    "question": "Which convenience food resulted from surplus after a Thanksgiving season?",
-                    "answers": ["Frozen pie", "TV dinner", "Canned gravy"],
-                    "correct": 1
-                },
-                {
-                    "question": "Which food was eaten at the 1621 harvest feast but rarely appears on modern Thanksgiving menus?",
-                    "answers": ["Clams", "Goose", "Cornbread"],
-                    "correct": 0
-                }
-            ]
-        },
-        {
-            "set": 2,
-            "questions": [
-                {
-                    "question": "Which feature helped transform the New York Thanksgiving parade into a national spectacle?",
-                    "answers": ["Marching bands", "Giant balloons", "Celebrity hosts"],
-                    "correct": 1
-                },
-                {
-                    "question": "Which department store originally organized the Thanksgiving parade?",
-                    "answers": ["Macy's", "Bloomingdale's", "Sears"],
-                    "correct": 0
-                },
-                {
-                    "question": "Which factor most helped turkey replace other meats for Thanksgiving meals?",
-                    "answers": ["Farm size", "Affordability", "Rail transport"],
-                    "correct": 1
-                },
-                {
-                    "question": "Which publication helped standardize Thanksgiving recipes nationally?",
-                    "answers": ["Local newspapers", "Church bulletins", "Good Housekeeping"],
-                    "correct": 2
-                },
-                {
-                    "question": "Which ingredient spread nationally due to early food canning?",
-                    "answers": ["Pumpkin puree", "Sweet corn", "Cranberries"],
-                    "correct": 0
-                }
-            ]
-        },
-        {
-            "set": 3,
-            "questions": [
-                {
-                    "question": "Which sport became closely associated with Thanksgiving broadcasts?",
-                    "answers": ["Football", "Baseball", "Hockey"],
-                    "correct": 0
-                },
-                {
-                    "question": "Which team became a long-standing Thanksgiving football host?",
-                    "answers": ["Chicago Bears", "Detroit Lions", "Green Bay Packers"],
-                    "correct": 1
-                },
-                {
-                    "question": "Which development most enabled nationwide Thanksgiving menu consistency?",
-                    "answers": ["Recipe media", "Rail shipping", "Food canning"],
-                    "correct": 2
-                },
-                {
-                    "question": "Why did Thanksgiving resist becoming a weekend holiday in the U.S.?",
-                    "answers": ["Work patterns", "Church customs", "Market timing"],
-                    "correct": 0
-                },
-                {
-                    "question": "Which 19th-century movement most pushed Thanksgiving as a moral tradition?",
-                    "answers": ["Political unity", "Religious reform", "Public education"],
-                    "correct": 1
-                }
-            ]
-        }
-    ];
+    const theme = getCurrentTheme();
+    const themeKey = CURRENT_THEME;
+    
+    if (themeKey === 'thanksgiving') {
+        return [
+            {
+                "set": 1,
+                "questions": [
+                    {
+                        "question": "Which flavor blend became a defining modern Thanksgiving dessert profile in the 20th century?",
+                        "answers": ["Pumpkin spice", "Apple spice", "Cinnamon sugar"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "Which U.S. president moved Thanksgiving earlier to influence holiday shopping?",
+                        "answers": ["Herbert Hoover", "F. D. Roosevelt", "Harry Truman"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which medium most helped synchronize Thanksgiving celebrations nationwide by mid-century?",
+                        "answers": ["Radio", "Newspapers", "Television"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "Which convenience food resulted from surplus after a Thanksgiving season?",
+                        "answers": ["Frozen pie", "TV dinner", "Canned gravy"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which food was eaten at the 1621 harvest feast but rarely appears on modern Thanksgiving menus?",
+                        "answers": ["Clams", "Goose", "Cornbread"],
+                        "correct": 0
+                    }
+                ]
+            },
+            {
+                "set": 2,
+                "questions": [
+                    {
+                        "question": "Which feature helped transform the New York Thanksgiving parade into a national spectacle?",
+                        "answers": ["Marching bands", "Giant balloons", "Celebrity hosts"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which department store originally organized the Thanksgiving parade?",
+                        "answers": ["Macy's", "Bloomingdale's", "Sears"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "Which factor most helped turkey replace other meats for Thanksgiving meals?",
+                        "answers": ["Farm size", "Affordability", "Rail transport"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which publication helped standardize Thanksgiving recipes nationally?",
+                        "answers": ["Local newspapers", "Church bulletins", "Good Housekeeping"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "Which ingredient spread nationally due to early food canning?",
+                        "answers": ["Pumpkin puree", "Sweet corn", "Cranberries"],
+                        "correct": 0
+                    }
+                ]
+            },
+            {
+                "set": 3,
+                "questions": [
+                    {
+                        "question": "Which sport became closely associated with Thanksgiving broadcasts?",
+                        "answers": ["Football", "Baseball", "Hockey"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "Which team became a long-standing Thanksgiving football host?",
+                        "answers": ["Chicago Bears", "Detroit Lions", "Green Bay Packers"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which development most enabled nationwide Thanksgiving menu consistency?",
+                        "answers": ["Recipe media", "Rail shipping", "Food canning"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "Why did Thanksgiving resist becoming a weekend holiday in the U.S.?",
+                        "answers": ["Work patterns", "Church customs", "Market timing"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "Which 19th-century movement most pushed Thanksgiving as a moral tradition?",
+                        "answers": ["Political unity", "Religious reform", "Public education"],
+                        "correct": 1
+                    }
+                ]
+            }
+        ];
+    } else if (themeKey === 'july4th') {
+        return [
+            {
+                "set": 1,
+                "questions": [
+                   
+                    {
+                        "question": "In which year was the Declaration of Independence signed?",
+                        "answers": ["1492", "1776", "1812"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which document declared American independence from Great Britain?",
+                        "answers": ["The Constitution", "The Bill of Rights", "The Declaration of Independence"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "Which city hosted the first public reading of the Declaration of Independence?",
+                        "answers": ["Philadelphia", "Washington D.C.", "New York"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "Which founding father is credited with writing most of the Declaration of Independence?",
+                        "answers": ["George Washington", "Thomas Jefferson", "Benjamin Franklin"],
+                        "correct": 1
+                    },
+                    {
+                       "question": "Which battle is considered the turning point of the American Revolution?",
+                        "answers": ["Battle of Saratoga", "Battle of Bunker Hill", "Battle of Yorktown"],
+                        "correct": 0
+                    }
+                ]
+            }
+           
+        ];
+    }
+    
+    // Default to Thanksgiving if theme not found
+    return [];
 }
 
 // Puzzle Games:
@@ -242,23 +381,13 @@ function getQuizData() {
 // -------------------------------------------------------------------------------------------
 
 function getRandomPhrase() {
-    const phrases = [
-        "Saving room for pumpkin pie",
-        "Thankful for the little things",
-        "Eat first ask questions later",
-        "Leftover Turkey sandwiches all week",
-        "Just leave me to my food coma",
-        "Grateful hearts and full bellies",
-        "Count your blessings not calories",
-        "Stuffed with gratitude and love",
-        "Autumn leaves and pumpkin please",
-        "Family food fun and football",
-        "Pumpkin spice and everything nice",
-        "Thankful thoughts and warm wishes",
-        "Together is the best place to be",
-        "Gratitude is the best attitude",
-        "Countless reasons to be grateful"
-    ];
+    const theme = getCurrentTheme();
+    const phrases = theme.phrases;
+    
+    if (!phrases || phrases.length === 0) {
+        console.warn('No phrases found for current theme, using fallback');
+        return "Default phrase";
+    }
     
     const randomIndex = Math.floor(Math.random() * phrases.length);
     return phrases[randomIndex];
@@ -269,11 +398,8 @@ function getRandomPhrase() {
 // -------------------------------------------------------------------------------------------
 
 function getRandomCrossWords(count = 2) {
-    const words = [
-        'TURKEY', 'GRAVY', 'FEAST', 'FAMILY', 'PUMPKIN', 'HARVEST', 
-        'THANKS', 'CANDLE', 'LEAVES', 'AUTUMN', 'PILGRIM', 
-        'SQUASH', 'APPLES', 'BREAD', 'FRIENDS', 'ROAST'
-    ].filter(word => word.length >= 5 && word.length <= 7);
+    const theme = getCurrentTheme();
+    const words = theme.crossWords.filter(word => word.length >= 5 && word.length <= 7);
     
     const shuffled = [...words].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(count, shuffled.length));
@@ -288,7 +414,9 @@ function getRandomCrossWords(count = 2) {
 // -------------------------------------------------------------------------------------------
 
 function getSuspectEmojis() {
-    return ['🦃', '🥧', '🍂', '🌽', '🍁']; // 5 emojis
+    // Always use current theme emojis (no firehouse check for suspect game)
+    const theme = getCurrentTheme();
+    return theme.suspectEmojis; // 5 emojis
 }
 
 // -------------------------------------------------------------------------------------------
@@ -303,6 +431,11 @@ function getSuspectEmojis() {
 // ----------------------------------------- Zoom -----------------------------------------
 // -------------------------------------------------------------------------------------------
 
+function getZoomImage() {
+    const theme = getCurrentTheme();
+    return theme.zoomImage || 'weeklyBackgrounds/thanksgiving_zoom.jpg'; // Default to thanksgiving if not set
+}
+
 // -------------------------------------------------------------------------------------------
 // ----------------------------------------- Shift -----------------------------------------
 // -------------------------------------------------------------------------------------------
@@ -312,34 +445,10 @@ function getSuspectEmojis() {
 // -------------------------------------------------------------------------------------------
 
 function getBeticleTargetWord() {
-    const commonWords = [
-        'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
-        'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
-        'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
-        'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
-        'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
-        'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
-        'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
-        'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
-        'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
-        'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
-        'WRITE', 'YACHT', 'YOUTH', 'ZEBRA'
-    ];
-    
-    // Use date as seed for deterministic word selection (same word each day)
-    const today = new Date();
-    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const dateSeed = todayKey.split('-').join('');
-    const seed = parseInt(dateSeed) || 0;
-    
-    // Use seeded random to pick a word (deterministic per day)
-    const seededRandom = (seed) => {
-        const x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    };
-    
-    const randomIndex = Math.floor(seededRandom(seed) * commonWords.length);
-    return commonWords[randomIndex];
+    const theme = getCurrentTheme();
+    const words = theme.beticleWords || [];
+    const randomIndex = Math.floor(Math.random() * words.length);
+    return words[randomIndex];
 }
 
 // -------------------------------------------------------------------------------------------
@@ -347,35 +456,8 @@ function getBeticleTargetWord() {
 // -------------------------------------------------------------------------------------------
 
 function getMysteryWordTargetWord() {
-    const commonWords = [
-        'APPLE', 'BEACH', 'BRAIN', 'BREAD', 'CHAIR', 'CLOUD', 'DANCE', 'EARTH', 'FIELD', 'FLAME',
-        'GLASS', 'GRASS', 'HEART', 'HOUSE', 'LIGHT', 'MUSIC', 'OCEAN', 'PAPER', 'PLANT', 'RIVER',
-        'SMILE', 'SPACE', 'STONE', 'STORM', 'SUNNY', 'SWEET', 'TABLE', 'THING', 'TIGER', 'TRAIN',
-        'WATER', 'WHEEL', 'WORLD', 'WRITE', 'YELLOW', 'YOUNG', 'ZEBRA', 'ANGEL', 'ARROW', 'BERRY',
-        'BLOCK', 'BRAND', 'BRICK', 'CANDY', 'CROWN', 'DREAM', 'EAGLE', 'FENCE', 'FLASH', 'GHOST',
-        'GREEN', 'HAPPY', 'HORSE', 'IMAGE', 'JELLY', 'KNIFE', 'LEMON', 'MAGIC', 'MOUSE', 'NIGHT',
-        'PEACE', 'PHONE', 'PIZZA', 'QUEEN', 'QUIET', 'RADIO', 'ROBOT', 'SHARK', 'SHEEP', 'SNAKE',
-        'SPEED', 'SPOON', 'STAMP', 'STICK', 'STONE', 'STORE', 'STORY', 'SWEET', 'SWING', 'THUMB',
-        'TOAST', 'TOWER', 'TRACK', 'TRUCK', 'TRUTH', 'TWIST', 'UNITY', 'VALUE', 'VIBES', 'VIDEO',
-        'VITAL', 'VOICE', 'WASTE', 'WATCH', 'WAVES', 'WHEAT', 'WHEEL', 'WHITE', 'WOMAN', 'WORLD',
-        'WRITE', 'YACHT', 'YOUTH', 'ZEBRA', 'ZONAL'
-    ];
-    
-    // Get today's key for localStorage
-    const today = new Date();
-    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const storedWord = localStorage.getItem(`mysteryWordTarget_${todayKey}`);
-    
-    if (storedWord) {
-        return storedWord;
-    }
-    
-    // Pick a random word from common words
-    const randomIndex = Math.floor(Math.random() * commonWords.length);
-    const selectedWord = commonWords[randomIndex];
-    
-    // Store it for today
-    localStorage.setItem(`mysteryWordTarget_${todayKey}`, selectedWord);
-    
-    return selectedWord;
+    const theme = getCurrentTheme();
+    const words = theme.mysteryWords || [];
+    const randomIndex = Math.floor(Math.random() * words.length);
+    return words[randomIndex];
 }

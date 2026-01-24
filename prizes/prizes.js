@@ -4,13 +4,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('prizes-overlay-grid');
     const cards = grid ? Array.from(grid.querySelectorAll('.prizes-card')) : [];
     const overlayTitle = document.querySelector('.prizes-overlay-title');
+    
+    // Get puzzle images from current theme
+    let puzzleBig = 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg';
+    let puzzleMedium = 'weeklyBackgrounds/thanksgiving_puzzleMedium.jpg';
+    let puzzleSmall = 'weeklyBackgrounds/thanksgiving_puzzleSmall.jpg';
+    
+    if (typeof getCurrentTheme === 'function') {
+        const theme = getCurrentTheme();
+        if (theme.puzzleBackground) {
+            puzzleBig = theme.puzzleBackground;
+        }
+        if (theme.puzzleMedium) {
+            puzzleMedium = theme.puzzleMedium;
+        }
+        if (theme.puzzleSmall) {
+            puzzleSmall = theme.puzzleSmall;
+        }
+    }
+    
     const prizeSets = [
         {
             name: 'big',
             list: Array.from(document.querySelectorAll('.prize-container .prize-grid.grid-4x4 .prize-box')),
             cols: 4,
             rows: 4,
-            image: 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg',
+            image: puzzleBig,
             scroll: 'top',
         },
         {
@@ -18,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             list: Array.from(document.querySelectorAll('.prize-container .prize-grid.grid-2x4 .prize-box')),
             cols: 4,
             rows: 2,
-            image: 'weeklyBackgrounds/thanksgiving_puzzleMedium.jpg',
+            image: puzzleMedium,
             scroll: 'bottom',
         },
         {
@@ -26,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             list: Array.from(document.querySelectorAll('.prize-container .prize-grid.grid-1x4 .prize-box')),
             cols: 4,
             rows: 1,
-            image: 'weeklyBackgrounds/thanksgiving_puzzleSmall.jpg',
+            image: puzzleSmall,
             scroll: 'bottom',
         },
     ];

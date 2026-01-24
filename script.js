@@ -255,14 +255,36 @@ function openGame(gameId) {
         iframe.setAttribute('style', 'width: 100%; height: 100%; border: none;');
     }
     
-    // Build URL with scheme parameter if present
+    // Build URL with scheme parameter and header type if present
     const urlParams = new URLSearchParams(window.location.search);
+    const headerType = urlParams.get('d');
     const scheme = urlParams.get('s');
-    const gameUrl = scheme ? `${config.path}?s=${scheme}` : config.path;
+    const theme = urlParams.get('theme');
+    
+    // Build game URL with parameters
+    let gameUrl = config.path;
+    const gameParams = new URLSearchParams();
+    if (scheme) {
+        gameParams.set('s', scheme);
+    }
+    if (headerType && gameId === 'match3') {
+        // Pass header type to match3 game so it can detect firehouse
+        gameParams.set('d', headerType);
+    }
+    if (theme && (gameId === 'zoom' || gameId === 'suspect')) {
+        // Pass theme to zoom and suspect games so they can use the correct images/content
+        gameParams.set('theme', theme);
+    }
+    if (gameParams.toString()) {
+        gameUrl += '?' + gameParams.toString();
+    }
     
     // Load the game
     iframe.src = gameUrl;
     console.log(`Loading game ${gameId}: ${gameUrl}`);
+    if (gameId === 'match3' && headerType) {
+        console.log(`Match3 - Passing headerType '${headerType}' in URL: ${gameUrl}`);
+    }
     
     // Show overlay
     overlay.classList.add('active');
@@ -687,11 +709,103 @@ window.updateCrossStars = updateCrossStars;
     setTimeout(hideWeekHeaderBackground, 1000);
 })();
 
+// Function to apply theme settings
+function applyThemeSettings() {
+    if (typeof getCurrentTheme === 'function') {
+        const theme = getCurrentTheme();
+        
+        // Update week subtitle text
+        const weekSubtitles = document.querySelectorAll('.week-subtitle, .week-subtitle-type1');
+        weekSubtitles.forEach(subtitle => {
+            subtitle.textContent = theme.name.toUpperCase();
+        });
+        
+        // Update quiz titles
+        const quizTitles = document.querySelectorAll('.subsection-title');
+        quizTitles.forEach(title => {
+            if (title.textContent.includes('THANKSGIVING QUIZ') || title.textContent.includes('4TH OF JULY QUIZ')) {
+                title.textContent = theme.quizTitle;
+            }
+        });
+        
+        // Update background images
+        const themePattern = theme.backgroundPattern;
+        if (themePattern) {
+            // Check if it's firehouse or bigy - if so, put image on calendar, otherwise on carousel
+            const urlParams = new URLSearchParams(window.location.search);
+            const headerType = urlParams.get('d');
+            const isFirehouseOrBigy = headerType === 'firehouse2' || headerType === 'bigy' || headerType === 'bigy2';
+            
+            const style = document.createElement('style');
+            style.id = 'theme-background-styles';
+            
+            if (isFirehouseOrBigy) {
+                // Put background on week-theme-section for firehouse/bigy (behind "THIS WEEK'S THEME")
+                // Use ::before pseudo-element with 0.15 opacity
+                style.textContent = `
+                    .week-theme-section::before {
+                        content: '' !important;
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        background-image: url('${themePattern}') !important;
+                        background-size: cover !important;
+                        background-position: center !important;
+                        background-repeat: no-repeat !important;
+                        opacity: 0.15 !important;
+                        pointer-events: none !important;
+                        z-index: 0 !important;
+                    }
+                    body.firehouse2 .week-combined-container2B .week-theme-section::before,
+                    body.bigy2 .week-combined-container2B .week-theme-section::before,
+                    .week-combined-container2A .week-theme-section::before {
+                        content: '' !important;
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        background-image: url('${themePattern}') !important;
+                        background-size: cover !important;
+                        background-position: center !important;
+                        background-repeat: no-repeat !important;
+                        opacity: 0.15 !important;
+                        pointer-events: none !important;
+                        z-index: 0 !important;
+                    }
+                `;
+            } else {
+                // Put background on carousel for normal
+                style.textContent = `
+                    .top-logo-carousel-container-type1 {
+                        background-image: url('${themePattern}') !important;
+                    }
+                `;
+            }
+            
+            // Remove existing theme style if present
+            const existingStyle = document.getElementById('theme-background-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            document.head.appendChild(style);
+        }
+    }
+}
+
 // Run when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     setCurrentDate();
     updateHeaderStarCounter();
     updateWalletStars2();
+    
+    // Apply theme settings
+    applyThemeSettings();
+    
     // Update bonus spin display - ensure it runs after DOM is ready
     setTimeout(() => {
         updateBonusSpinDisplay();
@@ -701,6 +815,25 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
     updateCalendar();
     }, 100);
+    
+    // Initialize deals page display if it's the active page
+    const dealsPage = document.getElementById('deals-page');
+    if (dealsPage && dealsPage.classList.contains('active')) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const headerType = urlParams.get('d');
+        const regularDeals = document.getElementById('regular-deals');
+        const firehouseDeals = document.getElementById('dealsFirehouse');
+        
+        if (headerType === 'firehouse2' && firehouseDeals) {
+            // Show firehouse deals, hide regular deals
+            if (regularDeals) regularDeals.style.display = 'none';
+            firehouseDeals.style.display = 'grid';
+        } else {
+            // Show regular deals, hide firehouse deals
+            if (regularDeals) regularDeals.style.display = 'grid';
+            if (firehouseDeals) firehouseDeals.style.display = 'none';
+        }
+    }
     
     loadGameScores2();
     updateBoostHighScore();
@@ -761,6 +894,24 @@ buttons.forEach(button => {
         const targetPageElement = document.getElementById(`${targetPage}-page`);
         if (targetPageElement) {
             targetPageElement.classList.add('active');
+        }
+        
+        // Handle firehouse deals display
+        if (targetPage === 'deals') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const headerType = urlParams.get('d');
+            const regularDeals = document.getElementById('regular-deals');
+            const firehouseDeals = document.getElementById('dealsFirehouse');
+            
+            if (headerType === 'firehouse2' && firehouseDeals) {
+                // Show firehouse deals, hide regular deals
+                if (regularDeals) regularDeals.style.display = 'none';
+                firehouseDeals.style.display = 'grid';
+            } else {
+                // Show regular deals, hide firehouse deals
+                if (regularDeals) regularDeals.style.display = 'grid';
+                if (firehouseDeals) firehouseDeals.style.display = 'none';
+            }
         }
         
         // Update logo visibility when switching pages
@@ -942,6 +1093,9 @@ function checkURLParameters() {
         
         // Apply blue styling and white text for scramble, MC, and FoF
         applyBigyStyling();
+        
+        // Re-apply theme settings after bigy styling is applied
+        applyThemeSettings();
     } else if (headerType === 'bigy2') {
         // Show header-type2, hide header-type1
         if (headerType1) headerType1.style.display = 'none';
@@ -967,6 +1121,9 @@ function checkURLParameters() {
         
         // Apply blue styling and white text for scramble, MC, and FoF
         applyBigyStyling();
+        
+        // Re-apply theme settings after bigy2 styling is applied
+        applyThemeSettings();
         
         // Show logo for bigy2 (same as bigy)
         if (headerLogo) {
@@ -1004,9 +1161,148 @@ function checkURLParameters() {
                 }
             }, 50);
         });
+    } else if (headerType === 'firehouse2') {
+        // Show header-type2, hide header-type1
+        if (headerType1) headerType1.style.display = 'none';
+        if (headerType2) headerType2.style.display = 'block';
+        
+        // Show container2B, hide container2A
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'flex';
+        
+        // Set firehouse logo
+        if (headerLogo) {
+            headerLogo.src = 'src/img/firehousesubs/logo.png';
+        }
+        carouselLogos.forEach(logo => {
+            logo.src = 'src/img/firehousesubs/logo.png';
+        });
+        
+        // Apply DM Sans font to all elements except serif fonts and letter-box
+        applyFontScheme('DM Sans');
+        
+        // Add body class for firehouse2 styling
+        document.body.classList.add('firehouse2');
+        
+        // Apply firehouse red styling and white text for scramble, MC, and FoF
+        applyFirehouseStyling();
+        
+        // Re-apply theme settings after firehouse styling is applied
+        applyThemeSettings();
+        
+        // Show logo for firehouse2
+        if (headerLogo) {
+            headerLogo.style.display = 'block';
+        }
+        
+        // For firehouse2, use yellow gradient hint button styling
+        const hintButton = document.querySelector('.unscramble-hint-btn');
+        if (hintButton) {
+            // Remove any existing event listeners by cloning and replacing
+            const newHintButton = hintButton.cloneNode(true);
+            hintButton.parentNode.replaceChild(newHintButton, hintButton);
+            
+            // Apply yellow gradient styling for firehouse2
+            newHintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
+            newHintButton.style.color = 'white';
+            newHintButton.style.borderRadius = '6px';
+            newHintButton.style.padding = '8px 24px';
+            newHintButton.style.fontWeight = '700';
+            newHintButton.style.boxShadow = 'none';
+            // Remove lightbulb emoji for firehouse2
+            newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
+            if (newHintButton.textContent.trim() === '') {
+                newHintButton.textContent = 'Hint';
+            }
+        }
+        
+        // Update carousel text for firehouse2
+        const carouselSlides = document.querySelectorAll('.top-logo-carousel .carousel-slide');
+        carouselSlides.forEach(slide => {
+            const title = slide.querySelector('.promotional-banner-title');
+            const subtitle = slide.querySelector('.promotional-banner-subtitle');
+            if (title && title.textContent.includes('GO UNLIMITED')) {
+                title.innerHTML = 'Feed the Crowd. Save the Day.';
+                title.style.textTransform = 'none';
+                if (subtitle) {
+                    subtitle.textContent = 'Got a big crew to feed? Call for backup with Firehouse Subs catering for any occasion.';
+                }
+            }
+            if (title && title.textContent.includes('DAILY GAMES')) {
+                title.innerHTML = '$100 Million Donated<br>to First Responders';
+                title.style.textTransform = 'none';
+                if (subtitle) {
+                    subtitle.textContent = 'The Foundation has supported thousands of equipment grants for first responders across the country.';
+                }
+            }
+        });
+        
+        // Update sweepsGame image for firehouse
+        const boostSweepsImg = document.getElementById('boost-sweeps-game-img');
+        if (boostSweepsImg) {
+            boostSweepsImg.src = 'src/img/firehousesubs/sweepsGame.png';
+        }
+        
+        // Update calendar for firehouse2 after container is shown
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                if (typeof updateCalendar === 'function') {
+                    console.log('[Firehouse2] Updating calendar after container shown');
+                    updateCalendar();
+                }
+                // Re-apply theme settings after container is shown
+                applyThemeSettings();
+            }, 50);
+        });
+    } else if (headerType === 'wegmans') {
+        // Show header-type1, hide header-type2 (normal version)
+        if (headerType1) headerType1.style.display = 'block';
+        if (headerType2) headerType2.style.display = 'none';
+        
+        // Hide both containers for wegmans (uses normal calendar)
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'none';
+        
+        // Set wegmans logo for wegmans header (upper left)
+        if (headerLogo) {
+            headerLogo.src = 'src/img/wegmans/wegmans.png';
+            headerLogo.style.display = 'block'; // Explicitly show logo for wegmans
+        }
+        // Update all carousel logos to use wegmans2.png
+        carouselLogos.forEach(logo => {
+            logo.src = 'src/img/wegmans/wegmans2.png';
+        });
+        
+        // Also update first and last carousel slides specifically for wegmans
+        const carouselSlides = document.querySelectorAll('.carousel-slide-type1');
+        if (carouselSlides.length > 0) {
+            // First slide
+            const firstSlide = carouselSlides[0];
+            const firstSlideImg = firstSlide.querySelector('img');
+            if (firstSlideImg) {
+                firstSlideImg.src = 'src/img/wegmans/wegmans2.png';
+            }
+            // Last slide
+            const lastSlide = carouselSlides[carouselSlides.length - 1];
+            const lastSlideImg = lastSlide.querySelector('img');
+            if (lastSlideImg) {
+                lastSlideImg.src = 'src/img/wegmans/wegmans2.png';
+            }
+        }
+        
+        // Apply Nunito font (default)
+        applyFontScheme('Nunito');
+        
+        // Add body class for wegmans styling
+        document.body.classList.add('wegmans');
+        
+        // Re-apply theme settings
+        applyThemeSettings();
     } else {
-        // Remove bigy2 class if it exists
+        // Remove bigy2 and firehouse2 classes if they exist
         document.body.classList.remove('bigy2');
+        document.body.classList.remove('firehouse2');
         
         // Default: show header-type1, hide header-type2
         if (headerType1) headerType1.style.display = 'block';
@@ -1073,7 +1369,7 @@ function checkURLParameters() {
     }
         
     // Initialize the appropriate carousel based on header type
-    if (headerType === 'bigy') {
+    if (headerType === 'bigy' || headerType === 'bigy2' || headerType === 'firehouse2') {
         initBigyCarousel();
     } else {
         initType1Carousel();
@@ -1121,6 +1417,311 @@ function applyFontScheme(fontFamily) {
 }
 
 // Function to apply bigy styling (blue backgrounds, white text)
+function applyWegmansStyling() {
+    // Change page background to white for wegmans
+    document.body.style.backgroundColor = 'white';
+    
+    // Change all sections to white background
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.backgroundColor = 'white';
+    });
+    
+    // Scramble sections - orange gradient for wegmans
+    const scrambleTop = document.querySelector('.scramble-top-section');
+    const scrambleBottom = document.querySelector('.scramble-bottom-section');
+    if (scrambleTop) {
+        scrambleTop.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
+        scrambleTop.style.backgroundColor = '';
+        scrambleTop.style.borderBottom = 'none';
+    }
+    if (scrambleBottom) {
+        scrambleBottom.style.background = '#ce3f24';
+        scrambleBottom.style.backgroundColor = '#ce3f24';
+    }
+    
+    // MC sections - orange for wegmans (darker top, lighter bottom)
+    const mcTop = document.querySelector('.mc-top-section');
+    const mcBottom = document.querySelector('.mc-bottom-section');
+    if (mcTop) {
+        mcTop.style.background = '#a0301a';
+        mcTop.style.backgroundColor = '#a0301a';
+        mcTop.style.borderBottom = 'none';
+    }
+    if (mcBottom) {
+        mcBottom.style.background = '#ce3f24';
+        mcBottom.style.backgroundColor = '#ce3f24';
+    }
+    
+    // Quiz sections - orange gradient for wegmans
+    const quizTop = document.querySelector('.quiz-top-section');
+    const quizBottom = document.querySelector('.quiz-bottom-section');
+    if (quizTop) {
+        quizTop.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
+        quizTop.style.backgroundColor = '';
+        quizTop.style.borderBottom = 'none';
+    }
+    if (quizBottom) {
+        // quizBottom.style.background = '#ce3f24';
+        quizBottom.style.backgroundColor = '#ce3f24';
+    }
+    
+    // FoF sections - orange for wegmans (darker top, lighter bottom)
+    const fofTop = document.querySelector('.fof-top-section');
+    const fofBottom = document.querySelector('.fof-bottom-section');
+    if (fofTop) {
+        fofTop.style.background = '#a0301a';
+        fofTop.style.backgroundColor = '#a0301a';
+        fofTop.style.borderBottom = 'none';
+    }
+    if (fofBottom) {
+        fofBottom.style.background = '#ce3f24';
+        fofBottom.style.backgroundColor = '#ce3f24';
+    }
+    
+    // Stars - wegmans color (#ce3f24) instead of red
+    const unscrambleStars = document.querySelectorAll('.unscramble-stars');
+    unscrambleStars.forEach(stars => {
+        stars.style.color = '#ce3f24';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#ce3f24';
+        });
+    });
+    
+    const mcStars = document.querySelectorAll('.mc-stars');
+    mcStars.forEach(stars => {
+        stars.style.color = '#ce3f24';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#ce3f24';
+        });
+    });
+    
+    const fofStars = document.querySelectorAll('.fof-stars');
+    fofStars.forEach(stars => {
+        stars.style.color = '#ce3f24';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#ce3f24';
+        });
+    });
+    
+    const quizStars = document.querySelectorAll('.quiz-stars');
+    quizStars.forEach(stars => {
+        stars.style.color = '#ce3f24';
+        const starIcons = stars.querySelectorAll('.quiz-star');
+        starIcons.forEach(icon => {
+            icon.style.color = '#ce3f24';
+        });
+    });
+    
+    // Header bar - orange gradient for wegmans
+    const headerBar = document.querySelector('.header-bar');
+    if (headerBar) {
+        headerBar.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
+    }
+    
+    // Star counter - wegmans color background
+    const starCounter = document.querySelector('.star-counter');
+    if (starCounter) {
+        starCounter.style.backgroundColor = '#ce3f24';
+        const starCount = starCounter.querySelector('.star-count');
+        if (starCount) {
+            starCount.style.color = 'white';
+        }
+        const starIcon = starCounter.querySelector('.star-icon');
+        if (starIcon) {
+            starIcon.style.color = '#FFD700';
+        }
+    }
+    
+    // Date text - black for wegmans
+    const dateElement = document.querySelector('.date');
+    if (dateElement) {
+        dateElement.style.color = '#000';
+    }
+    const dateSubtitle = document.querySelector('.date-subtitle');
+    if (dateSubtitle) {
+        dateSubtitle.style.color = '#000';
+    }
+    
+    // Show logo for wegmans
+    const headerLogo = document.querySelector('.header-logo');
+    if (headerLogo) {
+        headerLogo.style.display = 'block';
+    }
+    
+    // Question mark - default grey for wegmans (don't override)
+    
+    // Profile picture - orange for wegmans
+    const profilePicture = document.querySelector('.profile-picture');
+    if (profilePicture) {
+        profilePicture.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
+        profilePicture.style.backgroundColor = '';
+    }
+    
+    // Profile container - white background for wegmans
+    const profileContainer = document.querySelector('.profile-container');
+    if (profileContainer) {
+        profileContainer.style.background = 'white';
+        profileContainer.style.backgroundColor = 'white';
+    }
+    
+    // Profile page wegmans color elements
+    const dealEarnContainer = document.querySelector('.deal-earn-container');
+    if (dealEarnContainer) {
+        dealEarnContainer.style.backgroundColor = '#ce3f24';
+    }
+    
+    // Deal button containers - wegmans color
+    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
+    dealButtonContainers.forEach(container => {
+        container.style.backgroundColor = '#ce3f24';
+    });
+    
+    const challengesContainer = document.querySelector('.profile-challenges-container');
+    if (challengesContainer) {
+        challengesContainer.style.borderColor = '#ce3f24';
+        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.05) 0%, rgba(206, 63, 36, 0.03) 100%)';
+        challengesContainer.style.boxShadow = '0 4px 12px rgba(206, 63, 36, 0.15)';
+    }
+    
+    const achievementsContainer = document.querySelector('.profile-achievements-container');
+    if (achievementsContainer) {
+        achievementsContainer.style.borderColor = '#ce3f24';
+        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.05) 0%, rgba(206, 63, 36, 0.03) 100%)';
+        achievementsContainer.style.boxShadow = '0 4px 12px rgba(206, 63, 36, 0.15)';
+    }
+    
+    const achievementsHeader = document.querySelector('.achievements-header');
+    if (achievementsHeader) {
+        achievementsHeader.style.backgroundColor = '#ce3f24';
+        achievementsHeader.style.borderBottomColor = 'rgba(206, 63, 36, 0.3)';
+    }
+    
+    const challengesHeader = document.querySelector('.challenges-header');
+    if (challengesHeader) {
+        challengesHeader.style.backgroundColor = '#ce3f24';
+        challengesHeader.style.borderBottomColor = 'rgba(206, 63, 36, 0.3)';
+    }
+    
+    // Challenge items - wegmans color
+    const challengeItems = document.querySelectorAll('.challenge-item');
+    challengeItems.forEach(item => {
+        item.style.borderBottomColor = 'rgba(206, 63, 36, 0.2)';
+        item.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.08) 0%, rgba(206, 63, 36, 0.04) 100%)';
+    });
+    
+    // Challenge rewards - wegmans color
+    const challengeRewards = document.querySelectorAll('.challenge-reward');
+    challengeRewards.forEach(reward => {
+        reward.style.color = '#ce3f24';
+        reward.style.background = 'linear-gradient(135deg, rgba(206, 63, 36, 0.15) 0%, rgba(206, 63, 36, 0.1) 100%)';
+        reward.style.boxShadow = '0 2px 4px rgba(206, 63, 36, 0.2)';
+    });
+    
+    // Star icons inline - wegmans color
+    const starIconsInline = document.querySelectorAll('.star-icon-inline');
+    starIconsInline.forEach(icon => {
+        icon.style.color = '#ce3f24';
+        icon.style.textShadow = '0 1px 2px rgba(206, 63, 36, 0.3)';
+    });
+    
+    // Text colors - white for wegmans
+    const subsectionTitles = document.querySelectorAll('.subsection-title');
+    subsectionTitles.forEach(title => {
+        title.style.color = 'white';
+        title.style.textTransform = 'none';
+    });
+    
+    // Section titles - remove transform for wegmans but keep default font (Aleo)
+    const sectionTitles = document.querySelectorAll('.section-title');
+    sectionTitles.forEach(title => {
+        title.style.transform = 'translateY(0)';
+    });
+    
+    // Journey page - keep original purple gradient for wegmans (don't change)
+    const journeyPage = document.getElementById('journey-page');
+    if (journeyPage) {
+        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
+    }
+    
+    // Apply yellow gradient styling to hint button for wegmans (same as firehouse)
+    const hintButton = document.querySelector('.unscramble-hint-btn');
+    if (hintButton) {
+        // Remove any existing event listeners by cloning and replacing
+        const newHintButton = hintButton.cloneNode(true);
+        hintButton.parentNode.replaceChild(newHintButton, hintButton);
+        
+        // Apply yellow gradient styling for wegmans (same as firehouse)
+        newHintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
+        newHintButton.style.color = 'white';
+        newHintButton.style.borderRadius = '6px';
+        newHintButton.style.padding = '8px 24px';
+        newHintButton.style.fontWeight = '700';
+        newHintButton.style.boxShadow = 'none';
+        // Remove lightbulb emoji for wegmans (same as firehouse)
+        newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
+        if (newHintButton.textContent.trim() === '') {
+            newHintButton.textContent = 'Hint';
+        }
+    }
+    
+    const mcQuestions = document.querySelectorAll('.mc-question');
+    mcQuestions.forEach(question => {
+        question.style.color = 'white';
+    });
+    
+    // Quiz text elements - white for wegmans
+    const quizQuestions = document.querySelectorAll('.quiz-question');
+    quizQuestions.forEach(question => {
+        question.style.color = 'white';
+    });
+    
+    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
+    quizDifficulties.forEach(difficulty => {
+        difficulty.style.color = 'white';
+    });
+    
+    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
+    quizQuestionNumbers.forEach(number => {
+        number.style.color = 'white';
+    });
+    
+    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
+    unscrambleLabels.forEach(label => {
+        label.style.color = '#666'; // Normal grey like bottom part
+    });
+    
+    const fofInstructions = document.querySelectorAll('.fof-instruction');
+    fofInstructions.forEach(instruction => {
+        instruction.style.color = 'white';
+    });
+    
+    // Change letter boxes to white to light grey gradient background with orange text for wegmans
+    const letterBoxes = document.querySelectorAll('.letter-box');
+    letterBoxes.forEach(box => {
+        box.style.background = 'linear-gradient(to bottom, white, #e0e0e0)';
+        box.style.color = '#ce3f24';
+        box.style.border = '2px solid #ce3f24';
+    });
+    
+    // Center the calendar "this week's theme" text for wegmans
+    const weekThemeSection = document.querySelector('.week-theme-section');
+    if (weekThemeSection) {
+        weekThemeSection.style.alignItems = 'center';
+    }
+    const weekTitle = document.querySelector('.week-title');
+    if (weekTitle) {
+        weekTitle.style.textAlign = 'center';
+    }
+    const weekSubtitle = document.querySelector('.week-subtitle');
+    if (weekSubtitle) {
+        weekSubtitle.style.textAlign = 'center';
+    }
+}
+
 function applyBigyStyling() {
     // Change page background to white for bigy
     document.body.style.backgroundColor = 'white';
@@ -1344,11 +1945,11 @@ function applyBigyStyling() {
         title.style.textTransform = 'none'; // Remove uppercase for bigy
     });
     
-    // Section titles - remove transform for bigy and change to Nunito
+    // Section titles - remove transform for bigy but keep default font (Aleo)
     const sectionTitles = document.querySelectorAll('.section-title');
     sectionTitles.forEach(title => {
         title.style.transform = 'translateY(0)';
-        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        // Keep default Aleo font for section titles
     });
     
     // Journey page - blue gradient for bigy
@@ -1428,6 +2029,365 @@ function applyBigyStyling() {
     }
     
     // Remove drop shadow from quiz containers for bigy
+    const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
+    quizContainers.forEach(container => {
+        container.style.boxShadow = 'none';
+    });
+}
+
+// Function to apply firehouse styling (red backgrounds, white text)
+function applyFirehouseStyling() {
+    // Change page background to off-white for firehouse (same as normal version)
+    document.body.style.backgroundColor = '#f5f5f5';
+    document.documentElement.style.backgroundColor = '#f5f5f5';
+    
+    // Change all sections to off-white background to match body (not white)
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.backgroundColor = '#f5f5f5';
+    });
+    
+    // Also set content wrapper and html background if they exist
+    const content = document.querySelector('.content');
+    if (content) {
+        content.style.backgroundColor = '#f5f5f5';
+    }
+    
+    // Ensure html element also has the background
+    const html = document.documentElement;
+    html.style.backgroundColor = '#f5f5f5';
+    
+    // Scramble sections - light red to dark red gradient for firehouse
+    const scrambleTop = document.querySelector('.scramble-top-section');
+    const scrambleBottom = document.querySelector('.scramble-bottom-section');
+    if (scrambleTop) {
+        scrambleTop.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
+        scrambleTop.style.backgroundColor = '';
+        scrambleTop.style.borderBottom = 'none';
+    }
+    if (scrambleBottom) {
+        scrambleBottom.style.background = '#bf1722';
+        scrambleBottom.style.backgroundColor = '#bf1722';
+    }
+    
+    // MC sections - red for firehouse
+    const mcTop = document.querySelector('.mc-top-section');
+    const mcBottom = document.querySelector('.mc-bottom-section');
+    if (mcTop) {
+        mcTop.style.background = '#a00910';
+        mcTop.style.backgroundColor = '#a00910';
+        mcTop.style.borderBottom = 'none';
+    }
+    if (mcBottom) {
+        mcBottom.style.background = '#bf1722';
+        mcBottom.style.backgroundColor = '#bf1722';
+    }
+    
+    // Quiz sections - light red to dark red gradient for firehouse
+    const quizTop = document.querySelector('.quiz-top-section');
+    const quizBottom = document.querySelector('.quiz-bottom-section');
+    if (quizTop) {
+        quizTop.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
+        quizTop.style.backgroundColor = '';
+        quizTop.style.borderBottom = 'none';
+    }
+    if (quizBottom) {
+        quizBottom.style.background = '#bf1722';
+        quizBottom.style.backgroundColor = '#bf1722';
+    }
+    
+    // FoF sections - red for firehouse
+    const fofTop = document.querySelector('.fof-top-section');
+    const fofBottom = document.querySelector('.fof-bottom-section');
+    if (fofTop) {
+        fofTop.style.background = '#a00910';
+        fofTop.style.backgroundColor = '#a00910';
+        fofTop.style.borderBottom = 'none';
+    }
+    if (fofBottom) {
+        fofBottom.style.background = '#bf1722';
+        fofBottom.style.backgroundColor = '#bf1722';
+    }
+    
+    // Stars - red for firehouse
+    const unscrambleStars = document.querySelectorAll('.unscramble-stars');
+    unscrambleStars.forEach(stars => {
+        stars.style.color = '#dc3545';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#dc3545';
+        });
+    });
+    
+    const mcStars = document.querySelectorAll('.mc-stars');
+    mcStars.forEach(stars => {
+        stars.style.color = '#dc3545';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#dc3545';
+        });
+    });
+    
+    const fofStars = document.querySelectorAll('.fof-stars');
+    fofStars.forEach(stars => {
+        stars.style.color = '#dc3545';
+        const starIcons = stars.querySelectorAll('span, .star-icon');
+        starIcons.forEach(icon => {
+            icon.style.color = '#dc3545';
+        });
+    });
+    
+    const quizStars = document.querySelectorAll('.quiz-stars');
+    quizStars.forEach(stars => {
+        stars.style.color = '#dc3545';
+        const starIcons = stars.querySelectorAll('.quiz-star');
+        starIcons.forEach(icon => {
+            icon.style.color = '#dc3545';
+        });
+    });
+    
+    // Header bar - dark grey to black gradient with white text and Nunito for firehouse
+    const headerBar = document.querySelector('.header-bar');
+    if (headerBar) {
+        headerBar.style.background = 'linear-gradient(to bottom,rgb(48, 48, 48), #000000)';
+        headerBar.style.color = 'white';
+        headerBar.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        
+        // Make all text elements in header bar white and Nunito
+        const headerTextElements = headerBar.querySelectorAll('.date, .date-subtitle, .header-title, .header-logo, span, div');
+        headerTextElements.forEach(element => {
+            element.style.color = 'white';
+            element.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        });
+    }
+    
+    // Star counter - light red background for firehouse
+    const starCounter = document.querySelector('.star-counter');
+    if (starCounter) {
+        starCounter.style.backgroundColor = '#bf1722';
+        const starCount = starCounter.querySelector('.star-count');
+        if (starCount) {
+            starCount.style.color = 'white';
+        }
+        const starIcon = starCounter.querySelector('.star-icon');
+        if (starIcon) {
+            starIcon.style.color = '#FFD700';
+        }
+    }
+    
+    // Date text - white for firehouse (in header bar with dark gradient)
+    const dateElement = document.querySelector('.date');
+    if (dateElement) {
+        dateElement.style.color = 'white';
+        dateElement.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    }
+    const dateSubtitle = document.querySelector('.date-subtitle');
+    if (dateSubtitle) {
+        dateSubtitle.style.color = 'white';
+        dateSubtitle.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    }
+    
+    // Show Firehouse logo for firehouse
+    const headerLogo = document.querySelector('.header-logo');
+    if (headerLogo) {
+        headerLogo.style.display = 'block';
+    }
+    
+    // Question mark - white for firehouse
+    const helpButton = document.querySelector('.help-button');
+    if (helpButton) {
+        helpButton.style.color = 'white';
+        helpButton.style.borderColor = 'white';
+    }
+    
+    // Profile picture - red for firehouse
+    const profilePicture = document.querySelector('.profile-picture');
+    if (profilePicture) {
+        profilePicture.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
+        profilePicture.style.backgroundColor = '';
+    }
+    
+    // Profile container - white background for firehouse
+    const profileContainer = document.querySelector('.profile-container');
+    if (profileContainer) {
+        profileContainer.style.background = 'white';
+        profileContainer.style.backgroundColor = 'white';
+    }
+    
+    // Profile page red elements - change to red for firehouse
+    const dealEarnContainer = document.querySelector('.deal-earn-container');
+    if (dealEarnContainer) {
+        dealEarnContainer.style.backgroundColor = '#dc3545';
+    }
+    
+    // Deal button containers - red for firehouse
+    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
+    dealButtonContainers.forEach(container => {
+        container.style.backgroundColor = '#dc3545';
+    });
+    
+    const challengesContainer = document.querySelector('.profile-challenges-container');
+    if (challengesContainer) {
+        challengesContainer.style.borderColor = '#dc3545';
+        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
+        challengesContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+    }
+    
+    const achievementsContainer = document.querySelector('.profile-achievements-container');
+    if (achievementsContainer) {
+        achievementsContainer.style.borderColor = '#dc3545';
+        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
+        achievementsContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+    }
+    
+    const achievementsHeader = document.querySelector('.achievements-header');
+    if (achievementsHeader) {
+        achievementsHeader.style.backgroundColor = '#dc3545';
+        achievementsHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+    }
+    
+    const challengesHeader = document.querySelector('.challenges-header');
+    if (challengesHeader) {
+        challengesHeader.style.backgroundColor = '#dc3545';
+        challengesHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+    }
+    
+    // Challenge items - red for firehouse
+    const challengeItems = document.querySelectorAll('.challenge-item');
+    challengeItems.forEach(item => {
+        item.style.borderBottomColor = 'rgba(220, 53, 69, 0.2)';
+        item.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.08) 0%, rgba(220, 53, 69, 0.04) 100%)';
+    });
+    
+    // Challenge rewards - red for firehouse
+    const challengeRewards = document.querySelectorAll('.challenge-reward');
+    challengeRewards.forEach(reward => {
+        reward.style.color = '#dc3545';
+        reward.style.background = 'linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.1) 100%)';
+        reward.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.2)';
+    });
+    
+    // Star icons inline - red for firehouse
+    const starIconsInline = document.querySelectorAll('.star-icon-inline');
+    starIconsInline.forEach(icon => {
+        icon.style.color = '#dc3545';
+        icon.style.textShadow = '0 1px 2px rgba(220, 53, 69, 0.3)';
+    });
+    
+    // Text colors - white for firehouse (keep as is, no uppercase)
+    const subsectionTitles = document.querySelectorAll('.subsection-title');
+    subsectionTitles.forEach(title => {
+        title.style.color = 'white';
+        title.style.textTransform = 'none'; // Remove uppercase for firehouse
+        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    // Section titles - remove transform for firehouse but keep default font (Aleo)
+    const sectionTitles = document.querySelectorAll('.section-title');
+    sectionTitles.forEach(title => {
+        title.style.transform = 'translateY(0)';
+        // Keep default Aleo font for section titles
+    });
+    
+    // Journey page - purple gradient for firehouse
+    const journeyPage = document.getElementById('journey-page');
+    if (journeyPage) {
+        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
+    }
+    
+    // Boost game title - Firehouse Match for firehouse
+    const gameTitle = document.querySelector('#boost-page .game-title');
+    if (gameTitle) {
+        gameTitle.textContent = 'FIREHOUSE MATCH';
+    }
+    
+    // Apply yellow gradient styling to hint button for firehouse
+    const hintButton = document.querySelector('.unscramble-hint-btn');
+    if (hintButton) {
+        hintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
+        hintButton.style.color = 'white';
+        hintButton.style.borderRadius = '8px';
+        hintButton.style.padding = '8px 20px';
+        hintButton.style.fontWeight = '700';
+        hintButton.style.boxShadow = 'none';
+        // Add lightbulb emoji for firehouse
+        const buttonText = hintButton.textContent.trim();
+        if (!buttonText.includes('💡')) {
+            hintButton.textContent = '💡 Hint';
+        }
+        // Override hover state for firehouse
+        hintButton.addEventListener('mouseenter', function() {
+            if (!this.disabled) {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = 'none';
+            }
+        }, { once: false });
+        hintButton.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = 'none';
+        }, { once: false });
+    }
+    
+    const mcQuestions = document.querySelectorAll('.mc-question');
+    mcQuestions.forEach(question => {
+        question.style.color = 'white';
+    });
+    
+    // Quiz text elements - white for firehouse
+    const quizQuestions = document.querySelectorAll('.quiz-question');
+    quizQuestions.forEach(question => {
+        question.style.color = 'white';
+        question.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
+    quizDifficulties.forEach(difficulty => {
+        difficulty.style.color = 'white';
+        difficulty.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
+    quizQuestionNumbers.forEach(number => {
+        number.style.color = 'white';
+        number.style.fontFamily = "'Nunito', sans-serif";
+    });
+    
+    const quizQuestionsFirehouse = document.querySelectorAll('.quiz-question');
+    quizQuestionsFirehouse.forEach(question => {
+        question.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
+    unscrambleLabels.forEach(label => {
+        label.style.color = 'white';
+        label.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    const fofInstructions = document.querySelectorAll('.fof-instruction');
+    fofInstructions.forEach(instruction => {
+        instruction.style.color = 'white';
+        instruction.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    // Ensure subsection titles use Nunito (they're originally Nunito in CSS)
+    const subsectionTitlesFirehouse = document.querySelectorAll('.subsection-title');
+    subsectionTitlesFirehouse.forEach(title => {
+        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    });
+    
+    // Change letter boxes to white background with lighter red text for firehouse
+    const letterBoxes = document.querySelectorAll('.letter-box');
+    letterBoxes.forEach(box => {
+        box.style.background = 'white';
+        box.style.color = '#bf1722';
+    });
+    
+    // Also call the scramble.js function if it exists (for dynamically created boxes)
+    if (typeof applyLetterBoxStyling === 'function') {
+        applyLetterBoxStyling();
+    }
+    
+    // Remove drop shadow from quiz containers for firehouse
     const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
     quizContainers.forEach(container => {
         container.style.boxShadow = 'none';
@@ -2047,7 +3007,14 @@ function updateBoostPageForBigy() {
     // Market Match is now the default - Change game title to Market Match
     const gameTitle = document.querySelector('#boost-page .game-title');
     if (gameTitle) {
-        gameTitle.textContent = 'MARKET MATCH';
+        // Check if firehouse is active
+        const urlParams = new URLSearchParams(window.location.search);
+        const headerType = urlParams.get('d');
+        if (headerType === 'firehouse2') {
+            gameTitle.textContent = 'FIREHOUSE MATCH';
+        } else {
+            gameTitle.textContent = 'MARKET MATCH';
+        }
     }
     
     // Update play-color-box with image and red gradient
@@ -2063,9 +3030,15 @@ function updateBoostPageForBigy() {
         
         // Add image if it doesn't exist
         let img = playColorBox.querySelector('img');
+        // Check if firehouse mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const headerType = urlParams.get('d');
+        const isFirehouse = headerType === 'firehouse2';
+        const imageSrc = isFirehouse ? 'src/img/firehousesubs/sweepsGame.png' : 'src/img/bigy/sweepsGame.png';
+        
         if (!img) {
             img = document.createElement('img');
-            img.src = 'src/img/bigy/sweepsGame.png';
+            img.src = imageSrc;
             img.style.height = '100px';
             img.style.width = 'auto';
             img.style.marginBottom = '4px';
@@ -2078,7 +3051,7 @@ function updateBoostPageForBigy() {
                 playColorBox.appendChild(img);
             }
         } else {
-            img.src = 'src/img/bigy/sweepsGame.png';
+            img.src = imageSrc;
             img.style.height = '100px';
         }
     }
@@ -2114,8 +3087,13 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     });
     
     // Keep rival and profile containers light (unless dark mode)
+    // Exclude deals-page profile-container from this styling
     const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container, .boost-container');
     lightContainers.forEach(container => {
+        // Skip if this is inside deals-page
+        if (container.closest('#deals-page')) {
+            return;
+        }
         if (backgroundColor === '#000000') {
             container.style.background = '#1a1a1a';
             container.style.backgroundColor = '#1a1a1a';
@@ -2314,7 +3292,8 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
-    const isBigyMode = isBigy || isBigy2;
+    const isFirehouse2 = headerType === 'firehouse2';
+    const isBigyMode = isBigy || isBigy2 || isFirehouse2;
     
     // Show and set logo
     const logo = document.querySelector('.header-logo');
@@ -2348,12 +3327,14 @@ function updateLogoVisibility() {
     const closeButton = document.querySelector('.game-overlay-close');
     const helpButton = document.querySelector('.help-button');
     
-    // Check if we're in default, bigy, or bigy2 mode
+    // Check if we're in default, bigy, bigy2, firehouse2, or wegmans mode
     const urlParams = new URLSearchParams(window.location.search);
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
-    const isBigyMode = isBigy || isBigy2;
+    const isFirehouse2 = headerType === 'firehouse2';
+    const isWegmans = headerType === 'wegmans';
+    const isBigyMode = isBigy || isBigy2 || isFirehouse2 || isWegmans;
     
     // Hide/show help button based on close button state
     if (helpButton) {
@@ -2364,7 +3345,7 @@ function updateLogoVisibility() {
             helpButton.classList.remove('hidden');
             helpButton.style.display = 'inline-flex';
             // Set help button color based on mode
-            if (isBigyMode) {
+            if (isBigyMode && headerType !== 'wegmans') {
                 helpButton.style.color = 'white';
                 helpButton.style.borderColor = 'white';
             } else {
@@ -2375,15 +3356,15 @@ function updateLogoVisibility() {
     }
     
     // Show/hide logo based on game overlay state and mode
-            if (logo) {
-                if (closeButton && closeButton.classList.contains('show')) {
+    if (logo) {
+        if (closeButton && closeButton.classList.contains('show')) {
             // Game overlay is open - hide logo
-                    logo.style.display = 'none';
-                } else {
-            // Game overlay is closed - show logo for bigy and bigy2
+            logo.style.display = 'none';
+        } else {
+            // Game overlay is closed - show logo for bigy, bigy2, firehouse2, and wegmans
             logo.style.display = isBigyMode ? 'block' : 'none';
-            }
         }
+    }
 }
 
 // Function to observe and style dynamically added letter boxes
@@ -2473,98 +3454,8 @@ document.addEventListener('keydown', (e) => {
     }
     
     if (e.key === 'q' || e.key === 'Q') {
-        // Reset daily game data for today
-        const todayKey = getTodayKey();
-        
-        // Phrases
-        localStorage.removeItem(`phrasesStars_${todayKey}`);
-        localStorage.removeItem(`phrasesComplete_${todayKey}`);
-        
-        // Suspect
-        localStorage.removeItem(`suspectStars_${todayKey}`);
-        localStorage.removeItem(`suspectComplete_${todayKey}`);
-        localStorage.removeItem(`suspectWon_${todayKey}`);
-        
-        // Cross
-        localStorage.removeItem(`crossStars_${todayKey}`);
-        localStorage.removeItem(`crossComplete_${todayKey}`);
-        
-        // Defuser
-        localStorage.removeItem(`defuserStars_${todayKey}`);
-        if (window.defuserIframe) {
-            try {
-                const iframe = document.getElementById('defuserIframe');
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage('resetDefuserLocalStorage', '*');
-                }
-            } catch (err) {
-                console.warn('Could not message defuser iframe to reset storage:', err);
-            }
-        }
-        
-        // Tally
-        localStorage.removeItem(`tallyStars_${todayKey}`);
-        localStorage.removeItem(`tallyComplete_${todayKey}`);
-        try {
-            const tallyIframe = document.getElementById('tallyIframe');
-            if (tallyIframe && tallyIframe.contentWindow) {
-                tallyIframe.contentWindow.postMessage('resetTallyLocalStorage', '*');
-            }
-        } catch (err) {
-            console.warn('Could not message tally iframe to reset storage:', err);
-        }
-        
-        // Quiz
-        localStorage.removeItem(`quizComplete_${todayKey}`);
-        localStorage.removeItem(`quizStars_${todayKey}`);
-        localStorage.removeItem(`quizState_${todayKey}`);
-        // Reload quiz game
-        if (window.resetQuizGame) {
-            window.resetQuizGame();
-        }
-        
-        // Scramble
-        // Reload scramble game
-        if (window.resetScrambleGame) {
-            window.resetScrambleGame();
-        }
-        
-        // Gold Case (puzzle game)
-        localStorage.removeItem(`goldCaseStars_${todayKey}`);
-        localStorage.removeItem(`goldCaseComplete_${todayKey}`);
-        localStorage.removeItem(`goldCaseScore_${todayKey}`);
-        // Reset bonus spin data
-        localStorage.removeItem(`bonusSpinSpun_${todayKey}`);
-        localStorage.removeItem(`bonusSpinStars_${todayKey}`);
-        localStorage.removeItem('bonusSpinCheatUnlocked');
-        console.log('[MainPage] RESET: Cleared puzzle and bonus spin data for key:', todayKey);
-        
-        // Update bonus spin display after reset
-        updateBonusSpinDisplay();
-        
-        // Update cross stars display
-        if (window.updateCrossStars) {
-            window.updateCrossStars();
-        }
-        
-        // Reload main game scores so puzzle stars / cards refresh
-        if (window.loadGameScores2) {
-            window.loadGameScores2();
-        }
-        
-        // Update the display
-        if (window.loadGameScores) {
-            window.loadGameScores();
-        }
-        if (window.updatePhrasesStars) {
-            window.updatePhrasesStars();
-        }
-        if (window.updateSuspectStars) {
-            window.updateSuspectStars();
-        }
-        if (window.updateCrossStars) {
-            window.updateCrossStars();
-        }
+        // Reset all data (same as reset button, but without popup)
+        resetAllData();
     } else if (e.key === '1') {
         // Debug: Show all data for today
         const today = new Date();
@@ -3188,129 +4079,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Reset all data function (called by Q key and reset button)
 function resetAllData() {
-    // Clear all progress
-    const todayKey = getTodayKey();
-    
-    console.log('[Reset] Resetting all data for:', todayKey);
-    console.log('[Reset] Before removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
-    
-    // Clear ALL highLow data (including old date formats)
-    console.log('[Reset] Clearing all highLow-related data...');
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('highLow') || key.includes('scramble') || key.includes('mystery') || 
-                    key.includes('beticle') || key.includes('memory') || key.includes('blackjack') || 
-                    key.includes('lostAndFound') || key.includes('multipleChoice') || key.includes('factOrFiction') ||
-                    key.includes('match3') || key.includes('zoom') || key.includes('shift') || key.includes('quiz'))) {
-            keysToRemove.push(key);
-        }
-    }
-    keysToRemove.forEach(key => {
-        console.log('[Reset] Removing:', key);
-        localStorage.removeItem(key);
-    });
-    
-    console.log('[Reset] After removal - highLowComplete:', localStorage.getItem(`highLowComplete_${todayKey}`));
-    
-    // Reset mystery word completion and state
-    localStorage.removeItem(`mysteryWordComplete_${todayKey}`);
-    
-    // Reset beticle completion and state
-    localStorage.removeItem(`beticleComplete_${todayKey}`);
-    
-    // Reset memory game completion and data
-    localStorage.removeItem(`memoryComplete_${todayKey}`);
-    localStorage.removeItem(`memoryScore_${todayKey}`);
-    localStorage.removeItem(`memoryStars_${todayKey}`);
-    localStorage.removeItem(`blackjackComplete_${todayKey}`);
-    localStorage.removeItem(`blackjackScore_${todayKey}`);
-    localStorage.removeItem(`blackjackStars_${todayKey}`);
-    localStorage.removeItem(`lostAndFoundComplete_${todayKey}`);
-    localStorage.removeItem(`lostAndFoundScore_${todayKey}`);
-    localStorage.removeItem(`lostAndFoundStars_${todayKey}`);
-    
-    // Reset zoom game completion and data
-    localStorage.removeItem(`zoomComplete_${todayKey}`);
-    localStorage.removeItem(`zoomStars_${todayKey}`);
-    
-    // Reset shift game completion and data
-    localStorage.removeItem(`shiftComplete_${todayKey}`);
-    localStorage.removeItem(`shiftStars_${todayKey}`);
-    
-    // Reset quiz game completion and data
-    localStorage.removeItem(`quizComplete_${todayKey}`);
-    localStorage.removeItem(`quizStars_${todayKey}`);
-    
-    // Reset daily stars to zero
-    localStorage.setItem(`dailyStars_${todayKey}`, '0');
-    
-    // Reset total stars to zero
-    localStorage.setItem('totalStars', '0');
-    
-    // Reset usable stars to zero
-    localStorage.removeItem(`usableStars_${todayKey}`);
-    
-    // Reset games played
-    localStorage.setItem('gamesPlayed', '0');
-    localStorage.removeItem(`playedGames_${todayKey}`);
-    
-    // Reset prize tiles
-    localStorage.removeItem('prizeTiles');
-    
-    
-    // Reset journey progress
-    localStorage.removeItem('journeyLevel');
-    for (let i = 1; i <= 10; i++) {
-        localStorage.removeItem(`journeyPosition_level${i}`);
-    }
+    // Clear ALL localStorage variables
+    console.log('[Reset] Clearing all localStorage data...');
+    localStorage.clear();
     
     console.log('[Reset] All data cleared, reloading page...');
-    
-    // Update displays immediately before reload
-    if (typeof updateStarDisplay === 'function') {
-        updateStarDisplay();
-    }
-    if (typeof updateWalletStars === 'function') {
-        updateWalletStars();
-    }
-    if (typeof updateRivalStars === 'function') {
-        updateRivalStars();
-    }
-    if (typeof updateMemoryDisplay === 'function') {
-        updateMemoryDisplay();
-    }
-    if (typeof updateBlackjackDisplay === 'function') {
-        updateBlackjackDisplay();
-    }
-    if (typeof loadGameScores === 'function') {
-        loadGameScores();
-    }
-    if (typeof loadGameScores2 === 'function') {
-        loadGameScores2();
-    }
-    if (typeof updateBoostHighScore === 'function') {
-        updateBoostHighScore();
-    }
-    if (typeof updateMysteryWordStars === 'function') {
-        updateMysteryWordStars();
-    }
-    if (typeof updateBeticleStars === 'function') {
-        updateBeticleStars();
-    }
-    if (typeof updateCalendar === 'function') {
-        updateCalendar();
-    }
-    
-    // Update usable stars display
-    if (window.updateMoveStarsDisplay) {
-        window.updateMoveStarsDisplay();
-    }
-    
-    // Update journey button state
-    if (window.updateJourneyButtonState) {
-        window.updateJourneyButtonState();
-    }
     
     // Small delay to ensure display updates before reload
     setTimeout(() => {

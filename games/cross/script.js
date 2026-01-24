@@ -37,6 +37,20 @@ let answerWord2 = answerWords[1];
 const answerWord = answerWord1; // For backwards compatibility
 let answerWordLength = answerWord1.length;
 
+// Store answer chains globally for validation
+let globalAnswerChain1 = null;
+let globalAnswerChain2 = null;
+let globalShiftedNumberPositions1 = null;
+let globalShiftedLetterPositions1 = null;
+let globalShiftedNumberPositions2 = null;
+let globalShiftedLetterPositions2 = null;
+let globalNumberShift1 = null;
+let globalLetterShift1 = null;
+let globalNumberShift2 = null;
+let globalLetterShift2 = null;
+let globalWord1CellIndices = null; // Set of cell indices that belong to word1 (e.g., "number-5", "letter-3", "center")
+let globalWord2CellIndices = null; // Set of cell indices that belong to word2
+
 // Generate unique random letters excluding answer letters (no repeats)
 function getUniqueRandomLetters(count, excludeLetters = []) {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -339,6 +353,18 @@ function generatePuzzle() {
             positionToLetter2.set(posKey, answerLetters2[index]);
         });
         
+        // Store answer chains and shift positions globally for validation
+        globalAnswerChain1 = answerChain1;
+        globalAnswerChain2 = answerChain2;
+        globalShiftedNumberPositions1 = shiftedNumberPositions1;
+        globalShiftedLetterPositions1 = shiftedLetterPositions1;
+        globalShiftedNumberPositions2 = shiftedNumberPositions2;
+        globalShiftedLetterPositions2 = shiftedLetterPositions2;
+        globalNumberShift1 = randomNumberShift1;
+        globalLetterShift1 = randomLetterShift1;
+        globalNumberShift2 = randomNumberShift2;
+        globalLetterShift2 = randomLetterShift2;
+        
         // Fill remaining positions at shift 1 with random letters (for word 1 visibility)
         const remainingPositions1 = [];
         for (let i = 0; i < shiftedNumberPositions1.length; i++) {
@@ -460,6 +486,10 @@ function generatePuzzle() {
                 word2CellIndicesFinal.add('center');
             }
         });
+        
+        // Store which cells belong to which word (after they're defined)
+        globalWord1CellIndices = word1CellIndicesFinal;
+        globalWord2CellIndices = word2CellIndicesFinal;
         
         // Map back: assign word1 letters to word1 cells, word2 letters to word2 cells
         for (let i = 0; i < numberPositions.length; i++) {
@@ -652,6 +682,33 @@ function generateSingleWordPuzzle() {
     
     centerLetter = positionToLetter.get('2,2') || '';
     
+    // Build word1 cell indices for single word puzzle
+    const word1CellIndicesSingle = new Set();
+    answerChain.forEach((pos) => {
+        // Find which cell index will be at this position
+        for (let i = 0; i < shiftedNumberPositions.length; i++) {
+            const shiftPos = shiftedNumberPositions[i];
+            if (shiftPos[0] === pos[0] && shiftPos[1] === pos[1]) {
+                word1CellIndicesSingle.add(`number-${i}`);
+                break;
+            }
+        }
+        for (let i = 0; i < shiftedLetterPositions.length; i++) {
+            const shiftPos = shiftedLetterPositions[i];
+            if (shiftPos[0] === pos[0] && shiftPos[1] === pos[1]) {
+                word1CellIndicesSingle.add(`letter-${i}`);
+                break;
+            }
+        }
+        if (pos[0] === 2 && pos[1] === 2) {
+            word1CellIndicesSingle.add('center');
+        }
+    });
+    
+    // Set global word associations for single word puzzle
+    globalWord1CellIndices = word1CellIndicesSingle;
+    globalWord2CellIndices = new Set(); // Empty for single word puzzle
+    
     return { 
         numberValues: numberValues, 
         letterValues: letterValues,
@@ -756,6 +813,13 @@ function createNumberCells() {
         }
         cell.dataset.numberIndex = index;
         
+        // Associate cell with word1 or word2 if it belongs to one
+        if (globalWord1CellIndices && globalWord1CellIndices.has(`number-${index}`)) {
+            cell.dataset.wordAssociation = 'word1';
+        } else if (globalWord2CellIndices && globalWord2CellIndices.has(`number-${index}`)) {
+            cell.dataset.wordAssociation = 'word2';
+        }
+        
         cell.style.top = `${row * (cellSize + gap)}px`;
         cell.style.left = `${col * (cellSize + gap)}px`;
         
@@ -788,6 +852,13 @@ function createLetterCells() {
         }
         cell.dataset.letterIndex = index;
         
+        // Associate cell with word1 or word2 if it belongs to one
+        if (globalWord1CellIndices && globalWord1CellIndices.has(`letter-${index}`)) {
+            cell.dataset.wordAssociation = 'word1';
+        } else if (globalWord2CellIndices && globalWord2CellIndices.has(`letter-${index}`)) {
+            cell.dataset.wordAssociation = 'word2';
+        }
+        
         cell.style.top = `${row * (cellSize + gap)}px`;
         cell.style.left = `${col * (cellSize + gap)}px`;
         
@@ -803,6 +874,12 @@ function createLetterCells() {
         centerCell.textContent = '';
     } else {
         centerCell.textContent = centerLetter;
+    }
+    // Associate center cell with word1 or word2 if it belongs to one
+    if (globalWord1CellIndices && globalWord1CellIndices.has('center')) {
+        centerCell.dataset.wordAssociation = 'word1';
+    } else if (globalWord2CellIndices && globalWord2CellIndices.has('center')) {
+        centerCell.dataset.wordAssociation = 'word2';
     }
     centerCell.style.top = `${2 * (cellSize + gap)}px`;
     centerCell.style.left = `${2 * (cellSize + gap)}px`;
@@ -1321,8 +1398,37 @@ function checkAnswer() {
     const selectedLetters = selectedPath.map(cell => cell.textContent.trim()).filter(letter => letter !== '');
     const selectedWord = selectedLetters.join('');
     
+    // Check if all selected cells belong to the same word
+    const wordAssociations = selectedPath.map(cell => cell.dataset.wordAssociation).filter(assoc => assoc);
+    if (wordAssociations.length === 0) {
+        // No cells are associated with a word - wrong answer
+        resetHighlighting();
+        ensureWord1Green();
+        ensureWord2Blue();
+        return false;
+    }
+    
+    // Check if all cells belong to the same word
+    const firstAssociation = wordAssociations[0];
+    const allSameWord = wordAssociations.every(assoc => assoc === firstAssociation);
+    if (!allSameWord) {
+        // Cells belong to different words - wrong answer
+        resetHighlighting();
+        ensureWord1Green();
+        ensureWord2Blue();
+        return false;
+    }
+    
     // Check if matches word 1
     if (selectedLetters.length === answerWord1.length && selectedWord === answerWord1) {
+        // Verify that all selected cells belong to word1
+        if (firstAssociation !== 'word1') {
+            // Word matches but cells belong to word2 - wrong answer
+            resetHighlighting();
+            ensureWord1Green();
+            ensureWord2Blue();
+            return false;
+        }
         // Check if this is the first word found or second word found
         const isFirstWord = firstWordFound === null;
         
@@ -1393,6 +1499,14 @@ function checkAnswer() {
     
     // Check if matches word 2
     if (selectedLetters.length === answerWord2.length && selectedWord === answerWord2) {
+        // Verify that all selected cells belong to word2
+        if (firstAssociation !== 'word2') {
+            // Word matches but cells belong to word1 - wrong answer
+            resetHighlighting();
+            ensureWord1Green();
+            ensureWord2Blue();
+            return false;
+        }
         // Check if this is the first word found or second word found
         const isFirstWord = firstWordFound === null;
         
@@ -1920,7 +2034,9 @@ function restoreSolvedWords() {
 function init() {
     // Update instruction text
     const instructionText = document.getElementById('instructionText');
-    instructionText.textContent = `Topic: Thanksgiving • find 2 words `;
+    // Get current theme name
+    const themeName = (typeof getCurrentTheme === 'function') ? getCurrentTheme().name : 'Thanksgiving';
+    instructionText.textContent = `Topic: ${themeName} • find 2 words `;
     
     createReferenceGrid();
     createNumberCells();
