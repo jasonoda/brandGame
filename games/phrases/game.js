@@ -495,7 +495,10 @@ function updatePointerEvents(state) {
             // Normal gameplay: letter selection UI is active, solve UI is hidden
             if (gameContent) gameContent.style.pointerEvents = 'auto';
             if (letterSelectionUI) letterSelectionUI.style.pointerEvents = 'auto';
-            if (bottomSection) bottomSection.style.pointerEvents = 'none';
+            if (bottomSection) {
+                bottomSection.style.pointerEvents = 'none';
+                bottomSection.style.opacity = '0';
+            }
             if (solveUI) solveUI.style.pointerEvents = 'none';
             if (keyboard) keyboard.style.pointerEvents = 'none';
             break;
@@ -504,7 +507,10 @@ function updatePointerEvents(state) {
             // Solve UI active: letter selection UI is faded, solve UI and keyboard are active
             if (gameContent) gameContent.style.pointerEvents = 'none';
             if (letterSelectionUI) letterSelectionUI.style.pointerEvents = 'none';
-            if (bottomSection) bottomSection.style.pointerEvents = 'auto';
+            if (bottomSection) {
+                bottomSection.style.pointerEvents = 'auto';
+                bottomSection.style.opacity = '1';
+            }
             if (solveUI) solveUI.style.pointerEvents = 'auto';
             if (keyboard) keyboard.style.pointerEvents = 'auto';
             break;
@@ -513,7 +519,10 @@ function updatePointerEvents(state) {
             // Puzzle solved: everything hidden except phrase display
             if (gameContent) gameContent.style.pointerEvents = 'auto';
             if (letterSelectionUI) letterSelectionUI.style.pointerEvents = 'none';
-            if (bottomSection) bottomSection.style.pointerEvents = 'none';
+            if (bottomSection) {
+                bottomSection.style.pointerEvents = 'none';
+                bottomSection.style.opacity = '0';
+            }
             if (solveUI) solveUI.style.pointerEvents = 'none';
             if (keyboard) keyboard.style.pointerEvents = 'none';
             break;
@@ -599,6 +608,9 @@ function selectLetters() {
             const selected = getRandomItems(zeroArray, available);
             result.push(...selected);
         }
+        
+        // Shuffle so the zero (wrong) letter is not always in the same position
+        result = result.sort(() => Math.random() - 0.5);
     }
     
     return result.slice(0, 3);

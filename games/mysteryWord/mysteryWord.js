@@ -99,6 +99,12 @@ async function loadWordList() {
 // Initialize game
 async function init() {
     console.log("Loading Mystery Word game...");
+    const themeHintEl = document.getElementById('instructionThemeHint');
+    if (themeHintEl && typeof getCurrentTheme === 'function') {
+        themeHintEl.textContent = 'HINT: ' + getCurrentTheme().name.toUpperCase();
+    } else if (themeHintEl) {
+        themeHintEl.textContent = 'HINT: THANKSGIVING';
+    }
     await loadWordList();
     targetWord = getTargetWord();
     // console.log("Target word:", targetWord); // For debugging

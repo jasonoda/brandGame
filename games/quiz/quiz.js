@@ -119,10 +119,7 @@ function loadQuizData() {
 
 // Get difficulty text
 function getDifficultyText(questionIndex) {
-    if (questionIndex === 4) {
-        return 'FINAL QUESTION';
-    }
-    const difficulties = ['VERY EASY', 'EASY', 'MEDIUM', 'HARD'];
+    const difficulties = ['VERY EASY', 'EASY', 'MEDIUM', 'HARD', 'HARD'];
     return difficulties[questionIndex] || 'VERY EASY';
 }
 

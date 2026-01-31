@@ -1559,7 +1559,7 @@ body::before {
     align-items: center;
     justify-content: flex-start;
     gap: 5px;
-    padding: 1%;
+    /* padding: 1%; */
     min-height: 0;
     box-sizing: border-box;
     flex-shrink: 0;
@@ -1633,12 +1633,10 @@ body::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 0;
     padding-top: 8px;
     padding-bottom: 6px;
     transform: translateY(2px);
-    /* padding: 2%; */
-    /* border: 1px solid purple; */
     position: relative;
     flex-shrink: 0;
 }
@@ -1935,15 +1933,16 @@ body::before {
 }
 
 .action-cell {
-    /* flex: 1; */
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* border: 1px solid red; */
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .action-button {
-    width: 90px;
+    width: 100%;
     height: 100%;
     max-height: 100%;
     background: linear-gradient(to bottom, #ffe259, #ffa751);
@@ -2062,11 +2061,12 @@ body::before {
     min-width: 200px;
     text-align: center;
     z-index: 10000;
-    padding: 8px 5px;
+    padding: 6px 5px;
     width: 260px;
     display: none;
     justify-content: center;
     align-items: center;
+    margin-bottom: 2px;
 }
 
 .deal-button::before {
@@ -2154,14 +2154,20 @@ body::before {
     }
 }
 
+/* Bonus popups (pick 3, double, free clue, 7-case warning) - shared style */
+.goldcase-bonus-popup,
+.free-clue-popup {
+    font-family: 'Nunito', sans-serif;
+    padding: 10px 16px;
+    border-radius: 5px;
+}
+
 /* Free Clue Popup Styling */
 .free-clue-popup {
     position: fixed;
     background: #ffffff;
     color: #666666;
-    padding: 4px 10px;
-    border-radius: 8px 0 0 8px; /* Left rounded, right square */
-    font-family: 'Sanchez', serif;
+    border-radius: 5px 0 0 5px; /* Left rounded, right square for slide-in */
     font-size: 15px;
     font-weight: 400;
     text-align: center;
@@ -2183,13 +2189,15 @@ body::before {
 
 /* Pick Three Popup Styling - Now handled inline in JavaScript */
 
-/* Base Clue Button Styling */
+/* Base Clue Button Styling - same width as game container (bottom section) */
 #clueButton {
     position: absolute;
-    bottom: 10px;
+    bottom: 11px;
     left: 50%;
     transform: translateX(-50%);
-    width: 280px;
+    width: 95%;
+    max-width: 500px;
+    box-sizing: border-box;
     height: 30px;
     background: linear-gradient(to bottom, #ffe259, #ffa751);
     color: #453021;
@@ -2256,7 +2264,9 @@ body::before {
 }
 
 /* Desktop side blockers to mask wide desktops with a fixed center gap */
-:root{ --play-area-width: 500px; }
+:root {
+    --play-area-width: 500px;
+}
 
 .side-blocker{
     position: fixed;

@@ -3310,7 +3310,7 @@ const tutorialSteps = [
     },
     {
         title: "CIRCUITS:",
-        content: "Wires are connected to 2 circuits<br>• They can be light or dark<br>• They can have numbers that are the same<br>or add to odd or even"
+        content: "Wires are connected to 2 circuits<br>• They can be light or dark<br>• They can have numbers that are the same or add to odd or even"
     },
     {
         title: "DEFUSE THE BOMB",

@@ -111,6 +111,7 @@ body {
     justify-content: center;
     padding-bottom: 5px;
     flex-shrink: 0;
+    line-height: 1.2;
 }
 
 .instruction.has-result {
@@ -126,20 +127,37 @@ body {
     display: flex;
     justify-content: center;
     gap: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     flex-shrink: 0;
 }
 
 .instruction.has-result > div {
-    line-height: 1.4;
+    line-height: 1.2;
 }
 
 .instruction.has-result > div:not(.suspect-star-container) {
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .instruction.has-result > div:first-of-type:not(.suspect-star-container) {
-    margin-top: 8px;
+    margin-top: 4px;
+}
+
+@media (max-height: 799px) {
+    .container {
+        transform: translateY(0);
+        justify-content: flex-start;
+        padding-top: 4px;
+    }
+    .instruction,
+    .instruction.has-result {
+        min-height: 0;
+        margin-bottom: 8px;
+        padding-bottom: 2px;
+    }
+    .suspect-star-container {
+        margin-bottom: 4px;
+    }
 }
 
 .suspect-star {

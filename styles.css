@@ -3928,7 +3928,7 @@ body[style*="background-color: #000000"] .cost-text {
 /* Instructions Container - Consistent width */
 #instructionsStartDiv {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 6px;
     border: 1px solid #ccc;
     margin-bottom: 12px;
@@ -3946,6 +3946,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-family: 'Aleo', serif;
     font-size: 14px;
     margin-bottom: 6px;
+    line-height: 1.5;
     text-transform: lowercase;
     text-align: center;
 }
@@ -3954,6 +3955,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 6px;
+    line-height: 1.5;
     text-transform: lowercase;
     font-family: 'Aleo', serif;
     text-align: center;
@@ -4076,5 +4078,39 @@ body[data-game="lostAndFound"] #playButton {
 #playButton[data-game="memory"],
 body[data-game="memory"] #playButton {
     background: #4dd0a8;
+}
+
+/* Short viewport: compact start screen (height < 650px) */
+@media (max-height: 649px) {
+    #instructionsStartDiv {
+        padding: 14px 18px;
+        margin-bottom: 8px;
+    }
+    #instructionsStartDiv .instructionLine,
+    .instructionLine {
+        /* font-size: 12px; */
+        /* margin-bottom: 4px; */
+    }
+    .instructionDivider {
+        /* margin: 4px 0; */
+    }
+    #startMenuContainer img {
+        margin-bottom: 4px !important;
+    }
+    #beticleTitle,
+    #mysteryWordTitle,
+    #crossTitle,
+    #phrasesTitle,
+    #tallyTitle,
+    #defuserTitle,
+    #suspectTitle,
+    #zoomTitle,
+    #shiftTitle,
+    #goldCaseTitle,
+    #blackjackTitle,
+    #lostAndFoundTitle,
+    #memoryTitle {
+        margin-bottom: 6px;
+    }
 }
 

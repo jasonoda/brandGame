@@ -556,15 +556,15 @@ class EndScore {
 			this.starThresholds = data;
 		} catch (error) {
 			console.error('Failed to load star thresholds via fetch:', error);
-			// Fallback to default values
-			this.starThresholds = [0, 100000, 600000, 1200000, 2000000];
+			// Fallback to default values (no double button; max deal 1M)
+			this.starThresholds = [0, 100000, 250000, 500000, 1000000];
 		}
 	}
 	createFinalScoreOverlay(scoreValue, statsArray = []) {
 		// Ensure star thresholds are loaded
-		if (!this.starThresholds) {
-			this.starThresholds = [0, 100000, 600000, 1200000, 2000000];
-		}
+        if (!this.starThresholds) {
+            this.starThresholds = [0, 100000, 250000, 500000, 1000000];
+        }
 		
 		
 		// Create black overlay
@@ -1105,8 +1105,7 @@ class Scene {
         // Button usage tracking
         this.buttonUsageStates = {
             freeClue: false,      // FREE CLUE button (action button 0)
-            pick3: false,         // PICK 3 button (action button 1) 
-            double: false,        // DOUBLE button (action button 2)
+            pick3: false,         // PICK 3 button (action button 1)
             clueButton: false     // Clue button
         };
         
@@ -1355,22 +1354,7 @@ class Scene {
                 actionButtons[1].addEventListener('click', () => {
                     if (!this.gameStarted) return; // Don't work until game starts
                     
-                    // Play bingnice sound for action button 2
-                    // this.e.s.p("bingnice");
-                    
                     this.startPickThree();
-                });
-            }
-            
-            // Add click listener to third action button for double
-            if (actionButtons[2]) {
-                actionButtons[2].addEventListener('click', () => {
-                    if (!this.gameStarted) return; // Don't work until game starts
-                    
-                    // Play bingnice sound for action button 3
-                    // this.e.s.p("bingnice");
-                    
-                    this.showDoubleWindow();
                 });
             }
             
@@ -1565,208 +1549,6 @@ class Scene {
         }
     }
     
-    showDoubleWindow() {
-        // Create the double window
-        const doubleWindow = document.createElement('div');
-        doubleWindow.id = 'doubleWindow';
-        doubleWindow.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #ffffff;
-            color: #666666;
-            padding: 30px;
-            border-radius: 15px;
-            font-family: 'Sanchez', serif;
-            text-align: center;
-            z-index: 10000;
-            box-shadow: none;
-            border: 1px solid #cccccc;
-        `;
-        
-        // Create title
-        const title = document.createElement('div');
-        title.style.cssText = `
-            font-size: 24px;
-            font-weight: 400;
-            margin-bottom: 20px;
-            color: #666666;
-            font-family: 'Sanchez', serif;
-        `;
-        title.textContent = 'DOUBLE';
-        
-        // Create description
-        const description = document.createElement('div');
-        description.style.cssText = `
-            font-size: 16px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-            color: #666666;
-            font-family: 'Sanchez', serif;
-        `;
-        description.innerHTML = `
-            Make ALL low and medium<br>cases worth $1.<br><br>
-            Double the value of your<br>highest value unopened case.<br><br>
-        `;
-        
-        // Create button container
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.cssText = `
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        `;
-        
-        // Create ACCEPT button
-        const acceptButton = document.createElement('button');
-        acceptButton.textContent = 'ACCEPT';
-        acceptButton.style.cssText = `
-            background: #ffffff;
-            color: #666666;
-            border: 1px solid #cccccc;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-family: 'Sanchez', serif;
-            font-size: 16px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: none;
-        `;
-        acceptButton.onmouseover = () => {
-            acceptButton.style.background = '#f5f5f5';
-        };
-        acceptButton.onmouseout = () => {
-            acceptButton.style.background = '#ffffff';
-        };
-        acceptButton.onclick = () => this.acceptDouble();
-        
-        // Create CANCEL button
-        const cancelButton = document.createElement('button');
-        cancelButton.textContent = 'CANCEL';
-        cancelButton.style.cssText = `
-            background: #ffffff;
-            color: #666666;
-            border: 1px solid #cccccc;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-family: 'Sanchez', serif;
-            font-size: 16px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: none;
-        `;
-        cancelButton.onmouseover = () => {
-            cancelButton.style.background = '#f5f5f5';
-        };
-        cancelButton.onmouseout = () => {
-            cancelButton.style.background = '#ffffff';
-        };
-        cancelButton.onclick = () => this.cancelDouble();
-        
-        // Assemble the window
-        buttonContainer.appendChild(acceptButton);
-        buttonContainer.appendChild(cancelButton);
-        doubleWindow.appendChild(title);
-        doubleWindow.appendChild(description);
-        doubleWindow.appendChild(buttonContainer);
-        
-        // Disable other action buttons while double window is open
-        this.disableActionButtons([0, 1]); // Disable FREE CLUE and PICK 3 buttons
-        
-        // Add to page
-        document.body.appendChild(doubleWindow);
-    }
-    
-    acceptDouble() {
-        // Step 1: Find the highest unopened case value
-        let highestUnopenedValue = 0;
-        let highestUnopenedCase = null;
-        
-        this.cases.forEach(caseObj => {
-            if (caseObj.value !== "CLUE" && caseObj.action !== "opened") {
-                if (caseObj.value > highestUnopenedValue) {
-                    highestUnopenedValue = caseObj.value;
-                    highestUnopenedCase = caseObj;
-                }
-            }
-        });
-        
-        //console.log(`Highest unopened case: ${highestUnopenedCase ? highestUnopenedCase.caseNumber : 'none'} with value: ${highestUnopenedValue}`);
-        
-        // Step 2: Apply the new rules
-        this.cases.forEach(caseObj => {
-            if (caseObj.value !== "CLUE") {
-                if (caseObj.value >= 50000) {
-                    // High value cases (>= 50000)
-                    if (caseObj === highestUnopenedCase) {
-                        // Only the highest unopened case gets doubled
-                        caseObj.value = caseObj.value * 2;
-                        //console.log(`Case ${caseObj.caseNumber} (highest unopened) value doubled from ${caseObj.originalValue} to ${caseObj.value}`);
-                    } else {
-                        // All other high value cases stay the same
-                        //console.log(`Case ${caseObj.caseNumber} (other high value) stays at ${caseObj.value}`);
-                    }
-                } else {
-                    // Low and medium value cases (< 50000) get set to 1
-                    caseObj.value = 1;
-                    //console.log(`Case ${caseObj.caseNumber} value set to 1 (was ${caseObj.originalValue})`);
-                }
-            }
-        });
-        
-        // Step 3: Update bottom panel using their DOM references
-        this.cases.forEach(caseObj => {
-            if (caseObj.value !== "CLUE" && caseObj.bottomPanelCell) {
-                caseObj.bottomPanelCell.textContent = caseObj.value.toString();
-                // Don't change opacity - keep opened cases greyed out
-                if (caseObj.action === "opened") {
-                    caseObj.bottomPanelCell.style.opacity = "0.3";
-                    caseObj.bottomPanelCell.style.color = "#999";
-                } else {
-                    caseObj.bottomPanelCell.style.opacity = "1";
-                    caseObj.bottomPanelCell.style.color = "black";
-                }
-            }
-        });
-        
-        // Update deal value
-        this.updateDealValue();
-        
-        // Close the window
-        this.closeDoubleWindow();
-        
-        // Re-enable action buttons (respecting usage states)
-        this.enableActionButtonsRespectingUsage([0, 1]);
-        
-        // Mark DOUBLE button as used
-        this.markButtonAsUsed('double');
-        
-        // Disable the third action button (DOUBLE)
-        const actionButtons = document.querySelectorAll('.action-button');
-        if (actionButtons[2]) {
-            actionButtons[2].disabled = true;
-            // No opacity changes - CSS handles the styling
-            actionButtons[2].style.cursor = "not-allowed";
-        }
-    }
-    
-    cancelDouble() {
-        // Re-enable action buttons (respecting usage states)
-        this.enableActionButtonsRespectingUsage([0, 1]);
-        // Simply close the window
-        this.closeDoubleWindow();
-    }
-    
-    closeDoubleWindow() {
-        const doubleWindow = document.getElementById('doubleWindow');
-        if (doubleWindow && doubleWindow.parentNode) {
-            doubleWindow.parentNode.removeChild(doubleWindow);
-        }
-    }
-    
     assignCasesToBottomPanel() {
         // Get all score cells (excluding headers)
         const scoreCells = document.querySelectorAll('.score-cell:not(.header)');
@@ -1817,7 +1599,7 @@ class Scene {
             cell.style.color = "black";
         });
         
-        // Update each cell with the corresponding case value
+        // Update each cell with the corresponding case value (and x2 if doubled)
         unopenedCases.forEach((caseObj, index) => {
             if (scoreCells[index]) {
                 scoreCells[index].textContent = caseObj.value.toString();
@@ -1897,20 +1679,10 @@ class Scene {
     }
     
     showRevealWindow(value) {
-
-        //console.log("showRevealWindow "+value);
-
         this.e.suitcase.assignPriceTexture(value);
-
-        // assign the right image to the valuesign mesh
-
-        // Play case button press sound
-        // this.e.s.p("openClick");
 
         this.e.suitcase.show("show");
 
-        // this.e.s.p("openClick");
-            
         if (value <= 500) {
             this.e.s.p("good");
         } else if (value <= 25000) {
@@ -1920,7 +1692,6 @@ class Scene {
         } else if (value === 1000000) {
             this.e.s.p("bad");
         }
-        
     }
     
     hideRevealWindow() {
@@ -2318,8 +2089,9 @@ class Scene {
     }
     
     showMessagePopup(message) {
-        // Create popup element
+        // Create popup element (styled like bonus popups)
         const popup = document.createElement('div');
+        popup.className = 'goldcase-bonus-popup';
         popup.style.cssText = `
             position: fixed;
             top: 50%;
@@ -2327,9 +2099,9 @@ class Scene {
             transform: translate(-50%, -50%);
             background: #ffffff;
             color: #666666;
-            padding: 20px 30px;
-            border-radius: 10px;
-            font-family: 'Sanchez', serif;
+            padding: 10px 16px;
+            border-radius: 5px;
+            font-family: 'Nunito', sans-serif;
             font-size: 16px;
             font-weight: 400;
             z-index: 10000;
@@ -3067,7 +2839,7 @@ class Scene {
             this.revealAllCaseValues();
             
             // Disable action buttons
-            this.disableActionButtons([0, 1, 2]);
+            this.disableActionButtons([0, 1]);
             
             // Disable all case buttons
             this.disableAllCaseButtons();
@@ -3413,7 +3185,7 @@ class Scene {
         this.markButtonAsUsed('pick3');
         
         // Disable other action buttons during pick 3 mode
-        this.disableActionButtons([0, 1, 2]); // Disable FREE CLUE, PICK 3, and DOUBLE buttons
+        this.disableActionButtons([0, 1]); // Disable FREE CLUE and PICK 3 buttons
         
         // Show persistent instruction popup over bottom section
         this.showPickThreePopup("Pick three cases: the LOWEST value case will be revealed");
@@ -3523,7 +3295,7 @@ class Scene {
         this.action = this.originalAction;
         
         // Re-enable action buttons (respecting usage states)
-        this.enableActionButtonsRespectingUsage([0, 2]);
+        this.enableActionButtonsRespectingUsage([0]);
         
         // Hide the pick 3 popup
         this.hidePickThreePopup();
@@ -3542,16 +3314,16 @@ class Scene {
             transform: translateX(-50%);
             background: #ffffff;
             color: #666666;
-            padding: 20px 30px;
-            border-radius: 10px;
-            font-family: 'Sanchez', serif;
+            padding: 10px 16px;
+            border-radius: 5px;
+            font-family: 'Nunito', sans-serif;
             font-size: 16px;
             font-weight: 400;
             z-index: 10000;
             border: 1px solid #cccccc;
             box-shadow: none;
             text-align: center;
-            min-width: 300px;
+            min-width: 280px;
         `;
         this.pickThreePopup.textContent = message;
         
@@ -3601,9 +3373,6 @@ class Scene {
                 } else if (index === 1 && !this.isButtonUsed('pick3')) {
                     shouldEnable = true;
                     //console.log("PICK 3 button re-enabled (not used yet)");
-                } else if (index === 2 && !this.isButtonUsed('double')) {
-                    shouldEnable = true;
-                    //console.log("DOUBLE button re-enabled (not used yet)");
                 } else {
                     //console.log(`Action button ${index} stays disabled (already used)`);
                 }
@@ -3818,11 +3587,6 @@ class Scene {
                 button.disabled = false;
                 button.style.cursor = "pointer";
                 //console.log("PICK 3 button enabled (not used yet)");
-            } else if (index === 2 && !this.isButtonUsed('double')) {
-                // Third action button (DOUBLE) - only enable if not used
-                button.disabled = false;
-                button.style.cursor = "pointer";
-                //console.log("DOUBLE button enabled (not used yet)");
             } else {
                 // Button has been used, it stays disabled
                 //console.log(`Action button ${index} stays disabled (already used)`);
@@ -5976,16 +5740,11 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
-// Calculate stars from Gold Case score
+// Calculate stars from Gold Case score (no double button; max deal 1M)
 function calculateGoldCaseStarsFromScore(scoreValue) {
     let stars = 0;
-    // Star thresholds for Gold Case (matching EndScore defaults)
-    const starThresholds = [0, 100000, 600000, 1200000, 2000000];
-    // 1 star = >= 0
-    // 2 stars = >= 100000
-    // 3 stars = >= 600000
-    // 4 stars = >= 1200000
-    // 5 stars = >= 2000000
+    const starThresholds = [0, 100000, 500000, 800000, 1000000];
+    // 1 star = >= 0, 2 = >= 100k, 3 = >= 500k, 4 = >= 800k, 5 = >= 1M
     for (let i = starThresholds.length - 1; i >= 0; i--) {
         if (scoreValue >= starThresholds[i]) {
             stars = i + 1; // Add 1 because index 0 = 1 star, index 4 = 5 stars

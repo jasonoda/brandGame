@@ -1053,6 +1053,7 @@ addButtonHandlers(letterRightBtn, () => shiftLetters(1));
 
 // Hint functionality
 function handleHint() {
+    if (hintButton.disabled) return;
     hintCount++;
     
     if (hintCount === 1) {
@@ -2011,6 +2012,7 @@ function restoreSolvedWords() {
         const bothWordsFound = (word1Found && word2Found) || (savedState && savedState.word1Found && savedState.word2Found);
         
         if (isComplete && bothWordsFound) {
+            if (hintButton) hintButton.disabled = true;
             const starsEarned = parseInt(localStorage.getItem(`crossStars_${todayKey}`) || '0');
             const instructionText = document.getElementById('instructionText');
             if (instructionText && starsEarned > 0) {
@@ -2078,6 +2080,8 @@ function createStarDisplay(starsEarned) {
 function showWinScreen() {
     const instructionText = document.getElementById('instructionText');
     if (!instructionText) return;
+    
+    if (hintButton) hintButton.disabled = true;
     
     // Calculate stars based on hints used
     // No hints: 5 stars, 1 hint: 4 stars, 2 hints: 3 stars, 3 hints: 2 stars
@@ -2156,6 +2160,7 @@ init();
             init();
             gameInitialized = true;
         }
+        if (hintButton) hintButton.disabled = true;
     }
 })();
 

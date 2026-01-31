@@ -281,3 +281,33 @@ body {
     color: #333;
     text-align: center;
 }
+
+@media (max-height: 699px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        gap: 10px;
+    }
+    .instruction-text {
+        margin-bottom: 4px;
+        min-height: 32px;
+        font-size: 9pt;
+    }
+    .controls {
+        gap: 16px;
+        margin-top: 8px;
+    }
+    .button-label {
+        height: 16px;
+        margin-bottom: 4px;
+    }
+    .hint-button {
+        margin-top: 8px;
+        padding: 8px 20px;
+        font-size: 14px;
+    }
+    .hint-answers {
+        margin-top: 6px;
+    }
+}

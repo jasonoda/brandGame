@@ -22,6 +22,12 @@ body {
 
 /* Start Menu Styles - Now in main styles.css */
 
+#instructionsStartDiv .instructionThemeHint {
+    color: #FF8C42;
+    /* font-weight: 600; */
+    text-transform: uppercase;
+}
+
 .colorExample {
     display: flex;
     align-items: center;
@@ -302,6 +308,12 @@ body {
     flex: 1.5;
     font-size: 11px !important;
     letter-spacing: 0.5px;
+}
+
+.key-large[data-key="ENTER"] {
+    padding: 8px 6px;
+    font-size: 10px !important;
+    letter-spacing: 0.3px;
 }
 
 .key-large[data-key="BACKSPACE"] {

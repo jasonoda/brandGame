@@ -57,9 +57,9 @@ function getShapeName(shapeIndex) {
 // Update instructions text based on mode
 const suspectInstructionLines = document.querySelectorAll('#instructionsStartDiv .instructionLine');
 if (suspectInstructionLines[1]) {
-    suspectInstructionLines[1].textContent = useEmojis
-        ? 'each person has a color, image, and number'
-        : 'each person has color, shape, and number';
+    suspectInstructionLines[1].innerHTML = useEmojis
+        ? 'each person has a<br>color, image, and number'
+        : 'each person has a<br>color, shape, and number';
 }
 
 const gameArea = document.getElementById('gameArea');
@@ -558,10 +558,9 @@ function showCompletedScreen() {
     
     // Show final result
     if (gameWon) {
-        const peopleKilledText = totalKilled === 1 ? '1 person was killed' : `${totalKilled} people were killed`;
         const starDisplay = createStarDisplay(starsEarned);
         instructionDiv.classList.add('has-result');
-        instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>CORRECT</div><div>You found the killer on turn ${questionCount}</div><div>${peopleKilledText}</div>`;
+        instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>turn ${questionCount} - ${totalKilled} dead</div>`;
         
         // Show jail on killer
         const killerElement = peopleData[killerIndex].element;
@@ -761,11 +760,10 @@ function questionPerson(personIndex) {
             localStorage.setItem(`suspectWon_${todayKey}`, 'true');
             
             // Format final message with star display
-            const turnNumber = questionCount; // Subtract 1 from display (was questionCount + 1)
-            const peopleKilledText = totalKilled === 1 ? '1 person was killed' : `${totalKilled} people were killed`;
+            const turnNumber = questionCount;
             const starDisplay = createStarDisplay(starsEarned);
             instructionDiv.classList.add('has-result');
-            instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>CORRECT</div><div>You found the killer on turn ${turnNumber}</div><div>${peopleKilledText}</div>`;
+            instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>turn ${turnNumber} - ${totalKilled} dead</div>`;
             
             accuseMode = false;
             // Disable both buttons when game is won
@@ -970,13 +968,27 @@ function killerTurn() {
                 isRandomKill = true;
             }
         } else {
-            // Random killing mode: kill anyone except the killer and questioned people
-            targets = peopleData.filter((p, i) => 
+            // Prefer killing people with 0 traits in common with the killer
+            const eligible = peopleData.filter((p, i) => 
                 i !== killerIndex && 
                 !p.dead &&
                 !p.questioned
             );
-            isRandomKill = true;
+            const zeroTraits = eligible.filter(p => countCommonTraits(p, killer) === 0);
+            const withTraits = eligible.filter(p => countCommonTraits(p, killer) > 0);
+            // Build target list: fill from zero-traits first (shuffled), then from with-traits if needed
+            const shuffle = (arr) => {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            };
+            const zeroShuffled = shuffle(zeroTraits);
+            const withShuffled = shuffle(withTraits);
+            targets = [...zeroShuffled, ...withShuffled];
+            if (zeroTraits.length === 0) isRandomKill = true;
         }
         
         // Select multiple victims
@@ -984,8 +996,8 @@ function killerTurn() {
         currentRoundVictims = [];
         
         if (victimsToKill > 0) {
-            // Shuffle and pick victims
-            const shuffled = [...targets];
+            // Pick first N from targets (zero-traits preferred, already ordered)
+            const shuffled = targets.slice(0, victimsToKill);
             for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
