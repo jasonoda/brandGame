@@ -13,6 +13,51 @@ function getTodayKey() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
+// Ordinal suffix for dates: 1st, 2nd, 3rd, 4th, etc.
+function getOrdinalDate(day) {
+    const n = Math.floor(day);
+    const v = n % 100;
+    if (v >= 11 && v <= 13) return n + 'th';
+    const u = v % 10;
+    if (u === 1) return n + 'st';
+    if (u === 2) return n + 'nd';
+    if (u === 3) return n + 'rd';
+    return n + 'th';
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTH_ABBREV = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// 2 days before Thanksgiving (4th Thursday of November)
+function getThanksgivingTwoDaysBefore(year) {
+    const nov1 = new Date(year, 10, 1);
+    const firstThu = (4 - nov1.getDay() + 7) % 7;
+    const thanksgiving = new Date(year, 10, 1 + firstThu + 21);
+    const twoBefore = new Date(thanksgiving.getTime());
+    twoBefore.setDate(twoBefore.getDate() - 2);
+    return twoBefore;
+}
+
+function getBannerDateText() {
+    if (typeof getCurrentTheme !== 'function') return "TODAY'S GAMES";
+    const theme = getCurrentTheme();
+    const name = theme.name;
+    if (name === 'Thanksgiving') {
+        const d = getThanksgivingTwoDaysBefore(new Date().getFullYear());
+        return MONTH_ABBREV[d.getMonth()] + ' ' + getOrdinalDate(d.getDate()) + ' GAMES';
+    }
+    if (name === '4th of July') return 'Jul 2nd GAMES';
+    const today = new Date();
+    return MONTH_ABBREV[today.getMonth()] + ' ' + getOrdinalDate(today.getDate()) + ' GAMES';
+}
+
+function getSubtitleText() {
+    if (typeof getCurrentTheme !== 'function') return 'THANKSGIVING';
+    const theme = getCurrentTheme();
+    const name = theme.name;
+    return theme.name.toUpperCase();
+}
+
 // Function to update calendar display
 function updateCalendar() {
     const today = new Date();
@@ -373,14 +418,6 @@ function updateWalletStars2() {
     try {
         const todayKey = getTodayKey();
         
-        // Update level display
-        const journeyLevel = parseInt(localStorage.getItem('journeyLevel') || '1');
-        const journeyPosition = parseInt(localStorage.getItem(`journeyPosition_level${journeyLevel}`) || '0');
-        const levelElement = document.querySelector('.profile-level');
-        if (levelElement) {
-            levelElement.textContent = `Level ${journeyLevel}-${journeyPosition + 1}`;
-        }
-        
         // Update today's stars
         const todayStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
         
@@ -714,11 +751,23 @@ function applyThemeSettings() {
     if (typeof getCurrentTheme === 'function') {
         const theme = getCurrentTheme();
         
-        // Update week subtitle text
+        // Update week subtitle text (e.g. "2 days before Thanksgiving" or "July 2nd")
         const weekSubtitles = document.querySelectorAll('.week-subtitle, .week-subtitle-type1');
+        const subtitleText = getSubtitleText();
         weekSubtitles.forEach(subtitle => {
-            subtitle.textContent = theme.name.toUpperCase();
+            subtitle.textContent = subtitleText;
         });
+        
+        // Update banner date (instead of TODAY'S GAMES)
+        const bannerText = document.querySelector('.todays-games-text');
+        if (bannerText) bannerText.textContent = getBannerDateText();
+        
+        // Update TODAY'S GAMES banner background (day1 image per theme)
+        const day1Image = theme.day1Image || 'weeklyBackgrounds/thanksgiving_day1.png';
+        const todaysBanner = document.querySelector('.todays-games-banner');
+        if (todaysBanner) {
+            todaysBanner.style.backgroundImage = `url('${day1Image}')`;
+        }
         
         // Update quiz titles
         const quizTitles = document.querySelectorAll('.subsection-title');
@@ -917,6 +966,9 @@ buttons.forEach(button => {
         // Update logo visibility when switching pages
         updateLogoVisibility();
         
+        // Scroll viewport to top when switching tabs/pages (snap, no animation)
+        window.scrollTo(0, 0);
+        
         // Update move stars display when switching to journey tab
         if (targetPage === 'journey') {
             if (window.updateMoveStarsDisplay) {
@@ -932,12 +984,6 @@ buttons.forEach(button => {
             const moveStars = localStorage.getItem(`usableStars_${todayKey}`);
             console.log('[Journey Tab] Current move stars:', moveStars);
             
-            // Hide help button on journey page
-            const helpButton = document.querySelector('.help-button');
-            if (helpButton) {
-                helpButton.classList.add('hidden');
-            }
-            
             // Snap container position when journey tab becomes active
             if (window.snapJourneyContainer) {
                 const journeyPage = document.getElementById('journey-page');
@@ -945,13 +991,10 @@ buttons.forEach(button => {
                                 window.snapJourneyContainer();
                     }
                 }
-        } else {
-            // Show help button on other pages (if close button is not showing)
-            const helpButton = document.querySelector('.help-button');
-            if (helpButton) {
-                updateLogoVisibility();
-            }
         }
+        
+        // Help button visibility: only on home page (updateLogoVisibility checks home + close button)
+        updateLogoVisibility();
         
         
         // Trigger rival page animations
@@ -978,11 +1021,15 @@ buttons.forEach(button => {
             }, 50);
         }
         
-        // Update boost page stats when boost page is shown
-        if (targetPage === 'sweeps' && mode === 'b') {
-            updateBoostStats();
-            // Update boost page for bigy style if applicable
-            updateBoostPageForBigy();
+        // Update games page stats when games page is shown
+        if (targetPage === 'games') {
+            updateGamesPageStats();
+            updateGamesPageForBigy();
+            
+            // Ensure scramble letters are laid out correctly now that container is visible
+            if (typeof resizeMainPageScramble === 'function') {
+                resizeMainPageScramble();
+            }
         }
         
         // Initialize sweepstakes page when shown (only if not boost mode)
@@ -991,6 +1038,15 @@ buttons.forEach(button => {
         }
     });
 });
+
+// TODAY'S GAMES banner: click goes to games tab
+const todaysGamesLink = document.getElementById('todays-games-link');
+if (todaysGamesLink) {
+    todaysGamesLink.addEventListener('click', () => {
+        const gamesTab = document.querySelector('.tab-button[data-page="games"]');
+        if (gamesTab) gamesTab.click();
+    });
+}
 
 // Rival page animations
 function animateRivalPage() {
@@ -1364,8 +1420,8 @@ function checkURLParameters() {
         
         changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
         
-        // Update boost page for bigy style when using bigy scheme
-    updateBoostPageForBigy();
+        // Update games page Market Match box for bigy style when using bigy scheme
+        updateGamesPageForBigy();
     }
         
     // Initialize the appropriate carousel based on header type
@@ -1582,28 +1638,26 @@ function applyWegmansStyling() {
     
     const challengesContainer = document.querySelector('.profile-challenges-container');
     if (challengesContainer) {
-        challengesContainer.style.borderColor = '#ce3f24';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.05) 0%, rgba(206, 63, 36, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(206, 63, 36, 0.15)';
+        challengesContainer.style.borderColor = '';
+        challengesContainer.style.background = '';
+        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsContainer = document.querySelector('.profile-achievements-container');
     if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#ce3f24';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.05) 0%, rgba(206, 63, 36, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(206, 63, 36, 0.15)';
+        achievementsContainer.style.borderColor = '';
+        achievementsContainer.style.background = '';
+        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsHeader = document.querySelector('.achievements-header');
     if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#ce3f24';
-        achievementsHeader.style.borderBottomColor = 'rgba(206, 63, 36, 0.3)';
+        achievementsHeader.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
     }
     
     const challengesHeader = document.querySelector('.challenges-header');
     if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#ce3f24';
-        challengesHeader.style.borderBottomColor = 'rgba(206, 63, 36, 0.3)';
+        challengesHeader.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
     }
     
     // Challenge items - wegmans color
@@ -1892,28 +1946,26 @@ function applyBigyStyling() {
     
     const challengesContainer = document.querySelector('.profile-challenges-container');
     if (challengesContainer) {
-        challengesContainer.style.borderColor = '#dc3545';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+        challengesContainer.style.borderColor = '';
+        challengesContainer.style.background = '';
+        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsContainer = document.querySelector('.profile-achievements-container');
     if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#dc3545';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+        achievementsContainer.style.borderColor = '';
+        achievementsContainer.style.background = '';
+        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsHeader = document.querySelector('.achievements-header');
     if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#dc3545';
-        achievementsHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+        achievementsHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
     }
     
     const challengesHeader = document.querySelector('.challenges-header');
     if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#dc3545';
-        challengesHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+        challengesHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
     }
     
     // Challenge items - red for bigy
@@ -2228,28 +2280,26 @@ function applyFirehouseStyling() {
     
     const challengesContainer = document.querySelector('.profile-challenges-container');
     if (challengesContainer) {
-        challengesContainer.style.borderColor = '#dc3545';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+        challengesContainer.style.borderColor = '';
+        challengesContainer.style.background = '';
+        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsContainer = document.querySelector('.profile-achievements-container');
     if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#dc3545';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.15)';
+        achievementsContainer.style.borderColor = '';
+        achievementsContainer.style.background = '';
+        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsHeader = document.querySelector('.achievements-header');
     if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#dc3545';
-        achievementsHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+        achievementsHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
     }
     
     const challengesHeader = document.querySelector('.challenges-header');
     if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#dc3545';
-        challengesHeader.style.borderBottomColor = 'rgba(220, 53, 69, 0.3)';
+        challengesHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
     }
     
     // Challenge items - red for firehouse
@@ -2296,7 +2346,7 @@ function applyFirehouseStyling() {
     }
     
     // Boost game title - Firehouse Match for firehouse
-    const gameTitle = document.querySelector('#boost-page .game-title');
+    const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
     if (gameTitle) {
         gameTitle.textContent = 'FIREHOUSE MATCH';
     }
@@ -2510,28 +2560,26 @@ function applyDefaultStyling() {
     
     const challengesContainer = document.querySelector('.profile-challenges-container');
     if (challengesContainer) {
-        challengesContainer.style.borderColor = '#FF8C42';
-        challengesContainer.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%)';
-        challengesContainer.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.15)';
+        challengesContainer.style.borderColor = '';
+        challengesContainer.style.background = '';
+        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsContainer = document.querySelector('.profile-achievements-container');
     if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '#FF8C42';
-        achievementsContainer.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%)';
-        achievementsContainer.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.15)';
+        achievementsContainer.style.borderColor = '';
+        achievementsContainer.style.background = '';
+        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
     
     const achievementsHeader = document.querySelector('.achievements-header');
     if (achievementsHeader) {
-        achievementsHeader.style.backgroundColor = '#FF8C42';
-        achievementsHeader.style.borderBottomColor = 'rgba(255, 140, 66, 0.3)';
+        achievementsHeader.style.background = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
     }
     
     const challengesHeader = document.querySelector('.challenges-header');
     if (challengesHeader) {
-        challengesHeader.style.backgroundColor = '#FF8C42';
-        challengesHeader.style.borderBottomColor = 'rgba(255, 140, 66, 0.3)';
+        challengesHeader.style.background = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
     }
     
     // Challenge items - orange for default (CSS already has orange, but ensure no bigy overrides)
@@ -2940,24 +2988,24 @@ function updateBoostHighScore(score = null) {
     }
 }
 
-// Update boost page stats
-function updateBoostStats() {
+// Update games page stats (e.g. Market Match high score)
+function updateGamesPageStats() {
     updateBoostHighScore();
 }
 
-// Update boost page for bigy style
-function updateBoostPageForBigy() {
+// Update games page Market Match box for bigy/donut style
+function updateGamesPageForBigy() {
     const urlParams = new URLSearchParams(window.location.search);
     const scheme = urlParams.get('s');
     
     // Market Match is now the default, only show Donut Matcher if scheme is explicitly set to 'donut'
     if (scheme === 'donut') {
         // Show Donut Matcher only if explicitly requested
-        const gameTitle = document.querySelector('#boost-page .game-title');
+        const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
         if (gameTitle) {
             gameTitle.textContent = 'DONUT MATCHER';
         }
-        const playColorBox = document.querySelector('#boost-page .play-color-box');
+        const playColorBox = document.querySelector('#games-page .boost-game-box .play-color-box');
         if (playColorBox) {
             playColorBox.style.background = 'linear-gradient(to bottom, #FF6B9D, #C44569)';
             // Remove image if it exists
@@ -3005,7 +3053,7 @@ function updateBoostPageForBigy() {
     }
     
     // Market Match is now the default - Change game title to Market Match
-    const gameTitle = document.querySelector('#boost-page .game-title');
+    const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
     if (gameTitle) {
         // Check if firehouse is active
         const urlParams = new URLSearchParams(window.location.search);
@@ -3018,7 +3066,7 @@ function updateBoostPageForBigy() {
     }
     
     // Update play-color-box with image and red gradient
-    const playColorBox = document.querySelector('#boost-page .play-color-box');
+    const playColorBox = document.querySelector('#games-page .boost-game-box .play-color-box');
     if (playColorBox) {
         playColorBox.style.background = 'linear-gradient(to bottom, #e84066, #c82a48)';
         
@@ -3088,7 +3136,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
     
     // Keep rival and profile containers light (unless dark mode)
     // Exclude deals-page profile-container from this styling
-    const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container, .boost-container');
+    const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container, .games-container');
     lightContainers.forEach(container => {
         // Skip if this is inside deals-page
         if (container.closest('#deals-page')) {
@@ -3193,7 +3241,7 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
         }
         
         // Change wallet page text colors to light grey
-        const walletTextElements = document.querySelectorAll('.profile-username, .profile-level, .stat-label, .stat-value');
+        const walletTextElements = document.querySelectorAll('.profile-username, .profile-location, .stat-label, .stat-value');
         walletTextElements.forEach(element => {
             element.style.color = lightGrey;
         });
@@ -3238,10 +3286,10 @@ function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, 
             sweepsContainer.style.backgroundColor = darkGrey;
         }
         
-        const boostContainer = document.querySelector('.boost-container');
-        if (boostContainer) {
-            boostContainer.style.background = darkGrey;
-            boostContainer.style.backgroundColor = darkGrey;
+        const gamesContainer = document.querySelector('.games-container');
+        if (gamesContainer) {
+            gamesContainer.style.background = darkGrey;
+            gamesContainer.style.backgroundColor = darkGrey;
         }
         
         // Change all small text to light grey (except date and game titles)
@@ -3336,9 +3384,11 @@ function updateLogoVisibility() {
     const isWegmans = headerType === 'wegmans';
     const isBigyMode = isBigy || isBigy2 || isFirehouse2 || isWegmans;
     
-    // Hide/show help button based on close button state
+    // Show help button only on home page (and when game overlay close button is not showing)
+    const homePage = document.getElementById('home-page');
+    const isHomeActive = homePage && homePage.classList.contains('active');
     if (helpButton) {
-        if (closeButton && closeButton.classList.contains('show')) {
+        if (!isHomeActive || (closeButton && closeButton.classList.contains('show'))) {
             helpButton.classList.add('hidden');
             helpButton.style.display = 'none';
         } else {
@@ -4068,11 +4118,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'b') {
         const sweepsButton = document.querySelector('.tab-button[data-page="sweeps"]');
         const sweepsPage = document.getElementById('sweeps-page');
-        const boostPage = document.getElementById('boost-page');
+        const gamesPageEl = document.getElementById('games-page');
         
-        if (sweepsButton && sweepsButton.classList.contains('active')) {
+        if (sweepsButton && sweepsButton.classList.contains('active') && gamesPageEl) {
             if (sweepsPage) sweepsPage.classList.remove('active');
-            if (boostPage) boostPage.classList.add('active');
+            gamesPageEl.classList.add('active');
         }
     }
 });
@@ -4146,4 +4196,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Expose reset function globally for Q key handler
 window.resetAllData = resetAllData;
+
+// Online indicator: random number 120–140 (all instances)
+document.addEventListener('DOMContentLoaded', () => {
+    const n = 120 + Math.floor(Math.random() * 21);
+    document.querySelectorAll('.online-count-num').forEach(el => { el.textContent = n; });
+});
 

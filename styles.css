@@ -144,6 +144,7 @@ body {
     background-color: transparent;
 }
 
+#home-page.active,
 #games-page.active {
     background-color: transparent;
     padding: 0;
@@ -171,7 +172,7 @@ body {
 }
 
 .profile-container {
-    background: white;
+    /* background: white; */
     border: none;
     border-radius: 0;
     padding: 40px 20px 40px 20px;
@@ -192,8 +193,19 @@ body {
     background: transparent !important;
 }
 
+/* Wallet/profile page: style like main page windows */
+#wallet-page .profile-container {
+    max-width: 600px;
+    margin: 10px auto 30px auto;
+    padding: 40px 20px 40px 20px;
+    /* border: var(--box-border-width) solid var(--box-border-color); */
+    /* border-radius: var(--box-border-radius); */
+    /* background-color: var(--box-background); */
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
+}
+
 .profile-username {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: #333;
     font-family: 'Aleo', sans-serif;
@@ -241,7 +253,7 @@ body {
 }
 
 .profile-actions {
-    font-size: 11px;
+    font-size: 12px;
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 10px;
@@ -304,7 +316,7 @@ body.wegmans .profile-today-stars .star-number {
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 0px 0px;
+    padding: 20px 20px 16px 20px;
     margin-bottom: 0;
     box-shadow: none;
     backdrop-filter: none;
@@ -380,7 +392,7 @@ body.wegmans .profile-today-stars .star-number {
 }
 
 .profile-stat-small .stat-number {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #FF8C42;
 }
@@ -627,10 +639,10 @@ body.wegmans .deal-button-container {
     margin-top: 10px;
     margin-bottom: 20px;
     padding: 0;
-    border: 1px solid #FF8C42;
-    border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%);
-    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+    border: var(--box-border-width) solid var(--box-border-color);
+    border-radius: var(--box-border-radius);
+    background-color: var(--box-background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
@@ -640,34 +652,34 @@ body.wegmans .deal-button-container {
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 0;
-    border: 1px solid #FF8C42;
-    border-radius: 8px;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.05) 0%, rgba(255, 140, 66, 0.03) 100%);
-    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+    border: var(--box-border-width) solid var(--box-border-color);
+    border-radius: var(--box-border-radius);
+    background-color: var(--box-background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
 .achievements-header {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: white;
     text-align: center;
-    padding: 5px 20px;
-    background-color: #FF8C42;
-    border-bottom: 2px solid rgba(255, 140, 66, 0.3);
+    padding: 10px 20px;
+    background: var(--header-gradient);
+    border-bottom: none;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .challenges-header {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: white;
     text-align: center;
-    padding:5px 20px;
-    background-color: #FF8C42;
-    border-bottom: 2px solid rgba(255, 140, 66, 0.3);
+    padding: 10px 20px;
+    background: var(--header-gradient);
+    border-bottom: none;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -677,40 +689,31 @@ body.wegmans .deal-button-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0px;
-    border-bottom: 1px solid rgba(255, 140, 66, 0.2);
-    /* border: 1px solid red; */
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: background-color 0.2s ease;
     position: relative;
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 140, 66, 0.04) 100%);
+    background-color: var(--box-background);
 }
 
 .challenge-item:hover {
-    background: linear-gradient(to bottom, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.08) 100%);
+    background-color: #f8f8f8;
 }
 
-/* Wegmans orange for profile challenges and achievements */
-body.wegmans .profile-challenges-container,
-body.wegmans .profile-achievements-container {
-    border-color: #ce3f24 !important;
-    background: linear-gradient(to bottom, rgba(206, 63, 36, 0.05) 0%, rgba(206, 63, 36, 0.03) 100%) !important;
-    box-shadow: 0 4px 12px rgba(206, 63, 36, 0.15) !important;
-}
+/* Wegmans: profile window headers stay orange; container uses same window style */
 
 body.wegmans .achievements-header,
 body.wegmans .challenges-header {
-    background-color: #ce3f24 !important;
-    border-bottom-color: rgba(206, 63, 36, 0.3) !important;
+    background: var(--wegmans-gradient) !important;
 }
 
 body.wegmans .challenge-item {
-    border-bottom-color: rgba(206, 63, 36, 0.2) !important;
-    background: linear-gradient(to bottom, rgba(206, 63, 36, 0.08) 0%, rgba(206, 63, 36, 0.04) 100%) !important;
+    background-color: var(--box-background);
 }
 
 body.wegmans .challenge-item:hover {
-    background: linear-gradient(to bottom, rgba(206, 63, 36, 0.15) 0%, rgba(206, 63, 36, 0.08) 100%) !important;
+    background-color: #f8f8f8;
 }
 
 .challenge-item:last-child {
@@ -718,7 +721,7 @@ body.wegmans .challenge-item:hover {
 }
 
 .challenge-text {
-    font-size: 14px;
+    font-size: 12px;
     color: #333;
     text-align: left;
     flex: 1;
@@ -728,7 +731,7 @@ body.wegmans .challenge-item:hover {
 }
 
 .challenge-reward {
-    font-size: 15px;
+    font-size: 12px;
     color: #FF8C42;
     font-weight: 700;
     text-align: right;
@@ -1177,7 +1180,7 @@ body.wegmans .carousel-content-type1 {
 
 /* Border radius for wegmans logo in carousel */
 body.wegmans .carousel-slide-type1 img {
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .carousel-icon {
@@ -1296,7 +1299,7 @@ body.wegmans .carousel-slide-type1 img {
     height: 100%;
     gap: 0;
     background: linear-gradient(to bottom, #e84066, #c82a48);
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 20px;
     margin: 0 auto;
     width: calc(100% - 40px);
@@ -1341,7 +1344,7 @@ body.wegmans .carousel-slide-type1 img {
 .week-combined-container2A {
     margin: 20px;
     margin-bottom: 12px !important;
-    border-radius: 12px;
+    border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
@@ -1515,15 +1518,9 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     /* border:1px solid red; */
 }
 
-/* Remove extra padding above DAILY ARCADE section and reduce space above title */
 .arcade-section {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    /* border:1px solid blue; */
-}
-
-.arcade-section .section-title {
-    /* margin-top: -10px !important; */
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 
@@ -1558,15 +1555,13 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 .section-title {
     font-size: 16px;
     font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0;
     color: #555;
     text-align: center;
     font-family: 'Aleo', serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    transform: translateY(2px);
-    /* border:1px solid blue; */
+    /* border: 1px solid red; */
 }
 
 
@@ -1588,6 +1583,59 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+}
+
+/* Online indicator below Thanksgiving */
+.online-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-top: 0px;
+    margin-bottom: 12px;
+}
+.online-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    flex-shrink: 0;
+    margin-right: 3px;
+}
+.online-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #000;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0;
+}
+.online-user-icon {
+    font-size: 7px;
+    transform: translateY(-2px);
+    margin-left: 2px;
+    line-height: 1;
+    display: inline-block;
+}
+
+/* User row above calendar */
+.user-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 10px;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+}
+.user-div .user-bullet {
+    color: #999;
+    font-weight: 700;
+    margin: 0 2px;
+    font-size: 7px;
+    transform: translateY(-1px);
 }
 
 .week-record-star {
@@ -1680,8 +1728,8 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     font-weight: 400;
     color: rgb(54, 54, 54);
     text-align: center;
-    margin-bottom: 8px;
-    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-top: -4px;
     font-family: 'Abril Fatface', serif;
     letter-spacing: 1px;
 }
@@ -1701,10 +1749,89 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     display: flex;
     flex-direction: column;
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    border: 1px solid #FFB84D;
-    border-radius: 8px;
+    border: none;
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(255, 140, 66, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* TODAY'S GAMES banner below calendar - placeholder image background, inner div has gradient + text */
+.todays-games-wrapper {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.todays-games-wrapper:active {
+    opacity: 0.98;
+}
+.todays-games-banner {
+    display: block;
+    min-height: 100px;
+    margin: 0;
+    background: #c8d4dc url('weeklyBackgrounds/thanksgiving_day1.png') center/cover no-repeat;
+    border-radius: 0;
+    box-shadow: inset 0 0 8px 4px rgba(0, 0, 0, 0.25);
+    /* border-top: 1px white solid; */
+    /* border-bottom: 1px white solid; */
+}
+.todays-games-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #49c8db 0%, #4f9dca 100%);
+    border-radius: 0;
+    padding: 7px 18px;
+    margin: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.todays-games-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 28%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.28);
+    transform: skewX(-35deg);
+    pointer-events: none;
+    animation: todays-games-shine 3.2s ease-in-out 0.5s infinite;
+}
+@keyframes todays-games-shine {
+    0% { transform: translateX(-120%) skewX(-35deg); }
+    37.5% { transform: translateX(420%) skewX(-35deg); }
+    37.5%,
+    100% { transform: translateX(420%) skewX(-35deg); }
+}
+.todays-games-text {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    
+}
+.todays-games-arrow {
+    margin-left: 3px;
+    /* margin-top: 1px; */
+    font-size: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+.todays-games-arrow svg {
+    display: block;
+}
+
+/* Home/games page: 6px radius for elements using variable */
+#home-page .highlow-container,
+#home-page .highlow-item {
+    border-radius: 6px;
 }
 
 /* Wegmans orange flat color for calendar */
@@ -1714,7 +1841,7 @@ body.wegmans .week-container-type1 {
     box-shadow: 0 2px 8px rgba(206, 63, 36, 0.2) !important;
 }
 
-/* Wegmans orange color for all orange gradient elements (except boost page) */
+/* Wegmans orange color for all orange gradient elements (except games page) */
 body.wegmans .header-bar,
 body.wegmans .scramble-top-section,
 body.wegmans .quiz-top-section,
@@ -1804,7 +1931,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -1815,7 +1942,7 @@ body.wegmans .entry-button {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
     padding: 12px 20px;
     flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
+    border-bottom: none;
 }
 
 .mc-top-section .subsection-title {
@@ -1850,7 +1977,7 @@ body.wegmans .entry-button {
 .mc-button {
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 12px 16px;
     font-size: 14px;
     font-weight: 700;
@@ -1876,9 +2003,9 @@ body.wegmans .entry-button {
 .quiz-container {
     border: none;
     padding: 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     background-color: transparent;
-    border-radius: 8px;
+    border-radius: 6px;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -1890,7 +2017,7 @@ body.wegmans .entry-button {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
     padding: 12px 20px;
     flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
+    border-bottom: none;
 }
 
 .quiz-top-section .subsection-title {
@@ -1953,7 +2080,7 @@ body.wegmans .entry-button {
 .quiz-button {
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 10px 16px;
     font-size: 14px;
     font-weight: 600;
@@ -1999,12 +2126,470 @@ body.wegmans .entry-button {
     color: white;
 }
 
+/* Challengers section - between quiz and poll, orange header, journey background */
+.featured-container {
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+    background-color: transparent;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.featured-top-section {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 12px 20px;
+    flex: 0 0 auto;
+    border-bottom: none;
+}
+
+.featured-top-section .subsection-title {
+    color: #fff !important;
+}
+
+.featured-bottom-section {
+    background: linear-gradient(to bottom, #4A148C, #2E0E5C);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px 20px;
+    gap: 0;
+}
+
+.challengers-daily-rival {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.challengers-subtitle {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.challengers-vs-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+}
+
+.challenger-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    max-width: 120px;
+}
+
+.challenger-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+    background: linear-gradient(to bottom, #F093FB, #F5576C);
+}
+
+.challenger-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.challenger-name {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.challenger-location {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+.challenger-stars {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.featured-bottom-section .challenger-stars .star-icon {
+    color: #FF8C42;
+    font-size: 16px;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+}
+
+.challengers-vs {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.challengers-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.6);
+    margin: 28px 0 12px;
+}
+
+.challengers-high-scores {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.challengers-high-scores-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.challengers-score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 0;
+}
+
+.challengers-score-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, #F093FB, #F5576C);
+}
+
+.challengers-score-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.challengers-score-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-width: 0;
+}
+
+.challengers-score-name {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+}
+
+.challengers-score-city {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.3;
+    margin-top: 1px;
+}
+
+.challengers-score-stars {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.featured-bottom-section .challengers-score-stars .star-icon {
+    color: #FF8C42;
+    font-size: 14px;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+}
+
+/* Daily Poll - same formatting as quiz */
+.poll-container {
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+    background-color: transparent;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.poll-top-section {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 12px 20px;
+    flex: 0 0 auto;
+    border-bottom: none;
+}
+
+.poll-top-section .subsection-title {
+    color: #fff !important;
+}
+
+.poll-bottom-section {
+    background-color: white;
+    padding: 0 0 12px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Poll layout: question on top, then either buttons or answers block in same vertical slot */
+.poll-vote-area {
+    position: relative;
+}
+
+.poll-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px 0 20px;
+    margin-top: 6px;
+    opacity: 0;
+    pointer-events: none;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* border: 1px solid #ff0000; */
+}
+
+.poll-result-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 90%;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.poll-result-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 8px;
+    row-gap: 1px;
+    font-size: 13px;
+    color: #444;
+}
+
+.poll-result-answer {
+    grid-column: 1 / 3;
+    font-weight: 600;
+    text-align: left;
+}
+
+.poll-result-pct {
+    font-weight: 700;
+    align-self: center;
+    transform: translateY(-4px);
+}
+
+.poll-result-bar-track {
+    position: relative;
+    height: 10px;
+    border-radius: 0;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.poll-result-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, #FFB84D, #FF8C42);
+    border-radius: 0;
+}
+
+.poll-question {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+    line-height: 1.4;
+    margin: 0;
+    /* border: 1px solid #0000ff; */
+}
+
+.poll-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: flex-start;
+    padding: 0 20px 0 20px;
+    /* border: 1px solid #ff0000; */
+}
+
+.poll-button {
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.poll-button:hover {
+    filter: brightness(1.1);
+}
+
+.poll-button:active {
+    filter: brightness(0.95);
+}
+
+.poll-button-yum {
+    background: linear-gradient(to bottom, #2DD7A4, #1DB88A);
+}
+
+.poll-button-yuck {
+    background: linear-gradient(to bottom, #FF6B6B, #D63645);
+}
+
+/* Complete Your Profile section - same formatting as poll */
+.profile-complete-container {
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+    background-color: transparent;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-complete-top-section {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 12px 20px;
+    flex: 0 0 auto;
+    border-bottom: none;
+}
+
+.profile-complete-top-section .subsection-title {
+    color: #fff !important;
+}
+
+.profile-complete-bottom-section {
+    background-color: white;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-complete-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-complete-input {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.profile-complete-input:focus {
+    border-color: #FF8C42;
+}
+
+.profile-complete-input::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+.profile-complete-enter-btn {
+    background: linear-gradient(to bottom, #6EDDD4, #4ECDC4);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
+    align-self: flex-end;
+    margin-top: 4px;
+}
+
+.profile-complete-enter-btn:hover {
+    background: linear-gradient(to bottom, #7EEDE4, #5EDDD4);
+    box-shadow: 0 4px 8px rgba(78, 205, 196, 0.4);
+}
+
+.profile-complete-enter-btn:active {
+    transform: translateY(0);
+}
+
 .on-this-day-container {
     border: none;
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 8px;
+    border-radius: 6px;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -2016,7 +2601,7 @@ body.wegmans .entry-button {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
     padding: 12px 20px;
     flex: 1;
-    border-bottom: 1px solid #bbb;
+    border-bottom: none;
 }
 
 .scramble-top-section .subsection-title {
@@ -2171,7 +2756,7 @@ body.wegmans .unscramble-label {
     padding: 0;
     margin-bottom: 0px;
     background-color: transparent;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -2182,7 +2767,7 @@ body.wegmans .unscramble-label {
     background: linear-gradient(to bottom, #26D7A4, #1DB88A);
     padding: 12px 20px;
     flex: 0 0 auto;
-    border-bottom: 1px solid #bbb;
+    border-bottom: none;
 }
 
 .fof-top-section .subsection-title {
@@ -2209,7 +2794,7 @@ body.wegmans .unscramble-label {
     background: linear-gradient(to bottom, #FF8FA3, #FF6B82);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 12px 16px;
     font-size: 13px;
     font-weight: 600;
@@ -2438,7 +3023,7 @@ body.wegmans .unscramble-label {
     flex-direction: column;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -2482,7 +3067,7 @@ body.wegmans .unscramble-label {
     border: var(--box-border-width) solid var(--box-border-color);
     margin-bottom: 8px;
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     overflow: hidden;
     cursor: pointer;
@@ -2562,7 +3147,7 @@ body.wegmans .unscramble-label {
     height: 140px;
     border: var(--box-border-width) solid var(--box-border-color);
     background-color: var(--box-background);
-    border-radius: 8px;
+    border-radius: 6px;
     margin-bottom: 20px;
     display: flex;
     overflow: hidden;
@@ -3292,7 +3877,7 @@ body.firehouse2 .help-button {
 }
 
 .boost-game-box {
-    margin-top: 10px;
+    margin-top: 8px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -3301,6 +3886,7 @@ body.firehouse2 .help-button {
     border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin-bottom: 8px;
 }
 
 .boost-game-top {
@@ -3383,7 +3969,7 @@ body.firehouse2 .help-button {
     color: #523d08;
     /* border: 2px solid rgba(218, 165, 32, 0.4); */
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 16px;
     font-weight: 700;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -3460,14 +4046,49 @@ body.firehouse2 .help-button {
     margin-top: 5px;
 }
 
-/* Boost page container styles (replacing sweeps-container on boost page) */
-.boost-container {
+/* Games page container (daily puzzles, boost, arcade, bonus) */
+.games-container {
     max-width: 600px;
     margin: 10px auto 30px auto;
-    padding: 10px 20px 0 20px;
+    padding: 0 20px 0 20px;
     background-color: transparent;
     min-height: 400px;
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
+}
+
+/* Games page: uniform section-title spacing (one rule for all) */
+.games-container .section-title {
+    margin: 8px 0;
+}
+.games-container > .section-title:first-child {
+    margin-top: 0;
+}
+
+/* Avoid double horizontal padding */
+.games-container .section {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.games-container .boost-game-bottom {
+    padding-bottom: 10px;
+}
+.games-container  {
+    margin-bottom: 0;
+}
+
+/* Less space above DAILY ARCADE: section-title after boost gets smaller margin-top (boost already has 10px padding-bottom) */
+.games-container .boost-game-box + .section-title {
+    margin-top: 2px;
+}
+
+.games-container .boost-game-box .play-color-box {
+    aspect-ratio: auto;
+    min-height: 0;
+    padding: 12px 0 16px 0;
+}
+
+.games-container .arcade-section {
+    padding-top: 0;
 }
 
 .boost-header {
@@ -3718,12 +4339,14 @@ body[style*="background-color: #000000"] .cost-text {
 }
 
 .prize-section-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    color: #000;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #555;
+    font-family: 'Aleo', serif;
     margin-bottom: 12px;
     text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .prize-container {

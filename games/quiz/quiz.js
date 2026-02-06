@@ -191,7 +191,7 @@ function displayQuestion() {
         if (quizCurrentQuestionIndex === 4 && quizGameWon && quizCorrectCount === 5) {
             difficultyElement.textContent = 'PERFECT';
         } else {
-            difficultyElement.textContent = `DIFFICULTY: ${getDifficultyText(quizCurrentQuestionIndex)}`;
+            difficultyElement.textContent = getDifficultyText(quizCurrentQuestionIndex);
         }
     }
     // Only show question number if game is not ended

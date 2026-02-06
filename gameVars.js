@@ -34,6 +34,7 @@ const THEMES = {
         name: 'Thanksgiving',
         quizTitle: 'DAILY THANKSGIVING QUIZ',
         backgroundPattern: 'weeklyBackgrounds/thanksgiving_pattern.jpg',
+        day1Image: 'weeklyBackgrounds/thanksgiving_day1.png',
         puzzleBackground: 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg',
         zoomImage: 'weeklyBackgrounds/thanksgiving_zoom.jpg',
         phrases: [
@@ -66,6 +67,7 @@ const THEMES = {
         name: '4th of July',
         quizTitle: 'DAILY 4TH OF JULY QUIZ',
         backgroundPattern: 'weeklyBackgrounds/forthOfJuly_pattern.png',
+        day1Image: 'weeklyBackgrounds/forthOfJuly_day1.png',
         puzzleBackground: 'weeklyBackgrounds/fourthOfJuly_puzzleBig.jpg',
         puzzleMedium: 'weeklyBackgrounds/fourthOfJuly_puzzleMedium.jpg',
         puzzleSmall: 'weeklyBackgrounds/fourthOfJuly_puzzleSmall.jpg',

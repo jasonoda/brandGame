@@ -1416,6 +1416,23 @@ async function loadGameData() {
     }
 }
 
+// Recalculate letter layout for main-page scramble when container becomes visible
+function resizeMainPageScramble() {
+    if (!isMainPageContext) return;
+    
+    initializeDOMElements();
+    if (!lettersContainer || !scrambledLetters || !scrambledLetters.length) return;
+
+    // If today's scramble is already complete, render the solved word layout
+    if (isScrambleComplete()) {
+        showCompletedScramble();
+    } else {
+        // Otherwise, re-create the scrambled layout based on the current container width
+        createLetterDivs(scrambledLetters);
+        applyLetterBoxStyling();
+    }
+}
+
 // Clean up function for game reset
 function resetGame() {
     if (animationFrame) {
