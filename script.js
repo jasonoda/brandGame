@@ -43,8 +43,7 @@ function getBannerDateText() {
     const theme = getCurrentTheme();
     const name = theme.name;
     if (name === 'Thanksgiving') {
-        const d = getThanksgivingTwoDaysBefore(new Date().getFullYear());
-        return MONTH_ABBREV[d.getMonth()] + ' ' + getOrdinalDate(d.getDate()) + ' GAMES';
+        return 'COMMUNITY';
     }
     if (name === '4th of July') return 'Jul 2nd GAMES';
     const today = new Date();
@@ -847,11 +846,56 @@ function applyThemeSettings() {
 }
 
 // Run when DOM is loaded
+// DEBUG: set to "morning" | "afternoon" | "evening" | "night" to override; "" = use real time
+const DEBUG_TIME_OF_DAY_OVERRIDE = "";
+
+function updateCommunityOnlineHeader() {
+    const el = document.getElementById('community-online-header-text');
+    if (!el) return;
+    let hour = new Date().getHours();
+    if (DEBUG_TIME_OF_DAY_OVERRIDE) {
+        const override = DEBUG_TIME_OF_DAY_OVERRIDE.toLowerCase();
+        if (override === "morning") hour = 8;
+        else if (override === "afternoon") hour = 14;
+        else if (override === "evening") hour = 18;
+        else if (override === "night") hour = 22;
+    }
+    const baseClass = 'community-online-header';
+    const bannerImg = document.querySelector('.community-online-banner-img');
+    const wrapper = el.closest('.community-online-wrapper');
+    if (wrapper) {
+        wrapper.classList.remove('community-online-wrapper--morning', 'community-online-wrapper--afternoon', 'community-online-wrapper--evening', 'community-online-wrapper--night');
+    }
+    if (hour >= 5 && hour < 12) {
+        el.textContent = 'GOOD MORNING!';
+        el.className = baseClass + ' community-online-header--morning';
+        if (bannerImg) bannerImg.src = 'src/img/morning.png';
+        if (wrapper) wrapper.classList.add('community-online-wrapper--morning');
+    } else if (hour >= 12 && hour < 17) {
+        el.textContent = 'GOOD AFTERNOON!';
+        el.className = baseClass + ' community-online-header--afternoon';
+        if (bannerImg) bannerImg.src = 'src/img/afternoon.png';
+        if (wrapper) wrapper.classList.add('community-online-wrapper--afternoon');
+    } else if (hour >= 17 && hour < 20) {
+        el.textContent = 'GOOD EVENING!';
+        el.className = baseClass + ' community-online-header--evening';
+        if (bannerImg) bannerImg.src = 'src/img/evening.png';
+        if (wrapper) wrapper.classList.add('community-online-wrapper--evening');
+    } else {
+        el.textContent = 'GOOD NIGHT';
+        el.className = baseClass + ' community-online-header--night';
+        if (bannerImg) bannerImg.src = 'src/img/night.png';
+        if (wrapper) wrapper.classList.add('community-online-wrapper--night');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     setCurrentDate();
     updateHeaderStarCounter();
     updateWalletStars2();
-    
+    if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
+    updateCommunityOnlineHeader();
+
     // Apply theme settings
     applyThemeSettings();
     
@@ -864,6 +908,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
     updateCalendar();
     }, 100);
+    
+    // Ensure main-page scramble letters are laid out correctly on initial load.
+    // Use a small delay so this runs after the scramble script finishes its own initialization.
+    if (typeof resizeMainPageScramble === 'function') {
+        setTimeout(() => {
+            resizeMainPageScramble();
+        }, 250);
+    }
     
     // Initialize deals page display if it's the active page
     const dealsPage = document.getElementById('deals-page');
@@ -1000,10 +1052,8 @@ buttons.forEach(button => {
         // Trigger rival page animations
         if (targetPage === 'rival') {
             animateRivalPage();
-            // Update rival stars with daily stars
-            if (window.updateRivalStars) {
-                window.updateRivalStars();
-            }
+            if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
+            if (window.updateRivalStars) window.updateRivalStars();
             // Ensure all star icons on rival page are orange
             setTimeout(() => {
                 const rivalStarIcons = document.querySelectorAll('#rival-page .star-icon');
@@ -1021,12 +1071,21 @@ buttons.forEach(button => {
             }, 50);
         }
         
-        // Update games page stats when games page is shown
-        if (targetPage === 'games') {
+        // Update community page stats when community page is shown
+        if (targetPage === 'community') {
+            updateCommunityOnlineHeader();
+            if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
             updateGamesPageStats();
             updateGamesPageForBigy();
-            
+
             // Ensure scramble letters are laid out correctly now that container is visible
+            if (typeof resizeMainPageScramble === 'function') {
+                resizeMainPageScramble();
+            }
+        }
+        
+        // When returning to the main page, re-layout the main-page scramble letters
+        if (targetPage === 'main') {
             if (typeof resizeMainPageScramble === 'function') {
                 resizeMainPageScramble();
             }
@@ -1039,13 +1098,81 @@ buttons.forEach(button => {
     });
 });
 
-// TODAY'S GAMES banner: click goes to games tab
+// TODAY'S GAMES banner: click goes to community tab
 const todaysGamesLink = document.getElementById('todays-games-link');
 if (todaysGamesLink) {
     todaysGamesLink.addEventListener('click', () => {
-        const gamesTab = document.querySelector('.tab-button[data-page="games"]');
-        if (gamesTab) gamesTab.click();
+        const communityTab = document.querySelector('.tab-button[data-page="community"]');
+        if (communityTab) communityTab.click();
     });
+}
+
+// Daily question: show thanks if already answered; on Enter save answer, add 3 stars, fade to thanks
+function initDailyQuestion() {
+    const todayKey = getTodayKey();
+    const storageKey = 'dailyQuestionAnswered_' + todayKey;
+    const answerKey = 'dailyQuestionAnswer_' + todayKey;
+    const entryRow = document.getElementById('daily-question-entry-row');
+    const thanksRow = document.getElementById('daily-question-thanks-row');
+    const inputEl = document.getElementById('daily-question-input');
+    const enterBtn = document.getElementById('daily-question-enter-btn');
+
+    function showThanksHideEntry() {
+        if (entryRow) entryRow.style.opacity = '0';
+        if (thanksRow) {
+            thanksRow.classList.add('visible');
+            thanksRow.style.opacity = '1';
+        }
+        if (inputEl) inputEl.disabled = true;
+        if (enterBtn) enterBtn.disabled = true;
+    }
+
+    if (localStorage.getItem(storageKey) === 'true') {
+        if (entryRow) entryRow.style.display = 'none';
+        if (thanksRow) {
+            thanksRow.classList.add('visible');
+            thanksRow.style.opacity = '1';
+        }
+        if (inputEl) inputEl.disabled = true;
+        if (enterBtn) enterBtn.disabled = true;
+    }
+
+    if (!enterBtn || !inputEl || !entryRow || !thanksRow) return;
+
+    enterBtn.addEventListener('click', function submitDailyQuestion() {
+        if (localStorage.getItem(storageKey) === 'true') return;
+        const answer = (inputEl.value || '').trim();
+        localStorage.setItem(answerKey, answer);
+        localStorage.setItem(storageKey, 'true');
+
+        var currentDaily = parseInt(localStorage.getItem('dailyStars_' + todayKey) || '0');
+        var currentTotal = parseInt(localStorage.getItem('totalStars') || '0');
+        var currentUsable = parseInt(localStorage.getItem('usableStars_' + todayKey) || '0');
+        localStorage.setItem('dailyStars_' + todayKey, String(currentDaily + 3));
+        localStorage.setItem('totalStars', String(currentTotal + 3));
+        localStorage.setItem('usableStars_' + todayKey, String(currentUsable + 3));
+        if (window.updateHeaderStarCounter) window.updateHeaderStarCounter();
+        if (window.updateWalletStars2) window.updateWalletStars2();
+        if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
+        if (window.updateRivalStars) window.updateRivalStars();
+        if (window.updateMoveStarsDisplay) window.updateMoveStarsDisplay();
+
+        if (typeof gsap !== 'undefined') {
+            gsap.to(entryRow, { opacity: 0, duration: 0.3, ease: 'power2.out', onComplete: function() {
+                entryRow.style.display = 'none';
+                thanksRow.classList.add('visible');
+                gsap.fromTo(thanksRow, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+            }});
+        } else {
+            showThanksHideEntry();
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDailyQuestion);
+} else {
+    initDailyQuestion();
 }
 
 // Rival page animations
@@ -2346,7 +2473,7 @@ function applyFirehouseStyling() {
     }
     
     // Boost game title - Firehouse Match for firehouse
-    const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
+    const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
     if (gameTitle) {
         gameTitle.textContent = 'FIREHOUSE MATCH';
     }
@@ -3001,11 +3128,11 @@ function updateGamesPageForBigy() {
     // Market Match is now the default, only show Donut Matcher if scheme is explicitly set to 'donut'
     if (scheme === 'donut') {
         // Show Donut Matcher only if explicitly requested
-        const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
+        const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
         if (gameTitle) {
             gameTitle.textContent = 'DONUT MATCHER';
         }
-        const playColorBox = document.querySelector('#games-page .boost-game-box .play-color-box');
+        const playColorBox = document.querySelector('#community-page .boost-game-box .play-color-box');
         if (playColorBox) {
             playColorBox.style.background = 'linear-gradient(to bottom, #FF6B9D, #C44569)';
             // Remove image if it exists
@@ -3053,7 +3180,7 @@ function updateGamesPageForBigy() {
     }
     
     // Market Match is now the default - Change game title to Market Match
-    const gameTitle = document.querySelector('#games-page .boost-game-box .game-title');
+    const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
     if (gameTitle) {
         // Check if firehouse is active
         const urlParams = new URLSearchParams(window.location.search);
@@ -3066,7 +3193,7 @@ function updateGamesPageForBigy() {
     }
     
     // Update play-color-box with image and red gradient
-    const playColorBox = document.querySelector('#games-page .boost-game-box .play-color-box');
+    const playColorBox = document.querySelector('#community-page .boost-game-box .play-color-box');
     if (playColorBox) {
         playColorBox.style.background = 'linear-gradient(to bottom, #e84066, #c82a48)';
         
@@ -3384,9 +3511,9 @@ function updateLogoVisibility() {
     const isWegmans = headerType === 'wegmans';
     const isBigyMode = isBigy || isBigy2 || isFirehouse2 || isWegmans;
     
-    // Show help button only on home page (and when game overlay close button is not showing)
-    const homePage = document.getElementById('home-page');
-    const isHomeActive = homePage && homePage.classList.contains('active');
+    // Show help button only on main page (and when game overlay close button is not showing)
+    const mainPage = document.getElementById('main-page');
+    const isHomeActive = mainPage && mainPage.classList.contains('active');
     if (helpButton) {
         if (!isHomeActive || (closeButton && closeButton.classList.contains('show'))) {
             helpButton.classList.add('hidden');
@@ -4024,6 +4151,25 @@ function getDailyStars() {
     return parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
 }
 
+// Rivals section "you" star count = today's daily total (earned today), not spendable balance
+function updateRivalsYouStarCount() {
+    const dailyStars = getDailyStars();
+    const vsRow = document.querySelector(".challengers-vs-row");
+    const firstCard = vsRow ? vsRow.querySelector(".challenger-card") : null;
+    const challengerCount = firstCard ? firstCard.querySelector(".challenger-star-count") : null;
+    if (challengerCount) challengerCount.textContent = String(dailyStars);
+    const rivalStarsEl = document.querySelector('.rival-profile:first-child .rival-stars');
+    if (rivalStarsEl) {
+        const starIcon = rivalStarsEl.querySelector('.star-icon');
+        if (starIcon) {
+            const textAfter = Array.from(rivalStarsEl.childNodes).find(function(n) { return n.nodeType === 3; });
+            if (textAfter) textAfter.textContent = textAfter.textContent.replace(/x\s*\d+/, ' x ' + dailyStars);
+            else rivalStarsEl.appendChild(document.createTextNode(' x ' + dailyStars));
+        } else rivalStarsEl.innerHTML = '<span class="star-icon" style="color:#FF8C42;">★</span> x ' + dailyStars;
+    }
+}
+window.updateRivalsYouStarCount = updateRivalsYouStarCount;
+
 function getSweepsEntries() {
     const todayKey = getTodayKey();
     return parseInt(localStorage.getItem(`sweepsEntries_${todayKey}`) || '0');
@@ -4079,10 +4225,9 @@ function initSweepsPage() {
                     window.updateStarDisplay();
                 }
                
-                if (window.updateRivalStars) {
-                    window.updateRivalStars();
-                }
-                
+                if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
+                if (window.updateRivalStars) window.updateRivalStars();
+
                 // Show confirmation
                 enterButton.textContent = 'Entry Added!';
                 enterButton.style.background = 'linear-gradient(135deg, #7adc75, #4fb971)';
@@ -4118,11 +4263,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'b') {
         const sweepsButton = document.querySelector('.tab-button[data-page="sweeps"]');
         const sweepsPage = document.getElementById('sweeps-page');
-        const gamesPageEl = document.getElementById('games-page');
+        const communityPageEl = document.getElementById('community-page');
         
-        if (sweepsButton && sweepsButton.classList.contains('active') && gamesPageEl) {
+        if (sweepsButton && sweepsButton.classList.contains('active') && communityPageEl) {
             if (sweepsPage) sweepsPage.classList.remove('active');
-            gamesPageEl.classList.add('active');
+            communityPageEl.classList.add('active');
         }
     }
 });

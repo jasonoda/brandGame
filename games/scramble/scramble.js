@@ -148,12 +148,13 @@ function updateRivalStars() {
                 userRivalStars.appendChild(newTextNode);
             }
             // Ensure star icon is orange
-            starIcon.style.color = '#FFB84D';
+            starIcon.style.color = '#FF8C42';
         } else {
             // Fallback: if star icon doesn't exist, recreate the structure
-            userRivalStars.innerHTML = `<span class="star-icon" style="color: #FFB84D;">★</span> x ${stars}`;
+            userRivalStars.innerHTML = `<span class="star-icon" style="color: #FF8C42;">★</span> x ${stars}`;
         }
     }
+    if (window.updateRivalsYouStarCount) window.updateRivalsYouStarCount();
 }
 
 // Check and update mystery word stars
@@ -163,7 +164,7 @@ function updateMysteryWordStars() {
     const isMysteryComplete = localStorage.getItem(`mysteryWordComplete_${todayKey}`) === 'true';
     
     if (mysteryWordStars && isMysteryComplete) {
-        mysteryWordStars.style.color = '#FFB84D';
+        mysteryWordStars.style.color = '#FF8C42';
     }
 }
 
@@ -174,7 +175,7 @@ function updateBeticleStars() {
     const isBeticleComplete = localStorage.getItem(`beticleComplete_${todayKey}`) === 'true';
     
     if (beticleStars && isBeticleComplete) {
-        beticleStars.style.color = '#FFB84D';
+        beticleStars.style.color = '#FF8C42';
     }
 }
 
@@ -200,7 +201,7 @@ function updateMemoryDisplay() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -245,7 +246,7 @@ function updateBlackjackDisplay() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -289,7 +290,7 @@ function updateBlackjackDisplay() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -337,7 +338,7 @@ function loadGameScores() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -379,7 +380,7 @@ function loadGameScores() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -423,7 +424,7 @@ function loadGameScores() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -457,7 +458,7 @@ function loadGameScores() {
             const star = document.createElement('span');
             star.textContent = '★';
             if (i < starsEarned) {
-                star.style.color = '#FFB84D';
+                star.style.color = '#FF8C42';
             } else {
                 star.style.color = '#ddd';
             }
@@ -484,7 +485,7 @@ function loadGameScores() {
             const star = document.createElement('span');
             star.textContent = '★';
             if (i < starsEarned) {
-                star.style.color = '#FFB84D';
+                star.style.color = '#FF8C42';
             } else {
                 star.style.color = '#ddd';
             }
@@ -523,7 +524,7 @@ window.updatePhrasesStars = function() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -547,7 +548,7 @@ window.updateSuspectStars = function() {
                 const star = document.createElement('span');
                 star.textContent = '★';
                 if (i < starsEarned) {
-                    star.style.color = '#FFB84D';
+                    star.style.color = '#FF8C42';
                 } else {
                     star.style.color = '#ddd';
                 }
@@ -1407,7 +1408,7 @@ async function loadGameData() {
             setTimeout(() => {
                 const rivalStarIcons = document.querySelectorAll('#rival-page .star-icon');
                 rivalStarIcons.forEach(icon => {
-                    icon.style.color = '#FFB84D';
+                    icon.style.color = '#FF8C42';
                 });
             }, 100);
         } catch (error) {

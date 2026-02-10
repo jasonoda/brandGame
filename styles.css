@@ -144,8 +144,8 @@ body {
     background-color: transparent;
 }
 
-#home-page.active,
-#games-page.active {
+#main-page.active,
+#community-page.active {
     background-color: transparent;
     padding: 0;
     margin: 0;
@@ -404,7 +404,7 @@ body.wegmans .profile-stat-small .stat-number {
 }
 
 .star-icon {
-    color: #dc3545;
+    color: #FF8C42;
     font-size: 16px;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
@@ -809,7 +809,7 @@ body.wegmans .challenge-reward {
 
 .stat-value .star-icon {
     font-size: 15px;
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .journey-coin-container {
@@ -1521,6 +1521,7 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 .arcade-section {
     padding-top: 0;
     padding-bottom: 0;
+    margin-bottom: 16px; /* extra space beneath last arcade games on home page */
 }
 
 
@@ -1554,7 +1555,7 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 
 .section-title {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 300;
     margin: 10px 0;
     color: #555;
     text-align: center;
@@ -1615,6 +1616,10 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     margin-left: 2px;
     line-height: 1;
     display: inline-block;
+}
+
+.online-user-icon i {
+    color: #fff;
 }
 
 /* User row above calendar */
@@ -1715,7 +1720,7 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 
 /* Header Type 1 Calendar Styles (from styleTemp) */
 .week-section-type1 {
-    padding: 16px 20px 6px 20px;
+    padding: 16px 20px 0px 20px;
     /* background-color: red; */
     text-align: center;
     position: relative;
@@ -1828,9 +1833,9 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     display: block;
 }
 
-/* Home/games page: 6px radius for elements using variable */
-#home-page .highlow-container,
-#home-page .highlow-item {
+/* Main page: 6px radius for elements using variable */
+#main-page .highlow-container,
+#main-page .highlow-item {
     border-radius: 6px;
 }
 
@@ -2278,6 +2283,135 @@ body.wegmans .entry-button {
     margin-bottom: 10px;
 }
 
+/* Community page: online block with small orange header (like weekly star results) */
+.community-online-wrapper {
+    margin: 10px 20px 0 20px;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.community-online-header {
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.community-online-header--morning {
+    background: linear-gradient(to bottom, #7FDBFF, #39CCCC);
+}
+
+.community-online-header--afternoon {
+    background: linear-gradient(to bottom, #2ECC71, #27AE60);
+}
+
+.community-online-header--evening {
+    background: linear-gradient(to bottom, #ff624d, #e03832);
+}
+
+.community-online-header--night {
+    background: linear-gradient(to bottom, #3c7a7a, #2f6464);
+}
+
+.community-online-banner {
+    position: relative;
+    height: 80px;
+    background: linear-gradient(to bottom, #4A148C, #2E0E5C);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.community-online-banner-img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.community-online-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    color: #fff;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 600;   
+}
+
+.community-online-wrapper--morning .community-online-inner {
+    background: #39CCCC;
+}
+
+.community-online-wrapper--afternoon .community-online-inner {
+    background: #27AE60;
+}
+
+.community-online-wrapper--evening .community-online-inner {
+    background: #ec3a34;
+}
+
+.community-online-wrapper--night .community-online-inner {
+    background: #2f6464;
+    border: 1px solid #64a5a5;
+}
+
+/* Community banner: dot next to "Online", number on next line */
+.community-online-inner .online-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+}
+
+.community-online-inner .online-label-row {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+}
+
+.community-online-inner .online-dot {
+    display: none;
+    transform: translateY(-1px);
+}
+
+.community-online-inner .online-count-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.community-online-inner .online-count-num {
+    display: block;
+}
+
+.community-online-inner .community-online-user-icon {
+    width: 8px;
+    height: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+    transform: translateY(-1px);
+}
+
 .challengers-high-scores-list {
     display: flex;
     flex-direction: column;
@@ -2384,22 +2518,54 @@ body.wegmans .entry-button {
     gap: 12px;
 }
 
-/* Poll layout: question on top, then either buttons or answers block in same vertical slot */
+/* Poll layout: question on top, then container with buttons and result absolutely positioned (like daily question) */
 .poll-vote-area {
     position: relative;
 }
 
+.poll-vote-container {
+    position: relative;
+    min-height: 88px;
+    height: 88px;
+    overflow: hidden;
+}
+
+.poll-vote-container.expanded {
+    height: auto;
+    overflow: visible;
+}
+
 .poll-result {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0 20px 0 20px;
-    margin-top: 6px;
     opacity: 0;
     pointer-events: none;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    /* border: 1px solid #ff0000; */
+}
+
+.poll-result.visible {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.poll-result-stars {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 6px;
+}
+
+.poll-result-star {
+    font-size: 18px;
+    color: #FF8C42;
 }
 
 .poll-result-stats {
@@ -2461,12 +2627,15 @@ body.wegmans .entry-button {
 }
 
 .poll-buttons {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
     justify-content: flex-start;
     padding: 0 20px 0 20px;
-    /* border: 1px solid #ff0000; */
 }
 
 .poll-button {
@@ -2496,6 +2665,210 @@ body.wegmans .entry-button {
 
 .poll-button-yuck {
     background: linear-gradient(to bottom, #FF6B6B, #D63645);
+}
+
+/* Daily Question - same card style as poll */
+.daily-question-container {
+    border: var(--box-border-width) solid var(--box-border-color);
+    border-radius: var(--box-border-radius);
+    overflow: hidden;
+    background-color: var(--box-background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.daily-question-top-section {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 12px 20px;
+    flex: 0 0 auto;
+    border-bottom: none;
+}
+
+.daily-question-top-section .subsection-title {
+    color: #fff !important;
+}
+
+.daily-question-bottom-section {
+    background-color: white;
+    padding: 16px 20px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.daily-question-text {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.daily-question-entry-container {
+    position: relative;
+    height: 44px;
+}
+
+.daily-question-entry-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.daily-question-thanks-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    opacity: 0;
+    pointer-events: none;
+    border: 1px solid #FF8C42;
+    border-radius: 0;
+}
+
+.daily-question-thanks-row.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.daily-question-thanks-text {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #FF8C42;
+}
+
+.daily-question-thanks-stars .star-icon {
+    color: #FF8C42;
+    font-size: 16px;
+}
+
+.daily-question-input {
+    flex: 1;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+}
+
+.daily-question-enter-btn {
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, #6EDDD4, #4ECDC4);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
+}
+
+.daily-question-enter-btn:hover {
+    background: linear-gradient(to bottom, #7EEDE4, #5EDDD4);
+    box-shadow: 0 4px 8px rgba(78, 205, 196, 0.4);
+}
+
+.daily-question-answers-label {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    border-top: 1px solid #ddd;
+    padding-top: 12px;
+    margin-top: -6px;
+}
+
+.daily-question-answers-scroll {
+    height: 195px;
+    overflow-y: auto;
+    border: 1px solid #e8c4d0;
+    /* border-radius: 6px; */
+    /* background: linear-gradient(to bottom, #FDE8F5, #FCE4EC); */
+    padding: 0;
+}
+
+.daily-question-answer-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 12px;
+    /* padding-left: 12px; */
+    border-bottom: 3px solid #fff;
+    background: #f7f6f0;
+    min-height: 0;
+}
+
+.daily-question-answer-row .daily-question-answer-icon {
+    order: -1;
+}
+
+.daily-question-answer-row .daily-question-answer-left {
+    order: 0;
+}
+
+.daily-question-answer-row:last-child {
+    border-bottom: none;
+}
+
+.daily-question-answer-left {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.daily-question-answer-meta {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.daily-question-answer-text {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+}
+
+.daily-question-answer-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, #F093FB, #F5576C);
+    transform: translateY(2px);
+}
+
+.daily-question-answer-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Complete Your Profile section - same formatting as poll */
@@ -2530,6 +2903,45 @@ body.wegmans .entry-button {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* Games page: DAILY BONUS wrapper styled like other orange-header cards */
+.bonus-section-container {
+    border: var(--box-border-width) solid var(--box-border-color);
+    border-radius: var(--box-border-radius);
+    overflow: hidden;
+    background-color: var(--box-background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bonus-top-section {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 12px 20px;
+    flex: 0 0 auto;
+    border-bottom: none;
+}
+
+.bonus-top-section .subsection-title {
+    color: #fff !important;
+}
+
+.bonus-bottom-section {
+    background-color: white;
+    padding: 0;
+}
+
+/* Tweak bonus spin card inside the orange-topped container */
+.bonus-section-container .bonus-box {
+    /* Let the outer container handle the main radius and shadow */
+    border-radius: 0 0 var(--box-border-radius) var(--box-border-radius);
+    margin-bottom: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* Add space under the whole DAILY BONUS block on the games page */
+.games-container .bonus-section-container {
+    margin-bottom: 16px;
 }
 
 .profile-complete-field {
@@ -2743,7 +3155,7 @@ body.wegmans .unscramble-label {
 }
 
 .highlow-stars .star.earned {
-    color: #dc3545;
+    color: #FF8C42;
 }
 
 .highlow-stars .star.unearned {
@@ -3871,7 +4283,7 @@ body.firehouse2 .help-button {
 }
 
 .boost-stat-item .star-icon {
-    color: #FFB84D;
+    color: #FF8C42;
     font-size: 20px;
     transform: translateY(-2px);
 }
@@ -4089,6 +4501,7 @@ body.firehouse2 .help-button {
 
 .games-container .arcade-section {
     padding-top: 0;
+    margin-bottom: 0; /* no extra bottom space inside games page */
 }
 
 .boost-header {
@@ -4184,7 +4597,7 @@ body.firehouse2 .help-button {
 
 .star-icon-large {
     font-size: 16px;
-    color: #dc3545;
+    color: #FF8C42;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
@@ -4347,6 +4760,25 @@ body[style*="background-color: #000000"] .cost-text {
     text-align: center;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+}
+
+/* Prizes page: use orange section bars above each prize grid, like main page sections */
+#prizes-page .prize-section-title {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    color: #fff;
+    margin: 0 20px 0 20px;
+    padding: 10px 16px;
+    text-align: center;
+    border-radius: 6px 6px 0 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+#prizes-page .prize-container {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .prize-container {
