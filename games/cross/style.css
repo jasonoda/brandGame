@@ -202,9 +202,10 @@ body {
 }
 
 #helpButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    right: auto !important;
     width: 15px;
     height: 15px;
     background: #707070;

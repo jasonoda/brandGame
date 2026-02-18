@@ -1,0 +1,442 @@
+/* Board (Journey tab) – hide legacy journey UI when board is shown */
+#journey-page .platforms-container,
+#journey-page .journey-button-container {
+    display: none !important;
+}
+
+/* Load overlay: same as first level background, fades out after 1s over 1s */
+.board-load-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    background: linear-gradient(to bottom, rgb(94, 35, 172), #2E0E5C);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Prize window backdrop – full screen, click to close */
+.board-prize-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1999;
+    display: none;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.board-prize-backdrop.is-open {
+    display: block;
+}
+
+/* Prize window – styled like reward overlay */
+.board-prize-window {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+    width: 200px;
+    background: #ffffff;
+    border-radius: 10px;
+    z-index: 2000;
+    display: none;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: none;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.board-prize-window.is-open {
+    display: block;
+}
+
+.board-prize-window-header {
+    background: linear-gradient(to bottom, rgb(94, 35, 172), #4d1e8f);
+    color: white;
+    font-family: 'Abril Fatface', Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    text-align: center;
+    padding: 14px 12px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border-radius: 10px 10px 0 0;
+    /* Prevent white line/bevel at top edge */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.board-prize-window-body {
+    padding: 12px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* gap: 4px; */
+}
+
+.board-prize-window-won {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+.board-prize-window-center {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #FF8C42;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-prize-window-dice {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    margin-top: 3px;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.board-prize-window-dice-dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #333;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.board-prize-window-dice-dot--tl { top: 25%; left: 25%; }
+.board-prize-window-dice-dot--c  { top: 50%; left: 50%; }
+.board-prize-window-dice-dot--br { top: 75%; left: 75%; }
+
+.board-prize-window-avatar {
+    width: 64px;
+    height: 64px;
+    margin-top: 9px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
+}
+
+.board-prize-window-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.board-prize-window-divider {
+    height: 1px;
+    background: #ddd;
+    margin: 0;
+}
+
+.board-prize-window-continue {
+    padding: 10px 12px 12px;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+}
+
+#board.board-container {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#board .board-wrapper {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+    transform-origin: center center;
+}
+
+#board .board-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+}
+
+/* Center level label: outer wrapper, inner rotated 45deg and scaled to distort */
+.board-center-level-outer {
+    position: absolute;
+    left: 51.9%;
+    top: 48.7%;
+    /* transform: translate(-50%, -50%); */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    pointer-events: none;
+    transform: scale(1, 0.5) translate(-57%, -90%);
+    /* border: 1px solid red; */
+}
+
+.board-center-level-inner {
+    transform: rotate(45deg);
+    white-space: nowrap;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 74px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    /* border: 1px solid blue; */
+}
+
+#board .board-spaces-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#board .board-space {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 6%;
+    height: 6%;
+    min-width: 12px;
+    min-height: 12px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 0, 0.9);
+    background: rgba(255, 255, 0, 0.15);
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+}
+
+#board .board-space.board-space--debug {
+    visibility: hidden;
+}
+
+/* Property space containers: one per property, debug border by section */
+#board .board-property-container {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 35px;
+    pointer-events: none;
+    box-sizing: border-box;
+    overflow: visible;
+}
+#board .board-property-container[data-section="1"],
+#board .board-property-container[data-section="2"],
+#board .board-property-container[data-section="3"],
+#board .board-property-container[data-section="4"] { border: none; }
+#board .board-property-house-wrap {
+    position: absolute;
+    overflow: hidden;
+}
+#board .board-property-house-wrap .board-property-house-tint {
+    pointer-events: none;
+}
+#board .board-property-house-wrap .board-property-house {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+#board .board-property-house {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+#board .board-player-container {
+    position: absolute;
+    transform: translate(-50%, -50%) translateY(-6px);
+    width: 90px;
+    height: 90px;
+    pointer-events: none;
+    z-index: 200;
+}
+
+#board .board-player-bounce {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 90px;
+    height: 90px;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+#board .board-player-container .board-player {
+    display: block;
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* Top bar – dice + count, fixed below header bar (56px) */
+.board-top-bar {
+    position: fixed;
+    top: calc(56px + 12px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #2E0E5C;
+    border-radius: 9999px;
+    z-index: 1001;
+}
+
+.board-top-dice {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    border: 1px solid #333;
+    border-radius: 3px;
+}
+
+.board-top-dice-dot {
+    position: absolute;
+    width: 2.5px;
+    height: 2.5px;
+    background: #333;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.board-top-dice-dot--tl { top: 25%; left: 25%; }
+.board-top-dice-dot--c  { top: 50%; left: 50%; }
+.board-top-dice-dot--br { top: 75%; left: 75%; }
+
+.board-top-count {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.05em;
+}
+
+/* ROLL button – same look as journey GO button */
+.board-roll-container {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.board-roll-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(40, 63, 126, 0) 0%, rgba(40, 63, 126, 0.7) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    z-index: -1;
+}
+
+.board-roll-button {
+    position: relative;
+    background: linear-gradient(to bottom, #df2b51, #c82a48);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    outline: none;
+    pointer-events: auto;
+}
+
+.board-roll-button:focus {
+    outline: none;
+}
+
+/* Dice – just above ROLL button, no dark overlay */
+.board-dice-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: calc(80px + 70px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background: transparent;
+    pointer-events: none;
+}
+
+.board-dice-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+}
+
+.board-die {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    border: 2px solid #333;
+    border-radius: 8px;
+}
+
+.board-die-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    background: #333;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+@media (min-width: 768px) {
+    .board-roll-container {
+        bottom: 24px;
+    }
+    .board-dice-overlay {
+        padding-bottom: calc(24px + 70px);
+    }
+}

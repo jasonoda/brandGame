@@ -477,9 +477,19 @@ const popupContent = document.getElementById('popupContent');
 const closeButton = document.getElementById('closeButton');
 const redFlashOverlay = document.getElementById('redFlashOverlay');
 
-// Create audio object for stab sound
-const stabSound = new Audio('stab.mp3');
-stabSound.volume = 0.5; // Adjust volume as needed
+// Play stab sound helper - creates a fresh Audio each time (more reliable on mobile)
+function playStabSound() {
+    try {
+        const audio = new Audio('stab.mp3');
+        audio.volume = 0.5; // Adjust volume as needed
+        const p = audio.play();
+        if (p && typeof p.catch === 'function') {
+            p.catch(e => console.log('Sound play failed:', e));
+        }
+    } catch (e) {
+        console.log('Error playing stab sound:', e);
+    }
+}
 
 // Get today's key for localStorage
 function getTodayKey() {
@@ -578,7 +588,8 @@ function showCompletedScreen() {
     } else {
         const starDisplay = createStarDisplay(0);
         instructionDiv.classList.add('has-result');
-        instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>WRONG</div><div>The killer killed everyone</div>`;
+        // End notes when suspect is wrong
+        instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>THE KILLER WON</div>`;
     }
 }
 
@@ -604,52 +615,27 @@ function createStarDisplay(starsEarned) {
 // Award stars for suspect game
 function awardSuspectStars(stars) {
     const todayKey = getTodayKey();
-    
-    // Check if already completed today
-    const previousStars = parseInt(localStorage.getItem(`suspectStars_${todayKey}`) || '0');
-    const wasComplete = localStorage.getItem(`suspectComplete_${todayKey}`) === 'true';
-    
-    // Only add stars if first play or if earned more stars
-    const starDifference = wasComplete ? Math.max(0, stars - previousStars) : stars;
-    
-    if (starDifference > 0) {
-        const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-        const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-        
-        // Update daily stars
-        localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
-        
-        // Update total stars
-        localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-        
-        // Award stars
-        const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
-        if (awardFn) {
-            awardFn(starDifference, 'suspect');
-        } else {
-            // Fallback if awardStars not available
-            const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
-            localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
-            localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
-        }
-    }
-    
-    // Always save the new stars
-    localStorage.setItem(`suspectStars_${todayKey}`, String(stars));
     localStorage.setItem(`suspectComplete_${todayKey}`, 'true');
-    
-    // Update parent window displays if accessible
-    if (window.parent && window.parent.updateStarDisplay) {
-        window.parent.updateStarDisplay();
+
+    let notes;
+    if (stars > 0) {
+        // Use the same turn count shown in the in-game message so the end popup matches
+        notes = ['Killed: ' + totalKilled, 'Turns ' + questionCount];
+    } else {
+        // On a loss, the popup should just say that the killer won
+        notes = ['THE KILLER WON'];
     }
-    if (window.parent && window.parent.updateWalletStars) {
-        window.parent.updateWalletStars();
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'suspect',
+            stars: stars,
+            notes: notes,
+            delay: 1
+        }, '*');
     }
-    if (window.parent && window.parent.updateSuspectStars) {
-        window.parent.updateSuspectStars();
-    }
-    
+
     return stars;
 }
 
@@ -806,7 +792,8 @@ function questionPerson(personIndex) {
             // Update instruction with fail message
             const starDisplay = createStarDisplay(0); // Always 5 grey stars (0 stars earned)
             instructionDiv.classList.add('has-result');
-            instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>WRONG</div><div>The killer killed everyone</div>`;
+            // End notes when suspect is wrong
+            instructionDiv.innerHTML = `<div class="suspect-star-container">${starDisplay}</div><div>THE KILLER WON</div>`;
             
             // Shake screen
             document.body.style.animation = 'shake 0.5s';
@@ -817,8 +804,7 @@ function questionPerson(personIndex) {
             // Red flash animation with GSAP
             gsap.set(redFlashOverlay, { opacity: 0 });
             // Play stab sound
-            stabSound.currentTime = 0;
-            stabSound.play().catch(e => console.log('Sound play failed:', e));
+            playStabSound();
             gsap.to(redFlashOverlay, {
                 opacity: 0.3,
                 duration: 0.1,
@@ -1032,8 +1018,7 @@ function killerTurn() {
             // Red flash animation with GSAP
             gsap.set(redFlashOverlay, { opacity: 0 });
             // Play stab sound
-            stabSound.currentTime = 0;
-            stabSound.play().catch(e => console.log('Sound play failed:', e));
+            playStabSound();
             gsap.to(redFlashOverlay, {
                 opacity: 0.3,
                 duration: 0.1,
@@ -1565,7 +1550,12 @@ requestAnimationFrame(gameLoop);
     }
 }
 
-playButton.addEventListener('click', startGame);
+let _suspectClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+const playSuspectClick = () => { try { if (_suspectClick) { _suspectClick.currentTime = 0; _suspectClick.play().catch(() => {}); } } catch (e) {} };
+playButton.addEventListener('click', () => {
+    playSuspectClick();
+    startGame();
+});
 
 // Setup help button
 function setupHelpButton() {

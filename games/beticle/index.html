@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="beticle.css">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
 </head>
 <body data-game="beticle">
     <!-- Start Menu -->
@@ -22,11 +23,11 @@
                 <div class="instructionDivider"></div>
                 <div class="instructionLine">A game of alphebetical order.</div>
                 <div class="instructionDivider"></div>
-                <div class="instructionLine">Find the secret dictionary<br>word in 13 guesses.</div>
+                <div class="instructionLine">The answer is a 5-letter<br>dictionary word.</div>
                 <div class="instructionDivider"></div>
-                <div class="instructionLine">The word will lie alphebetically<br>between the words you guess.</div>
+                <div class="instructionLine">The answer will lie alphebetically<br>between the top and bottom word.</div>
                 <div class="instructionDivider"></div>
-                <div class="instructionLine">Guess more to narrow down the answer.</div>
+                <div class="instructionLine">13 Guesses to win<br>Guess more to narrow down the answer.</div>
             </div>
             <div id="playButton" data-game="beticle">PLAY</div>
         </div>
@@ -34,19 +35,7 @@
 
     <div class="game-container" id="gameContainer" style="display: none;">
         <button id="helpButton"></button>
-        <div id="guessCounter">
-            <div class="guess-label">GUESSES</div>
-            <div class="guess-circle">
-                <span id="guessNumber">13</span>
-            </div>
-            <div id="guessStars">
-                <span class="guess-star">★</span>
-                <span class="guess-star">★</span>
-                <span class="guess-star">★</span>
-                <span class="guess-star">★</span>
-                <span class="guess-star">★</span>
-            </div>
-        </div>
+        <div id="guessCounter">GUESSES: <span id="guessNumber">13</span></div>
         
         <div id="gameRows">
             <div id="topWordRow" class="word-row"></div>

@@ -39,7 +39,7 @@ let lastTime = new Date().getTime();
 let muteState = false;
 
 // ===== SOUND SYSTEM =====
-let soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
+let soundArray = ["good", "bad", "clue", "pickup", "tick", "complete", "click"];
 let loadedSounds = {};
 
 function initSounds() {
@@ -897,6 +897,7 @@ function setupPlayButton() {
     
     if (playButton) {
         playButton.addEventListener('click', () => {
+            if (loadedSounds.click) loadedSounds.click.play();
             // console.log("Play button clicked! Current action:", action);
             
             if (action === "start menu") {
@@ -1001,6 +1002,10 @@ function showGameOverScreen() {
     // Calculate stars earned and save to local storage
     const starsEarned = calculateStarsFromScore(score);
     saveMemoryGameResult(score, starsEarned);
+    
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'arcadeComplete', gameId: 'memory', stars: starsEarned }, '*');
+    }
 }
 
 // Calculate stars from score
@@ -1292,51 +1297,8 @@ function createSparks(star, num, starScale, starDistance) {
     }
 }
 
-// Check URL parameters and apply color scheme
+// Check URL parameters and apply color scheme (no-op after s param removal)
 async function applyColorScheme() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const scheme = urlParams.get('s');
-    
-    if (scheme === 'jos') {
-        const josGradient = 'linear-gradient(to bottom, #fe5094, #ea327e)';
-        const josCardGradient = 'linear-gradient(to bottom, #FF8C42, #FF6F3C)';
-        
-        // Set flag to use Jos images
-        useJosImages = true;
-        
-        // Preload Jos images
-        if (!josImagesPreloaded) {
-            // console.log("Preloading Jos images...");
-            await preloadJosImages();
-        }
-        
-        // Update score time container
-        const scoreTimeContainer = document.getElementById('scoreTimeContainer');
-        if (scoreTimeContainer) {
-            scoreTimeContainer.style.background = josGradient;
-        }
-        
-        // Update play button
-        const playButton = document.getElementById('playButton');
-        if (playButton) {
-            playButton.style.background = josGradient;
-            
-            // Update hover effect
-            playButton.addEventListener('mouseenter', () => {
-                playButton.style.boxShadow = '0 4px 12px rgba(254, 80, 148, 0.4)';
-            });
-            playButton.addEventListener('mouseleave', () => {
-                playButton.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-            });
-        }
-        
-        // Update card backs
-        window.josCardGradient = josCardGradient;
-        const cardBacks = document.querySelectorAll('.card-back');
-        cardBacks.forEach(cardBack => {
-            cardBack.style.background = josCardGradient;
-        });
-    }
 }
 
 // ===== START GAME =====

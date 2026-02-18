@@ -21,6 +21,13 @@ let wheelSpun = false;
 let currentRotation = 0;
 let isSpinning = false;
 
+var spinLoopSound = null;
+var reward2Sound = null;
+if (typeof Howl !== 'undefined') {
+    spinLoopSound = new Howl({ src: ['../../sounds/wheel_spinLoop.mp3'], loop: true });
+    reward2Sound = new Howl({ src: ['../../sounds/reward2.mp3'] });
+}
+
 function getTodayKey() {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -189,7 +196,8 @@ function spinWheel() {
     
     isSpinning = true;
     spinButton.disabled = true;
-    
+    if (spinLoopSound) spinLoopSound.play();
+
     // Choose random result
     const randomIndex = Math.floor(Math.random() * wheelAmounts.length);
     const selectedAmount = wheelAmounts[randomIndex];
@@ -228,7 +236,9 @@ function spinWheel() {
             // Animation complete
             isSpinning = false;
             wheelSpun = true;
-            
+            if (spinLoopSound) spinLoopSound.stop();
+            if (reward2Sound) reward2Sound.play();
+
             // Trigger flash and stars effect
             triggerWinEffect();
             
@@ -245,7 +255,29 @@ function spinWheel() {
             // Save the actual result (in case there's a mismatch)
             saveSpinState(actualAmount);
             
-            // Update parent window
+            // Award stars to parent (calendar/profile/header)
+            if (window.parent) {
+                try {
+                    const todayKey = getTodayKey();
+                    const currentDaily = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+                    localStorage.setItem(`dailyStars_${todayKey}`, String(currentDaily + actualAmount));
+                    if (typeof window.parent.awardStars === 'function') {
+                        window.parent.awardStars(actualAmount, 'bonusSpin');
+                    } else {
+                        const currentTotal = parseInt(localStorage.getItem('totalStars') || '0');
+                        const currentUsable = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
+                        localStorage.setItem('totalStars', String(currentTotal + actualAmount));
+                        localStorage.setItem(`usableStars_${todayKey}`, String(currentUsable + actualAmount));
+                    }
+                    if (window.parent.updateHeaderStarCounter) window.parent.updateHeaderStarCounter();
+                    if (window.parent.updateWalletStars2) window.parent.updateWalletStars2();
+                    if (window.parent.updateCalendar) window.parent.updateCalendar();
+                } catch (e) {
+                    console.log('[BonusSpin] Error awarding stars to parent:', e);
+                }
+            }
+            
+            // Update parent bonus spin UI
             if (window.parent && window.parent.updateBonusSpinStars) {
                 window.parent.updateBonusSpinStars();
             }
@@ -343,10 +375,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Draw initial wheel
     drawWheel();
     
-    // Spin button click
-    spinButton.addEventListener('click', spinWheel);
+    let _spinClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+    const playSpinClick = () => { try { if (_spinClick) { _spinClick.currentTime = 0; _spinClick.play().catch(() => {}); } } catch (e) {} };
+    spinButton.addEventListener('click', () => {
+        playSpinClick();
+        spinWheel();
+    });
     spinButton.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        playSpinClick();
         spinWheel();
     });
     

@@ -125,10 +125,8 @@ function updateHeaderStarCounter() {
         window.updateMoveStarsDisplay();
     } else {
         // If updateMoveStarsDisplay not available, set to 0 (don't show wrong value)
-    const starCountElement = document.querySelector('.star-count');
-    if (starCountElement) {
-            starCountElement.textContent = 'x 0';
-        }
+    const starCountElements = document.querySelectorAll('.star-counter .star-count');
+    starCountElements.forEach(function(el) { el.textContent = 'x 0'; });
     }
 }
 
@@ -256,11 +254,288 @@ const gameConfig = {
     'bonusSpin': { path: 'games/bonusSpin/index.html', specialAttrs: {} }
 };
 
+// Reward overlay thumbnail config (gradient, title, img src)
+const rewardThumbConfig = {
+    phrases: { gradient: 'linear-gradient(to bottom, #2DD7A4, #1DB88A)', title: 'PHRASES', img: 'src/img/phrases.svg' },
+    cross: { gradient: 'linear-gradient(to bottom, #00d4ff, #06b6e2)', title: 'CROSS', img: 'src/img/cross.svg' },
+    goldCase: { gradient: 'linear-gradient(to bottom, #FFD700, #FFA500)', title: 'GOLD CASE', img: 'src/img/goldCase.svg' },
+    suspect: { gradient: 'linear-gradient(to bottom, #FF6B6B, #D63645)', title: 'SUSPECT', img: 'src/img/suspect.svg' },
+    defuser: { gradient: 'linear-gradient(to bottom, #808080, #404040)', title: 'DEFUSER', img: 'src/img/defuser.svg' },
+    tally: { gradient: '#FF69B4', title: 'TALLY', img: 'src/img/tally.svg' },
+    zoom: { gradient: 'linear-gradient(to bottom, #FF8C42, #FF6B35)', title: 'ZOOM', img: 'src/img/tiles.svg' },
+    shift: { gradient: 'linear-gradient(to bottom, #6B8FE8, #596fc2)', title: 'SHIFT', img: 'src/img/shift.svg' },
+    beticle: { gradient: 'linear-gradient(to bottom, #AB69E0, #7B37B0)', title: 'BETICLE', img: 'src/img/betical.svg' },
+    mysteryWord: { gradient: 'linear-gradient(to bottom, #00CED1, #00b4b4)', title: 'MYSTERY WORD', img: 'src/img/mysteryWord.svg' },
+    blackjack: { gradient: 'linear-gradient(to bottom, #52d077, #2aa04a)', title: 'SPEED 21', img: 'src/img/speed21.svg' },
+    lostAndFound: { gradient: 'linear-gradient(to bottom, #F86DAA, #C6387A)', title: 'LOST & FOUND', img: 'src/img/lostAndFount.svg' },
+    memory: { gradient: 'linear-gradient(to bottom, #00d4ff, #0099cc)', title: 'MEMORY', img: 'src/img/memory.svg' },
+    match3: { gradient: 'linear-gradient(to bottom, #e84066, #c82a48)', title: 'MARKET MATCH', img: 'src/img/bigy/sweepsGame.png' }
+};
+
 // Track current active game
 let currentGameId = null;
 
+// Preload main sounds with Howler (loaded at start)
+const appSounds = {};
+(function loadAppSounds() {
+    if (typeof Howl === 'undefined') return;
+    ['reward1'].forEach(function(name) {
+        appSounds[name] = new Howl({ src: ['sounds/' + name + '.mp3'], preload: true });
+    });
+})();
+
+// Resume Web Audio context on first user interaction (improves mobile quality, required for iOS)
+(function initMobileAudio() {
+    if (typeof Howler === 'undefined') return;
+    var didResume = false;
+    function resumeCtx() {
+        if (didResume) return;
+        didResume = true;
+        if (Howler.ctx && typeof Howler.ctx.resume === 'function') {
+            Howler.ctx.resume().then(function() { /* ready */ }).catch(function() {});
+        }
+        document.removeEventListener('touchend', resumeCtx);
+        document.removeEventListener('click', resumeCtx);
+    }
+    document.addEventListener('touchend', resumeCtx, { passive: true, once: true });
+    document.addEventListener('click', resumeCtx, { once: true });
+})();
+
+function startRewardCelebration(stars) {
+    if (navigator.vibrate) navigator.vibrate(30);
+    const el = document.getElementById('rewardOverlay');
+    if (!el) return;
+    const box = el.querySelector('.reward-overlay-box');
+    el.style.display = 'flex';
+    el.classList.add('pointer-events-on');
+    if (box) gsap.set(box, { opacity: 0, visibility: 'hidden' });
+    const backdrop = el.querySelector('.reward-overlay-backdrop');
+    if (backdrop) gsap.set(backdrop, { opacity: 0 });
+    requestAnimationFrame(() => startRewardRain(stars));
+}
+
+function startRewardRain(stars) {
+    if (appSounds.reward1) appSounds.reward1.play();
+    const rain = document.getElementById('rewardOverlayRain');
+    if (!rain || typeof gsap === 'undefined') return;
+    rain.innerHTML = '';
+    const firstEmoji = (typeof getCurrentTheme === 'function' && getCurrentTheme().suspectEmojis)
+        ? (getCurrentTheme().suspectEmojis[0] || '★')
+        : '★';
+    const itemCount = Math.min(40, 6 + stars * 6);
+    const rect = rain.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    function rand(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    for (let i = 0; i < itemCount; i++) {
+        const isEmoji = Math.random() < 0.5;
+        const span = document.createElement('span');
+        span.className = 'rain-item' + (isEmoji ? ' rain-item-emoji' : '');
+        span.textContent = isEmoji ? firstEmoji : '★';
+        span.style.left = rand(-20, w + 20) + 'px';
+        span.style.top = '-50px';
+        rain.appendChild(span);
+
+        const duration = rand(1, 1.8);
+        const rotation = rand(-360, 360);
+        const driftX = rand(-120, 120);
+        const delay = rand(0, 0.8);
+
+        gsap.fromTo(span,
+            {
+                y: 0,
+                x: 0,
+                rotation: 0,
+                opacity: 0.9
+            },
+            {
+                y: h + 80,
+                x: driftX,
+                rotation: rotation,
+                duration: duration,
+                delay: delay,
+                ease: 'linear',
+                onComplete: () => span.remove()
+            }
+        );
+    }
+}
+
+function showRewardOverlay(gameId, stars, notes, diceLabel) {
+    const el = document.getElementById('rewardOverlay');
+    if (!el) return;
+    el.style.display = 'flex';
+    el.classList.add('pointer-events-on');
+    const box = el.querySelector('.reward-overlay-box');
+    const headerEl = el.querySelector('.reward-overlay-header');
+    const starsEl = el.querySelector('.reward-overlay-stars');
+    const notesEl = el.querySelector('.reward-overlay-notes');
+    const diceLabelEl = el.querySelector('.reward-overlay-dice-label');
+    const config = rewardThumbConfig[gameId] || { gradient: 'linear-gradient(to bottom, #888, #555)', title: gameId || 'GAME', img: '' };
+    stars = typeof stars === 'number' ? stars : 1;
+    notes = Array.isArray(notes) ? notes : (notes ? [notes] : []);
+    diceLabel = diceLabel != null ? String(diceLabel) : '+1';
+
+    headerEl.innerHTML = '';
+    const headerInner = document.createElement('div');
+    headerInner.className = 'reward-header-gradient';
+    headerInner.style.background = config.gradient;
+    headerInner.innerHTML = `
+        <button type="button" class="reward-overlay-close" aria-label="Close">✕</button>
+        <div class="reward-header-image"><img src="${config.img}" alt=""></div>
+        <div class="reward-header-title">${config.title}</div>
+    `;
+    headerEl.appendChild(headerInner);
+    const closeBtn = headerInner.querySelector('.reward-overlay-close');
+    if (closeBtn) {
+        closeBtn.onclick = (e) => { e.stopPropagation(); hideRewardOverlay(); };
+    }
+
+    starsEl.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'reward-star' + (i >= stars ? ' grey' : '');
+        star.textContent = '★';
+        starsEl.appendChild(star);
+    }
+
+    notesEl.innerHTML = '';
+    notesEl.classList.toggle('reward-overlay-notes--empty', notes.length === 0);
+    notes.forEach(text => {
+        const p = document.createElement('p');
+        p.className = 'reward-note';
+        p.textContent = text;
+        notesEl.appendChild(p);
+    });
+
+    if (diceLabelEl) diceLabelEl.textContent = diceLabel;
+
+    const backdrop = el.querySelector('.reward-overlay-backdrop');
+    const flash = el.querySelector('.reward-overlay-flash');
+    if (backdrop) {
+        gsap.set(backdrop, { opacity: 0 });
+        if (typeof gsap !== 'undefined') {
+            gsap.to(backdrop, { opacity: 0.95, duration: 0.5, ease: 'power2.out' });
+        } else {
+            backdrop.style.opacity = '0.95';
+        }
+    }
+    if (flash) {
+        flash.style.background = 'rgba(255,255,255,0.5)';
+        flash.style.opacity = '1';
+        if (typeof gsap !== 'undefined') {
+            gsap.to(flash, { opacity: 0, duration: 0.6, ease: 'power2.out' });
+        } else {
+            flash.style.opacity = '0';
+        }
+    }
+
+    if (typeof gsap !== 'undefined') {
+        gsap.set(box, { opacity: 0, scale: 0.5, visibility: 'visible' });
+        gsap.to(box, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            ease: 'back.out(1.7)',
+            delay: 0.1
+        });
+    } else {
+        box.style.opacity = '1';
+        box.style.transform = 'scale(1)';
+        box.style.visibility = 'visible';
+    }
+}
+
+function hideRewardOverlay() {
+    const el = document.getElementById('rewardOverlay');
+    if (!el) return;
+    const rain = document.getElementById('rewardOverlayRain');
+    if (rain) rain.innerHTML = '';
+    el.style.display = 'none';
+    el.classList.remove('pointer-events-on');
+}
+
+/**
+ * Standardized end-game handler for puzzle games.
+ * Awards stars, saves completion, shows reward overlay with +1 dice roll.
+ * @param {string} gameId - Game identifier (phrases, cross, etc.)
+ * @param {number} starsEarned - Total stars earned for this game
+ * @param {string[]} [notes=[]] - Optional notes to display
+ * @param {number} [delay=1] - Delay in seconds before showing the overlay
+ */
+function endGameFunction(gameId, starsEarned, notes, delay) {
+    notes = Array.isArray(notes) ? notes : (notes ? [notes] : []);
+    const delayMs = (typeof delay === 'number' ? delay : 1) * 1000;
+
+    const key = getPuzzleStarsKey(gameId);
+    if (key) {
+        const previousStars = parseInt(localStorage.getItem(key) || '0');
+        const starDifference = Math.max(0, starsEarned - previousStars);
+        localStorage.setItem(key, String(starsEarned));
+
+        if (starDifference > 0) {
+            const todayKey = getTodayKey();
+            const currentDaily = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
+            const currentTotal = parseInt(localStorage.getItem('totalStars') || '0');
+            // Always update daily and total stars for puzzle games
+            localStorage.setItem(`dailyStars_${todayKey}`, String(currentDaily + starDifference));
+            localStorage.setItem('totalStars', String(currentTotal + starDifference));
+
+            // Let journey/journey.js handle usable (spendable) stars & gamesPlayed if available
+            if (typeof window.awardStars === 'function') {
+                window.awardStars(starDifference, gameId);
+            } else {
+                // Fallback: manually update usable stars only when awardStars is not available
+                const currentUsable = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
+                localStorage.setItem(`usableStars_${todayKey}`, String(currentUsable + starDifference));
+                if (window.updateMoveStarsDisplay) window.updateMoveStarsDisplay();
+            }
+        }
+    }
+
+    if (window.updateStarDisplay) window.updateStarDisplay();
+    if (window.updatePhrasesStars) window.updatePhrasesStars();
+    if (window.loadGameScores) window.loadGameScores();
+    if (window.updateWalletStars) window.updateWalletStars();
+    if (window.updateRivalStars) window.updateRivalStars();
+    if (window.updateHeaderStarCounter) window.updateHeaderStarCounter();
+    if (window.updateWalletStars2) window.updateWalletStars2();
+    if (window.updateCalendar) window.updateCalendar();
+
+    if (typeof window.addBoardDiceRolls === 'function') {
+        window.addBoardDiceRolls(1);
+    }
+
+    if (starsEarned > 0) {
+        startRewardCelebration(starsEarned);
+    }
+    setTimeout(function() {
+        showRewardOverlay(gameId, starsEarned, notes, '+1');
+    }, delayMs);
+}
+
+window.endGameFunction = endGameFunction;
+
+// Helper to show/hide main sections under the game overlay
+function setMainSectionsVisible(isVisible) {
+    const displayValue = isVisible ? '' : 'none';
+    const sections = document.querySelectorAll('.section');
+    const titles = document.querySelectorAll('.section-title');
+    sections.forEach((el) => {
+        el.style.display = displayValue;
+    });
+    titles.forEach((el) => {
+        el.style.display = displayValue;
+    });
+}
+
 // Unified function to open a game
-function openGame(gameId) {
+// extraParams: optional object of params to add (e.g. { practice: 'true' })
+function openGame(gameId, extraParams) {
     const config = gameConfig[gameId];
     if (!config) {
         console.error(`Unknown game ID: ${gameId}`);
@@ -279,6 +554,8 @@ function openGame(gameId) {
     if (puzzleSessionStarted.hasOwnProperty(gameId)) {
         puzzleSessionStarted[gameId] = false;
     }
+    
+    hideRewardOverlay();
     
     // Set current game ID
     currentGameId = gameId;
@@ -299,18 +576,14 @@ function openGame(gameId) {
         iframe.setAttribute('style', 'width: 100%; height: 100%; border: none;');
     }
     
-    // Build URL with scheme parameter and header type if present
+    // Build URL with header type if present
     const urlParams = new URLSearchParams(window.location.search);
     const headerType = urlParams.get('d');
-    const scheme = urlParams.get('s');
     const theme = urlParams.get('theme');
     
     // Build game URL with parameters
     let gameUrl = config.path;
     const gameParams = new URLSearchParams();
-    if (scheme) {
-        gameParams.set('s', scheme);
-    }
     if (headerType && gameId === 'match3') {
         // Pass header type to match3 game so it can detect firehouse
         gameParams.set('d', headerType);
@@ -318,6 +591,9 @@ function openGame(gameId) {
     if (theme && (gameId === 'zoom' || gameId === 'suspect')) {
         // Pass theme to zoom and suspect games so they can use the correct images/content
         gameParams.set('theme', theme);
+    }
+    if (extraParams) {
+        Object.keys(extraParams).forEach(key => gameParams.set(key, extraParams[key]));
     }
     if (gameParams.toString()) {
         gameUrl += '?' + gameParams.toString();
@@ -333,10 +609,11 @@ function openGame(gameId) {
     // Show overlay
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    // Hide main sections while the game iframe is visible
+    setMainSectionsVisible(false);
     
-    // Show close button
-    const closeButton = document.querySelector('.game-overlay-close');
-    if (closeButton) closeButton.classList.add('show');
+    // Show close button(s) - both header and desktop bar
+    document.querySelectorAll('.game-overlay-close').forEach(function(btn) { btn.classList.add('show'); });
     updateLogoVisibility();
 }
 
@@ -352,6 +629,22 @@ window.addEventListener('message', (event) => {
             if (gameId && Object.prototype.hasOwnProperty.call(puzzleSessionStarted, gameId)) {
                 puzzleSessionStarted[gameId] = true;
             }
+        }
+    } else if (event.data && typeof event.data === 'object' && event.data.type === 'puzzleComplete') {
+        const { gameId, stars, notes, delay } = event.data;
+        if (gameId && currentGameId === gameId) {
+            endGameFunction(gameId, stars != null ? stars : 1, notes || [], delay);
+        }
+    } else if (event.data && typeof event.data === 'object' && event.data.type === 'arcadeComplete') {
+        const { gameId, stars } = event.data;
+        if (gameId && currentGameId === gameId) {
+            const starsEarned = typeof stars === 'number' ? stars : 1;
+            if (starsEarned > 0) {
+                startRewardCelebration(starsEarned);
+            }
+            setTimeout(() => {
+                showRewardOverlay(gameId, starsEarned, [], '+1');
+            }, 1000);
         }
     }
 });
@@ -473,27 +766,43 @@ function setCurrentDate() {
         weekHeaderBackground.remove();
     }
     
+    const dateElements = document.querySelectorAll('.header-bar .date, .desktop-date .date');
+    const dateSubtitleElements = document.querySelectorAll('.header-bar .date-subtitle, .desktop-date .date-subtitle');
+    if (!dateElements.length) return;
     
-    const dateElement = document.querySelector('.date');
-    if (!dateElement) return;
+    const today = new Date();
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const month = months[today.getMonth()];
+    const day = today.getDate();
+    const year = today.getFullYear();
+    const dateStr = `${month} ${day}, ${year}`;
     
-    const dateSubtitleElement = document.querySelector('.date-subtitle');
-    
-    // Always show title in caps
-    dateElement.textContent = 'Daily Game Center'
-        
-    // Always show current date in subtitle, regardless of URL params
-        if (dateSubtitleElement) {
-            const today = new Date();
-            const months = [
-                'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-            ];
-            const month = months[today.getMonth()];
-            const day = today.getDate();
-            const year = today.getFullYear();
-            dateSubtitleElement.textContent = `${month} ${day}, ${year}`;
-    }
+    const isBrandMode = new URLSearchParams(window.location.search).get('m') === 'brand';
+    dateElements.forEach(function(dateElement) {
+        if (isBrandMode) {
+            dateElement.textContent = 'Daily Game Center';
+            dateElement.classList.remove('date-tiles-mode');
+        } else {
+            dateElement.textContent = dateStr;
+            dateElement.classList.add('date-tiles-mode');
+            dateElement.style.textTransform = 'none';
+            dateElement.style.fontSize = '14px';
+            dateElement.style.fontWeight = '800';
+        }
+    });
+    dateSubtitleElements.forEach(function(dateSubtitleElement) {
+        if (isBrandMode) {
+            dateSubtitleElement.textContent = dateStr;
+            dateSubtitleElement.style.display = '';
+            dateSubtitleElement.style.textTransform = 'none';
+            dateSubtitleElement.style.fontSize = '9px';
+        } else {
+            dateSubtitleElement.style.display = 'none';
+        }
+    });
 }
 
 // Load game stars and display them on main page
@@ -557,9 +866,14 @@ function loadGameScores2() {
         }
     }
     
-    // Load blackjack stars
+    // Load blackjack score and stars
+    const blackjackScore = parseInt(localStorage.getItem(`blackjackScore_${todayKey}`) || '0');
     const blackjackStars = parseInt(localStorage.getItem(`blackjackStars_${todayKey}`) || '0');
+    const blackjackScoreElement = document.getElementById('blackjackScore');
     const blackjackStarsElement = document.getElementById('blackjackStars');
+    if (blackjackScoreElement) {
+        blackjackScoreElement.textContent = blackjackScore.toLocaleString();
+    }
     if (blackjackStarsElement) {
         blackjackStarsElement.innerHTML = '';
         for (let i = 0; i < 5; i++) {
@@ -692,11 +1006,16 @@ function loadGameScores2() {
     }
 }
 
-// Function to update blackjack stars display
+// Function to update blackjack score and stars display
 function updateBlackjackStars() {
     const todayKey = getTodayKey();
+    const blackjackScore = parseInt(localStorage.getItem(`blackjackScore_${todayKey}`) || '0');
     const blackjackStars = parseInt(localStorage.getItem(`blackjackStars_${todayKey}`) || '0');
+    const blackjackScoreElement = document.getElementById('blackjackScore');
     const blackjackStarsElement = document.getElementById('blackjackStars');
+    if (blackjackScoreElement) {
+        blackjackScoreElement.textContent = blackjackScore.toLocaleString();
+    }
     if (blackjackStarsElement) {
         blackjackStarsElement.innerHTML = '';
         for (let i = 0; i < 5; i++) {
@@ -882,7 +1201,7 @@ function updateCommunityOnlineHeader() {
         if (bannerImg) bannerImg.src = 'src/img/evening.png';
         if (wrapper) wrapper.classList.add('community-online-wrapper--evening');
     } else {
-        el.textContent = 'GOOD NIGHT';
+        el.textContent = 'GOOD EVENING';
         el.className = baseClass + ' community-online-header--night';
         if (bannerImg) bannerImg.src = 'src/img/night.png';
         if (wrapper) wrapper.classList.add('community-online-wrapper--night');
@@ -916,6 +1235,24 @@ document.addEventListener('DOMContentLoaded', function() {
             resizeMainPageScramble();
         }, 250);
     }
+
+    // Wallet/profile page: update level display under avatar
+    try {
+        const levelEl = document.getElementById('profile-level-display');
+        if (levelEl) {
+            let level = 1;
+            if (typeof getJourneyLevel === 'function') {
+                level = getJourneyLevel();
+            } else {
+                const stored = localStorage.getItem('journeyLevel');
+                const parsed = parseInt(stored || '1', 10);
+                if (!isNaN(parsed) && parsed > 0) level = parsed;
+            }
+            levelEl.textContent = `LEVEL ${level}`;
+        }
+    } catch (e) {
+        console.warn('[Profile] Failed to update level display:', e);
+    }
     
     // Initialize deals page display if it's the active page
     const dealsPage = document.getElementById('deals-page');
@@ -942,19 +1279,83 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize coin displays if function exists
     
-    // Initialize help button
-    const helpButton = document.querySelector('.help-button');
+    // Initialize help button(s) - original + desktop bar
+    const helpButtons = document.querySelectorAll('.help-button');
     const helpPopup = document.getElementById('help-popup-overlay');
     const helpPopupClose = document.querySelector('.help-popup-close');
     
-    if (helpButton && helpPopup) {
-        helpButton.addEventListener('click', () => {
-            helpPopup.classList.add('show');
-            // Disable body scrolling when popup is open
-            document.body.style.overflow = 'hidden';
+    if (helpPopup) {
+        helpButtons.forEach(function(helpButton) {
+            helpButton.addEventListener('click', function() {
+                helpPopup.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
         });
     }
     
+    // Avatar select popup
+    const AVATAR_STORAGE_KEY = 'selectedAvatarPath';
+    const AVATAR_PATHS = Array(50).fill('src/img/profile.png');
+    const avatarSelectOverlay = document.getElementById('avatarSelectOverlay');
+    const avatarSelectGrid = document.getElementById('avatarSelectGrid');
+    const profileImage = document.querySelector('.profile-image');
+    const profileActions = document.querySelector('.profile-actions');
+
+    function buildAvatarGrid() {
+        if (!avatarSelectGrid) return;
+        const currentPath = localStorage.getItem(AVATAR_STORAGE_KEY) || 'src/img/profile.png';
+        avatarSelectGrid.innerHTML = '';
+        AVATAR_PATHS.forEach((path, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'avatar-select-cell' + (path === currentPath ? ' selected' : '');
+            cell.dataset.path = path;
+            cell.dataset.index = String(i);
+            const img = document.createElement('img');
+            img.src = path;
+            img.alt = 'Avatar ' + (i + 1);
+            cell.appendChild(img);
+            cell.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-select-cell').forEach(c => c.classList.remove('selected'));
+                cell.classList.add('selected');
+                localStorage.setItem(AVATAR_STORAGE_KEY, path);
+                if (profileImage) profileImage.src = path;
+                if (typeof updateBoardPlayerAvatar === 'function') updateBoardPlayerAvatar(path);
+            });
+            avatarSelectGrid.appendChild(cell);
+        });
+    }
+
+    function showAvatarSelectPopup() {
+        if (!avatarSelectOverlay) return;
+        buildAvatarGrid();
+        avatarSelectOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideAvatarSelectPopup() {
+        if (!avatarSelectOverlay) return;
+        avatarSelectOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    if (profileActions) {
+        profileActions.addEventListener('click', showAvatarSelectPopup);
+    }
+    const avatarSelectClose = document.querySelector('.avatar-select-close');
+    if (avatarSelectClose) {
+        avatarSelectClose.addEventListener('click', hideAvatarSelectPopup);
+    }
+    if (avatarSelectOverlay) {
+        avatarSelectOverlay.addEventListener('click', (e) => {
+            if (e.target === avatarSelectOverlay) hideAvatarSelectPopup();
+        });
+    }
+
+    const savedAvatar = localStorage.getItem(AVATAR_STORAGE_KEY);
+    if (savedAvatar && profileImage) {
+        profileImage.src = savedAvatar;
+    }
+
     if (helpPopupClose && helpPopup) {
         const closePopup = () => {
             helpPopup.classList.remove('show');
@@ -1043,6 +1444,15 @@ buttons.forEach(button => {
                                 window.snapJourneyContainer();
                     }
                 }
+            // Center board (x and y) when journey tab is shown
+            if (window.boardCenterWrapper) {
+                requestAnimationFrame(function() { window.boardCenterWrapper(); });
+            }
+            // Re-enable roll button if user returned from question-mark (prizes) flow
+            if (window.boardRollWaitingForReturn && typeof window.boardRollReactivate === "function") {
+                window.boardRollReactivate();
+                window.boardRollWaitingForReturn = false;
+            }
         }
         
         // Help button visibility: only on home page (updateLogoVisibility checks home + close button)
@@ -1076,7 +1486,7 @@ buttons.forEach(button => {
             updateCommunityOnlineHeader();
             if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
             updateGamesPageStats();
-            updateGamesPageForBigy();
+            updateBoostGameBox();
 
             // Ensure scramble letters are laid out correctly now that container is visible
             if (typeof resizeMainPageScramble === 'function') {
@@ -1091,10 +1501,6 @@ buttons.forEach(button => {
             }
         }
         
-        // Initialize sweepstakes page when shown (only if not boost mode)
-        if (targetPage === 'sweeps' && mode !== 'b') {
-            setTimeout(initSweepsPage, 100);
-        }
     });
 });
 
@@ -1233,10 +1639,65 @@ function animateRivalPage() {
     });
 }
 
+// Apply mode (m param): default/tiles vs m=brand
+function applyMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('m');
+    const isBrandMode = mode === 'brand';
+    document.body.classList.toggle('mode-brand', isBrandMode);
+    document.body.classList.toggle('mode-tiles', !isBrandMode);
+
+    const dailyBoostWrapper = document.getElementById('daily-boost-wrapper');
+    const carouselType1 = document.querySelector('.top-logo-carousel-container-type1');
+    const carouselType2 = document.querySelector('.top-logo-carousel-container');
+    const prizesTabLabels = document.querySelectorAll('.tab-button[data-page="prizes"] .label');
+    const prizesTabTilesIcons = document.querySelectorAll('.tab-button[data-page="prizes"] .icon-tiles');
+    const prizesTabPrizesIcons = document.querySelectorAll('.tab-button[data-page="prizes"] .icon-prizes');
+    const prizesTitle = document.getElementById('prizes-page-title');
+    const prizesSubtitle = document.getElementById('prizes-page-subtitle');
+    const prizeTierTitles = document.querySelectorAll('.prize-section-title[data-prize-tier]');
+
+    const helpPopupTitle = document.querySelector('.help-popup-title');
+    if (helpPopupTitle) {
+        helpPopupTitle.textContent = isBrandMode ? 'Daily Game Center' : 'Welcome!';
+    }
+
+    if (isBrandMode) {
+        if (dailyBoostWrapper) dailyBoostWrapper.style.display = '';
+        if (carouselType1) carouselType1.style.display = '';
+        if (carouselType2) carouselType2.style.display = '';
+        prizesTabLabels.forEach(el => { el.textContent = 'Prizes'; });
+        prizesTabTilesIcons.forEach(el => { el.style.display = 'none'; });
+        prizesTabPrizesIcons.forEach(el => { el.style.display = ''; });
+        if (prizesTitle) prizesTitle.textContent = 'PRIZES';
+        if (prizesSubtitle) prizesSubtitle.innerHTML = 'Spend your stars to buy prize tiles.<br>Fill in all the spaces to win the prize.';
+        prizeTierTitles.forEach(el => {
+            const tier = el.getAttribute('data-prize-tier');
+            if (tier === 'gold') el.textContent = '$100 Prize';
+            else if (tier === 'silver') el.textContent = '$20 gift Certificate';
+            else if (tier === 'regular') el.textContent = '$5 Coupons';
+        });
+    } else {
+        if (dailyBoostWrapper) dailyBoostWrapper.style.display = 'none';
+        if (carouselType1) carouselType1.style.display = 'none';
+        if (carouselType2) carouselType2.style.display = 'none';
+        prizesTabLabels.forEach(el => { el.textContent = 'Tiles'; });
+        prizesTabTilesIcons.forEach(el => { el.style.display = ''; });
+        prizesTabPrizesIcons.forEach(el => { el.style.display = 'none'; });
+        if (prizesTitle) prizesTitle.textContent = 'TILES';
+        if (prizesSubtitle) prizesSubtitle.innerHTML = 'Spend your stars to buy tiles.<br>Fill in all the spaces to win avatars.<br>Resets weekly.';
+        prizeTierTitles.forEach(el => {
+            const tier = el.getAttribute('data-prize-tier');
+            if (tier === 'gold') el.textContent = 'GOLDEN AVATAR';
+            else if (tier === 'silver') el.textContent = 'SILVER AVATAR';
+            else if (tier === 'regular') el.textContent = 'AVATAR';
+        });
+    }
+}
+
 // Check URL parameters on page load
 function checkURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
-    const scheme = urlParams.get('s');
     const headerType = urlParams.get('d');
     
     // Handle header type switching
@@ -1420,10 +1881,10 @@ function checkURLParameters() {
             }
         });
         
-        // Update sweepsGame image for firehouse
-        const boostSweepsImg = document.getElementById('boost-sweeps-game-img');
-        if (boostSweepsImg) {
-            boostSweepsImg.src = 'src/img/firehousesubs/sweepsGame.png';
+        // Update boost game image for firehouse
+        const boostGameImg = document.getElementById('boost-game-img');
+        if (boostGameImg) {
+            boostGameImg.src = 'src/img/firehousesubs/sweepsGame.png';
         }
         
         // Update calendar for firehouse2 after container is shown
@@ -1486,6 +1947,7 @@ function checkURLParameters() {
         // Remove bigy2 and firehouse2 classes if they exist
         document.body.classList.remove('bigy2');
         document.body.classList.remove('firehouse2');
+        document.body.classList.remove('wegmans');
         
         // Default: show header-type1, hide header-type2
         if (headerType1) headerType1.style.display = 'block';
@@ -1510,46 +1972,11 @@ function checkURLParameters() {
         applyDefaultStyling();
     }
     
-    if (scheme === 'jos') {
-        // Apply Jos color scheme
-        const schemeBack = '#925441';
-        const schemeBarGrad = 'linear-gradient(to bottom, #fe5094, #ea327e)';
-        const schemeCalendarGrad = 'linear-gradient(to bottom, #FF8C42, #FF6F3C)';
-        const schemeBigText = '#f4efe5';
-        const logoPath = 'src/img/jos/jos_logo.png';
-        
-        changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
-    } else if (scheme === 'goodValue') {
-        // Apply Good Value color scheme - based on logo colors
-        const schemeBack = '#ececec';
-        const schemeBarGrad = 'linear-gradient(to bottom, #3aa9e3, #1785ca)';
-        const schemeCalendarGrad = 'linear-gradient(to bottom, #7adc75, #4fb971)';
-        const schemeBigText = '#333333';
-        const logoPath = 'src/img/goodValue/goodValue_logo.png';
-        
-        changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
-    } else if (scheme === 'dark') {
-        // Apply Dark color scheme
-        const schemeBack = '#000000';
-        const schemeBarGrad = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
-        const schemeCalendarGrad = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
-        const schemeBigText = '#ccc';
-        const logoPath = null; // Keep logo hidden
-        
-        changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
-    } else if (scheme === 'bigy') {
-        // Apply Bigy color scheme - keep default background and text, use red for header/calendar
-        const schemeBack = '#f5f5f5';
-        const schemeBarGrad = 'linear-gradient(to bottom, #df2b51, #c82a48)';
-        const schemeCalendarGrad = 'linear-gradient(to bottom, #df2b51, #c82a48)';
-        const schemeBigText = '#363636';
-        const logoPath = 'src/img/bigy/bigy.png';  
-        
-        changeColorScheme(schemeBack, schemeBarGrad, schemeCalendarGrad, schemeBigText, logoPath);
-        
-        // Update games page Market Match box for bigy style when using bigy scheme
-        updateGamesPageForBigy();
-    }
+    // Update boost game box (Market Match / Firehouse Match) based on header type
+    updateBoostGameBox();
+    
+    // Apply mode (m param): tiles vs brand
+    applyMode();
         
     // Initialize the appropriate carousel based on header type
     if (headerType === 'bigy' || headerType === 'bigy2' || headerType === 'firehouse2') {
@@ -1699,25 +2126,19 @@ function applyWegmansStyling() {
         });
     });
     
-    // Header bar - orange gradient for wegmans
-    const headerBar = document.querySelector('.header-bar');
-    if (headerBar) {
-        headerBar.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
-    }
+    // Header bar and desktop top bar - orange gradient for wegmans
+    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(bar) {
+        if (bar) bar.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
+    });
     
     // Star counter - wegmans color background
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
+    starCounters.forEach(function(starCounter) {
         starCounter.style.backgroundColor = '#ce3f24';
         const starCount = starCounter.querySelector('.star-count');
-        if (starCount) {
-            starCount.style.color = 'white';
-        }
+        if (starCount) starCount.style.color = 'white';
         const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FFD700';
-        }
-    }
+        if (starIcon) starIcon.style.color = '#FFD700';
+    });
     
     // Date text - black for wegmans
     const dateElement = document.querySelector('.date');
@@ -1821,12 +2242,6 @@ function applyWegmansStyling() {
     sectionTitles.forEach(title => {
         title.style.transform = 'translateY(0)';
     });
-    
-    // Journey page - keep original purple gradient for wegmans (don't change)
-    const journeyPage = document.getElementById('journey-page');
-    if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
-    }
     
     // Apply yellow gradient styling to hint button for wegmans (same as firehouse)
     const hintButton = document.querySelector('.unscramble-hint-btn');
@@ -2002,25 +2417,19 @@ function applyBigyStyling() {
         });
     });
     
-    // Header bar - white for bigy
-    const headerBar = document.querySelector('.header-bar');
-    if (headerBar) {
-        headerBar.style.background = 'white';
-    }
+    // Header bar and desktop top bar - white for bigy
+    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(bar) {
+        if (bar) bar.style.background = 'white';
+    });
     
     // Star counter - red background for bigy
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
+    document.querySelectorAll('.star-counter').forEach(function(starCounter) {
         starCounter.style.backgroundColor = '#dc3545';
         const starCount = starCounter.querySelector('.star-count');
-        if (starCount) {
-            starCount.style.color = 'white';
-        }
+        if (starCount) starCount.style.color = 'white';
         const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FFD700';
-        }
-    }
+        if (starIcon) starIcon.style.color = '#FFD700';
+    });
     
     // Date text - black for bigy
     const dateElement = document.querySelector('.date');
@@ -2134,7 +2543,7 @@ function applyBigyStyling() {
     // Journey page - blue gradient for bigy
     const journeyPage = document.getElementById('journey-page');
     if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #283f7e, #1a2d5c)';
+        journeyPage.style.background = 'linear-gradient(to bottom, #4A5A9E, #1a2d5c)';
     }
     
     // Apply gold styling to hint button for bigy
@@ -2325,34 +2734,25 @@ function applyFirehouseStyling() {
         });
     });
     
-    // Header bar - dark grey to black gradient with white text and Nunito for firehouse
-    const headerBar = document.querySelector('.header-bar');
-    if (headerBar) {
+    // Header bar and desktop top bar - dark grey to black gradient with white text and Nunito for firehouse
+    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(headerBar) {
         headerBar.style.background = 'linear-gradient(to bottom,rgb(48, 48, 48), #000000)';
         headerBar.style.color = 'white';
         headerBar.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        
-        // Make all text elements in header bar white and Nunito
-        const headerTextElements = headerBar.querySelectorAll('.date, .date-subtitle, .header-title, .header-logo, span, div');
-        headerTextElements.forEach(element => {
+        headerBar.querySelectorAll('.date, .date-subtitle, .header-title, .header-logo, span, div').forEach(function(element) {
             element.style.color = 'white';
             element.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         });
-    }
+    });
     
     // Star counter - light red background for firehouse
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
+    document.querySelectorAll('.star-counter').forEach(function(starCounter) {
         starCounter.style.backgroundColor = '#bf1722';
         const starCount = starCounter.querySelector('.star-count');
-        if (starCount) {
-            starCount.style.color = 'white';
-        }
+        if (starCount) starCount.style.color = 'white';
         const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FFD700';
-        }
-    }
+        if (starIcon) starIcon.style.color = '#FFD700';
+    });
     
     // Date text - white for firehouse (in header bar with dark gradient)
     const dateElement = document.querySelector('.date');
@@ -2469,7 +2869,7 @@ function applyFirehouseStyling() {
     // Journey page - purple gradient for firehouse
     const journeyPage = document.getElementById('journey-page');
     if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
+        journeyPage.style.background = 'linear-gradient(to bottom,rgb(103, 37, 190), #2E0E5C)';
     }
     
     // Boost game title - Firehouse Match for firehouse
@@ -2657,7 +3057,7 @@ function applyDefaultStyling() {
     // Journey page - purple gradient for default
     const journeyPage = document.getElementById('journey-page');
     if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom, #4A148C, #2E0E5C)';
+        journeyPage.style.background = 'linear-gradient(to bottom,rgb(94, 35, 172), #2E0E5C)';
     }
     
     // Remove any inline styles from letter boxes for default mode (let CSS handle it)
@@ -3120,66 +3520,8 @@ function updateGamesPageStats() {
     updateBoostHighScore();
 }
 
-// Update games page Market Match box for bigy/donut style
-function updateGamesPageForBigy() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const scheme = urlParams.get('s');
-    
-    // Market Match is now the default, only show Donut Matcher if scheme is explicitly set to 'donut'
-    if (scheme === 'donut') {
-        // Show Donut Matcher only if explicitly requested
-        const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
-        if (gameTitle) {
-            gameTitle.textContent = 'DONUT MATCHER';
-        }
-        const playColorBox = document.querySelector('#community-page .boost-game-box .play-color-box');
-        if (playColorBox) {
-            playColorBox.style.background = 'linear-gradient(to bottom, #FF6B9D, #C44569)';
-            // Remove image if it exists
-            const img = playColorBox.querySelector('img');
-            if (img) {
-                img.remove();
-            }
-            // Restore SVG if it was removed
-            if (!playColorBox.querySelector('svg')) {
-                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.setAttribute('width', '120');
-                svg.setAttribute('height', '120');
-                svg.setAttribute('viewBox', '0 0 24 24');
-                svg.setAttribute('style', 'margin-bottom: 1px;');
-                const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle1.setAttribute('cx', '12');
-                circle1.setAttribute('cy', '12');
-                circle1.setAttribute('r', '10');
-                circle1.setAttribute('fill', 'white');
-                circle1.setAttribute('opacity', '0.9');
-                const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle2.setAttribute('cx', '12');
-                circle2.setAttribute('cy', '12');
-                circle2.setAttribute('r', '6');
-                circle2.setAttribute('fill', 'none');
-                circle2.setAttribute('stroke', '#FF6B9D');
-                circle2.setAttribute('stroke-width', '2');
-                const circle3 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle3.setAttribute('cx', '12');
-                circle3.setAttribute('cy', '12');
-                circle3.setAttribute('r', '3');
-                circle3.setAttribute('fill', '#FF6B9D');
-                svg.appendChild(circle1);
-                svg.appendChild(circle2);
-                svg.appendChild(circle3);
-                const gameTitle = playColorBox.querySelector('.game-title');
-                if (gameTitle) {
-                    playColorBox.insertBefore(svg, gameTitle);
-                } else {
-                    playColorBox.appendChild(svg);
-                }
-            }
-        }
-        return;
-    }
-    
-    // Market Match is now the default - Change game title to Market Match
+// Update boost game box (Market Match / Firehouse Match) based on header type
+function updateBoostGameBox() {
     const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
     if (gameTitle) {
         // Check if firehouse is active
@@ -3232,270 +3574,6 @@ function updateGamesPageForBigy() {
     }
 }
 
-// Store current color scheme
-let currentColorScheme = null;
-// Store whether a logo has been specified
-let hasLogo = false;
-
-// Color scheme function
-function changeColorScheme(backgroundColor, barColor, calendarColor, textColor, logoPath) {
-    // Store the scheme for later use
-    currentColorScheme = { backgroundColor, barColor, calendarColor, textColor };
-    
-    // Change site background
-    document.body.style.backgroundColor = backgroundColor;
-    
-    // Change all light grey sections (but not rival-container and profile-container which should stay light)
-    const sections = document.querySelectorAll('.page, .week-section, .section');
-    sections.forEach(section => {
-        section.style.backgroundColor = backgroundColor;
-    });
-    
-    // Keep rival and wallet pages light (unless dark mode)
-    const lightPages = document.querySelectorAll('#rival-page, #wallet-page, #prizes-page');
-    lightPages.forEach(page => {
-        if (backgroundColor === '#000000') {
-            page.style.backgroundColor = '#1a1a1a';
-        } else {
-            page.style.backgroundColor = '#f8f8f8';
-        }
-    });
-    
-    // Keep rival and profile containers light (unless dark mode)
-    // Exclude deals-page profile-container from this styling
-    const lightContainers = document.querySelectorAll('.rival-container, .profile-container, .sweeps-container, .games-container');
-    lightContainers.forEach(container => {
-        // Skip if this is inside deals-page
-        if (container.closest('#deals-page')) {
-            return;
-        }
-        if (backgroundColor === '#000000') {
-            container.style.background = '#1a1a1a';
-            container.style.backgroundColor = '#1a1a1a';
-            container.style.border = 'none';
-        } else {
-            container.style.background = '#f8f8f8';
-            container.style.backgroundColor = '#f8f8f8';
-            container.style.border = 'none';
-        }
-    });
-    
-    // Only change header bar if we're not in default/bigy mode
-    const currentUrlParams = new URLSearchParams(window.location.search);
-    const currentHeaderType = currentUrlParams.get('d');
-    const currentScheme = currentUrlParams.get('s');
-    const shouldChangeHeader = currentScheme && currentScheme !== 'bigy' && !currentHeaderType;
-    
-    if (shouldChangeHeader) {
-    const headerBar = document.querySelector('.header-bar');
-    if (headerBar) {
-        headerBar.style.background = barColor;
-        }
-    }
-    
-    // Change week container (calendar)
-    const weekContainer = document.querySelector('.week-container');
-    if (weekContainer) {
-        weekContainer.style.background = calendarColor;
-        weekContainer.style.border = 'none';
-        weekContainer.style.boxShadow = 'none';
-    }
-    
-    // Change game overlay background
-    const gameOverlays = document.querySelectorAll('.game-overlay');
-    gameOverlays.forEach(overlay => {
-        overlay.style.backgroundColor = backgroundColor;
-    });
-    
-    // Change large serif text (section titles)
-    const sectionTitles = document.querySelectorAll('.section-title, .week-subtitle, .week-title');
-    sectionTitles.forEach(title => {
-        title.style.color = textColor;
-    });
-    
-    // Change scramble letter boxes to match top bar (only for custom schemes, not default)
-    // Default mode uses CSS red gradient, bigy mode is handled separately
-    const currentUrlParamsForBoxes = new URLSearchParams(window.location.search);
-    const currentSchemeForBoxes = currentUrlParamsForBoxes.get('s');
-    if (currentSchemeForBoxes && currentSchemeForBoxes !== 'bigy') {
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = barColor;
-    });
-    }
-    
-    // Hide borders on white boxes
-    const whiteBoxes = document.querySelectorAll('.play-box, .arcade-box, .bonus-box, .on-this-day-container, .highlow-container, .profile-container');
-    whiteBoxes.forEach(box => {
-        box.style.border = 'none';
-    });
-    
-    // Change white backgrounds to dark grey in dark mode
-    if (backgroundColor === '#000000') {
-        const darkGrey = '#1a1a1a';
-        const lightGrey = '#ccc';
-        whiteBoxes.forEach(box => {
-            box.style.backgroundColor = darkGrey;
-        });
-        
-        // Also change other white elements
-        const starCounter = document.querySelector('.star-counter');
-        if (starCounter) {
-            starCounter.style.backgroundColor = darkGrey;
-        }
-        
-        const profileIcon = document.querySelector('.profile-icon');
-        if (profileIcon) {
-            profileIcon.style.backgroundColor = darkGrey;
-        }
-        
-        // Change rival-vs background to dark grey and text to light grey
-        const rivalVs = document.querySelector('.rival-vs');
-        if (rivalVs) {
-            rivalVs.style.backgroundColor = darkGrey;
-            rivalVs.style.color = lightGrey;
-        }
-        
-        // Change rival page text colors to light grey
-        const rivalTitle = document.querySelector('.rival-title');
-        if (rivalTitle) {
-            rivalTitle.style.color = lightGrey;
-        }
-        
-        const rivalChallenge = document.querySelector('.rival-challenge');
-        if (rivalChallenge) {
-            rivalChallenge.style.color = lightGrey;
-        }
-        
-        // Change wallet page text colors to light grey
-        const walletTextElements = document.querySelectorAll('.profile-username, .profile-location, .stat-label, .stat-value');
-        walletTextElements.forEach(element => {
-            element.style.color = lightGrey;
-        });
-        
-        // Change sweepstakes page text colors to light grey
-        const sweepsTextElements = document.querySelectorAll('.sweeps-subtitle, .current-balance, .entry-count, .rules-text');
-        sweepsTextElements.forEach(element => {
-            element.style.color = lightGrey;
-        });
-        
-        // Ensure wallet and rival page backgrounds are set
-        const walletPage = document.querySelector('#wallet-page');
-        if (walletPage) {
-            walletPage.style.backgroundColor = darkGrey;
-        }
-        
-        const walletProfileContainer = document.querySelector('#wallet-page .profile-container');
-        if (walletProfileContainer) {
-            walletProfileContainer.style.background = darkGrey;
-            walletProfileContainer.style.backgroundColor = darkGrey;
-            walletProfileContainer.style.border = 'none';
-        }
-        
-        const prizesPage = document.querySelector('#prizes-page');
-        if (prizesPage) {
-            prizesPage.style.backgroundColor = darkGrey;
-        }
-        
-        const rivalPage = document.querySelector('#rival-page');
-        if (rivalPage) {
-            rivalPage.style.backgroundColor = darkGrey;
-        }
-        
-        const sweepsPage = document.querySelector('#sweeps-page');
-        if (sweepsPage) {
-            sweepsPage.style.backgroundColor = darkGrey;
-        }
-        
-        const sweepsContainer = document.querySelector('.sweeps-container');
-        if (sweepsContainer) {
-            sweepsContainer.style.background = darkGrey;
-            sweepsContainer.style.backgroundColor = darkGrey;
-        }
-        
-        const gamesContainer = document.querySelector('.games-container');
-        if (gamesContainer) {
-            gamesContainer.style.background = darkGrey;
-            gamesContainer.style.backgroundColor = darkGrey;
-        }
-        
-        // Change all small text to light grey (except date and game titles)
-        const smallTextSelectors = '.play-text, .subsection-title, .week-day, .week-date, .bonus-text, .arcade-text, .on-this-day-text, .rival-name, .profile-name, .rival-stars, .profile-total-stars';
-        const smallTextElements = document.querySelectorAll(smallTextSelectors);
-        smallTextElements.forEach(element => {
-            element.style.color = lightGrey;
-            // Ensure star icons inside keep their orange color
-            const starIcons = element.querySelectorAll('.star-icon');
-            starIcons.forEach(icon => {
-                icon.style.color = '#FFB84D';
-            });
-        });
-        
-        // Keep date text white
-        const dateElement = document.querySelector('.date');
-        if (dateElement) {
-            dateElement.style.color = 'white';
-        }
-        
-        // Also change any text inside white boxes that has dark color
-        whiteBoxes.forEach(box => {
-            const textElements = box.querySelectorAll('*');
-            textElements.forEach(element => {
-                if (!element.classList.contains('section-title') && 
-                    !element.classList.contains('week-subtitle') &&
-                    !element.classList.contains('date') &&
-                    !element.classList.contains('game-title') &&
-                    !element.classList.contains('star-counter') &&
-                    !element.classList.contains('star-icon') &&
-                    !element.classList.contains('star-count')) {
-                    const computedStyle = window.getComputedStyle(element);
-                    const color = computedStyle.color;
-                    // Only change dark text colors (black, dark grey)
-                    if (color === 'rgb(0, 0, 0)' || color === 'rgb(51, 51, 51)' || color === 'rgb(68, 68, 68)' || color === 'rgb(102, 102, 102)' || color === 'rgb(34, 34, 34)') {
-                        // Skip if it's white text or already styled
-                        if (color !== 'rgb(255, 255, 255)' && !element.style.color) {
-                            element.style.color = lightGrey;
-                        }
-                    }
-                }
-            });
-        });
-    }
-    
-    // Check URL parameter for logo placement
-    const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
-    const isBigy = headerType === 'bigy';
-    const isBigy2 = headerType === 'bigy2';
-    const isFirehouse2 = headerType === 'firehouse2';
-    const isBigyMode = isBigy || isBigy2 || isFirehouse2;
-    
-    // Show and set logo
-    const logo = document.querySelector('.header-logo');
-    
-    if (logoPath) {
-        hasLogo = true;
-            if (logo) {
-                logo.src = logoPath;
-            // Only show logo if close button is not showing AND we're in bigy or bigy2 mode
-                const closeButton = document.querySelector('.game-overlay-close');
-            if (closeButton && !closeButton.classList.contains('show') && isBigyMode) {
-                    logo.style.display = 'block';
-                } else {
-                    logo.style.display = 'none';
-            }
-        }
-    } else {
-        if (logo) {
-        logo.style.display = 'none';
-        }
-        hasLogo = false;
-    }
-    
-    // Watch for dynamically added letter boxes
-    observeLetterBoxes();
-}
-
 // Helper function to update logo visibility based on close button state
 function updateLogoVisibility() {
     const logo = document.querySelector('.header-logo');
@@ -3511,17 +3589,25 @@ function updateLogoVisibility() {
     const isWegmans = headerType === 'wegmans';
     const isBigyMode = isBigy || isBigy2 || isFirehouse2 || isWegmans;
     
-    // Show help button only on main page (and when game overlay close button is not showing)
-    const mainPage = document.getElementById('main-page');
-    const isHomeActive = mainPage && mainPage.classList.contains('active');
-    if (helpButton) {
-        if (!isHomeActive || (closeButton && closeButton.classList.contains('show'))) {
+    // Show help button(s): on mobile show only on main screen unless game open; on desktop show only when game open (upper left)
+    const shouldHideHelp = closeButton && closeButton.classList.contains('show');
+    const isDesktop = window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
+    const activeTab = document.querySelector('.tab-button.active');
+    const isMainPage = activeTab && activeTab.getAttribute('data-page') === 'main';
+    const helpButtons = document.querySelectorAll('.help-button');
+    helpButtons.forEach(function(helpButton) {
+        if (isDesktop && !shouldHideHelp) {
+            helpButton.classList.add('hidden');
+            helpButton.style.display = 'none';
+        } else if (shouldHideHelp && !isDesktop) {
+            helpButton.classList.add('hidden');
+            helpButton.style.display = 'none';
+        } else if (!isDesktop && !isMainPage) {
             helpButton.classList.add('hidden');
             helpButton.style.display = 'none';
         } else {
             helpButton.classList.remove('hidden');
             helpButton.style.display = 'inline-flex';
-            // Set help button color based on mode
             if (isBigyMode && headerType !== 'wegmans') {
                 helpButton.style.color = 'white';
                 helpButton.style.borderColor = 'white';
@@ -3530,6 +3616,11 @@ function updateLogoVisibility() {
                 helpButton.style.borderColor = '#666';
             }
         }
+    });
+    // Desktop help link (6th tab) - hide when game overlay open
+    const desktopHelpLink = document.querySelector('.desktop-help-link');
+    if (desktopHelpLink) {
+        desktopHelpLink.style.display = shouldHideHelp ? 'none' : 'flex';
     }
     
     // Show/hide logo based on game overlay state and mode
@@ -3544,82 +3635,8 @@ function updateLogoVisibility() {
     }
 }
 
-// Function to observe and style dynamically added letter boxes
-function observeLetterBoxes() {
-    const unscrambleContainer = document.querySelector('.unscramble-boxes');
-    if (!unscrambleContainer || !currentColorScheme) return;
-    
-    // Only observe for custom schemes, not default (default uses CSS)
-    const urlParams = new URLSearchParams(window.location.search);
-    const scheme = urlParams.get('s');
-    if (!scheme || scheme === 'bigy') return;
-    
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.classList && node.classList.contains('letter-box')) {
-                    node.style.background = currentColorScheme.barColor;
-                }
-            });
-        });
-    });
-    
-    observer.observe(unscrambleContainer, { childList: true });
-}
-
 // Check URL parameters when page loads
 checkURLParameters();
-
-// Check for splash overlay parameter
-function checkSplashOverlay() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const splash = urlParams.get('splash');
-    
-    if (splash === 'true') {
-        // Use multiple attempts to ensure DOM is ready
-        const showOverlay = () => {
-            const splashOverlay = document.getElementById('splash-overlay');
-            if (splashOverlay) {
-                splashOverlay.style.display = 'block';
-                
-                // Remove overlay on click
-                splashOverlay.addEventListener('click', () => {
-                    splashOverlay.style.display = 'none';
-                });
-                return true;
-            }
-            return false;
-        };
-        
-        // Try immediately
-        if (!showOverlay()) {
-            // If element not found, try after DOMContentLoaded
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(showOverlay, 50);
-                });
-            } else {
-                // DOM already loaded, try with a small delay
-                setTimeout(showOverlay, 50);
-            }
-        }
-    }
-}
-
-// Initialize splash overlay
-checkSplashOverlay();
-
-// Also check on window load as a fallback
-window.addEventListener('load', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const splash = urlParams.get('splash');
-    if (splash === 'true') {
-        const splashOverlay = document.getElementById('splash-overlay');
-        if (splashOverlay && splashOverlay.style.display === 'none') {
-            splashOverlay.style.display = 'block';
-        }
-    }
-});
 
 // Keyboard shortcut to test color scheme
 document.addEventListener('keydown', (e) => {
@@ -3716,6 +3733,8 @@ let pendingCloseOverlayElement = null;
 let pendingCloseIframeElement = null;
 
 function actuallyCloseOverlay(gameId, overlayElement, iframeToUnload) {
+    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+    hideRewardOverlay();
     if (overlayElement) {
         overlayElement.classList.remove('active');
     }
@@ -3737,18 +3756,24 @@ function actuallyCloseOverlay(gameId, overlayElement, iframeToUnload) {
     
     document.body.style.overflow = '';
     
+    // Restore main sections once the iframe is closed
+    setMainSectionsVisible(true);
+    
     // Reload game scores to update stars
     loadGameScores2();
+    
+    requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+    });
 }
 
-// Main close button handler
-const closeButton = document.querySelector('.game-overlay-close');
-if (closeButton) {
-    closeButton.addEventListener('click', () => {
+// Main close button handler - attach to all close buttons (header + desktop bar)
+document.querySelectorAll('.game-overlay-close').forEach(function(closeButton) {
+    closeButton.addEventListener('click', function() {
         if (!currentGameId) return;
         
-        // Hide close button
-        closeButton.classList.remove('show');
+        // Hide close button(s)
+        document.querySelectorAll('.game-overlay-close').forEach(function(btn) { btn.classList.remove('show'); });
         updateLogoVisibility();
         
         const overlay = document.getElementById('gameOverlay');
@@ -3769,7 +3794,7 @@ if (closeButton) {
         // Non-puzzle games or already-completed puzzles: close immediately
         actuallyCloseOverlay(currentGameId, overlay, iframe);
     });
-}
+});
 
 // Game incomplete modal buttons
 const gameIncompleteModal = document.getElementById('gameIncompleteModal');
@@ -3817,12 +3842,9 @@ if (gameKeepPlayingButton && gameIncompleteModal) {
         pendingCloseIframeElement = null;
         gameIncompleteModal.style.display = 'none';
         
-        // Restore close button since overlay is still active
-        const closeButtonEl = document.querySelector('.game-overlay-close');
-        if (closeButtonEl) {
-            closeButtonEl.classList.add('show');
-            updateLogoVisibility();
-        }
+        // Restore close button(s) since overlay is still active
+        document.querySelectorAll('.game-overlay-close').forEach(function(btn) { btn.classList.add('show'); });
+        updateLogoVisibility();
     });
 }
 
@@ -4170,108 +4192,6 @@ function updateRivalsYouStarCount() {
 }
 window.updateRivalsYouStarCount = updateRivalsYouStarCount;
 
-function getSweepsEntries() {
-    const todayKey = getTodayKey();
-    return parseInt(localStorage.getItem(`sweepsEntries_${todayKey}`) || '0');
-}
-
-function addSweepsEntry() {
-    const todayKey = getTodayKey();
-    const currentEntries = getSweepsEntries();
-    localStorage.setItem(`sweepsEntries_${todayKey}`, String(currentEntries + 1));
-    updateSweepsDisplay();
-}
-
-function updateSweepsDisplay() {
-    const balance = parseInt(localStorage.getItem('totalStars') || '0');
-    const entries = getSweepsEntries();
-    const balanceElement = document.getElementById('sweeps-balance');
-    const entryCountElement = document.getElementById('entry-count');
-    
-    if (balanceElement) {
-        balanceElement.textContent = balance;
-    }
-    if (entryCountElement) {
-        entryCountElement.textContent = entries;
-    }
-}
-
-// Initialize sweepstakes page
-function initSweepsPage() {
-    updateSweepsDisplay();
-    
-    const enterButton = document.getElementById('enter-sweeps-btn');
-    if (enterButton && !enterButton.dataset.listenerAdded) {
-        enterButton.dataset.listenerAdded = 'true';
-        enterButton.addEventListener('click', () => {
-            const balance = parseInt(localStorage.getItem('totalStars') || '0');
-            const entryCost = 10;
-            
-            if (balance >= entryCost) {
-                // Deduct from total stars
-                const todayKey = getTodayKey();
-                const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-                localStorage.setItem('totalStars', String(currentTotalStars - entryCost));
-                
-                // Also deduct from daily stars
-                const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-                localStorage.setItem(`dailyStars_${todayKey}`, String(Math.max(0, currentDailyStars - entryCost)));
-                
-                // Add entry
-                addSweepsEntry();
-                
-                // Update all star displays
-                if (window.updateStarDisplay) {
-                    window.updateStarDisplay();
-                }
-               
-                if (typeof updateRivalsYouStarCount === 'function') updateRivalsYouStarCount();
-                if (window.updateRivalStars) window.updateRivalStars();
-
-                // Show confirmation
-                enterButton.textContent = 'Entry Added!';
-                enterButton.style.background = 'linear-gradient(135deg, #7adc75, #4fb971)';
-                setTimeout(() => {
-                    enterButton.innerHTML = '<span class="button-star">★</span><span>Enter Sweepstakes</span>';
-                    enterButton.style.background = 'linear-gradient(135deg, #FFB84D, #FF8C42)';
-                }, 1500);
-            } else {
-                // Not enough stars
-                enterButton.textContent = 'Not Enough Stars';
-                enterButton.style.background = 'linear-gradient(135deg, #999, #777)';
-                setTimeout(() => {
-                    enterButton.innerHTML = '<span class="button-star">★</span><span>Enter Sweepstakes</span>';
-                    enterButton.style.background = 'linear-gradient(135deg, #FFB84D, #FF8C42)';
-                }, 1500);
-            }
-        });
-    }
-}
-
-// Initialize sweepstakes on page load if active
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode')?.toLowerCase();
-    
-    // Check if sweeps page is active (and not boost mode)
-    if (document.getElementById('sweeps-page')?.classList.contains('active') && mode !== 'b') {
-        initSweepsPage();
-    }
-    
-    // If mode=b, ensure boost page shows when sweeps tab is clicked
-    // Also handle if sweeps tab is already active on page load
-    if (mode === 'b') {
-        const sweepsButton = document.querySelector('.tab-button[data-page="sweeps"]');
-        const sweepsPage = document.getElementById('sweeps-page');
-        const communityPageEl = document.getElementById('community-page');
-        
-        if (sweepsButton && sweepsButton.classList.contains('active') && communityPageEl) {
-            if (sweepsPage) sweepsPage.classList.remove('active');
-            communityPageEl.classList.add('active');
-        }
-    }
-});
-
 // Reset all data function (called by Q key and reset button)
 function resetAllData() {
     // Clear ALL localStorage variables
@@ -4310,15 +4230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const boostSpendButton = document.querySelector('.boost-spend-button');
     if (boostSpendButton) {
         boostSpendButton.addEventListener('click', () => {
-            // Load match3 game - Market Match is now default
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-            // Temporarily override match3 path
-            const originalPath = gameConfig['match3'].path;
-            gameConfig['match3'].path = `games/match3/index.html?s=${gameScheme}`;
             openGame('match3');
-            gameConfig['match3'].path = originalPath;
         });
     }
     
@@ -4326,15 +4238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const practiceButton = document.querySelector('.boost-practice-button');
     if (practiceButton) {
         practiceButton.addEventListener('click', () => {
-            // Load match3 practice game - Market Match is now default
-            const urlParams = new URLSearchParams(window.location.search);
-            const scheme = urlParams.get('s');
-            const gameScheme = scheme === 'donut' ? 'donut' : (scheme || 'bigy');
-            // Temporarily override match3 path
-            const originalPath = gameConfig['match3'].path;
-            gameConfig['match3'].path = `games/match3/index.html?s=${gameScheme}&practice=true`;
-            openGame('match3');
-            gameConfig['match3'].path = originalPath;
+            openGame('match3', { practice: 'true' });
         });
     }
 });

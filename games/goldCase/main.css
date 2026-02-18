@@ -92,7 +92,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #ffffff;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
     background-size: auto 100%;
     background-attachment: fixed;
     z-index: 0;
@@ -1230,7 +1230,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(240, 240, 240, 0.95);
+    background: rgba(255, 255, 255, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1567,7 +1567,7 @@ body::before {
 }
 
 .score-cell {
-    background: linear-gradient(to bottom, #ffe259 0%, #ffe259 50%, #ffcc80 50%, #ffcc80 100%);
+    background: linear-gradient(to bottom, #f7dc58 0%, #f7dc58 50%, #f5bd5f 50%, #f5bd5f 100%);
     /* border: 1px solid #000; */
     display: flex;
     align-items: center;
@@ -1672,7 +1672,7 @@ body::before {
     width: 100%;
     height: 100%;
     /* max-width: 400px; */
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 20, 0.95) 50%, rgba(0, 0, 0, 0.9) 100%);
+    background: linear-gradient(to bottom, rgba(245, 245, 245, 0.92) 0%, rgba(232, 232, 232, 0.92) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1945,7 +1945,7 @@ body::before {
     width: 100%;
     height: 100%;
     max-height: 100%;
-    background: linear-gradient(to bottom, #ffe259, #ffa751);
+    background: linear-gradient(to bottom, #f7dc58 0%, #f5bd5f 100%);
     background-size: 200% 100%;
     color: #453021;
     border: none;
@@ -2019,7 +2019,7 @@ body::before {
     transform: none;
     color: #8b4513;
     border: none;
-    background: linear-gradient(to bottom, #ffe259, #ffa751);
+    background: linear-gradient(to bottom, #f7dc58 0%, #f5bd5f 100%);
     box-shadow: none;
     text-shadow: none;
 }
@@ -2199,7 +2199,7 @@ body::before {
     max-width: 500px;
     box-sizing: border-box;
     height: 30px;
-    background: linear-gradient(to bottom, #ffe259, #ffa751);
+    background: linear-gradient(to bottom, #f7dc58 0%, #f5bd5f 100%);
     color: #453021;
     border: none;
     border-radius: 4px;
@@ -2226,7 +2226,8 @@ body::before {
     transform: translate(-50%, -50%);
     z-index: 111000;
     display: none;
-    background: rgba(240, 240, 240, 0.95); /* Off-white to match clue window */
+    background: rgba(245, 245, 245, 0.98);
+    
     border-radius: 10px; /* Add border radius to three.js container */
     /* padding: 20px; */
     /* box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); */
@@ -2255,8 +2256,8 @@ body::before {
     width: 100%;
     height: 100%;
     z-index: 10001; /* Above TAKE DEAL button (10000) but below Three.js DOM element (1000000) */
-    background: rgba(240, 240, 240, 0.6); /* Start with less opaque beige, fades to more opaque */
-    backdrop-filter: blur(10px); /* Blur content behind the beige background */
+    background: rgba(245, 245, 245, 0.85);
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px); /* Safari support */
     pointer-events: none;
     opacity: 0;
@@ -2272,7 +2273,7 @@ body::before {
     position: fixed;
     top: 0;
     bottom: 0;
-    background: #000000;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
     z-index: 442000; /* above gameplay UI */
     pointer-events: none;
 }

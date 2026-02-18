@@ -202,7 +202,7 @@ class Loader {
 // ============================================================================
 
 // Shared sound system (same as Memory game)
-let soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
+let soundArray = ["good", "bad", "clue", "pickup", "tick", "complete", "click"];
 let loadedSounds = {};
 let engineInstance = null;
 
@@ -940,8 +940,11 @@ class Scene {
             });
         }
 
+        let _lafClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+        const playLafClick = () => { try { if (_lafClick) { _lafClick.currentTime = 0; _lafClick.play().catch(() => {}); } } catch (e) {} };
         if (playBtn) {
             playBtn.addEventListener('click', () => {
+                playLafClick();
                 console.log("[UI] Play button clicked, current action:", this.action);
                 this.setDifficulty('hard');
                 this.e.startGame();
@@ -951,6 +954,7 @@ class Scene {
             });
             playBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                if (loadedSounds.click) loadedSounds.click.play();
                 console.log("[UI] Play button touched, current action:", this.action);
                 this.setDifficulty('hard');
                 this.e.startGame();
@@ -1302,6 +1306,10 @@ update() {
                 
                 // Save game result
                 saveLostAndFoundGameResult(this.score, starsEarned);
+                
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'arcadeComplete', gameId: 'lostAndFound', stars: starsEarned }, '*');
+                }
                 
                 this.action="over"
             }

@@ -46,9 +46,10 @@ body {
 }
 
 #helpButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    right: auto !important;
     width: 15px;
     height: 15px;
     background: #707070;
@@ -78,7 +79,7 @@ body {
 }
 
 #helpButton:hover {
-    background: #606060;
+    background: inherit;
 }
 
 .button-container {
@@ -101,7 +102,7 @@ body {
 
 .instruction {
     font-size: 14px;
-    font-weight: normal;
+    font-weight: 700;
     color: #666;
     text-align: center;
     margin-bottom: 40px;
@@ -293,8 +294,8 @@ body {
 }
 
 .next-button:hover, .accuse-button:hover {
-    box-shadow: 0 4px 12px rgba(232, 64, 102, 0.4);
-    transform: translateY(-1px);
+    box-shadow: inherit;
+    transform: none;
 }
 
 .next-button:active, .accuse-button:active {
@@ -350,7 +351,7 @@ body {
 }
 
 .close-button:hover {
-    color: #000;
+    color: inherit;
 }
 
 .popup-content {

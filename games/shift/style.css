@@ -82,7 +82,7 @@ html {
 
 .reset-button {
     padding: 10px 16px;
-    font-size: 14px;
+    font-size: 16px;
     font-family: 'Nunito', sans-serif;
     font-weight: 600;
     color: white;
@@ -112,7 +112,7 @@ html {
     border: none;
     color: #666;
     font-family: 'Nunito', sans-serif;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 500;
     text-transform: lowercase;
     cursor: pointer;
@@ -124,7 +124,6 @@ html {
 @media (min-width: 768px) {
     .reset-button {
         padding: 10px 20px;
-        font-size: 16px;
     }
 }
 
@@ -225,7 +224,7 @@ html {
     color: #666;
     text-align: center;
     font-family: 'Nunito', sans-serif;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 500;
     text-transform: lowercase;
     display: flex;
@@ -328,9 +327,10 @@ html {
 /* Play Button Styles - Now in main styles.css */
 
 #helpButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    right: auto !important;
     width: 15px;
     height: 15px;
     background: #707070;

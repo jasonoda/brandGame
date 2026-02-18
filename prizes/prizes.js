@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    var prizeSounds = {};
+    if (typeof Howl !== 'undefined') {
+        ['click', 'reward2', 'reward4'].forEach(function(name) {
+            prizeSounds[name] = new Howl({ src: ['sounds/' + name + '.mp3'] });
+        });
+    }
+    function playPrizeSound(name) {
+        if (prizeSounds[name]) prizeSounds[name].play();
+    }
+
     const drawButton = document.getElementById('prizes-draw-button');
     const overlay = document.getElementById('prizes-overlay');
     const grid = document.getElementById('prizes-overlay-grid');
@@ -177,6 +187,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose reset for external callers (e.g., journey free draw)
     window.resetPrizesOverlay = resetOverlayCards;
 
+    // Show overlay over current page (e.g. board/journey) without switching tabs; after card reveal, switch to prizes tab
+    window.showPrizesOverlayFromBoard = function () {
+        if (!overlay || !grid || cards.length === 0) return;
+        window.prizesOverlayOriginalParent = overlay.parentNode;
+        document.body.appendChild(overlay);
+        overlay.style.zIndex = '3000';
+        window.prizesOverlayFromBoard = true;
+        stopAllPieceTweens();
+        resetOverlayCards();
+        gsap.to(cards, {
+            opacity: 1,
+            x: 0,
+            rotation: 0,
+            scale: 1,
+            duration: 0.4,
+            ease: 'power2.out',
+            stagger: 0.03,
+        });
+    };
+
     // Lightweight celebratory effect (small burst, quick cleanup)
     const playCelebrate = (parent) => {
         if (!parent) return;
@@ -230,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show overlay on draw with dealing animation
     drawButton.addEventListener('click', () => {
         if (window.removeUsableStars) {
-            window.removeUsableStars(4);
+            window.removeUsableStars(5);
             if (window.updateMoveStarsDisplay) window.updateMoveStarsDisplay();
         }
         stopAllPieceTweens();
@@ -252,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cards.forEach((card) => {
         card.addEventListener('click', () => {
             if (card.classList.contains('prize-flipped')) return;
+            playPrizeSound('click');
 
             // Fade out other cards
             cards.forEach((c) => {
@@ -314,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   card.style.backgroundPosition = bgPos;
                   card.style.backgroundRepeat = 'no-repeat';
                   card.classList.add('prize-flipped');
+                  playPrizeSound('reward2');
                   playCelebrate(overlay);
               })
               .to(card, { scaleX: 1, duration: 0.22, ease: 'power1.out' })
@@ -325,6 +357,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   onComplete: () => {
                       overlay.style.display = 'none';
                       overlay.style.opacity = '';
+                      overlay.style.zIndex = '';
+                      if (window.prizesOverlayFromBoard && window.prizesOverlayOriginalParent) {
+                          window.prizesOverlayOriginalParent.appendChild(overlay);
+                          window.prizesOverlayFromBoard = false;
+                          window.prizesOverlayOriginalParent = null;
+                          // If this overlay was opened from the board question space,
+                          // reactivate the roll button now that the flow is complete.
+                          if (window.boardRollWaitingForReturn && typeof window.boardRollReactivate === 'function') {
+                              window.boardRollReactivate();
+                              window.boardRollWaitingForReturn = false;
+                          }
+                      }
                   },
               });
 
@@ -359,6 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Save tile state to localStorage
                 saveTileState();
+
+                // Check if this set is now complete (avatar win)
+                const allRevealed = set.list.every((b) => b.dataset.revealed === '1');
+                if (allRevealed) {
+                    playPrizeSound('reward4');
+                }
 
                 // Scroll to position based on prize size
                 scrollToPrizeSection(set.scroll);

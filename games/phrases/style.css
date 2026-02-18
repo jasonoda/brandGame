@@ -72,7 +72,7 @@ body {
 
 .bottom-section {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
@@ -82,14 +82,14 @@ body {
     align-items: center;
     z-index: 20;
     background: #efefef;
-    padding: 12px 16px max(16px, env(safe-area-inset-bottom));
-    border-top: 1px solid #ddd;
+    padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    border-bottom: 1px solid #ddd;
     box-sizing: border-box;
     transition: opacity 0.3s ease;
 }
 
 .guess-label {
-    font-size: 10px;
+    font-size: 16px;
     font-weight: 700;
     color: #999;
     letter-spacing: 1px;
@@ -134,7 +134,7 @@ body {
 .short-guess-counter {
     display: none;
     font-family: 'Nunito', sans-serif;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
     color: #666;
     text-transform: uppercase;
@@ -206,7 +206,7 @@ body {
 
 .instruction-line {
     font-family: 'Nunito', sans-serif;
-    font-size: 10px;
+    font-size: 16px;
     font-weight: 600;
     color: #666;
     text-transform: lowercase;
@@ -249,7 +249,7 @@ body {
     border: none;
     border-radius: 6px;
     font-family: 'Nunito', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: white;
     text-transform: lowercase;
@@ -272,13 +272,10 @@ body {
     background: linear-gradient(to bottom, #4dd0a8 0%, #3db893 100%);
 }
 
-.action-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(61, 184, 147, 0.4);
-}
-
+.action-btn:hover:not(:disabled),
 .action-btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: none;
+    box-shadow: none;
 }
 
 .action-btn:disabled {
@@ -464,8 +461,8 @@ body {
     background: none;
     border: none;
     font-family: 'Nunito', sans-serif;
+    font-size: 16px;
     z-index: 20;
-    font-size: 12px;
     font-weight: 600;
     color: #666;
     cursor: pointer;
@@ -480,7 +477,7 @@ body {
 
 .solve-title {
     font-family: 'Nunito', sans-serif;
-    font-size: 10px;
+    font-size: 16px;
     font-weight: 600;
     color: #666;
     text-transform: uppercase;
@@ -498,7 +495,7 @@ body {
     gap: 8px;
     width: 100%;
     max-width: 400px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     padding-bottom: 0;
 }
 
@@ -525,7 +522,7 @@ body {
     border: none;
     border-radius: 6px;
     font-family: 'Nunito', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: white;
     text-transform: lowercase;
@@ -548,8 +545,9 @@ body {
     flex-direction: column;
     gap: 6px;
     width: 100%;
-    padding-bottom: 0;
-    margin-top: 0;
+    padding: 0;
+    margin: 0;
+    min-height: 0;
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: 1;
@@ -638,7 +636,6 @@ body {
     
     .action-btn {
         padding: 10px 20px;
-        font-size: 12px;
     }
 }
 

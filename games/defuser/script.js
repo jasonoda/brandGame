@@ -82,6 +82,14 @@ function getCategoryColors(category) {
     return COLOR_PALETTES[category].slice(0, colorsPerCategory);
 }
 
+// Preload sounds with Howler at start
+var defuserSounds = {};
+if (typeof Howl !== 'undefined') {
+    ['click', 'defuser_cut', 'defuser_explode'].forEach(function(name) {
+        defuserSounds[name] = new Howl({ src: ['../../sounds/' + name + '.mp3'] });
+    });
+}
+
 // Store wire lines for cutting detection
 let wireLines = [];
 let globalTopIndices = [];
@@ -180,23 +188,22 @@ function defuserAwardStarsForCurrentRun() {
     const todayKey = defuserGetTodayKey();
     const existing = parseInt(localStorage.getItem(`defuserStars_${todayKey}`) || '0');
     
-    // Rounds completed is wires successfully cut
     const roundsCompleted = Math.max(0, gameState.currentRound - 1);
-    
-    // Check if game is won (all 7 rounds completed) - always give 5 stars for winning
     const isGameWon = gameState.currentRound >= 7;
     const starsThisRun = isGameWon ? 5 : defuserGetStarsForRoundsCompleted(roundsCompleted);
-    
-    if (starsThisRun <= 0) return { roundsCompleted, starsEarned: 0 };
-    
-    const newStars = Math.max(existing, starsThisRun);
-    const delta = newStars - existing;
-    
-    if (delta > 0) {
-        defuserAddStars(delta);
-        localStorage.setItem(`defuserStars_${todayKey}`, String(newStars));
+    const newStars = starsThisRun <= 0 ? 0 : Math.max(existing, starsThisRun);
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'defuser',
+            stars: newStars,
+            notes: ['WIRES CUT ' + roundsCompleted + ' / 7'],
+            delay: 0
+        }, '*');
     }
-    
+
+    if (starsThisRun <= 0) return { roundsCompleted, starsEarned: 0 };
     return { roundsCompleted, starsEarned: newStars };
 }
 
@@ -1071,6 +1078,7 @@ function handleCutEnd(e) {
     
     // Process cut wires
     if (cutWires.length > 0 && gameState.isCuttingEnabled) {
+        if (defuserSounds.defuser_cut) defuserSounds.defuser_cut.play();
         // Separate correct and wrong wires
         const correctWires = cutWires.filter(w => w.isCorrect === true);
         const wrongWires = cutWires.filter(w => w.isCorrect !== true);
@@ -1110,6 +1118,12 @@ function handleCutEnd(e) {
                 showPopup('WRONG!');
                 gameState.wrongMoves += wrongWires.length;
                 updateBombBoxes();
+                
+                // Check if 3 mistakes reached - game over
+                if (gameState.wrongMoves >= 3) {
+                    handleGameOver();
+                    return;
+                }
                 
                 wrongWires.forEach(wire => {
                     wire.opacity = 1;
@@ -2837,16 +2851,7 @@ function handleCorrectAnswer(cutWire) {
     const isFinalRound = gameState.currentRound >= 7;
     
     if (isFinalRound) {
-        // Game won - tally stars and show win message with stars
-        const result = defuserAwardStarsForCurrentRun();
-        const starRow = defuserGetStarRowHTML(result.starsEarned || 5);
-        const subText = `7 / 7 wires cut<br>${starRow}`;
-        
-        // Game won - don't fade out, show win message
-        showPopup('YOU WON!', null, true, subText);
-        showFlashOverlay(true); // Green flash for win
-        
-        // Disable pause button
+        defuserAwardStarsForCurrentRun();
         const pauseButton = document.getElementById('pauseButton');
         if (pauseButton) {
             pauseButton.disabled = true;
@@ -2953,6 +2958,7 @@ function showPopup(message, onComplete, isWin = false, subText = '') {
 
 // Handle game over when timer runs out
 function handleGameOver() {
+    if (defuserSounds.defuser_explode) defuserSounds.defuser_explode.play();
     // Disable cutting
     gameState.isCuttingEnabled = false;
     
@@ -2962,15 +2968,8 @@ function handleGameOver() {
         timerInterval = null;
     }
     
-    // Tally stars based on rounds completed
-    const result = defuserAwardStarsForCurrentRun();
-    const roundsCompleted = result.roundsCompleted;
-    const starRow = defuserGetStarRowHTML(result.starsEarned);
-    const subText = `${roundsCompleted} / 7 wires cut<br>${starRow}`;
-    
-    // Show game over popup with subtext and stars
-    showPopup('GAME OVER', null, false, subText);
-    
+    defuserAwardStarsForCurrentRun();
+
     // Show red flash
     showFlashOverlay(false); // false = red flash for game over
 }
@@ -4639,6 +4638,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (playButton) {
         playButton.addEventListener('click', () => {
+            if (defuserSounds.click) defuserSounds.click.play();
             // Hide start menu and show start menu 2
             const startMenu = document.getElementById('startMenu');
             if (startMenu) {
@@ -4651,7 +4651,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (startButton) {
-        startButton.addEventListener('click', startGame);
+        startButton.addEventListener('click', () => {
+            if (defuserSounds.click) defuserSounds.click.play();
+            startGame();
+        });
     }
     
     if (tutorialButton) {

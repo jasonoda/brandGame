@@ -67,9 +67,9 @@ function removeMoveStars(amount) {
 function updateMoveStarsDisplay() {
     const moveStars = getMoveStars();
     const displayElement = document.querySelector('.journey-star-count');
-    const headerStars = document.querySelector('.star-count');
+    const headerStarElements = document.querySelectorAll('.star-counter .star-count');
     if (displayElement) displayElement.textContent = moveStars;
-    if (headerStars) headerStars.textContent = 'x ' + moveStars;
+    headerStarElements.forEach(function(el) { el.textContent = 'x ' + moveStars; });
 }
 
 // Make updateMoveStarsDisplay globally accessible
@@ -586,24 +586,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add coin to inventory after full animation (0.3 delay + 0.7 up + 0.5 wait + 0.75 fade = 2.25s)
                 setTimeout(() => {
                     coinElements[index] = null; // Remove reference
-                    
-                    // Switch to prizes tab and auto-draw a card
-                    const prizesTabBtn = document.querySelector('.tab-button[data-page="prizes"]');
-                    if (prizesTabBtn) {
-                        prizesTabBtn.click();
-                        setTimeout(() => {
-                            if (window.resetPrizesOverlay) {
-                                window.resetPrizesOverlay();
-                            } else {
-                                const overlay = document.getElementById('prizes-overlay');
-                                if (overlay) overlay.style.display = 'flex';
-                            }
-                            setTimeout(() => {
-                                const drawBtn = document.getElementById('prizes-draw-button');
-                                if (drawBtn) drawBtn.click();
-                            }, 200);
-                        }, 200);
-                    }
                 }, 2250);
                 
                 return true; // Card was collected

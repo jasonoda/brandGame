@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
 </head>
 <body data-game="phrases">
     <div id="startMenu">
@@ -63,52 +64,18 @@
         </div>
     </div>
     <div class="bottom-section">
-            <div class="solve-ui">
-                <div class="solve-ui-header">
-                    <button class="back-btn">← back</button>
-                    <div class="solve-title">SOLVE THE PUZZLE</div>
-                </div>
-                <div class="solve-input-container">
-                    <input type="text" class="solve-input" id="solveInput" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
-                    <button class="solve-ui-btn">solve</button>
-                </div>
+        <div class="solve-ui">
+            <div class="solve-ui-header">
+                <button class="back-btn">← back</button>
+                <div class="solve-title">SOLVE THE PUZZLE</div>
             </div>
-            <div class="keyboard">
-            <div class="keyboard-row">
-                <button class="key" data-key="Q">Q</button>
-                <button class="key" data-key="W">W</button>
-                <button class="key" data-key="E">E</button>
-                <button class="key" data-key="R">R</button>
-                <button class="key" data-key="T">T</button>
-                <button class="key" data-key="Y">Y</button>
-                <button class="key" data-key="U">U</button>
-                <button class="key" data-key="I">I</button>
-                <button class="key" data-key="O">O</button>
-                <button class="key" data-key="P">P</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key" data-key="A">A</button>
-                <button class="key" data-key="S">S</button>
-                <button class="key" data-key="D">D</button>
-                <button class="key" data-key="F">F</button>
-                <button class="key" data-key="G">G</button>
-                <button class="key" data-key="H">H</button>
-                <button class="key" data-key="J">J</button>
-                <button class="key" data-key="K">K</button>
-                <button class="key" data-key="L">L</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key key-large" data-key="SPACE">SPACE</button>
-                <button class="key" data-key="Z">Z</button>
-                <button class="key" data-key="X">X</button>
-                <button class="key" data-key="C">C</button>
-                <button class="key" data-key="V">V</button>
-                <button class="key" data-key="B">B</button>
-                <button class="key" data-key="N">N</button>
-                <button class="key" data-key="M">M</button>
-                <button class="key key-large" data-key="BACKSPACE">⌫</button>
+            <div class="solve-input-container">
+                <input type="text" class="solve-input" id="solveInput" placeholder="" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+                <button class="solve-ui-btn">solve</button>
             </div>
         </div>
+        <!-- Keyboard removed: rely on device keyboard when solve input is focused -->
+        <div class="keyboard"></div>
     </div>
     <script src="../../gameVars.js"></script>
     <script src="game.js"></script>

@@ -483,7 +483,7 @@ class Sounds {
     setUp(e) {
 
         this.e=e;
-        this.soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
+        this.soundArray = ["good", "bad", "clue", "pickup", "tick", "complete", "click"];
         this.loadedSounds = [];
 
         for(var i=0; i<this.soundArray.length; i++){
@@ -1388,6 +1388,7 @@ class Scene {
             const playButton = document.getElementById('playButton');
             if (playButton) {
                 playButton.addEventListener('click', () => {
+                    this.e.s.p('click');
                     // Notify parent that Gold Case has started (for quit warning logic)
                     if (window.parent) {
                         window.parent.postMessage('puzzleStarted:goldCase', '*');
@@ -1861,8 +1862,7 @@ class Scene {
         
         const clueWindow = document.getElementById('clueWindow');
         if (clueWindow) {
-            // Update clue window background to very light grey
-            clueWindow.style.background = 'rgba(240, 240, 240, 0.95)';
+            clueWindow.style.background = 'linear-gradient(to bottom, rgba(245, 245, 245, 0.92) 0%, rgba(232, 232, 232, 0.92) 100%)';
             
             // Update clue content background to white
             const clueContent = document.getElementById('clueContent');
@@ -2205,10 +2205,8 @@ class Scene {
             // Show the clue menu instead of just a popup with a 2 second delay
             setTimeout(() => {
                 this.showClueWindow(true);
+                this.e.s.p("clue");
             }, 2000);
-            
-            // Play clue sound
-            this.e.s.p("clue");
         } else {
             // No clues available for initial free clue
             this.showFreeCluePopup("No more clues");
@@ -2936,122 +2934,23 @@ class Scene {
     }
     
     createDealAmountOverlay(dealValue) {
-
-        // Calculate stars earned from the final score
         const starsEarned = calculateGoldCaseStarsFromScore(dealValue);
-        
-        // Save the game result
         saveGoldCaseGameResult(dealValue, starsEarned);
 
-        // Use endScore to create the final score overlay
-        // Pass the time bonus as the only stat to display
-        const statsArray = [['TIME BONUS', this.timeBonus]];
-        this.e.endScore.createFinalScoreOverlay(dealValue, statsArray);
-        
-        // Add examine remaining cases button after 2 seconds
+        // Enable clue button so user can examine remaining cases after closing reward overlay
         setTimeout(() => {
-            this.addExamineRemainingCasesButton();
-        }, 2000);
-    }
-    
-    addExamineRemainingCasesButton() {
-        // Find the final score overlay created by endScore
-        const overlay = document.querySelector('.finalScoreOverlay');
-        if (!overlay) {
-            return;
-        }
-        
-        
-        // Create examine button
-        const examineButton = document.createElement('button');
-        examineButton.style.cssText = `
-            position: absolute;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Sanchez', serif;
-            font-size: 13px;
-            font-weight: 400;
-            color: #666666;
-            background: #ffffff;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            padding: 15px 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            opacity: 0;
-            white-space: nowrap;
-            min-width: 280px;
-            z-index: 16001;
-        `;
-        examineButton.textContent = 'EXAMINE REMAINING CASES';
-        
-        overlay.appendChild(examineButton);
-        
-        // Animate button in
-        gsap.to(examineButton, {
-            duration: 0.8,
-            opacity: 1,
-            y: 0,
-            ease: "sine.out",
-            onComplete: () => {
-            }
-        });
-        
-        // Add subtle hover effect (no down state)
-        examineButton.addEventListener('mouseenter', () => {
-            // examineButton.style.background = 'rgba(255, 255, 255, 0.1)';
-        });
-        
-        examineButton.addEventListener('mouseleave', () => {
-            examineButton.style.background = 'transparent';
-        });
-        
-        // Add click functionality
-        examineButton.addEventListener('click', () => {
-            this.fadeOutDealOverlay(overlay);
-            // this.e.s.p("click1");
-        });
-    }
-    
-    fadeOutDealOverlay(overlay) {
-        // Immediately disable pointer events to prevent interference
-        overlay.style.pointerEvents = 'none';
-        
-        gsap.to(overlay, {
-            duration: 0.8,
-            opacity: 0,
-            ease: "power2.in",
-            onComplete: () => {
-                // Ensure the overlay is completely removed
-                if (overlay.parentNode) {
-                    overlay.parentNode.removeChild(overlay);
-                    //console.log("Deal overlay completely removed from DOM");
+            if (this.gameEnded) {
+                const clueButton = document.getElementById('clueButton');
+                if (clueButton) {
+                    clueButton.disabled = false;
+                    clueButton.style.cursor = "pointer";
+                    clueButton.style.pointerEvents = "auto";
+                    clueButton.onclick = () => this.showClueWindow(false);
                 }
-                
-                // Force a small delay to ensure DOM cleanup, then enable clue button
-                setTimeout(() => {
-                    if (this.gameEnded) {
-                        // SIMPLE APPROACH: Just enable the clue button directly
-                        const clueButton = document.getElementById('clueButton');
-                        if (clueButton) {
-                            clueButton.disabled = false;
-                            clueButton.style.cursor = "pointer";
-                            clueButton.style.pointerEvents = "auto";
-                            
-                            // Add a simple click handler that will definitely work
-                            clueButton.onclick = () => {
-                                //console.log("CLUE BUTTON CLICKED AFTER GAME END!");
-                                this.showClueWindow(false);
-                            };
-                            
-                            //console.log("Clue button SIMPLY enabled with direct click handler");
-                        }
-                    }
-                }, 100);
             }
-        });
+        }, 100);
     }
+    
     
     revealAllCaseValues() {
         this.cases.forEach(caseObj => {
@@ -4680,25 +4579,24 @@ class Suitcase {
             ease: "power2.out"
         });
         
-        // Fade tempBlocker to beige/off-white (matching clue window) - fade to more opaque
+        // Fade tempBlocker to off-white gradient (match game background) - gradient alpha 0.6 to 0.95
         const tempBlocker = document.getElementById('tempBlocker');
+        const blockerAlpha = { a: 0.6 };
         if (tempBlocker) {
             tempBlocker.style.pointerEvents = 'auto';
-            tempBlocker.style.background = 'rgba(240, 240, 240, 0.6)'; // Start with less opaque beige
-            tempBlocker.style.backdropFilter = 'blur(10px)'; // Blur content behind
-            tempBlocker.style.webkitBackdropFilter = 'blur(10px)'; // Safari support
+            tempBlocker.style.opacity = '1';
+            tempBlocker.style.background = 'linear-gradient(to bottom, rgba(245, 245, 245, 0.6) 0%, rgba(232, 232, 232, 0.6) 100%)';
+            tempBlocker.style.backdropFilter = 'blur(10px)';
+            tempBlocker.style.webkitBackdropFilter = 'blur(10px)';
         }
-        tl.to('#tempBlocker', {
-            opacity: 0.975, // 95% opacity
+        tl.to(blockerAlpha, {
+            a: 0.95,
             duration: 0.15,
             ease: "power2.out",
             onUpdate: function() {
-                const tempBlocker = document.getElementById('tempBlocker');
                 if (tempBlocker) {
-                    // Fade background alpha from 0.6 to 0.95 for 95% opacity effect
-                    const progress = gsap.getProperty('#tempBlocker', 'opacity');
-                    const alpha = 0.6 + (progress * 0.35); // Fade from 0.6 to 0.95
-                    tempBlocker.style.background = `rgba(240, 240, 240, ${alpha})`;
+                    const alpha = blockerAlpha.a;
+                    tempBlocker.style.background = `linear-gradient(to bottom, rgba(245, 245, 245, ${alpha}) 0%, rgba(232, 232, 232, ${alpha}) 100%)`;
                 }
             }
         }, 0);
@@ -5743,7 +5641,7 @@ function getTodayKey() {
 // Calculate stars from Gold Case score (no double button; max deal 1M)
 function calculateGoldCaseStarsFromScore(scoreValue) {
     let stars = 0;
-    const starThresholds = [0, 100000, 500000, 800000, 1000000];
+    const starThresholds = [0, 100000, 250000, 400000, 750000];
     // 1 star = >= 0, 2 = >= 100k, 3 = >= 500k, 4 = >= 800k, 5 = >= 1M
     for (let i = starThresholds.length - 1; i >= 0; i--) {
         if (scoreValue >= starThresholds[i]) {
@@ -5771,69 +5669,20 @@ function saveGoldCaseGameResult(finalScore, starsEarned) {
     const isBetter = !wasComplete || finalScore > previousScore || starsEarned > previousStars;
     
     if (isBetter) {
-        // Calculate star difference to add to totals
-        const starDifference = wasComplete ? (starsEarned - previousStars) : starsEarned;
-        
-        console.log('[GoldCase] Adding star difference:', starDifference);
-    
-        // Update daily and total stars if there's a difference
-        if (starDifference !== 0) {
-            const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-            const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-            
-            localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
-            localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-            
-            // Award games played (1 point per game, only once per game)
-            // Try parent window first (if in iframe), then current window
-            const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
-            if (awardFn) {
-                awardFn(starDifference, 'goldCase');
-            } else {
-                // Fallback if awardStars not available - manually add usable stars
-                const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
-                localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-                // Also add usable stars manually
-                const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
-                localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
-            }
-        }
-        
-        // Always save the new score and stars if better
         localStorage.setItem(`goldCaseScore_${todayKey}`, String(finalScore));
-        localStorage.setItem(`goldCaseStars_${todayKey}`, String(starsEarned));
         localStorage.setItem(`goldCaseComplete_${todayKey}`, 'true');
-        
-        console.log('[GoldCase] Verified saved stars:', localStorage.getItem(`goldCaseStars_${todayKey}`));
-    }
-    
-    // Update parent window displays if accessible
-    if (window.parent && window.parent !== window) {
-        if (window.parent.updateStarDisplay) {
-            window.parent.updateStarDisplay();
+
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'puzzleComplete',
+                gameId: 'goldCase',
+                stars: starsEarned,
+                notes: ['Deal: ' + finalScore],
+                delay: 0
+            }, '*');
         }
-        if (window.parent.updateWalletStars) {
-            window.parent.updateWalletStars();
-        }
-        if (window.parent.updateRivalStars) {
-            window.parent.updateRivalStars();
-        }
-        if (window.parent.updateHeaderStarCounter) {
-            window.parent.updateHeaderStarCounter();
-        }
-        if (window.parent.updateWalletStars2) {
-            window.parent.updateWalletStars2();
-        }
-        
-        // Update calendar
-        if (window.parent.updateCalendar) {
-            window.parent.updateCalendar();
-        }
-        
-        // Reload Gold Case scores on main page
-        if (window.parent.loadGameScores) {
-            window.parent.loadGameScores();
-        }
+
+        console.log('[GoldCase] Verified saved stars:', starsEarned);
     }
 }
 

@@ -93,18 +93,20 @@ function tallyAwardWinStars() {
     const todayKey = tallyGetTodayKey();
     const existing = parseInt(localStorage.getItem(`tallyStars_${todayKey}`) || '0');
     if (existing > 0) {
-        // Already awarded today
         return;
     }
-    
-    const starsEarned = 5; // Single-puzzle game: always 5 on win
-    tallyAddStars(starsEarned);
-    localStorage.setItem(`tallyStars_${todayKey}`, String(starsEarned));
+
+    const starsEarned = 5;
     localStorage.setItem(`tallyComplete_${todayKey}`, 'true');
-    
-    // Let main page refresh its stars row
-    if (window.parent && window.parent.loadGameScores2) {
-        window.parent.loadGameScores2();
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'tally',
+            stars: starsEarned,
+            notes: [],
+            delay: 1
+        }, '*');
     }
 }
 
@@ -1300,7 +1302,10 @@ function setupPlayButton() {
     const playButton = document.getElementById('playButton');
     
     if (playButton) {
+        let _tallyClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+        const playTallyClick = () => { try { if (_tallyClick) { _tallyClick.currentTime = 0; _tallyClick.play().catch(() => {}); } } catch (e) {} };
         playButton.addEventListener('click', () => {
+            playTallyClick();
             const startMenu = document.getElementById('startMenu');
             const gameContainer = document.getElementById('gameContainer');
             

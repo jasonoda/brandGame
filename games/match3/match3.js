@@ -780,7 +780,7 @@ class Scene {
         
         if (playButton) {
             playButton.addEventListener('click', (e) => {
-                // Sound effect removed
+                this.e.s.p('click1');
                 e.preventDefault();
                 e.stopPropagation();
                 this.e.startGame();
@@ -2765,6 +2765,10 @@ class Scene {
             localStorage.setItem(`match3Score_${todayKey}`, String(this.score));
             localStorage.setItem(`match3Stars_${todayKey}`, String(starsEarned));
             localStorage.setItem(`match3Complete_${todayKey}`, 'true');
+            
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'arcadeComplete', gameId: 'match3', stars: starsEarned }, '*');
+            }
             
             console.log('[Match3] After - dailyStars:', newDailyStars, 'totalStars:', newTotalStars, 'usableStars:', newUsableStars);
             console.log('[Match3] Verifying localStorage - dailyStars_' + todayKey + ':', localStorage.getItem(`dailyStars_${todayKey}`));

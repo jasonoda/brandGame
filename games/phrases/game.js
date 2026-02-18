@@ -11,8 +11,10 @@ const solveInput = document.getElementById('solveInput');
 const solveUIBtn = document.querySelector('.solve-ui-btn');
 const backBtn = document.querySelector('.back-btn');
 const keyboard = document.querySelector('.keyboard');
+const guessCounter = document.getElementById('guessCounter');
 const guessNumber = document.getElementById('guessNumber');
 const shortGuessCounter = document.getElementById('shortGuessCounter');
+const phraseTitle = document.getElementById('phraseTitle');
 const guessStars = document.getElementById('guessStars');
 const guessStars2 = document.getElementById('guessStars2');
 const gameContent = document.querySelector('.game-content');
@@ -46,6 +48,17 @@ const STAR_THRESHOLDS = {
 
 // Vowels
 const VOWELS = new Set(['A', 'E', 'I', 'O', 'U', 'Y']);
+
+// Preload sounds with Howler at start
+var phrasesSounds = {};
+if (typeof Howl !== 'undefined') {
+    ['click', 'phrases_letter'].forEach(function(name) {
+        phrasesSounds[name] = new Howl({ src: ['../../sounds/' + name + '.mp3'] });
+    });
+}
+function playPhrasesSound(name) {
+    if (phrasesSounds[name]) phrasesSounds[name].play();
+}
 
 // UI State constants
 const UI_STATE = {
@@ -157,6 +170,7 @@ function showCompletedState() {
 
 // Start game when play button is clicked
 playButton.addEventListener('click', () => {
+    playPhrasesSound('click');
     // Notify parent that Phrases has started (for quit warning logic)
     if (window.parent) {
         window.parent.postMessage('puzzleStarted:phrases', '*');
@@ -368,22 +382,17 @@ function adjustLetterBoxSizes(hasLongWord, hasVeryLongWord = false) {
         return;
     }
     
-    // Get the phrase display container
+    // Get the phrase display container and use its parent width as available space
     const phraseDisplayEl = document.querySelector('.phrase-display');
     if (!phraseDisplayEl) {
         console.log('[Phrases] phraseDisplayEl not found');
         return;
     }
     
-    // Get the actual available width considering all padding and margins
-    const computedStyle = window.getComputedStyle(phraseDisplayEl);
-    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-    const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-    const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
-    const marginRight = parseFloat(computedStyle.marginRight) || 0;
-    
-    const containerWidth = phraseDisplayEl.offsetWidth;
-    const availableLineWidth = containerWidth - paddingLeft - paddingRight - marginLeft - marginRight;
+    // Use the width of the main game container for calculations, not just the content width
+    const containerEl = phraseDisplayEl.parentElement || phraseDisplayEl;
+    const containerWidth = containerEl.clientWidth || phraseDisplayEl.clientWidth;
+    const availableLineWidth = containerWidth;
     
     // Get the default box size and gap from CSS
     const defaultBoxSize = 50; // From CSS
@@ -734,7 +743,7 @@ function revealLetters() {
         if (boxIndex < boxesToReveal.length) {
             const box = boxesToReveal[boxIndex];
             box.textContent = lastSelectedLetter;
-            
+            playPhrasesSound('phrases_letter');
             // Set to bright immediately
             gsap.set(box, { filter: 'brightness(1.5)' });
             
@@ -847,24 +856,30 @@ function showSolveUI() {
     letterSelectionUI.classList.add('faded');
     }
     
-    // Fade in solve UI and keyboard
+    // Hide guesses and phrase title while solve is open
+    if (guessCounter) guessCounter.style.display = 'none';
+    if (shortGuessCounter) shortGuessCounter.style.display = 'none';
+    if (phraseTitle) phraseTitle.style.visibility = 'hidden';
+    
+    // Fade in solve UI (device keyboard will appear when input is focused)
     setTimeout(() => {
         solveUI.classList.add('visible');
-        keyboard.classList.add('visible');
-        
         // Update pointer events for solve UI state
         updatePointerEvents(UI_STATE.SOLVE_UI);
         
-        enableKeyboardForTyping();
         solveInput.focus();
     }, 50);
 }
 
 function hideSolveUI() {
-    // Fade out solve UI and keyboard
+    // Fade out solve UI (keyboard removed)
     solveUI.classList.remove('visible');
-    keyboard.classList.remove('visible');
     disableKeyboard();
+    
+    // Show guesses and phrase title again
+    if (guessCounter) guessCounter.style.display = 'flex';
+    if (shortGuessCounter) shortGuessCounter.style.display = '';
+    if (phraseTitle) phraseTitle.style.visibility = '';
     
     // Update pointer events back to gameplay state
     updatePointerEvents(UI_STATE.GAMEPLAY);
@@ -885,6 +900,7 @@ backBtn.addEventListener('click', () => {
 });
 
 function enableKeyboardForTyping() {
+    if (!keyboard) return;
     const keys = keyboard.querySelectorAll('.key');
     keys.forEach(key => {
         key.disabled = false;
@@ -895,6 +911,7 @@ function enableKeyboardForTyping() {
 }
 
 function disableKeyboard() {
+    if (!keyboard) return;
     const keys = keyboard.querySelectorAll('.key');
     keys.forEach(key => {
         key.disabled = true;
@@ -936,17 +953,29 @@ function checkSolve() {
         // Calculate and award stars based on current turn
         const starsEarned = getStarCount(currentTurn);
         console.log('[Phrases] Puzzle solved! Stars earned:', starsEarned, 'Turn:', currentTurn);
-        awardStars(starsEarned);
-        
+
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'puzzleComplete',
+                gameId: 'phrases',
+                stars: starsEarned,
+                notes: [],
+                delay: 1.5
+            }, '*');
+        }
+
         // Clear instruction line text
         if (instructionLine) {
             instructionLine.textContent = 'CORRECT!';
         }
         
-        // Hide solve UI immediately (but NOT keyboard with display none)
+        // Instantly hide solve UI and grey backdrop
         solveUI.classList.remove('visible');
-        keyboard.classList.remove('visible');
         disableKeyboard();
+        if (bottomSection) {
+            bottomSection.style.transition = 'none';
+            bottomSection.style.display = 'none';
+        }
         
         // Correct - animate letters with shiny effect
         animateShinyLetters();
@@ -1043,17 +1072,19 @@ function animateShinyLetters() {
     });
 }
 
-// Handle typing in input field
-solveInput.addEventListener('input', (e) => {
-    // Convert to uppercase
-    e.target.value = e.target.value.toUpperCase();
-});
-
 solveInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         checkSolve();
     }
 });
+
+function handleTapOutsideSolve(e) {
+    if (solveUI && solveUI.classList.contains('visible') && !solveUI.contains(e.target)) {
+        hideSolveUI();
+    }
+}
+document.addEventListener('mousedown', handleTapOutsideSolve);
+document.addEventListener('touchend', handleTapOutsideSolve, { passive: true });
 
 // Global keyboard event listener for reset
 document.addEventListener('keydown', (e) => {
@@ -1082,7 +1113,6 @@ function toggleKeyboard(show) {
 toggleKeyboard(false);
 
 // Update phrase title based on current theme on page load
-const phraseTitle = document.getElementById('phraseTitle');
 if (phraseTitle && typeof getCurrentTheme === 'function') {
     const theme = getCurrentTheme();
     phraseTitle.textContent = `${theme.name.toUpperCase()} PHRASE`;

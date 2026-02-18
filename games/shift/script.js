@@ -381,7 +381,7 @@ function resetGame(fadeOutButtons = false) {
     const starsDisplay = document.getElementById('starsDisplay');
     if (instructionText && starsDisplay) {
         if (hintPressCount === 0) {
-            instructionText.textContent = 'drag to shift colors';
+            instructionText.textContent = 'drag blocks to shift colors';
             instructionText.style.display = 'block';
             starsDisplay.style.display = 'none';
         } else if (hintPressCount >= 1) {
@@ -870,64 +870,32 @@ function animateWin() {
         cell.classList.add('win-celebration');
     });
     
-    // After animations, show stars
+    // Notify parent immediately when you win (haptic, sound, rain start right away)
+    let stars = 0;
+    if (gaveUp) {
+        stars = 0;
+    } else if (hintPressCount === 0) {
+        stars = 5;
+    } else if (hintPressCount === 1) {
+        stars = 4;
+    } else if (hintPressCount >= 2) {
+        stars = 3;
+    }
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'shift',
+            stars: stars,
+            notes: ['Hint used: ' + hintPressCount],
+            delay: 1
+        }, '*');
+    }
+    
+    // After animations, save and show stars
     setTimeout(() => {
-        // Calculate and display stars
-        let stars = 0;
-        if (gaveUp) {
-            stars = 0;
-        } else if (hintPressCount === 0) {
-            stars = 5;
-        } else if (hintPressCount === 1) {
-            stars = 4;
-        } else if (hintPressCount >= 2) {
-            stars = 3;
-        }
-        
-        // Save stars and final color to localStorage
         const todayKey = getTodayKey();
         savedFinalColor = targetColor;
-        
-        // Check if already completed today
-        const wasComplete = localStorage.getItem(`shiftComplete_${todayKey}`) === 'true';
-        const previousStars = parseInt(localStorage.getItem(`shiftStars_${todayKey}`) || '0');
-        
-        // Calculate star difference to add to totals
-        const starDifference = wasComplete ? Math.max(0, stars - previousStars) : stars;
-        
-        // Award stars if there's a difference
-        if (starDifference > 0) {
-            const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-            const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-            
-            localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
-            localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-            
-            // Award games played (1 point per game, only once per game)
-            // Try parent window first (if in iframe), then current window
-            const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
-            if (awardFn) {
-                awardFn(starDifference, 'shift');
-            } else {
-                // Fallback if awardStars not available - manually add usable stars
-                const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
-                localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-                // Also add usable stars manually
-                const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
-                localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
-            }
-        }
-        
-        localStorage.setItem(`shiftStars_${todayKey}`, String(stars));
         localStorage.setItem(`shiftComplete_${todayKey}`, 'true');
-        
-        // Update parent window star display
-        if (window.parent && window.parent.loadGameScores2) {
-            window.parent.loadGameScores2();
-        }
-        if (window.parent && window.parent.updateStarDisplay) {
-            window.parent.updateStarDisplay();
-        }
         
         // Display stars in instruction area
         const instructionText = document.querySelector('.instruction-text');
@@ -1124,7 +1092,7 @@ function startGame() {
     const instructionText = document.querySelector('.instruction-text');
     const starsDisplay = document.getElementById('starsDisplay');
     if (instructionText && starsDisplay) {
-        instructionText.textContent = 'drag to shift colors';
+        instructionText.textContent = 'drag blocks to shift colors';
         instructionText.style.display = 'block';
         starsDisplay.style.display = 'none';
     }
@@ -1175,7 +1143,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         const playButton = document.getElementById('playButton');
         if (playButton) {
+            let _shiftClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+            const playShiftClick = () => { try { if (_shiftClick) { _shiftClick.currentTime = 0; _shiftClick.play().catch(() => {}); } } catch (e) {} };
             playButton.addEventListener('click', () => {
+                playShiftClick();
                 // Notify parent that Shift has started (for quit warning logic)
                 if (window.parent) {
                     window.parent.postMessage('puzzleStarted:shift', '*');

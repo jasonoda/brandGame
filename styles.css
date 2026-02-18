@@ -98,8 +98,25 @@ body {
     fill: #dc3545;
 }
 
+.tab-button.active .icon-tiles svg rect {
+    stroke: #dc3545;
+}
+.tab-button.active .icon-tiles svg text {
+    fill: #dc3545;
+}
+
 .tab-button.active .label {
     color: #dc3545;
+}
+
+/* Hide Deals tab for now */
+.tab-button[data-page="deals"] {
+    display: none;
+}
+
+/* Desktop top bar - hidden by default, shown at 768px+ */
+.desktop-top-bar {
+    display: none;
 }
 
 .icon {
@@ -134,6 +151,292 @@ body {
     background-color: transparent;
 }
 
+/* Desktop layout: 768px+ */
+@media (min-width: 768px) {
+    .help-button.hidden {
+        display: none !important;
+    }
+    .help-button:not(.hidden) {
+        display: inline-flex !important;
+        left: auto;
+        right: 15px;
+    }
+    .desktop-top-bar .game-overlay-close {
+        display: none !important;
+    }
+    .game-overlay-close-desktop.show {
+        display: flex;
+    }
+    /* Hide the 6 nav links when a game is open on desktop */
+    body:has(#gameOverlay.active) .desktop-nav-tabs {
+        display: none !important;
+    }
+    .desktop-top-bar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 56px;
+        align-items: center;
+        padding: 0 20px;
+        background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10001;
+        gap: 24px;
+    }
+    .desktop-date {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+    .desktop-date .date {
+        font-size: 17px;
+        font-weight: 500;
+        color: white;
+        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .desktop-date .date-subtitle {
+        font-size: 10px;
+        font-weight: 500;
+        color: white;
+        text-align: left;
+    }
+    .desktop-nav-tabs {
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+    }
+    .desktop-nav-tabs .tab-button {
+        flex: 0 0 auto;
+        padding: 8px 16px;
+        min-width: 70px;
+        flex-direction: row;
+        gap: 6px;
+        border-radius: 6px;
+    }
+    .desktop-nav-tabs .tab-button .icon {
+        margin-bottom: 0;
+    }
+    .desktop-nav-tabs .tab-button:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    .desktop-nav-tabs .tab-button.active {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    .desktop-nav-tabs .tab-button.active .icon svg path,
+    .desktop-nav-tabs .tab-button.active .label {
+        fill: white;
+        color: white;
+    }
+    .desktop-nav-tabs .tab-button.active .icon-tiles svg rect {
+        stroke: white;
+    }
+    .desktop-nav-tabs .tab-button.active .icon-tiles svg text {
+        fill: white;
+    }
+    /* About tab: icon only (question mark in circle), no highlight when active */
+    .desktop-nav-tabs .tab-button.desktop-help-link .label {
+        display: none;
+    }
+    .desktop-nav-tabs .tab-button[data-page="help"].active {
+        background: transparent;
+    }
+    .desktop-nav-tabs .tab-button[data-page="help"].active .label {
+        color: rgba(255, 255, 255, 0.95);
+    }
+    .desktop-nav-tabs .tab-button .icon svg path {
+        fill: rgba(255, 255, 255, 0.9);
+    }
+    .desktop-nav-tabs .tab-button .icon-tiles svg rect {
+        stroke: rgba(255, 255, 255, 0.9);
+    }
+    .desktop-nav-tabs .tab-button .icon-tiles svg text {
+        fill: rgba(255, 255, 255, 0.9);
+    }
+    .desktop-nav-tabs .tab-button .label {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+    }
+    .desktop-star-area {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    .desktop-top-bar .desktop-star-area .star-counter {
+        position: static;
+        flex: 0 0 auto;
+    }
+    .desktop-top-bar .star-counter .star-icon {
+        color: white;
+    }
+    .desktop-top-bar .star-counter .star-count {
+        color: #333;
+    }
+    .header-bar {
+        display: none !important;
+    }
+    .bottom-bar {
+        display: none !important;
+    }
+    body {
+        padding-bottom: 0;
+        overflow: hidden;
+        height: 100vh;
+    }
+    .content {
+        padding-top: 56px;
+        max-width: none;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .desktop-scroll-wrap {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .desktop-scroll-inner {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .content:has(#wallet-page.active) .desktop-scroll-inner {
+        max-width: 400px;
+    }
+    /* Desktop-only: larger game thumbnail icons and titles */
+    #main-page .play-color-box img,
+    #main-page .play-color-box-image img,
+    #main-page .arcade-color img,
+    #main-page .bonus-color img,
+    #community-page .bonus-color img,
+    .games-container .bonus-color img {
+        height: 40px !important;
+        width: auto !important;
+    }
+    #main-page .play-box .game-title,
+    #main-page .arcade-box .game-title,
+    #main-page .boost-game-box .game-title,
+    #main-page .bonus-box .game-title,
+    #community-page .bonus-box .game-title,
+    .games-container .bonus-box .game-title {
+        font-size: 28px !important;
+        margin-top: 5px;
+    }
+    #main-page #mysteryWordBox .game-title {
+        max-width: 6.5em;
+        line-height: 1.15;
+    }
+    #main-page .arcade-box {
+        height: 190px;
+    }
+    #main-page .bonus-box,
+    #community-page .bonus-box,
+    .games-container .bonus-box {
+        height: 190px;
+    }
+    #main-page .todays-games-banner {
+        min-height: 140px;
+    }
+    #community-page .community-online-wrapper {
+        margin-top: 20px;
+    }
+    #community-page .community-online-banner {
+        height: 130px;
+    }
+    #community-page .community-online-inner {
+        width: 88px;
+        height: 88px;
+    }
+    #community-page .community-online-inner .online-dot {
+        display: none !important;
+    }
+    #community-page .community-online-inner .online-label-row {
+        gap: 5px;
+    }
+    #community-page .community-online-inner .online-text {
+        font-size: 14px;
+    }
+    #community-page .community-online-inner .online-count-num {
+        font-size: 16px;
+    }
+    #community-page .community-online-inner .community-online-user-icon {
+        width: 14px;
+        height: 14px;
+    }
+    /* Hide main page online indicator on desktop */
+    #main-page .online-indicator {
+        display: none !important;
+    }
+    /* Desktop online indicator: top-left, white bg, full radius, bigger type */
+    .online-indicator-desktop {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: fixed;
+        top: 72px;
+        left: 20px;
+        padding: 8px 14px;
+        background: white;
+        border-radius: 9999px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+    }
+    .online-indicator-desktop .online-dot {
+        width: 6px;
+        height: 6px;
+        margin-right: 4px;
+    }
+    .online-indicator-desktop .online-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #000;
+    }
+    .online-indicator-desktop .online-user-icon {
+        width: 12px;
+        height: 12px;
+        margin-left: 4px;
+    }
+    /* Hide main page user-div on desktop */
+    #main-page .user-div {
+        display: none !important;
+    }
+    /* Desktop user stats: upper-right, slightly bigger, dark grey */
+    .user-div-desktop {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        position: fixed;
+        top: 72px;
+        right: 30px;
+        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 15px;
+        font-weight: 400;
+        color: #868686;
+        z-index: 10000;
+    }
+    .user-div-desktop .user-bullet {
+        color: #666;
+        font-weight: 400;
+        margin: 0 2px;
+        font-size: 8px;
+        transform: translateY(-1px);
+    }
+}
+
 .page {
     display: none;
 }
@@ -149,6 +452,13 @@ body {
     background-color: transparent;
     padding: 0;
     margin: 0;
+}
+
+@media (min-width: 768px) {
+    #main-page.active,
+    #community-page.active {
+        padding-bottom: 10px;
+    }
 }
 
 .page-header {
@@ -193,11 +503,11 @@ body {
     background: transparent !important;
 }
 
-/* Wallet/profile page: style like main page windows */
+/* Wallet/profile page: style like main page windows; same max-width as prizes */
 #wallet-page .profile-container {
-    max-width: 600px;
+    max-width: 500px;
     margin: 10px auto 30px auto;
-    padding: 40px 20px 40px 20px;
+    padding: 20px 20px 40px 20px;
     /* border: var(--box-border-width) solid var(--box-border-color); */
     /* border-radius: var(--box-border-radius); */
     /* background-color: var(--box-background); */
@@ -205,21 +515,30 @@ body {
 }
 
 .profile-username {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #333;
     font-family: 'Aleo', sans-serif;
-    margin-bottom: 6px;
+    margin-bottom: 0;
     /* border: 1px solid blue; */
 }
 
 .profile-location-level {
-    font-size: 13px;
+    font-size: 15px;
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    margin-bottom: 25px;
+    margin-bottom: 16px;
     display: flex;
     gap: 15px;
+}
+
+.profile-level {
+    font-size: 15px;
+    font-weight: bold;
+    color: #666;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-top: 4px;
+    margin-bottom: 0;
 }
 
 .profile-picture {
@@ -228,7 +547,7 @@ body {
     background: linear-gradient(to bottom, #F093FB, #F5576C);
     border: none;
     border-radius: 50%;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -253,12 +572,121 @@ body {
 }
 
 .profile-actions {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    margin-top: 10px;
+    margin-top: 0;
     margin-bottom: 20px;
     text-align: center;
+    cursor: pointer;
+}
+
+/* Avatar select popup */
+.avatar-select-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    box-sizing: border-box;
+}
+
+.avatar-select-popup {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: min(400px, calc(100vw - 40px));
+    max-height: calc(100vh - 96px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.avatar-select-header {
+    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    color: white;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-select-title {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.avatar-select-close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.avatar-select-content {
+    padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.avatar-select-hint {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.avatar-select-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    justify-items: center;
+    max-width: 352px;
+    margin: 0 auto;
+}
+
+.avatar-select-cell {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f0f0f0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* padding: 4px; */
+    box-sizing: border-box;
+}
+
+
+.avatar-select-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .profile-stars-section {
@@ -316,7 +744,7 @@ body.wegmans .profile-today-stars .star-number {
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 20px 20px 16px 20px;
+    padding: 5px 20px 16px 20px;
     margin-bottom: 0;
     box-shadow: none;
     backdrop-filter: none;
@@ -348,6 +776,7 @@ body.wegmans .profile-today-stars .star-number {
     gap: 6px;
     margin-top: 0;
     margin-bottom: 8px;
+    transform: translateY(7px);
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -373,13 +802,17 @@ body.wegmans .profile-today-stars .star-number {
 }
 
 .profile-stat-small .star-label-row {
-    transform: translateX(-6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transform: none;
 }
 
 .profile-stat-small .star-icon-small {
     font-size: 16px;
     color: #FF8C42;
-    transform: translateY(-2px);
+    transform: none;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
 }
@@ -633,7 +1066,7 @@ body.wegmans .deal-button-container {
     background-color: #c82333;
 }
 
-.profile-challenges-container {
+.profile-account-container {
     width: 100%;
     max-width: 500px;
     margin-top: 10px;
@@ -644,6 +1077,79 @@ body.wegmans .deal-button-container {
     background-color: var(--box-background);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+}
+
+.account-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    background: var(--header-gradient);
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.account-content {
+    padding: 16px;
+}
+
+.account-login,
+.account-create-btn {
+    font-size: 14px;
+    color: white;
+    text-align: center;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    background: linear-gradient(to bottom, #6EC1E4, #4A9FD4);
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.account-create-btn {
+    margin-top: 10px;
+}
+
+.account-divider {
+    height: 1px;
+    background: #ddd;
+    margin: 12px 0;
+}
+
+.account-create {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-bottom: 12px;
+}
+
+.account-field {
+    margin-bottom: 10px;
+}
+
+.account-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-bottom: 4px;
+}
+
+.account-input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.account-field:last-child {
+    margin-bottom: 0;
 }
 
 .profile-achievements-container {
@@ -660,7 +1166,7 @@ body.wegmans .deal-button-container {
 }
 
 .achievements-header {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     color: white;
     text-align: center;
@@ -673,7 +1179,7 @@ body.wegmans .deal-button-container {
 }
 
 .challenges-header {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     color: white;
     text-align: center;
@@ -689,7 +1195,7 @@ body.wegmans .deal-button-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
+    padding: 12px 14px;
     border-bottom: 1px solid #eee;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: background-color 0.2s ease;
@@ -721,17 +1227,17 @@ body.wegmans .challenge-item:hover {
 }
 
 .challenge-text {
-    font-size: 12px;
+    font-size: 14px;
     color: #333;
     text-align: left;
     flex: 1;
     font-weight: 500;
     line-height: 1.4;
-    padding-left: 10px;
+    padding-left: 0px;
 }
 
 .challenge-reward {
-    font-size: 12px;
+    font-size: 14px;
     color: #FF8C42;
     font-weight: 700;
     text-align: right;
@@ -740,10 +1246,10 @@ body.wegmans .challenge-item:hover {
     gap: 4px;
     white-space: nowrap;
     background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.1) 100%);
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 8px;
+    padding-right: 6px;
     border-radius: 20px;
-    margin-right: 10px;
+    margin-right: 0;
     box-shadow: 0 2px 4px rgba(255, 140, 66, 0.2);
 }
 
@@ -794,14 +1300,14 @@ body.wegmans .challenge-reward {
 }
 
 .stat-label {
-    font-size: 13px;
+    font-size: 15px;
     color: #666;
     margin-bottom: 4px;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .stat-value {
-    font-size: 13px;
+    font-size: 15px;
     color: #666;
     font-weight: 400;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -883,14 +1389,13 @@ body.wegmans .challenge-reward {
     top: 0;
     left: 0;
     right: 0;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
     z-index: 10001;
-    max-width: 500px;
-    margin: 0 auto;
     min-height: 56px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -959,7 +1464,7 @@ body.wegmans .challenge-reward {
 }
 
 .date {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 500;
     color: white;
     text-align: center;
@@ -969,11 +1474,25 @@ body.wegmans .challenge-reward {
     letter-spacing: 0.5px;
 }
 
+/* Tiles mode: show date in top bar - mixed case, smaller font */
+.date.date-tiles-mode {
+    font-size: 12px;
+    font-weight: 500;
+    transform: translateY(1px);
+    text-transform: none;
+}
+
 .date-subtitle {
     font-size: 10px;
     font-weight: 500;
     color: white;
     text-align: center;
+}
+
+/* Brand mode: date subtitle as "December 18, 2025" - mixed case, smaller font */
+body.mode-brand .date-subtitle {
+    font-size: 9px;
+    text-transform: none;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     line-height: 1.2;
@@ -983,7 +1502,7 @@ body.wegmans .challenge-reward {
 .star-counter {
     background-color: white;
     border-radius: 20px;
-    padding: 6px 14px;
+    padding: 2px 10px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1586,6 +2105,14 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     text-transform: uppercase;
 }
 
+/* Desktop online indicator & user stats: hidden on mobile only */
+@media (max-width: 767px) {
+    .online-indicator-desktop,
+    .user-div-desktop {
+        display: none !important;
+    }
+}
+
 /* Online indicator below Thanksgiving */
 .online-indicator {
     display: flex;
@@ -1611,15 +2138,13 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     letter-spacing: 0;
 }
 .online-user-icon {
-    font-size: 7px;
+    width: 9px;
+    height: 9px;
     transform: translateY(-2px);
-    margin-left: 2px;
-    line-height: 1;
+    margin-left: 3px;
     display: inline-block;
-}
-
-.online-user-icon i {
-    color: #fff;
+    vertical-align: middle;
+    opacity: 0.6;
 }
 
 /* User row above calendar */
@@ -1739,6 +2264,29 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     letter-spacing: 1px;
 }
 
+@media (min-width: 768px) {
+    .week-title-type1 {
+        margin-bottom: -4px;
+        /* margin-top: 0px; */
+        /* border: 1px solid red; */
+    }
+    .week-subtitle-type1,
+    .week-theme-section .week-subtitle {
+        width: 100%;
+        box-sizing: border-box;
+        padding-bottom: 11px;
+        margin-top: -8px;
+        font-size: 44px !important;
+    }
+    /* Extra padding above and below DAILY WARM UP, DAILY PUZZLES, and DAILY ARCADE */
+    .section-title-warmup,
+    .section-title-puzzles,
+    .section-title-arcade {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
 .week-title-type1 {
     font-size: 12px;
     font-weight: 900;
@@ -1848,6 +2396,7 @@ body.wegmans .week-container-type1 {
 
 /* Wegmans orange color for all orange gradient elements (except games page) */
 body.wegmans .header-bar,
+body.wegmans .desktop-top-bar,
 body.wegmans .scramble-top-section,
 body.wegmans .quiz-top-section,
 body.wegmans .mc-top-section,
@@ -1862,7 +2411,7 @@ body.wegmans .entry-button {
 
 .week-record-box-type1 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 2px 2px;
+    padding: 6px 6px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1871,10 +2420,10 @@ body.wegmans .entry-button {
 }
 
 .week-record-text-type1 {
-    font-size: 10px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
-    font-weight: 600;
+    font-weight: 800;
     font-family: 'Nunito', 'Helvetica Neue', sans-serif;
     letter-spacing: 0.5px;
 }
@@ -1945,7 +2494,7 @@ body.wegmans .entry-button {
 
 .mc-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -1964,7 +2513,7 @@ body.wegmans .entry-button {
 }
 
 .mc-question {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 400;
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2020,7 +2569,7 @@ body.wegmans .entry-button {
 
 .quiz-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -2050,7 +2599,7 @@ body.wegmans .entry-button {
 }
 
 .quiz-difficulty {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     color: #666;
     font-family: 'Nunito', sans-serif;
@@ -2058,14 +2607,14 @@ body.wegmans .entry-button {
 }
 
 .quiz-question-number {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: #999;
     font-family: 'Nunito', sans-serif;
 }
 
 .quiz-question {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 400;
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2147,7 +2696,7 @@ body.wegmans .entry-button {
 
 .featured-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -2167,18 +2716,18 @@ body.wegmans .entry-button {
 
 .challengers-daily-rival {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #fff;
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .challengers-subtitle {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
@@ -2294,8 +2843,8 @@ body.wegmans .entry-button {
 .community-online-header {
     padding: 6px 12px;
     text-align: center;
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 800;
     color: rgba(255, 255, 255, 0.95);
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
@@ -2409,7 +2958,7 @@ body.wegmans .entry-button {
     height: 8px;
     object-fit: contain;
     flex-shrink: 0;
-    transform: translateY(-1px);
+    /* transform: translateY(1px); */
 }
 
 .challengers-high-scores-list {
@@ -2500,7 +3049,7 @@ body.wegmans .entry-button {
 
 .poll-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -2616,7 +3165,7 @@ body.wegmans .entry-button {
 
 .poll-question {
     padding: 12px 20px;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #444;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2681,7 +3230,7 @@ body.wegmans .entry-button {
 
 .daily-question-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -2701,7 +3250,7 @@ body.wegmans .entry-button {
 
 .daily-question-text {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #444;
     margin: 0;
@@ -2841,7 +3390,7 @@ body.wegmans .entry-button {
 
 .daily-question-answer-meta {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: #888;
     margin-bottom: 2px;
@@ -2849,7 +3398,7 @@ body.wegmans .entry-button {
 
 .daily-question-answer-text {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #333;
     line-height: 1.3;
@@ -2887,7 +3436,7 @@ body.wegmans .entry-button {
 
 .profile-complete-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 12px 20px 12px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -2916,7 +3465,7 @@ body.wegmans .entry-button {
 
 .bonus-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 12px 20px 12px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
@@ -3011,7 +3560,7 @@ body.wegmans .entry-button {
 
 .scramble-top-section {
     background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    padding: 12px 20px;
+    padding: 10px 20px 10px 17px;
     flex: 1;
     border-bottom: none;
 }
@@ -3045,7 +3594,7 @@ body.wegmans .entry-button {
 }
 
 .subsection-title {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     /* margin-bottom: 12px; */
     color: #666;
@@ -3077,7 +3626,7 @@ body.wegmans .entry-button {
 }
 
 .unscramble-label {
-    font-size: 13px;
+    font-size: 15px;
     color: white;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
@@ -3665,7 +4214,7 @@ body.wegmans .unscramble-label {
 }
 
 #journey-page.active {
-    background: linear-gradient(to bottom, #4A148C, #2E0E5C);
+    background: linear-gradient(to bottom, #6a19d3, #2E0E5C);
     position: fixed;
     top: 0;
     left: 0;
@@ -3677,6 +4226,13 @@ body.wegmans .unscramble-label {
     margin: 0;
     padding: 0;
     z-index: 1;
+}
+
+@media (min-width: 768px) {
+    #journey-page.active {
+        bottom: 0;
+        height: 100vh;
+    }
 }
 
 .platforms-container {
@@ -3762,8 +4318,16 @@ body.wegmans .journey-go-button {
     outline: none;
 }
 
+#prizes-draw-button {
+    gap: 0;
+}
+
+#prizes-draw-button .star-icon {
+    margin-left: 4px;
+}
+
 .journey-go-button .star-icon {
-    color: white;
+    color: #FF8C42;
     font-size: 16px;
 }
 
@@ -3914,7 +4478,7 @@ body.wegmans .journey-go-button {
     width: 100%;
     height: 100%;
     border: none;
-    touch-action: none;
+    touch-action: manipulation;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
 }
@@ -3930,6 +4494,206 @@ body.wegmans .journey-go-button {
     opacity: 1;
     pointer-events: none;
     animation: loadingFade 0.9s ease-out forwards;
+}
+
+/* Reward prize overlay – used by puzzle games */
+.reward-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.reward-overlay.pointer-events-on {
+    pointer-events: auto;
+}
+
+.reward-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(245, 245, 245, 0.99);
+    pointer-events: none;
+}
+
+.reward-overlay-rain {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.reward-overlay-rain .rain-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 28px;
+    line-height: 1;
+    transform-origin: center center;
+    color: #FF8C42;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.reward-overlay-rain .rain-item.rain-item-emoji {
+    font-size: 32px;
+}
+
+.reward-overlay-flash {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    pointer-events: none;
+}
+
+.reward-overlay-box {
+    position: relative;
+    width: 200px;
+    margin-top: -25px;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.reward-overlay-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reward-overlay-header {
+    padding: 0;
+}
+
+.reward-overlay-header .reward-header-gradient {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    padding: 14px 12px;
+}
+
+.reward-overlay-header .reward-header-gradient .reward-overlay-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+.reward-overlay-header .reward-header-image img {
+    height: 24px;
+    width: auto;
+    margin-bottom: 2px;
+}
+
+.reward-overlay-header .reward-header-title {
+    color: white;
+    font-family: 'Abril Fatface', serif;
+    font-size: 20px;
+    font-weight: 400;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    word-wrap: break-word;
+    line-height: 1.25;
+}
+
+.reward-overlay-stars {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 10px 12px 10px;
+}
+
+.reward-overlay-stars .reward-star {
+    font-size: 18px;
+    color: #FF8C42;
+}
+
+.reward-overlay-stars .reward-star.grey {
+    color: #ddd;
+}
+
+.reward-overlay-notes {
+    padding: 0 12px 16px;
+    text-align: center;
+}
+
+.reward-overlay-notes:empty,
+.reward-overlay-notes.reward-overlay-notes--empty {
+    display: none;
+    padding: 0;
+}
+
+.reward-overlay-notes .reward-note {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.reward-overlay-notes .reward-note + .reward-note {
+    margin-top: 2px;
+}
+
+.reward-overlay-divider {
+    height: 1px;
+    background: #ddd;
+    margin: 0;
+}
+
+.reward-overlay-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+}
+
+.reward-overlay-dice {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.reward-overlay-dice-dot {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #333;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.reward-overlay-dice-dot--tl { top: 25%; left: 25%; }
+.reward-overlay-dice-dot--c  { top: 50%; left: 50%; }
+.reward-overlay-dice-dot--br { top: 75%; left: 75%; }
+
+.reward-overlay-dice-label {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
 }
 
 @keyframes loadingFade {
@@ -3973,6 +4737,44 @@ body.wegmans .journey-go-button {
 .game-overlay-close:hover {
     background: #f5f5f5;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Desktop only: plain X in upper right below the bar (no circle); on mobile only the header X (upper left) shows */
+@media (max-width: 767px) {
+    .game-overlay-close-desktop,
+    .game-overlay-close-desktop.show {
+        display: none !important;
+    }
+}
+
+.game-overlay-close-desktop {
+    display: none;
+    position: fixed;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    box-shadow: none;
+    color: #333;
+    font-size: 28px;
+    cursor: pointer;
+    font-weight: 400;
+    line-height: 1;
+    padding: 0;
+    top: 72px;
+    right: 20px;
+    left: auto;
+    transform: none;
+    z-index: 10004;
+}
+
+.game-overlay-close-desktop:hover {
+    background: transparent;
+    box-shadow: none;
+    color: #000;
 }
 
 /* Firehouse close button - ensure x is visible */
@@ -4147,8 +4949,8 @@ body.firehouse2 .help-button {
     background: white;
     border-radius: 6px;
     padding: 30px;
-    max-width: 500px;
-    width: 90%;
+    width: 80%;
+    max-width: 650px;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
@@ -4178,19 +4980,98 @@ body.firehouse2 .help-button {
 }
 
 .help-popup-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 20px;
-    font-family: 'Aleo', serif;
+    display: none;
+}
+
+/* Game not complete modal */
+#gameIncompleteModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 11000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#gameIncompleteModal .game-incomplete-content {
+    background: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+    padding: 12px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    max-width: 260px;
     text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#gameIncompleteModal .game-incomplete-title {
+    color: #D63645;
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 16px;
+}
+
+#gameIncompleteModal .game-incomplete-message {
+    color: #444444;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+#gameIncompleteModal .game-incomplete-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+#gameIncompleteModal .game-incomplete-button {
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+}
+
+#gameIncompleteModal .game-incomplete-button--quit {
+    background: #D63645;
+    color: #ffffff;
+    border: none;
+}
+
+#gameIncompleteModal .game-incomplete-button--keep {
+    background: #f0f0f0;
+    color: #333333;
+    border: 1px solid #cccccc;
 }
 
 .help-popup-text {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13px;
+    line-height: 1.4;
     color: #555;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+}
+
+.help-popup-text p:first-child {
+    text-align: center;
+    font-family: 'Aleo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.help-popup-text p.help-popup-caps {
+    font-size: 15px;
+    color: #FF8C42;
+    font-weight: 700;
+    margin-bottom: 2px;
+    margin-top: 22px;
+}
+.help-popup-text > p:nth-of-type(3) {
+    margin-top: 37px;
 }
 
 .help-popup-text p {
@@ -4206,6 +5087,42 @@ body.firehouse2 .help-button {
     font-weight: 700;
 }
 
+.help-popup-credit {
+    font-family: 'Roboto Slab', 'Rockwell', 'Courier New', serif !important;
+    font-weight: 700;
+    font-size: 15px;
+    color: #333;
+    margin-top: 35px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .help-popup-text p:first-child {
+        font-size: 28px;
+    }
+}
+
+/* About page (same content as help popup) */
+#help-page {
+    padding: 20px;
+    padding-bottom: 80px;
+    min-height: calc(100vh - 116px);
+    overflow-y: auto;
+}
+
+.help-page-content {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+@media (min-width: 768px) {
+    .help-page-content {
+        padding-top: 30px;
+    }
+}
+
 #memoryIframe, #mysteryWordIframe, #beticleIframe, #blackjackIframe, #lostAndFoundIframe, #goldCaseIframe, #match3Iframe {
     width: 100%;
     height: 100%;
@@ -4216,23 +5133,14 @@ body.firehouse2 .help-button {
     overflow: hidden;
 }
 
-/* Sweepstakes Page Styles */
-.sweeps-container {
-    max-width: 600px;
-    margin: 10px auto 30px auto; /* move sweeps content a bit higher, add 30px space below */
-    padding: 10px 20px 0 20px;
-    background-color: #f8f8f8;
-    min-height: auto;
-    /* border: 1px solid green; */
-}
-
-.sweeps-header {
+/* Prizes page header */
+.prizes-header {
     text-align: center;
     margin-bottom: 0;
     padding-top: 12px;
 }
 
-.sweeps-title {
+.prizes-title {
     font-size: 26px; /* match .section-title / THIS WEEK */
     font-weight: 400;
     color: #000;
@@ -4241,6 +5149,7 @@ body.firehouse2 .help-button {
     letter-spacing: 0.5px;
 }
 
+/* Legacy sweeps-subtitle (unused) */
 .sweeps-subtitle {
     font-size: 12px; /* match .week-subtitle / THANKSGIVING */
     font-weight: 400;
@@ -4522,7 +5431,7 @@ body.firehouse2 .help-button {
 }
 
 .boost-subtitle {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     color: #444;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -4543,6 +5452,7 @@ body.firehouse2 .help-button {
     }
 }
 
+/* Legacy sweeps-coin-tracker (unused) */
 .sweeps-coin-tracker {
     display: flex;
     justify-content: center;
@@ -4699,20 +5609,9 @@ body.firehouse2 .help-button {
     margin: 4px 0;
 }
 
-/* Dark mode adjustments for sweepstakes */
-body[style*="background-color: rgb(0, 0, 0)"] .sweeps-container,
-body[style*="background-color: #000000"] .sweeps-container {
-    background-color: #1a1a1a;
-}
-
-
-body[style*="background-color: rgb(0, 0, 0)"] .sweeps-entry-section,
-body[style*="background-color: #000000"] .sweeps-entry-section {
-    background: #2a2a2a;
-}
-
-body[style*="background-color: rgb(0, 0, 0)"] .sweeps-title,
-body[style*="background-color: #000000"] .sweeps-title {
+/* Dark mode adjustments for prizes title */
+body[style*="background-color: rgb(0, 0, 0)"] .prizes-title,
+body[style*="background-color: #000000"] .prizes-title {
     color: #ccc;
 }
 
@@ -4728,6 +5627,15 @@ body[style*="background-color: #000000"] .cost-text {
     min-height: calc(100vh - 116px);
 }
 
+@media (min-width: 768px) {
+    /* Tiles/Prizes page: keep same max-width as mobile on desktop */
+    #prizes-page .prizes-scrollable-content {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 
 .prizes-scrollable-content {
     overflow-y: auto;
@@ -4737,7 +5645,7 @@ body[style*="background-color: #000000"] .cost-text {
 }
 
 .prizes-collect-text {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     color: #444;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -4880,6 +5788,12 @@ body[style*="background-color: #000000"] .cost-text {
     pointer-events: none;
 }
 
+@media (min-width: 768px) {
+    .prizes-button-container {
+        bottom: 24px;
+    }
+}
+
 .prizes-overlay {
     position: fixed;
     inset: 0;
@@ -4997,7 +5911,7 @@ body[style*="background-color: #000000"] .cost-text {
 
 #instructionsStartDiv .instructionLine {
     color: #666;
-    font-weight: 500;
+    font-weight: 700;
     font-family: 'Aleo', serif;
     font-size: 14px;
     margin-bottom: 6px;
@@ -5008,7 +5922,7 @@ body[style*="background-color: #000000"] .cost-text {
 
 .instructionLine {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
     margin-bottom: 6px;
     line-height: 1.5;
     text-transform: lowercase;

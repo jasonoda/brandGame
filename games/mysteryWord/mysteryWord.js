@@ -26,51 +26,16 @@ function markMysteryWordComplete() {
 
 function addStars(count) {
     const todayKey = getTodayKey();
-    const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-    const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-    
-    // Update daily stars
-    localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + count));
-    
-    // Update total stars
-    localStorage.setItem('totalStars', String(currentTotalStars + count));
-    
-    // Award stars and games played (1 point per game, only once per game)
-    // Try parent window first (if in iframe), then current window
-    const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
-    if (awardFn) {
-        awardFn(count, 'mysteryWord');
-    } else {
-        // Fallback if awardStars not available - manually add usable stars
-        const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
-        localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-        // Also add usable stars manually
-        const todayKey = getTodayKey();
-        const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
-        localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + count));
-    }
-    
-    // Update parent window star display if accessible
-    if (window.parent && window.parent.updateStarDisplay) {
-        window.parent.updateStarDisplay();
-    }
-    
-    // Update wallet and rival displays if accessible
-    if (window.parent && window.parent.updateWalletStars) {
-        window.parent.updateWalletStars();
-    }
-    if (window.parent && window.parent.updateRivalStars) {
-        window.parent.updateRivalStars();
-    }
-    
-    // Update parent window mystery word stars if accessible
-    if (window.parent && window.parent.updateMysteryWordStars) {
-        window.parent.updateMysteryWordStars();
-    }
-    
-    // Update parent window calendar if accessible
-    if (window.parent && window.parent.updateCalendar) {
-        window.parent.updateCalendar();
+    localStorage.setItem(`mysteryWordComplete_${todayKey}`, 'true');
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'mysteryWord',
+            stars: count,
+            notes: [],
+            delay: 1
+        }, '*');
     }
 }
 
@@ -190,7 +155,10 @@ function setupPlayButton() {
     const playButton = document.getElementById('playButton');
     
     if (playButton) {
+        let _mwClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+        const playMwClick = () => { try { if (_mwClick) { _mwClick.currentTime = 0; _mwClick.play().catch(() => {}); } } catch (e) {} };
         playButton.addEventListener('click', () => {
+            playMwClick();
             // Notify parent that Mystery Word has started (for quit warning logic)
             if (window.parent) {
                 window.parent.postMessage('puzzleStarted:mysteryWord', '*');
@@ -258,6 +226,32 @@ function setupPlayButton() {
     }
 }
 
+// Always lock grid and tiles to 60px so they never grow or shift (same size at all viewports)
+function applyGridSizeLock() {
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+    const tiles = grid.querySelectorAll('.tile');
+    const rows = grid.querySelectorAll('.grid-row');
+    const gridWidth = 5 * 60 + 4 * 5 + 20;
+
+    grid.style.width = gridWidth + 'px';
+    grid.style.minWidth = gridWidth + 'px';
+    grid.style.maxWidth = gridWidth + 'px';
+    grid.style.gridTemplateRows = 'repeat(5, 60px)';
+    rows.forEach(function (row) {
+        row.style.gridTemplateColumns = 'repeat(5, 60px)';
+    });
+    tiles.forEach(function (tile) {
+        tile.style.width = '60px';
+        tile.style.height = '60px';
+        tile.style.minWidth = '60px';
+        tile.style.minHeight = '60px';
+        tile.style.maxWidth = '60px';
+        tile.style.maxHeight = '60px';
+        tile.style.fontSize = '32px';
+    });
+}
+
 // Create the grid
 function createGrid() {
     const grid = document.getElementById('grid');
@@ -276,6 +270,7 @@ function createGrid() {
         
         grid.appendChild(row);
     }
+    applyGridSizeLock();
 }
 
 // Setup keyboard clicks
@@ -557,105 +552,46 @@ function positionGuessCounter() {
 
 // Handle responsive layout
 function handleResponsiveLayout() {
+    applyGridSizeLock();
     const guessCounter = document.getElementById('guessCounter');
     const grid = document.getElementById('grid');
     const keyboard = document.querySelector('.keyboard');
-    const windowHeight = window.innerHeight;
-    
     // Check if game is done (won)
     const todayKey = getTodayKey();
     const isComplete = localStorage.getItem(`mysteryWordComplete_${todayKey}`) === 'true';
     const gameDone = isComplete;
     
-    if (windowHeight < 750) {
-        // Hide guess counter
-        if (guessCounter) {
-            guessCounter.style.display = 'none';
-        }
+    // Hide guess counter (same as before for shifted-up layout)
+    if (guessCounter) {
+        guessCounter.style.display = 'none';
+    }
+    
+    // Always center grid between top and keyboard (shift upwards) at all viewport heights
+    if (grid && keyboard) {
+        const keyboardRect = keyboard.getBoundingClientRect();
+        const keyboardTop = keyboardRect.top;
+        const topOfPage = 0;
+        const centerY = (topOfPage + keyboardTop) / 2 - 30;
         
-        // Center grid between top and keyboard
-        if (grid && keyboard) {
-            const keyboardRect = keyboard.getBoundingClientRect();
-            const keyboardTop = keyboardRect.top;
-            const topOfPage = 0;
-            const centerY = (topOfPage + keyboardTop) / 2 - 30;
-            
-            grid.style.top = centerY + 'px';
-            grid.style.transform = 'translate(-50%, -50%)';
-            // Ensure opacity is 0 and no transition during positioning
-            grid.style.opacity = '0';
-            grid.style.transition = 'none';
-            grid.style.visibility = 'hidden';
-            
-            // Only fade in grid if game is not done
-            if (!gameDone) {
-                setTimeout(() => {
-                    grid.style.visibility = 'visible';
-                    grid.style.transition = 'opacity 0.5s ease';
-                    grid.style.opacity = '1';
-                }, 100);
-            } else {
-                // Game is done, keep grid visible but don't animate
+        grid.style.top = centerY + 'px';
+        grid.style.transform = 'translate(-50%, -50%)';
+        grid.style.opacity = '0';
+        grid.style.transition = 'none';
+        grid.style.visibility = 'hidden';
+    }
+    
+    if (!gameDone) {
+        if (grid) {
+            setTimeout(() => {
                 grid.style.visibility = 'visible';
+                grid.style.transition = 'opacity 0.5s ease';
                 grid.style.opacity = '1';
-            }
+            }, 100);
         }
     } else {
-        // Show guess counter (unless game is done)
-        if (guessCounter) {
-            if (gameDone) {
-                guessCounter.style.display = 'none';
-            } else {
-                guessCounter.style.display = 'flex';
-                // Ensure opacity is 0 initially
-                guessCounter.style.opacity = '0';
-            }
-        }
-        
-        // Center grid normally (moved up 30px)
         if (grid) {
-            grid.style.top = '50%';
-            grid.style.transform = 'translate(-50%, calc(-50% - 30px))';
-            // Ensure opacity is 0 and no transition during positioning
-            grid.style.opacity = '0';
-            grid.style.transition = 'none';
-            grid.style.visibility = 'hidden';
-        }
-        
-        // Ensure opacity is 0 and no transition during positioning
-        if (guessCounter && !gameDone) {
-            guessCounter.style.opacity = '0';
-            guessCounter.style.transition = 'none';
-            guessCounter.style.visibility = 'hidden';
-        }
-        
-        // Reposition guess counter (only if game is not done)
-        if (!gameDone) {
-            positionGuessCounter();
-        }
-        
-        // Only fade in guess counter and grid if game is not done
-        if (!gameDone) {
-            if (guessCounter) {
-                setTimeout(() => {
-                    guessCounter.style.visibility = 'visible';
-                    guessCounter.style.transition = 'opacity 0.5s ease';
-                    guessCounter.style.opacity = '1';
-                }, 100);
-            }
-            if (grid) {
-                setTimeout(() => {
-                    grid.style.visibility = 'visible';
-                    grid.style.transition = 'opacity 0.5s ease';
-                    grid.style.opacity = '1';
-                }, 100);
-            }
-        } else {
-            // Game is done, keep grid visible but don't animate
-            if (grid) {
-                grid.style.visibility = 'visible';
-                grid.style.opacity = '1';
-            }
+            grid.style.visibility = 'visible';
+            grid.style.opacity = '1';
         }
     }
 }
@@ -696,16 +632,10 @@ function celebrateWin() {
         }, index * 100);
     });
     
-    // Mark as complete and award stars
     markMysteryWordComplete();
-    // Stars = 5 - currentRow (5 for first guess, 4 for second, etc.)
     const starsEarned = 5 - currentRow;
     addStars(starsEarned);
-    
-    // Save stars to local storage for display on main page
-    const todayKey = getTodayKey();
-    localStorage.setItem(`mysteryWordStars_${todayKey}`, String(starsEarned));
-    
+
     // Hide keyboard and guess counter completely
     const keyboard = document.querySelector('.keyboard');
     const guessCounter = document.getElementById('guessCounter');

@@ -44,6 +44,7 @@
         if (window.updateHeaderStarCounter) window.updateHeaderStarCounter();
         if (window.updateWalletStars2) window.updateWalletStars2();
         if (window.updateMoveStarsDisplay) window.updateMoveStarsDisplay();
+        if (window.updateCalendar) window.updateCalendar();
     }
 
     function initPoll() {

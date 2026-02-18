@@ -143,7 +143,7 @@ class Sounds {
     setUp(e) {
 
         this.e=e;
-        this.soundArray = ["good", "bad", "clue", "pickup", "tick", "complete"];
+        this.soundArray = ["good", "bad", "clue", "pickup", "tick", "complete", "click"];
         this.loadedSounds = [];
 
         for(var i=0; i<this.soundArray.length; i++){
@@ -587,6 +587,7 @@ class Scene {
         // Play button functionality
         if (newPlayButton) {
             newPlayButton.addEventListener('click', () => {
+                this.e.s.p('click');
                 console.log('Play button clicked');
                 this.startCountdownSequence();
                 this.e.startGame();
@@ -1200,6 +1201,10 @@ class Scene {
         const starsEarned = calculateBlackjackStarsFromScore(this.score);
         saveBlackjackGameResult(this.score, starsEarned);
         
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'arcadeComplete', gameId: 'blackjack', stars: starsEarned }, '*');
+        }
+        
         // Send final validation breadcrumb
         this.levelScore = this.currentIntervalScore; // Set the levelScore for the existing breadCrumb method
         this.gameScores = this.currentIntervalHandScores; // Set handScores for existing breadCrumb method
@@ -1387,7 +1392,7 @@ class Scene {
                 // Enable stay button
                 stayButton.style.opacity = '1';
                 stayButton.style.pointerEvents = 'auto';
-                stayButton.style.background = 'linear-gradient(to bottom, #44bb63, #2b9346)';
+                stayButton.style.background = 'linear-gradient(to bottom, #2ba89a, #1e8075)';
                 stayButton.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
             } else {
                 // Disable and grey out stay button

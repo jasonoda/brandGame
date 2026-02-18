@@ -2086,22 +2086,18 @@ function showWinScreen() {
     // Calculate stars based on hints used
     // No hints: 5 stars, 1 hint: 4 stars, 2 hints: 3 stars, 3 hints: 2 stars
     const starsEarned = 5 - hintCount;
-    
-    // Save stars and mark as complete
+
     const todayKey = getTodayKey();
-    localStorage.setItem(`crossStars_${todayKey}`, String(starsEarned));
     localStorage.setItem(`crossComplete_${todayKey}`, 'true');
-    
-    // Award stars to parent window if available
-    if (window.parent && window.parent.awardStars) {
-        window.parent.awardStars(starsEarned, 'cross');
-    }
-    
-    // Update main page stars display immediately
-    if (window.parent && window.parent.updateCrossStars) {
-        window.parent.updateCrossStars();
-    } else if (window.updateCrossStars) {
-        window.updateCrossStars();
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'cross',
+            stars: starsEarned,
+            notes: ['Hints used: ' + hintCount],
+            delay: 1
+        }, '*');
     }
     
     // Fade out the instruction text
@@ -2164,11 +2160,16 @@ init();
     }
 })();
 
+let _crossClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+const playCrossClick = () => { try { if (_crossClick) { _crossClick.currentTime = 0; _crossClick.play().catch(() => {}); } } catch (e) {} };
 if (playButton) {
-    playButton.addEventListener('click', startGame);
-    // Touch events for mobile
+    playButton.addEventListener('click', () => {
+        playCrossClick();
+        startGame();
+    });
     playButton.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        playCrossClick();
         startGame();
     });
 }

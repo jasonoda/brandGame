@@ -27,64 +27,16 @@ function markBeticleComplete() {
 
 function addStars(count) {
     const todayKey = getTodayKey();
-    
-    // Check if already completed today
-    const previousStars = parseInt(localStorage.getItem(`beticleStars_${todayKey}`) || '0');
-    const wasComplete = localStorage.getItem(`beticleComplete_${todayKey}`) === 'true';
-    
-    // Only add stars if first play or if earned more stars
-    const starDifference = wasComplete ? Math.max(0, count - previousStars) : count;
-    
-    if (starDifference > 0) {
-        const currentDailyStars = parseInt(localStorage.getItem(`dailyStars_${todayKey}`) || '0');
-        const currentTotalStars = parseInt(localStorage.getItem('totalStars') || '0');
-        
-        // Update daily stars
-        localStorage.setItem(`dailyStars_${todayKey}`, String(currentDailyStars + starDifference));
-        
-        // Update total stars
-        localStorage.setItem('totalStars', String(currentTotalStars + starDifference));
-        
-        // Award games played (1 point per game, only once per game)
-        // Try parent window first (if in iframe), then current window
-        const awardFn = (window.parent && window.parent.awardStars) ? window.parent.awardStars : (window.awardStars || null);
-        if (awardFn) {
-            awardFn(starDifference, 'beticle');
-        } else {
-            // Fallback if awardStars not available - manually add usable stars
-            const currentGamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
-            localStorage.setItem('gamesPlayed', String(Math.max(0, currentGamesPlayed + 1)));
-            // Also add usable stars manually
-            const todayKey = getTodayKey();
-            const currentUsableStars = parseInt(localStorage.getItem(`usableStars_${todayKey}`) || '0');
-            localStorage.setItem(`usableStars_${todayKey}`, String(currentUsableStars + starDifference));
-        }
-    }
-    
-    // Always update beticle stars to the new count (even if no star difference)
-    localStorage.setItem(`beticleStars_${todayKey}`, String(count));
-    
-    // Update parent window star display if accessible
-    if (window.parent && window.parent.updateStarDisplay) {
-        window.parent.updateStarDisplay();
-    }
-    
-    // Update wallet and rival displays if accessible
-    if (window.parent && window.parent.updateWalletStars) {
-        window.parent.updateWalletStars();
-    }
-    if (window.parent && window.parent.updateRivalStars) {
-        window.parent.updateRivalStars();
-    }
-    
-    // Update parent window beticle stars if accessible
-    if (window.parent && window.parent.loadGameScores) {
-        window.parent.loadGameScores();
-    }
-    
-    // Update parent window calendar if accessible
-    if (window.parent && window.parent.updateCalendar) {
-        window.parent.updateCalendar();
+    localStorage.setItem(`beticleComplete_${todayKey}`, 'true');
+
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'puzzleComplete',
+            gameId: 'beticle',
+            stars: count,
+            notes: [],
+            delay: 1
+        }, '*');
     }
 }
 
@@ -160,7 +112,10 @@ function setupPlayButton() {
     const playButton = document.getElementById('playButton');
     
     if (playButton) {
+        let _betClick = (function() { try { const a = new Audio(new URL('../../sounds/click.mp3', window.location.href).href); a.preload = 'auto'; a.load(); return a; } catch (e) { return null; } })();
+        const playBetClick = () => { try { if (_betClick) { _betClick.currentTime = 0; _betClick.play().catch(() => {}); } } catch (e) {} };
         playButton.addEventListener('click', () => {
+            playBetClick();
             // Notify parent that Beticle has started (for quit warning logic)
             if (window.parent) {
                 window.parent.postMessage('puzzleStarted:beticle', '*');
@@ -225,6 +180,13 @@ function createWordRows() {
         tile.dataset.row = 'bottom';
         tile.dataset.position = i;
         bottomRow.appendChild(tile);
+    }
+
+    // Set initial hint text until first guess
+    const hintElement = document.getElementById('proximityHint');
+    if (hintElement) {
+        hintElement.textContent = 'START: Enter any 5-letter word.';
+        hintElement.style.opacity = '1';
     }
 }
 
@@ -414,27 +376,24 @@ function submitGuess() {
     // Update guess counter and stars
     updateGuessDisplay_Counter();
     
-    // Check if max guesses reached
+    // Check if max guesses reached (lost)
     if (guesses.length >= MAX_GUESSES) {
         gameOver = true;
-        
+        addStars(0); // Mark complete so closing with X doesn't show "keep playing" modal
+
         // Show the correct answer in the middle row
         const guessTiles = document.querySelectorAll('[data-row="guess"]');
         guessTiles.forEach((tile, index) => {
             tile.textContent = targetWord[index];
             tile.classList.add('filled');
         });
-        
+
         // Update hint to show out of guesses
         const hintElement = document.getElementById('proximityHint');
         if (hintElement) {
             hintElement.textContent = 'out of guesses';
             hintElement.style.opacity = '1';
         }
-        
-        // Make all stars grey
-        const stars = document.querySelectorAll('.guess-star');
-        stars.forEach(star => star.classList.add('grey'));
     }
     
     // Note: currentGuess is cleared in animateGuessToRow
@@ -561,53 +520,14 @@ function updateProximityHint(topWord, bottomWord) {
     originalHintText = message;
     hintElement.textContent = message;
     hintElement.style.opacity = '1';
-    
-    // Update hint display with guess count if counter is hidden
-    updateHintWithGuessCount();
 }
 
-// Update guess counter and stars display
+// Update guess counter display
 function updateGuessDisplay_Counter() {
     const guessNumber = document.getElementById('guessNumber');
-    const stars = document.querySelectorAll('.guess-star');
-    
-    const guessesRemaining = MAX_GUESSES - guesses.length;
-    
     if (guessNumber) {
-        guessNumber.textContent = guessesRemaining;
+        guessNumber.textContent = MAX_GUESSES - guesses.length;
     }
-    
-    // Update stars based on guesses remaining (to match the number in the circle)
-    // If 0 guesses remaining (game lost), all stars should be grey
-    let activeStars = 5;
-    
-    if (guessesRemaining === 0) {
-        // Game lost - all stars grey
-        activeStars = 0;
-    } else if (guessesRemaining <= 1) {
-        activeStars = 1;
-    } else if (guessesRemaining <= 3) {
-        activeStars = 2;
-    } else if (guessesRemaining <= 6) {
-        activeStars = 3;
-    } else if (guessesRemaining <= 8) {
-        activeStars = 4;
-    } else {
-        activeStars = 5;
-    }
-    
-    console.log('Active stars:', activeStars);
-    
-    stars.forEach((star, index) => {
-        if (index < activeStars) {
-            star.classList.remove('grey');
-        } else {
-            star.classList.add('grey');
-        }
-    });
-    
-    // Update hint display with guess count if counter is hidden
-    updateHintWithGuessCount();
 }
 
 // Add guess to the list with feedback (not used anymore but kept for compatibility)
@@ -659,13 +579,8 @@ function celebrateWin() {
 
     console.log('Stars earned:', starsEarned);
     
-    // Award stars first (before marking complete and saving beticle stars)
     addStars(starsEarned);
-    
-    // Save beticle stars to local storage
-    const todayKey = getTodayKey();
-    localStorage.setItem(`beticleStars_${todayKey}`, String(starsEarned));
-    
+
     // Mark as complete
     markBeticleComplete();
     
@@ -812,69 +727,8 @@ function showGameOver() {
 }
 
 
-// Store original hint text
-let originalHintText = '';
-
-// Update hint display with guess count when counter is hidden
-function updateHintWithGuessCount() {
-    const hintElement = document.getElementById('proximityHint');
-    const windowHeight = window.innerHeight;
-    
-    if (!hintElement) return;
-    
-    if (windowHeight < 630) {
-        // Counter is hidden, append guess count
-        const guessesRemaining = MAX_GUESSES - guesses.length;
-        // Store original text if not already stored
-        if (!originalHintText && hintElement.textContent && !hintElement.textContent.includes('GUESSES:')) {
-            originalHintText = hintElement.textContent;
-        }
-        // Append guess count with bullet separator
-        if (originalHintText) {
-            hintElement.textContent = originalHintText + ' • GUESSES: ' + guessesRemaining;
-        } else {
-            hintElement.textContent = hintElement.textContent.replace(/ • GUESSES: \d+/, '') + ' • GUESSES: ' + guessesRemaining;
-        }
-    } else {
-        // Counter is shown, restore original text
-        if (originalHintText) {
-            hintElement.textContent = originalHintText;
-            originalHintText = '';
-        } else {
-            // Remove guess count if present
-            hintElement.textContent = hintElement.textContent.replace(/ • GUESSES: \d+/, '');
-        }
-    }
-}
-
-// Handle responsive layout
+// Handle responsive layout (guess counter is always visible now)
 function handleResponsiveLayout() {
-    const guessCounter = document.getElementById('guessCounter');
-    const gameRows = document.getElementById('gameRows');
-    const windowHeight = window.innerHeight;
-    
-    if (windowHeight < 630) {
-        // Hide guess counter
-        if (guessCounter) {
-            guessCounter.style.display = 'none';
-        }
-        // Adjust gameRows to center better when guess counter is hidden
-        if (gameRows) {
-            gameRows.style.transform = 'translateY(40px)';
-        }
-    } else {
-        // Show guess counter
-        if (guessCounter) {
-            guessCounter.style.display = 'flex';
-        }
-        // Reset gameRows to original position when guess counter is shown
-        if (gameRows) {
-            gameRows.style.transform = 'translateY(-30px)';
-        }
-    }
-    
-    // Update hint display with guess count
-    updateHintWithGuessCount();
 }
 
 // Initialize when DOM is loaded
