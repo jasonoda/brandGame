@@ -28,8 +28,9 @@
     // Journey background gradients for the journey page (board tab)
     // Keep depth the same, just rotate hue through this array.
     var JOURNEY_BACKGROUNDS = [
-        
+        // "linear-gradient(to bottom, rgb(224, 224, 224),rgb(202, 202, 202))",  // purple
         "linear-gradient(to bottom, rgb(94, 35, 172), #2E0E5C)",  // purple
+        
         "linear-gradient(to bottom, rgb(35, 172, 158), #0E5C52)",  // greenish blue
         "linear-gradient(to bottom, rgb(35, 94, 172), #0E2E5C)",  // blue   
         "linear-gradient(to bottom, rgb(172, 35, 135), #5C0E3A)", // magenta
@@ -272,6 +273,18 @@
         // GO space should not give stars or a prize window
         if (type === "go") {
             if (typeof reactivateRoll === "function") reactivateRoll();
+            return;
+        }
+
+        // Avatar space: trigger BOARD BADGE overlay instead of the default prize window
+        if (type === "profile") {
+            if (typeof window.showBoardBadgeOverlay === "function") {
+                window.showBoardBadgeOverlay();
+                if (typeof reactivateRoll === "function") reactivateRoll();
+            } else {
+                // Fallback to existing profile prize window if board badge overlay is unavailable
+                showPrizeWindow(type, reactivateRoll);
+            }
             return;
         }
 

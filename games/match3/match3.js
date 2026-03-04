@@ -639,25 +639,7 @@ class Scene {
         const urlParams = new URLSearchParams(window.location.search);
         this.isPracticeMode = urlParams.get('practice') === 'true';
         
-        // Check if firehouse mode from URL parameter
-        let headerType = urlParams.get('d');
-        let isFirehouse = headerType === 'firehouse2';
-        
-        // Also check parent window if available (for iframe context)
-        if (!isFirehouse && window.parent && window.parent !== window) {
-            try {
-                const parentUrlParams = new URLSearchParams(window.parent.location.search);
-                const parentHeaderType = parentUrlParams.get('d');
-                if (parentHeaderType === 'firehouse2') {
-                    isFirehouse = true;
-                    headerType = parentHeaderType;
-                }
-            } catch (e) {
-                // Cross-origin or other error, ignore
-            }
-        }
-        
-        console.log('Match3 - URL param d:', headerType, 'isFirehouse:', isFirehouse);
+        console.log('Match3 - URL param d:', urlParams.get('d'));
         
         // Show practice game label if in practice mode
         if (this.isPracticeMode) {
@@ -684,22 +666,11 @@ class Scene {
         this.multiplierValues = [];
         this.jewelColors = ['#FF6B6B', '#4ECDC4', '#0066FF', '#FFA726', '#9B59B6', '#FFFFFF', '#808080'];
         this.jewelLetters = ['r', 'g', 'b', 'o', 'p', 'w', 'l'];
-        // Use firehouse emojis if firehouse mode, otherwise use default food emojis
-        this.jewelEmojis = isFirehouse 
-            ? ['🪓', '👨‍🚒', '🔥', '🚒', '🧯', '⭐', '💥'] // firehouse: sub, fireman, fire, firetruck, bread, bonus star, bonus explosion
-            : ['🍞', '🥬', '🍎', '🥛', '🥫', '⭐', '💥']; // default: bread, lettuce, apple, milk carton, soup, bonus star, bonus explosion
+        this.jewelEmojis = ['🍞', '🥬', '🍎', '🥛', '🥫', '⭐', '💥']; // bread, lettuce, apple, milk carton, soup, bonus star, bonus explosion
         console.log('Match3 - Using emojis:', this.jewelEmojis);
         this.initializeGrid();
         this.createGameHTML();
         this.bindEvents();
-        
-        // Update sweepsGame image if firehouse mode
-        if (isFirehouse) {
-            const startMenuImg = document.querySelector('#startMenuContainer img');
-            if (startMenuImg && startMenuImg.src.includes('sweepsGame.png')) {
-                startMenuImg.src = '../../src/img/firehousesubs/sweepsGame.png';
-            }
-        }
     }
 
     initializeGrid() {

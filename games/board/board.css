@@ -290,10 +290,10 @@
     pointer-events: none;
 }
 
-/* Top bar – dice + count, fixed below header bar (56px) */
+/* Top bar – dice + count, fixed below header bar (46px) */
 .board-top-bar {
     position: fixed;
-    top: calc(56px + 12px + env(safe-area-inset-top));
+    top: calc(46px + 12px + env(safe-area-inset-top));
     left: 50%;
     transform: translateX(-50%);
     display: flex;

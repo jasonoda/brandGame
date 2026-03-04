@@ -404,10 +404,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Save tile state to localStorage
                 saveTileState();
 
-                // Check if this set is now complete (avatar win)
+                // Check if this set is now complete (badge win)
                 const allRevealed = set.list.every((b) => b.dataset.revealed === '1');
                 if (allRevealed) {
                     playPrizeSound('reward4');
+                    // Award appropriate badge based on which prize grid was completed
+                    if (typeof window.handlePrizeTilesCompletion === 'function') {
+                        window.handlePrizeTilesCompletion(set.name);
+                    }
                 }
 
                 // Scroll to position based on prize size

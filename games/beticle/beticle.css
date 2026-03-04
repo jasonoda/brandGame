@@ -24,6 +24,7 @@ body {
 
 #instructionsStartDiv .instructionThemeHint {
     color: #FF8C42;
+    font-family: 'Sanchez', serif;
     /* font-weight: 600; */
     text-transform: uppercase;
 }

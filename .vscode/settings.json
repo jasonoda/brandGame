@@ -1,0 +1,7 @@
+{
+  "editor.colorDecorators": true,
+  "editor.defaultColorDecorators": true,
+  "files.associations": {
+    "gameVars.js": "javascriptreact"
+  }
+}

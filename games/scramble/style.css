@@ -77,7 +77,7 @@ body {
 
 .letter {
     position: absolute;
-    background-color: #c0c0c0;
+    background: var(--calendar-background-top-color, #c0c0c0);
     border-radius: 8px;
     display: flex;
     justify-content: center;
@@ -106,7 +106,7 @@ body {
 }
 
 .letter.fixed-letter {
-    background-color: #a0a0a0;
+    background: var(--calendar-background-top-color, #a0a0a0);
     cursor: default;
 }
 

@@ -1,10 +1,27 @@
 :root {
-    --box-border-radius: 8px;
-    --box-border-color: #ccc;
-    --box-background: white;
-    --box-border-width: 0px;
-    --header-gradient: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    --wegmans-gradient: linear-gradient(to bottom, #ce3f24, #a0301a);
+       
+    /* ----------------TOP BAR ---------------- */
+    --top-bar-bg-mobile: #71dad4;
+    --top-bar-text-mobile: #000000;
+    --top-bar-bg-desktop: #e6e6e6;
+    --top-bar-text-desktop:#333333;
+    /* ----------------GRADIENT---------------- */
+    --page-gradient-top: #bdeeea;
+    /* ----------------HEADER---------------- */
+    --masterGrad: #cdfffc;
+    --header-text-color: #7b8f94;
+    /* ----------------CALENDAR---------------- */
+    --calendar-background-top-color: linear-gradient(to bottom, #e73f65, #cb2c4b);
+    --calendar-background-top-text: #ffffff;
+    --calendar-top-solid: #e73f65;
+    --calendar-background-color: #e8fffe;
+    --calendar-background-bottom-color: #e8fffe;
+    --calendar-border-color: #a8d1ce;
+    --calendar-highlight-color: #ffffff;
+
+    /* ----------------MASTER---------------- */
+    --box-border-radius: 6px;
+
 }
 
 * {
@@ -24,16 +41,36 @@ button:focus {
     outline: none;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     padding-bottom: 60px;
     background-color: #f5f5f5;
+    overflow-x: hidden;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
     touch-action: manipulation;
     -webkit-touch-callout: none;
+}
+
+/* Full-page vertical gradient: color at top to transparent, above off-white, below content; does not scroll */
+.page-gradient-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, var(--page-gradient-top), transparent);
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* Splash Overlay */
@@ -114,8 +151,9 @@ body {
     display: none;
 }
 
-/* Desktop top bar - hidden by default, shown at 768px+ */
-.desktop-top-bar {
+/* Desktop-only elements inside header-bar: hidden on mobile */
+.header-bar .desktop-date,
+.header-bar .desktop-nav-tabs {
     display: none;
 }
 
@@ -142,12 +180,15 @@ body {
     margin-top: 2px;
 }
 
+/* (was overriding tab label font; reverted to use shared .label styles) */
+
 .content {
     padding: 0;
     max-width: 500px;
     margin: 0 auto;
     position: relative;
-    padding-top: 56px;
+    z-index: 1;
+    padding-top: 46px;
     background-color: transparent;
 }
 
@@ -161,7 +202,7 @@ body {
         left: auto;
         right: 15px;
     }
-    .desktop-top-bar .game-overlay-close {
+    .header-bar .game-overlay-close {
         display: none !important;
     }
     .game-overlay-close-desktop.show {
@@ -171,41 +212,39 @@ body {
     body:has(#gameOverlay.active) .desktop-nav-tabs {
         display: none !important;
     }
-    .desktop-top-bar {
-        display: flex;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 56px;
-        align-items: center;
+    /* Single header-bar: desktop layout (same bar as mobile) */
+    .header-bar {
+        height: 46px;
         padding: 0 20px;
-        background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        z-index: 10001;
         gap: 24px;
+        background: var(--masterGrad);
+        color: var(--top-bar-text-desktop);
     }
-    .desktop-date {
+    .header-bar .header-logo,
+    .header-bar .date-container {
+        display: none !important;
+    }
+    .header-bar .desktop-date {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         flex: 1 1 0;
         min-width: 0;
     }
-    .desktop-date .date {
+    .header-bar .desktop-date .date {
         font-size: 17px;
         font-weight: 500;
-        color: white;
-        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--top-bar-text-desktop);
+        font-family: 'Adamina', serif;
         line-height: 1.2;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    .desktop-date .date-subtitle {
+    .header-bar .desktop-date .date-subtitle {
         font-size: 10px;
         font-weight: 500;
-        color: white;
+        color: var(--top-bar-text-desktop);
+        font-family: 'Adamina', serif;
         text-align: left;
     }
     .desktop-nav-tabs {
@@ -217,104 +256,250 @@ body {
     }
     .desktop-nav-tabs .tab-button {
         flex: 0 0 auto;
-        padding: 8px 16px;
-        min-width: 70px;
+        padding: 2px 12px;
+        min-width: 60px;
         flex-direction: row;
-        gap: 6px;
-        border-radius: 6px;
+        gap: 4px;
+        border-radius: var(--box-border-radius);
     }
     .desktop-nav-tabs .tab-button .icon {
         margin-bottom: 0;
     }
     .desktop-nav-tabs .tab-button:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: transparent;
     }
     .desktop-nav-tabs .tab-button.active {
-        background: rgba(255, 255, 255, 0.3);
+        background: transparent;
     }
-    .desktop-nav-tabs .tab-button.active .icon svg path,
-    .desktop-nav-tabs .tab-button.active .label {
-        fill: white;
-        color: white;
+    .header-bar .desktop-nav-tabs .tab-button.active .icon svg path,
+    .header-bar .desktop-nav-tabs .tab-button.active .label {
+        fill: var(--top-bar-text-desktop);
+        color: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button.active .icon-tiles svg rect {
-        stroke: white;
+    .header-bar .desktop-nav-tabs .tab-button.active .icon-tiles svg rect {
+        stroke: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button.active .icon-tiles svg text {
-        fill: white;
+    .header-bar .desktop-nav-tabs .tab-button.active .icon-tiles svg text {
+        fill: var(--top-bar-text-desktop);
     }
     /* About tab: icon only (question mark in circle), no highlight when active */
     .desktop-nav-tabs .tab-button.desktop-help-link .label {
         display: none;
     }
-    .desktop-nav-tabs .tab-button[data-page="help"].active {
+    .header-bar .desktop-nav-tabs .tab-button[data-page="help"].active {
         background: transparent;
     }
-    .desktop-nav-tabs .tab-button[data-page="help"].active .label {
-        color: rgba(255, 255, 255, 0.95);
+    .header-bar .desktop-nav-tabs .tab-button[data-page="help"].active .label {
+        color: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button .icon svg path {
-        fill: rgba(255, 255, 255, 0.9);
+    .header-bar .desktop-nav-tabs .tab-button .icon svg path {
+        fill: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button .icon-tiles svg rect {
-        stroke: rgba(255, 255, 255, 0.9);
+    .header-bar .desktop-nav-tabs .tab-button .icon-tiles svg rect {
+        stroke: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button .icon-tiles svg text {
-        fill: rgba(255, 255, 255, 0.9);
+    .header-bar .desktop-nav-tabs .tab-button .icon-tiles svg text {
+        fill: var(--top-bar-text-desktop);
     }
-    .desktop-nav-tabs .tab-button .label {
-        color: rgba(255, 255, 255, 0.95);
+    .header-bar .desktop-nav-tabs .tab-button .label {
+        color: var(--top-bar-text-desktop);
         font-size: 14px;
+        font-family: 'Adamina', serif;
     }
-    .desktop-star-area {
+    .header-bar .desktop-nav-tabs {
+        display: flex;
+    }
+    .header-bar .desktop-star-area {
+        display: flex;
         flex: 1 1 0;
         min-width: 0;
-        display: flex;
         justify-content: flex-end;
         align-items: center;
     }
-    .desktop-top-bar .desktop-star-area .star-counter {
+    .header-bar .desktop-star-area .star-counter {
         position: static;
         flex: 0 0 auto;
+        top: auto;
+        transform: none;
     }
-    .desktop-top-bar .star-counter .star-icon {
+    .header-bar .star-counter .star-icon {
         color: white;
     }
-    .desktop-top-bar .star-counter .star-count {
+    .header-bar .star-counter .star-count {
         color: #333;
     }
-    .header-bar {
-        display: none !important;
+    /* Desktop top bar: smaller icons */
+    .header-bar .desktop-nav-tabs .tab-button .icon {
+        font-size: 18px;
+        transform: translateY(1px);
+    }
+    .header-bar .desktop-nav-tabs .tab-button .icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .header-bar .desktop-nav-tabs .tab-button .icon-tiles {
+        font-size: 16px;
+    }
+    .header-bar .desktop-nav-tabs .tab-button .icon-tiles svg {
+        width: 17px;
+        height: 17px;
+    }
+    .header-bar .desktop-nav-tabs .tab-button.desktop-help-link .icon {
+        font-size: 20px;
+    }
+    .header-bar .desktop-nav-tabs .tab-button.desktop-help-link .icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    .header-bar .star-counter .star-icon {
+        font-size: 14px;
+        transform: translateY(-1px);
+    }
+    .header-bar .star-counter .star-count {
+        font-size: 12px;
+        transform: translateY(1px);
     }
     .bottom-bar {
         display: none !important;
     }
     body {
         padding-bottom: 0;
-        overflow: hidden;
-        height: 100vh;
     }
     .content {
-        padding-top: 56px;
+        padding-top: 46px;
         max-width: none;
         width: 100%;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
     }
     .desktop-scroll-wrap {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
         overflow-x: hidden;
+        background: transparent;
     }
     .desktop-scroll-inner {
         max-width: 600px;
         margin: 0 auto;
+        background: transparent;
     }
     .content:has(#wallet-page.active) .desktop-scroll-inner {
         max-width: 400px;
+    }
+    .content:has(#main-page.active) .desktop-scroll-inner {
+        max-width: 800px;
+    }
+    .content:has(#community-page.active) .desktop-scroll-inner {
+        max-width: 800px;
+    }
+    #community-page .games-container {
+        max-width: 800px;
+    }
+    /* Main page desktop: scramble and quiz side by side, exactly same height */
+    #main-page .section-title-warmup + .section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: stretch;
+        min-height: 320px;
+        max-height: 520px;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    #main-page .section-title-warmup + .section .on-this-day-container,
+    #main-page .section-title-warmup + .section .quiz-container,
+    #main-page .section-title-warmup + .section .mc-container {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+    }
+    #main-page .section-title-warmup + .section .on-this-day-container {
+        grid-column: 1;
+    }
+    #main-page .section-title-warmup + .section .quiz-container,
+    #main-page .section-title-warmup + .section .mc-container {
+        grid-column: 2;
+    }
+    /* Less space between warmup section and Daily Puzzles */
+    #main-page .section-title-warmup + .section + .section-title-puzzles {
+        margin-top: 9px;
+    }
+    /* Desktop: show scramble and quiz stars before play, all grey (no extend animation) */
+    #main-page .unscramble-stars {
+        display: flex !important;
+        opacity: 1 !important;
+        max-height: none !important;
+    }
+    #main-page .unscramble-stars .unscramble-star {
+        color: #ddd;
+    }
+    #main-page .unscramble-stars .unscramble-star:not(.grey) {
+        color: #FF8C42;
+    }
+    #main-page .quiz-stars {
+        display: flex !important;
+        opacity: 1 !important;
+        max-height: 20px !important;
+        overflow: visible !important;
+    }
+    #main-page .quiz-stars .quiz-star {
+        color: #ddd;
+    }
+    #main-page .quiz-stars .quiz-star:not(.grey) {
+        color: #FF8C42;
+    }
+    /* Desktop: scramble layout – label top, letters + hint centered in middle, stars at bottom */
+    #main-page .scramble-bottom-section {
+        grid-template-rows: auto 1fr auto;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        align-items: stretch;
+    }
+    #main-page .scramble-bottom-section .unscramble-label {
+        grid-row: 1;
+        grid-column: 1;
+        margin-top: 4px;
+        margin-bottom: 0;
+        text-align: center;
+        color: #666;
+        font-size: 15px;
+    }
+    #main-page .scramble-bottom-section .unscramble-middle {
+        grid-row: 2;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+    }
+    #main-page .scramble-bottom-section .unscramble-middle .unscramble-hint-btn {
+        width: 100%;
+        max-width: 100%;
+    }
+    #main-page .scramble-bottom-section .unscramble-stars {
+        grid-row: 3;
+        grid-column: 1;
+        margin-top: 0;
+        align-self: end;
+    }
+    /* Main page desktop: puzzles section 3 per row */
+    #main-page .play-boxes {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    /* Main page desktop: arcade 3 per row, white section below colored; match puzzle horizontal spacing (gap 10px) */
+    #main-page .arcade-section {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    #main-page .arcade-box {
+        flex-direction: column;
+        height: auto;
+        margin-bottom: 0;
+    }
+    #main-page .arcade-box .arcade-color {
+        width: 100%;
+        min-height: 200px;
     }
     /* Desktop-only: larger game thumbnail icons and titles */
     #main-page .play-color-box img,
@@ -325,6 +510,10 @@ body {
     .games-container .bonus-color img {
         height: 40px !important;
         width: auto !important;
+    }
+    #main-page .play-box-nav .play-box-nav-icon {
+        height: 40px;
+        width: 40px;
     }
     #main-page .play-box .game-title,
     #main-page .arcade-box .game-title,
@@ -340,7 +529,7 @@ body {
         line-height: 1.15;
     }
     #main-page .arcade-box {
-        height: 190px;
+        height: 340px;
     }
     #main-page .bonus-box,
     #community-page .bonus-box,
@@ -348,13 +537,53 @@ body {
         height: 190px;
     }
     #main-page .todays-games-banner {
-        min-height: 140px;
+        min-height: 170px;
+    }
+    /* Community page desktop: online and daily poll side by side (like scramble and quiz) */
+    #community-page .community-top-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: stretch;
+        margin-top: 20px;
+        margin-bottom: 0;
+        padding: 0 20px;
+    }
+    #community-page .community-top-row .community-online-wrapper {
+        margin: 0;
+        min-height: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border-radius: var(--box-border-radius);
+    }
+    #community-page .community-top-row .community-poll-section {
+        padding: 0;
+        margin: 0;
+        min-height: 0;
+    }
+    #community-page .community-top-row .community-poll-section .poll-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    #community-page .community-top-row .community-poll-section .poll-bottom-section {
+        flex: 1;
+        min-height: 0;
+    }
+    /* Online header: Sanchez, same padding as daily poll top */
+    #community-page .community-online-header {
+        font-family: 'Adamina', serif;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 20px 10px 17px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.95);
     }
     #community-page .community-online-wrapper {
-        margin-top: 20px;
+        margin-top: 0;
     }
     #community-page .community-online-banner {
-        height: 130px;
+        height: 160px;
     }
     #community-page .community-online-inner {
         width: 88px;
@@ -409,23 +638,19 @@ body {
         height: 12px;
         margin-left: 4px;
     }
-    /* Hide main page user-div on desktop */
-    #main-page .user-div {
-        display: none !important;
-    }
-    /* Desktop user stats: upper-right, slightly bigger, dark grey */
+    /* Desktop user stats: upper-right (hidden; shown in banner instead) */
     .user-div-desktop {
-        display: flex;
+        display: none !important;
         align-items: center;
         flex-wrap: wrap;
         gap: 4px;
         position: fixed;
-        top: 72px;
-        right: 30px;
+    top: 62px;
+    right: 30px;
         font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 15px;
-        font-weight: 400;
-        color: #868686;
+        font-size: 13px;
+        font-weight: 200;
+        color: #333;
         z-index: 10000;
     }
     .user-div-desktop .user-bullet {
@@ -434,6 +659,46 @@ body {
         margin: 0 2px;
         font-size: 8px;
         transform: translateY(-1px);
+    }
+    /* Desktop: Sanchez less bold */
+    .subsection-title,
+    .achievements-header,
+    .challenges-header,
+    .account-header,
+    .avatar-select-title,
+    #prizes-page .prize-section-title,
+    .header-bar .desktop-date .date,
+    .header-bar .desktop-date .date-subtitle,
+    .header-bar .desktop-nav-tabs .tab-button .label {
+        font-weight: 600;
+    }
+    /* Desktop: white Sanchez titles on orange gradient (on this day, quiz, poll, daily question, challengers, daily bonus, etc.) – less bold */
+    .scramble-top-section .subsection-title,
+    .mc-top-section .subsection-title,
+    .quiz-top-section .subsection-title,
+    .poll-top-section .subsection-title,
+    .daily-question-top-section .subsection-title,
+    .featured-top-section .subsection-title,
+    .bonus-top-section .subsection-title,
+    .profile-complete-top-section .subsection-title,
+    .fof-top-section .subsection-title {
+        font-weight: 500;
+    }
+    /* Desktop: Tiles (prizes) and Profile (wallet) – white Sanchez headers unbold */
+    #prizes-page .prize-section-title,
+    .achievements-header,
+    .challenges-header,
+    .account-header {
+        font-weight: 500 !important;
+    }
+    /* Desktop: top bar nav link text – same less bold */
+    .header-bar .desktop-nav-tabs .tab-button .label {
+        font-weight: 500;
+    }
+    /* Desktop: top bar date – same less bold */
+    .header-bar .desktop-date .date,
+    .header-bar .desktop-date .date-subtitle {
+        font-weight: 500;
     }
 }
 
@@ -452,6 +717,11 @@ body {
     background-color: transparent;
     padding: 0;
     margin: 0;
+}
+
+#main-page {
+    position: relative;
+    z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -508,9 +778,9 @@ body {
     max-width: 500px;
     margin: 10px auto 30px auto;
     padding: 20px 20px 40px 20px;
-    /* border: var(--box-border-width) solid var(--box-border-color); */
-    /* border-radius: var(--box-border-radius); */
-    /* background-color: var(--box-background); */
+    border-radius: var(--box-border-radius);
+    /* border: 0px solid #ccc; */
+    /* background-color: #ffffff; */
     /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
 }
 
@@ -538,25 +808,21 @@ body {
     color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 4px;
-    margin-bottom: 0;
+    margin-bottom: 6px;
 }
 
 .profile-picture {
     width: 130px;
     height: 130px;
-    background: linear-gradient(to bottom, #F093FB, #F5576C);
+    background: #ffffff; /* solid white so no page color shows through */
     border: none;
-    border-radius: 50%;
+    border-radius: var(--box-border-radius);
     margin-bottom: 13px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    /* box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3); */
-    color: white;
-    font-size: 60px;
-    font-weight: 400;
 }
 
 .profile-image {
@@ -569,6 +835,7 @@ body {
     transform: translate(-50%, -50%);
     font-family: 'Abril Fatface', serif;
     line-height: 1;
+    /* opacity: 0; */
 }
 
 .profile-actions {
@@ -578,7 +845,7 @@ body {
     margin-top: 0;
     margin-bottom: 20px;
     text-align: center;
-    cursor: pointer;
+    cursor: default;
 }
 
 /* Avatar select popup */
@@ -596,7 +863,7 @@ body {
 
 .avatar-select-popup {
     background: #ffffff;
-    border-radius: 10px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     max-width: min(400px, calc(100vw - 40px));
     max-height: calc(100vh - 96px);
@@ -606,7 +873,7 @@ body {
 }
 
 .avatar-select-header {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     color: white;
     padding: 14px 16px;
     display: flex;
@@ -617,9 +884,7 @@ body {
 }
 
 .avatar-select-title {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 16px;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.02em;
 }
 
@@ -734,12 +999,6 @@ body {
     color: #FF8C42;
 }
 
-/* Wegmans orange for profile stars */
-body.wegmans .profile-today-stars .star-icon,
-body.wegmans .profile-today-stars .star-number {
-    color: #ce3f24 !important;
-}
-
 .profile-stars-container {
     background: transparent;
     border: none;
@@ -830,12 +1089,6 @@ body.wegmans .profile-today-stars .star-number {
     color: #FF8C42;
 }
 
-/* Wegmans orange for profile stat small */
-body.wegmans .profile-stat-small .star-icon-small,
-body.wegmans .profile-stat-small .stat-number {
-    color: #ce3f24 !important;
-}
-
 .star-icon {
     color: #FF8C42;
     font-size: 16px;
@@ -873,21 +1126,15 @@ body.wegmans .profile-stat-small .stat-number {
 .deal-item {
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     background: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     height: auto;
 }
 
-/* Regular deals - exclude firehouse deals */
-.deal-item:not(.firehouse-deal) {
-    display: flex;
-    flex-direction: column;
-}
-
 /* Image takes up whole top part - set pixel height */
-.deal-item:not(.firehouse-deal) .deal-image {
+.deal-item .deal-image {
     width: 100%;
     height: 200px;
     overflow: hidden;
@@ -897,14 +1144,14 @@ body.wegmans .profile-stat-small .stat-number {
     flex-shrink: 0;
 }
 
-.deal-item:not(.firehouse-deal) .deal-image img {
+.deal-item .deal-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
 /* Middle section - center title vertically and horizontally */
-.deal-item:not(.firehouse-deal) .deal-content {
+.deal-item .deal-content {
     height: 110px;
     min-height: 110px;
     max-height: 110px;
@@ -918,7 +1165,7 @@ body.wegmans .profile-stat-small .stat-number {
     background: white;
 }
 
-.deal-item:not(.firehouse-deal) .deal-title {
+.deal-item .deal-title {
     font-weight: 700;
     color: #333;
     font-size: 14px;
@@ -938,71 +1185,6 @@ body.wegmans .profile-stat-small .stat-number {
     line-height: 1.3;
 }
 
-/* Firehouse deals - specific height structure */
-.firehouse-deal {
-    height: auto !important;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Image: 600x360 aspect ratio (5:3) */
-.firehouse-deal .deal-image {
-    width: 100%;
-    aspect-ratio: 600 / 360;
-    height: auto !important;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.firehouse-deal .deal-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-/* Middle text part: 110px tall, centered */
-.firehouse-deal .deal-content {
-    height: 110px !important;
-    min-height: 110px !important;
-    max-height: 110px !important;
-    padding: 0 12px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
-    flex-shrink: 0;
-    background: white;
-}
-
-.firehouse-deal .deal-title {
-    text-align: center !important;
-    margin: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    font-weight: 700;
-    color: #333;
-    font-size: 14px;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Bottom red button part: 46px tall */
-.firehouse-deal .deal-button-container {
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
-    background-color: #c40000 !important;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
 .deal-button-container {
     background-color: #dc3545;
     display: flex;
@@ -1010,13 +1192,7 @@ body.wegmans .profile-stat-small .stat-number {
     width: 100%;
 }
 
-/* Wegmans orange for deal button containers */
-body.wegmans .deal-button-container {
-    background-color: #ce3f24 !important;
-}
-
-/* Regular deals button container - same height as firehouse */
-.deal-item:not(.firehouse-deal) .deal-button-container {
+.deal-item .deal-button-container {
     height: 46px;
     min-height: 46px;
     max-height: 46px;
@@ -1072,21 +1248,29 @@ body.wegmans .deal-button-container {
     margin-top: 10px;
     margin-bottom: 20px;
     padding: 0;
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     border-radius: var(--box-border-radius);
-    background-color: var(--box-background);
+    background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
-.account-header {
+/* Shared Sanchez font + size for section headers (match .subsection-title: 14px): achievements, challenges, account, avatar select, prizes/tiles */
+    .achievements-header,
+    .challenges-header,
+    .account-header,
+    .avatar-select-title,
+    #prizes-page .prize-section-title {
+    font-family: 'Adamina', serif;
     font-size: 14px;
+}
+
+.account-header {
     font-weight: 700;
     color: white;
     text-align: center;
     padding: 10px 20px;
-    background: var(--header-gradient);
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(to bottom, #FFB84D, #ffa928);
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -1102,14 +1286,21 @@ body.wegmans .deal-button-container {
     text-align: center;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 600;
-    background: linear-gradient(to bottom, #6EC1E4, #4A9FD4);
-    border-radius: 8px;
+    /* Soften gradient to feel closer to flat */
+    background: linear-gradient(to bottom, #5FB5DD, #4FA8D7);
+    border-radius: 0;
     padding: 10px 16px;
     cursor: pointer;
+    width: 50%;
+    border: none;
+    flex: 1 1 0;
 }
 
 .account-create-btn {
-    margin-top: 10px;
+    margin-top: 0;
+    border-top: none;
+    /* Light blue divider line between the two profile buttons */
+    border-left: 1px solid #b6dbf5;
 }
 
 .account-divider {
@@ -1158,35 +1349,173 @@ body.wegmans .deal-button-container {
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 0;
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     border-radius: var(--box-border-radius);
-    background-color: var(--box-background);
+    background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
-.achievements-header {
+.profile-account-actions {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    border: 0px solid #ccc;
+    border-radius: var(--box-border-radius);
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.profile-badges-container {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0;
+    border: 0px solid #ccc;
+    border-radius: var(--box-border-radius);
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.badges-header {
+    font-family: 'Adamina', serif;
     font-size: 14px;
+    font-weight: 500;
+    color: var(--header-text-color);
+    text-align: center;
+    padding: 10px 20px;
+    background: var(--masterGrad);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.badges-body {
+    background-color: white;
+    padding: 12px 12px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.badges-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.badges-section-title {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--header-text-color);
+    text-align: center;
+}
+
+.badges-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.badge-tile {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--box-border-radius);
+    background-color: #f0f0f0;
+    opacity: 0.5;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.badge-tile.unlocked {
+    opacity: 1;
+}
+
+.badge-tile:not(.unlocked)::after {
+    /* lock body */
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 4px;
+    width: 8px;
+    height: 6px;
+    background: #ffffff;
+    border-radius: 1px;
+}
+
+.badge-tile:not(.unlocked)::before {
+    /* lock shackle */
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    width: 6px;
+    height: 4px;
+    border: 2px solid #ffffff;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    box-sizing: border-box;
+}
+
+.badge-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Simple color hints for badge types */
+.badge-tile.badge-gold {
+    background: linear-gradient(to bottom, #FFD700, #E6B800);
+}
+
+.badge-tile.badge-silver {
+    background: linear-gradient(to bottom, #E0E0E0, #B0B0B0);
+}
+
+.badge-tile.badge-unlocked {
+    background-color: #e0f3ff;
+}
+
+.badge-tile.badge-locked {
+    background-color: #f0f0f0;
+}
+
+.achievements-header {
     font-weight: 700;
     color: white;
     text-align: center;
     padding: 10px 20px;
-    background: var(--header-gradient);
+    background: var(--masterGrad);
     border-bottom: none;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .challenges-header {
-    font-size: 14px;
     font-weight: 700;
     color: white;
     text-align: center;
     padding: 10px 20px;
-    background: var(--header-gradient);
+    background: linear-gradient(to bottom, #FFB84D, #ffa928);
     border-bottom: none;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -1200,27 +1529,14 @@ body.wegmans .deal-button-container {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: background-color 0.2s ease;
     position: relative;
-    background-color: var(--box-background);
+    background-color: #ffffff;
 }
 
 .challenge-item:hover {
     background-color: #f8f8f8;
 }
 
-/* Wegmans: profile window headers stay orange; container uses same window style */
 
-body.wegmans .achievements-header,
-body.wegmans .challenges-header {
-    background: var(--wegmans-gradient) !important;
-}
-
-body.wegmans .challenge-item {
-    background-color: var(--box-background);
-}
-
-body.wegmans .challenge-item:hover {
-    background-color: #f8f8f8;
-}
 
 .challenge-item:last-child {
     border-bottom: none;
@@ -1253,12 +1569,6 @@ body.wegmans .challenge-item:hover {
     box-shadow: 0 2px 4px rgba(255, 140, 66, 0.2);
 }
 
-/* Wegmans orange for challenge rewards */
-body.wegmans .challenge-reward {
-    color: #ce3f24 !important;
-    background: linear-gradient(135deg, rgba(206, 63, 36, 0.15) 0%, rgba(206, 63, 36, 0.1) 100%) !important;
-    box-shadow: 0 2px 4px rgba(206, 63, 36, 0.2) !important;
-}
 
 .star-icon-inline {
     color: #FF8C42;
@@ -1274,7 +1584,7 @@ body.wegmans .challenge-reward {
     background: #e0e0e0;
     color: #333;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     font-size: 14px;
     font-weight: 600;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1295,7 +1605,7 @@ body.wegmans .challenge-reward {
 
 .profile-stat {
     padding: 8px 20px;
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     width: 80%;
 }
 
@@ -1393,11 +1703,29 @@ body.wegmans .challenge-reward {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    padding: 10px 20px;
+    background: var(--top-bar-bg-mobile);
     z-index: 10001;
-    min-height: 56px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 46px;
+    color: var(--top-bar-text-mobile);
+}
+/* Top bar text/date/icons on mobile (star container keeps its own colors) */
+.header-bar .date-container .date,
+.header-bar .date-container .date-subtitle,
+.header-bar .game-overlay-close {
+    color: var(--top-bar-text-mobile);
+}
+.header-bar .date-container .date,
+.header-bar .date-container .date-subtitle {
+    font-family: 'Adamina', serif;
+}
+
+/* Desktop: override top bar bg/text (must come after base .header-bar so desktop vars win) */
+@media (min-width: 768px) {
+    .header-bar {
+        background: var(--top-bar-bg-desktop);
+        color: var(--top-bar-text-desktop);
+    }
 }
 
 .menu-icon {
@@ -1509,6 +1837,8 @@ body.mode-brand .date-subtitle {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     position: absolute;
     right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 1;
 }
 
@@ -1587,11 +1917,6 @@ body.mode-brand .date-subtitle {
 
 .header-type2 {
     display: none;
-}
-
-/* Carousel background gradient for firehouse2 */
-body.firehouse2 .top-logo-carousel-container {
-    background: linear-gradient(to bottom, #bf1722, #a00910) !important;
 }
 
 .top-logo-carousel-container {
@@ -1685,21 +2010,15 @@ body.firehouse2 .top-logo-carousel-container {
     height: 100%;
     gap: 0;
     background: linear-gradient(to bottom, #e84066, #c82a48);
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     padding: 20px;
     margin: 0 auto;
     width: calc(100% - 40px);
     max-width: 120px;
 }
 
-/* Wegmans flat orange for carousel content */
-body.wegmans .carousel-content-type1 {
-    background: #ce3f24 !important;
-}
-
-/* Border radius for wegmans logo in carousel */
-body.wegmans .carousel-slide-type1 img {
-    border-radius: 6px;
+.carousel-slide-type1 img {
+    border-radius: var(--box-border-radius);
 }
 
 .carousel-icon {
@@ -1749,18 +2068,28 @@ body.wegmans .carousel-slide-type1 img {
 /* Type 1 Carousel Styles */
 .top-logo-carousel-container-type1 {
     position: relative;
-    margin: 0px auto 0 auto;
-    transform: translateY(0);
-    width: 100%;
+    left: 50%;
+    margin: 0;
+    /* 110% of viewport, centered: half of 110vw = 55vw */
+    transform: translateX(-55vw);
+    width: 110vw;
     height: 120px;
     overflow: hidden;
-    z-index: 4;
+    z-index: 0;
     padding-top: 10px;
+    background-color: #0f3340;
     background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
-    background-size: cover;
+    background-size: 120% auto;
     background-position: center;
     background-repeat: no-repeat;
-    border-bottom: 1px solid #c2c2c2;
+}
+
+@media (max-width: 767px) {
+    .top-logo-carousel-container-type1 {
+        left: 0;
+        transform: none;
+        width: 100vw;
+    }
 }
 
 .top-logo-carousel-type1 {
@@ -1784,6 +2113,7 @@ body.wegmans .carousel-slide-type1 img {
 }
 
 .carousel-arrow-type1 {
+    display: none;
     position: absolute;
     color: #999;
     font-size: 24px;
@@ -1792,14 +2122,13 @@ body.wegmans .carousel-slide-type1 img {
     user-select: none;
     z-index: 10;
     line-height: 1;
-    display: flex;
     align-items: center;
     justify-content: center;
     width: 20px;
     height: 20px;
     top: 50%;
     transform: translateY(-50%);
-    pointer-events: all;
+    pointer-events: none;
 }
 
 .carousel-arrow-left-type1 {
@@ -1818,7 +2147,7 @@ body.wegmans .carousel-slide-type1 img {
     height: 100%;
     gap: 0;
     background: linear-gradient(to bottom, #e84066, #c82a48);
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     padding: 20px;
     margin: 0 auto;
     width: calc(100% - 40px);
@@ -1863,7 +2192,7 @@ body.wegmans .carousel-slide-type1 img {
 .week-combined-container2A {
     margin: 20px;
     margin-bottom: 12px !important;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
@@ -1876,13 +2205,16 @@ body.wegmans .carousel-slide-type1 img {
 
 .week-combined-container2A {
     display: none; /* Hidden by default, shown for bigy */
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .week-combined-container2B {
     /* border: 1px solid #a8a8a8; */
-    margin: 20px;
-    margin-bottom: 13px;
-    border-radius: 6px;
+    margin: 20px auto 13px auto;
+    max-width: 500px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: none; /* Hidden by default, shown for bigy2 */
@@ -1909,21 +2241,17 @@ body.wegmans .carousel-slide-type1 img {
 /* White borders for container2B */
 .week-combined-container2B .week-record-box-type1 {
     border-bottom: none !important;
-    background: #283f7e;
+    background: var(--calendar-background-top-color);
     padding: 8px;
     /* border-radius: 4px; */
 }
 
-/* Wegmans orange gradient for calendar record box */
-body.wegmans .week-combined-container2B .week-record-box-type1 {
-    background: linear-gradient(to bottom, #e65f45, #ce3f24) !important;
-}
 
 /* White background for inactive day boxes */
 .week-combined-container2B .week-box-type1 {
-    border-right: 1px solid #cccccc;
+    border-right: 1px solid var(--calendar-border-color);
     border-top: none;
-    background: #ffffff;
+    background: var(--calendar-background-color);
 }
 
 /* Remove left border from first box and right border from last box */
@@ -1962,11 +2290,6 @@ body.wegmans .week-combined-container2B .week-record-box-type1 {
     color: #e84066;
 }
 
-/* Orange numbers for wegmans */
-body.wegmans .week-combined-container2B .day-number-type1 {
-    color: #ce3f24 !important;
-}
-
 /* Keep star yellow in container2B */
 .week-combined-container2B .week-record-star-type1 {
     color: #ffa551;
@@ -1974,13 +2297,13 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 
 /* Today highlight for container2B - red background */
 .week-combined-container2B .week-box-type1.today {
-    background: linear-gradient(to bottom, #e84066, #c82a48) !important;
+    background: var(--calendar-highlight-color) !important;
     border-top: none !important;
 }
 
 .week-combined-container2B .week-box-type1.today .day-initial-type1,
 .week-combined-container2B .week-box-type1.today .day-number-type1 {
-    color: #ffffff;
+    color: var(--header-text-color);
     font-weight: 700;
 }
 
@@ -2025,7 +2348,8 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 .section {
     padding: 0px 20px;
     margin: 0;
-    background-color: #f5f5f5;
+    background-color: transparent !important;
+    background: transparent !important;
     /* border:1px solid green; */
 }
 
@@ -2078,10 +2402,25 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     margin: 10px 0;
     color: #555;
     text-align: center;
-    font-family: 'Aleo', serif;
+    font-family: 'Adamina', serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    background: transparent !important;
     /* border: 1px solid red; */
+}
+
+/* DAILY WARM UP / DAILY PUZZLES / DAILY ARCADE: shared styling */
+.section-title-warmup,
+.section-title-puzzles,
+.section-title-arcade {
+    font-size: 12px;  /* match .week-title-type1 size */
+    font-weight: 900; /* match .week-title-type1 thickness */
+    margin: 10px 0;
+    color: #000000;
+    text-align: center;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 
@@ -2097,12 +2436,13 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 
 .week-record-text {
     font-size: 14px;
-    color: #000;
+    color: var(--header-text-color);
     text-align: left;
     font-weight: 600;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    
 }
 
 /* Desktop online indicator & user stats: hidden on mobile only */
@@ -2147,8 +2487,8 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     opacity: 0.6;
 }
 
-/* User row above calendar */
-.user-div {
+/* User stats row above calendar, driven by --calendar-background-bottom-color */
+.calendar-user-div {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2156,12 +2496,15 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     gap: 2px;
     margin-bottom: 10px;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: #333;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: var(--header-text-color);
+    background-image: none !important;
+    background-color: var(--calendar-background-bottom-color) !important;
 }
-.user-div .user-bullet {
-    color: #999;
+.calendar-user-div .user-bullet {
+    color: var(--header-text-color);
     font-weight: 700;
     margin: 0 2px;
     font-size: 7px;
@@ -2178,7 +2521,7 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 
 .week-record-value {
     font-size: 20px;
-    color: white;
+    color: var(--header-text-color);
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2201,8 +2544,8 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     max-width: 40px;
     box-sizing: border-box;
     height: 60px;
-    border: 1px solid #000;
-    border-bottom: 2px solid black;
+    border: 1px solid var(--calendar-border-color);
+    border-bottom: 2px solid var(--calendar-border-color);
     padding: 6px 2px;
     display: flex;
     flex-direction: column;
@@ -2210,25 +2553,25 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     align-items: center;
     gap: 2px;
     position: relative;
-    background: #f5f5f5;
-    border-radius: 20px;
+    background: var(--calendar-background-color);
+    border-radius: var(--box-border-radius);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .week-box.today {
-    background: #dc3545;
-    border-color: #dc3545;
+    background: var(--calendar-highlight-color);
+    border-color: var(--calendar-highlight-color);
 }
 
 .week-box.today .day-initial,
 .week-box.today .day-number {
-    color: #ffffff;
+    color: var(--header-text-color);
 }
 
 .day-initial {
     font-size: 10px;
-    color: #666;
+    color: var(--header-text-color);
     text-align: center;
     font-weight: 600;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2237,7 +2580,7 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 .day-number {
     white-space: nowrap;
     font-size: 16px;
-    color: #000;
+    color: var(--header-text-color);
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2246,11 +2589,17 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 /* Header Type 1 Calendar Styles (from styleTemp) */
 .week-section-type1 {
     padding: 16px 20px 0px 20px;
-    /* background-color: red; */
+    background: none;
     text-align: center;
     position: relative;
     z-index: 1;
     margin-bottom: 6px;
+}
+
+.header-type1 .week-section-type1 {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .week-subtitle-type1 {
@@ -2301,63 +2650,66 @@ body.wegmans .week-combined-container2B .day-number-type1 {
 .week-container-type1 {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin-top: 4px; /* gap so gradient does not sit behind Jason Streak Best row */
 }
 
 /* TODAY'S GAMES banner below calendar - placeholder image background, inner div has gradient + text */
 .todays-games-wrapper {
-    cursor: pointer;
+    cursor: default;
     user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-.todays-games-wrapper:active {
-    opacity: 0.98;
+    pointer-events: none;
 }
 .todays-games-banner {
     display: block;
-    min-height: 100px;
+    min-height: 130px;
     margin: 0;
-    background: #c8d4dc url('weeklyBackgrounds/thanksgiving_day1.png') center/cover no-repeat;
+    background: #c8d4dc url('weeklyBackgrounds/thanksgiving_day1.png') center center no-repeat;
+    background-size: 100% auto;
     border-radius: 0;
-    box-shadow: inset 0 0 8px 4px rgba(0, 0, 0, 0.25);
+    /* Softer inner shadow on calendar image */
+    /* box-shadow: inset 0 0 3px 3px rgba(0, 0, 0, 0.18); */
     /* border-top: 1px white solid; */
     /* border-bottom: 1px white solid; */
 }
-.todays-games-inner {
+.calendar-user-div {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: center;
     position: relative;
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
-    background: linear-gradient(180deg, #49c8db 0%, #4f9dca 100%);
+    background: transparent;
     border-radius: 0;
-    padding: 7px 18px;
+    padding: 8px 8px;
     margin: 0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
+    display: none;
 }
-.todays-games-inner::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 28%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.28);
-    transform: skewX(-35deg);
-    pointer-events: none;
-    animation: todays-games-shine 3.2s ease-in-out 0.5s infinite;
+.calendar-user-div::before {
+    display: none;
 }
-@keyframes todays-games-shine {
-    0% { transform: translateX(-120%) skewX(-35deg); }
-    37.5% { transform: translateX(420%) skewX(-35deg); }
-    37.5%,
-    100% { transform: translateX(420%) skewX(-35deg); }
+.calendar-user-div .user-name,
+.calendar-user-div .user-streak,
+.calendar-user-div .user-best {
+    color: var(--header-text-color);
+    /* font-weight: 500; */
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.2;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+}
+.calendar-user-div .user-bullet {
+    color: var(--header-text-color);
+    line-height: 1.2;
+    vertical-align: middle;
+    margin: 0 3px;
+    transform: translateY(-1px);
 }
 .todays-games-text {
     color: #fff;
@@ -2369,45 +2721,15 @@ body.wegmans .week-combined-container2B .day-number-type1 {
     
 }
 .todays-games-arrow {
-    margin-left: 3px;
-    /* margin-top: 1px; */
-    font-size: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-}
-.todays-games-arrow svg {
-    display: block;
+    display: none !important;
 }
 
-/* Main page: 6px radius for elements using variable */
+/* Main page: use variable for container radius */
 #main-page .highlow-container,
 #main-page .highlow-item {
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
 }
 
-/* Wegmans orange flat color for calendar */
-body.wegmans .week-container-type1 {
-    background: #ce3f24 !important;
-    border: 1px solid #ce3f24 !important;
-    box-shadow: 0 2px 8px rgba(206, 63, 36, 0.2) !important;
-}
-
-/* Wegmans orange color for all orange gradient elements (except games page) */
-body.wegmans .header-bar,
-body.wegmans .desktop-top-bar,
-body.wegmans .scramble-top-section,
-body.wegmans .quiz-top-section,
-body.wegmans .mc-top-section,
-body.wegmans .mc-bottom-section,
-body.wegmans .entry-button {
-    background: #ce3f24 !important;
-}
-
-body.wegmans .entry-button {
-    background: linear-gradient(135deg, #ce3f24, #a0301a) !important;
-}
 
 .week-record-box-type1 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
@@ -2417,11 +2739,12 @@ body.wegmans .entry-button {
     justify-content: center;
     align-items: center;
     gap: 0;
+    background: var(--calendar-background-top-color);
 }
 
 .week-record-text-type1 {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--calendar-background-top-text);
     text-align: center;
     font-weight: 800;
     font-family: 'Nunito', 'Helvetica Neue', sans-serif;
@@ -2441,13 +2764,14 @@ body.wegmans .entry-button {
 .week-box-type1 {
     flex: 1;
     height: 60px;
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    border-right: 1px solid var(--calendar-border-color);
     padding: 5px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 4px;
+    background: var(--calendar-background-color);
 }
 
 .week-box-type1:last-child {
@@ -2455,18 +2779,18 @@ body.wegmans .entry-button {
 }
 
 .week-box-type1.today {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--calendar-highlight-color);
 }
 
 .week-box-type1.today .day-initial-type1,
 .week-box-type1.today .day-number-type1 {
-    color: #ffffff;
+    color: var(--header-text-color);
     font-weight: 700;
 }
 
 .day-initial-type1 {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--header-text-color);
     text-align: center;
     font-weight: 600;
 }
@@ -2474,7 +2798,7 @@ body.wegmans .entry-button {
 .day-number-type1 {
     white-space: nowrap;
     font-size: 18px;
-    color: white;
+    color: var(--header-text-color);
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', 'Helvetica Neue', sans-serif;
@@ -2485,7 +2809,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -2493,14 +2817,14 @@ body.wegmans .entry-button {
 }
 
 .mc-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .mc-top-section .subsection-title {
-    color: white;
+    color: var(--header-text-color);
 }
 
 .mc-bottom-section {
@@ -2559,7 +2883,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 8px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -2568,14 +2892,14 @@ body.wegmans .entry-button {
 }
 
 .quiz-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .quiz-top-section .subsection-title {
-    color: white;
+    color: var(--header-text-color);
 }
 
 .quiz-bottom-section {
@@ -2686,7 +3010,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -2695,14 +3019,14 @@ body.wegmans .entry-button {
 }
 
 .featured-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .featured-top-section .subsection-title {
-    color: #fff !important;
+    color: var(--header-text-color) !important;
 }
 
 .featured-bottom-section {
@@ -2823,7 +3147,7 @@ body.wegmans .entry-button {
 
 .challengers-high-scores {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
     color: #fff;
     text-align: center;
@@ -2832,10 +3156,15 @@ body.wegmans .entry-button {
     margin-bottom: 10px;
 }
 
+/* Community page: top row wraps online + poll (desktop: side by side; mobile: stacked) */
+.community-top-row .community-poll-section {
+    margin-top: 12px;
+}
+
 /* Community page: online block with small orange header (like weekly star results) */
 .community-online-wrapper {
     margin: 10px 20px 0 20px;
-    border-radius: 5px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -2852,24 +3181,24 @@ body.wegmans .entry-button {
 }
 
 .community-online-header--morning {
-    background: linear-gradient(to bottom, #7FDBFF, #39CCCC);
+    background: #4ab7df;
 }
 
 .community-online-header--afternoon {
-    background: linear-gradient(to bottom, #2ECC71, #27AE60);
+    background: #40c978;
 }
 
 .community-online-header--evening {
-    background: linear-gradient(to bottom, #ff624d, #e03832);
+    background: #f35a48;
 }
 
 .community-online-header--night {
-    background: linear-gradient(to bottom, #3c7a7a, #2f6464);
+    background: #376c6c;
 }
 
 .community-online-banner {
     position: relative;
-    height: 80px;
+    height: 130px;
     background: linear-gradient(to bottom, #4A148C, #2E0E5C);
     display: flex;
     align-items: center;
@@ -2907,19 +3236,19 @@ body.wegmans .entry-button {
 }
 
 .community-online-wrapper--morning .community-online-inner {
-    background: #39CCCC;
+    background: #4ab7df; /* match morning header */
 }
 
 .community-online-wrapper--afternoon .community-online-inner {
-    background: #27AE60;
+    background: #40c978; /* match afternoon header */
 }
 
 .community-online-wrapper--evening .community-online-inner {
-    background: #ec3a34;
+    background: #f35a48; /* match evening header */
 }
 
 .community-online-wrapper--night .community-online-inner {
-    background: #2f6464;
+    background: #376c6c; /* match night header */
     border: 1px solid #64a5a5;
 }
 
@@ -2975,8 +3304,8 @@ body.wegmans .entry-button {
 }
 
 .challengers-score-avatar {
-    width: 35px;
-    height: 35px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -3000,7 +3329,7 @@ body.wegmans .entry-button {
 
 .challengers-score-name {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: #fff;
     line-height: 1.3;
@@ -3008,7 +3337,7 @@ body.wegmans .entry-button {
 
 .challengers-score-city {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.85);
     line-height: 1.3;
@@ -3017,7 +3346,7 @@ body.wegmans .entry-button {
 
 .challengers-score-stars {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: #fff;
     display: flex;
@@ -3039,7 +3368,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -3048,14 +3377,14 @@ body.wegmans .entry-button {
 }
 
 .poll-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .poll-top-section .subsection-title {
-    color: #fff !important;
+    color: var(--header-text-color) !important;
 }
 
 .poll-bottom-section {
@@ -3159,7 +3488,7 @@ body.wegmans .entry-button {
 
 .poll-result-bar-fill {
     height: 100%;
-    background: linear-gradient(to right, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     border-radius: 0;
 }
 
@@ -3185,6 +3514,9 @@ body.wegmans .entry-button {
     gap: 6px;
     justify-content: flex-start;
     padding: 0 20px 0 20px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .poll-button {
@@ -3218,10 +3550,10 @@ body.wegmans .entry-button {
 
 /* Daily Question - same card style as poll */
 .daily-question-container {
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     border-radius: var(--box-border-radius);
     overflow: hidden;
-    background-color: var(--box-background);
+    background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
@@ -3229,14 +3561,14 @@ body.wegmans .entry-button {
 }
 
 .daily-question-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .daily-question-top-section .subsection-title {
-    color: #fff !important;
+    color: var(--header-text-color) !important;
 }
 
 .daily-question-bottom-section {
@@ -3426,7 +3758,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -3435,14 +3767,14 @@ body.wegmans .entry-button {
 }
 
 .profile-complete-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 12px 20px 12px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .profile-complete-top-section .subsection-title {
-    color: #fff !important;
+    color: var(--header-text-color) !important;
 }
 
 .profile-complete-bottom-section {
@@ -3456,22 +3788,22 @@ body.wegmans .entry-button {
 
 /* Games page: DAILY BONUS wrapper styled like other orange-header cards */
 .bonus-section-container {
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     border-radius: var(--box-border-radius);
     overflow: hidden;
-    background-color: var(--box-background);
+    background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .bonus-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 12px 20px 12px 17px;
     flex: 0 0 auto;
     border-bottom: none;
 }
 
 .bonus-top-section .subsection-title {
-    color: #fff !important;
+    color: var(--header-text-color) !important;
 }
 
 .bonus-bottom-section {
@@ -3550,7 +3882,7 @@ body.wegmans .entry-button {
     padding: 0;
     margin-bottom: 12px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -3559,23 +3891,35 @@ body.wegmans .entry-button {
 }
 
 .scramble-top-section {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
-    flex: 1;
+    flex: 0 0 auto;
     border-bottom: none;
 }
 
 .scramble-top-section .subsection-title {
-    color: white;
+    color: var(--header-text-color);
 }
 
 .scramble-bottom-section {
     background-color: white;
     padding: 16px 20px;
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    grid-template-columns: 1fr auto;
     gap: 8px;
+    align-items: center;
+}
+
+.unscramble-middle {
+    display: contents;
+}
+
+.unscramble-label {
+    grid-row: 2;
+    grid-column: 1;
 }
 
 .on-this-day-container::before {
@@ -3597,18 +3941,30 @@ body.wegmans .entry-button {
     font-size: 14px;
     font-weight: 800;
     /* margin-bottom: 12px; */
-    color: #666;
+    color: var(--header-text-color);
     text-align: left;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Adamina', serif;
     position: relative;
     z-index: 1;
-    text-transform: uppercase;
+    text-transform: none;
+    letter-spacing: 0.5px;
+}
+
+/* Center subsection titles to match achievements-header, account-header, etc. */
+.scramble-top-section .subsection-title,
+.mc-top-section .subsection-title,
+.quiz-top-section .subsection-title,
+.poll-top-section .subsection-title,
+.daily-question-top-section .subsection-title,
+.featured-top-section .subsection-title,
+.bonus-top-section .subsection-title {
+    text-align: center;
 }
 
 .unscramble-boxes {
     position: relative;
-    height: 55px;
-    margin-bottom: 12px;
+    min-height: 55px;
+    margin-bottom: 0;
     overflow: visible;
     display: flex;
     flex-direction: row;
@@ -3618,11 +3974,9 @@ body.wegmans .entry-button {
     flex-wrap: nowrap;
     width: 100%;
     z-index: 1;
-}
-
-.unscramble-footer {
-    position: relative;
-    min-height: 36px;
+    grid-row: 1;
+    grid-column: 1 / -1;
+    align-self: center;
 }
 
 .unscramble-label {
@@ -3640,15 +3994,11 @@ body.wegmans .entry-button {
     z-index: 1;
 }
 
-/* Wegmans unscramble label grey */
-body.wegmans .unscramble-label {
-    color: #666 !important;
-}
 
 .unscramble-hint-btn {
-    position: absolute;
-    right: 0;
-    top: 0;
+    grid-row: 2;
+    grid-column: 2;
+    position: static;
     background: linear-gradient(to bottom, #6EDDD4, #4ECDC4);
     color: white;
     border: none;
@@ -3659,9 +4009,9 @@ body.wegmans .unscramble-label {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     z-index: 10;
     pointer-events: auto;
@@ -3669,7 +4019,6 @@ body.wegmans .unscramble-label {
 
 .unscramble-hint-btn:not(:disabled):hover {
     background: linear-gradient(to bottom, #7EEDE4, #5EDDD4);
-    box-shadow: 0 4px 8px rgba(78, 205, 196, 0.4);
     transition: all 0.2s ease;
 }
 
@@ -3682,15 +4031,17 @@ body.wegmans .unscramble-label {
     justify-content: center;
     gap: 2px;
     margin-top: -2px;
+    grid-row: 3;
+    grid-column: 1 / -1;
 }
 
 .unscramble-star {
     font-size: 18px;
-    color: #FF8C42;
+    color: #ddd;
 }
 
-.unscramble-star.grey {
-    color: #ddd;
+.unscramble-star:not(.grey) {
+    color: #FF8C42;
 }
 
 .highlow-stars {
@@ -3717,7 +4068,7 @@ body.wegmans .unscramble-label {
     padding: 0;
     margin-bottom: 0px;
     background-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -3732,7 +4083,7 @@ body.wegmans .unscramble-label {
 }
 
 .fof-top-section .subsection-title {
-    color: white;
+    color: var(--header-text-color);
 }
 
 .fof-bottom-section {
@@ -3836,9 +4187,9 @@ body.wegmans .unscramble-label {
     min-height: 40px;
     max-height: 50px;
     aspect-ratio: 1;
-    background: linear-gradient(to bottom, #e84066, #c82a48);
+    background: var(--calendar-background-top-color);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3867,10 +4218,10 @@ body.wegmans .unscramble-label {
 }
 
 .highlow-container {
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     padding: 15px;
     margin-bottom: 10px;
-    background-color: var(--box-background);
+    background-color: #ffffff;
     border-radius: var(--box-border-radius);
 }
 
@@ -3979,12 +4330,12 @@ body.wegmans .unscramble-label {
 
 .play-box {
     flex: 1;
-    border: var(--box-border-width) solid var(--box-border-color);
+    border: 0px solid #ccc;
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    background-color: var(--box-background);
-    border-radius: 6px;
+    background-color: #ffffff;
+    border-radius: var(--box-border-radius);
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -4023,12 +4374,28 @@ body.wegmans .unscramble-label {
     font-weight: 400;
 }
 
+.play-text-view {
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+}
+
+.play-box-nav .play-box-nav-icon {
+    height: 30px;
+    width: 30px;
+    margin-bottom: 1px;
+    flex-shrink: 0;
+}
+.play-box-nav .play-box-nav-icon path {
+    fill: white;
+}
+
 .arcade-box {
-    height: 140px;
-    border: var(--box-border-width) solid var(--box-border-color);
+    height: 142px;
+    border: 0px solid #ccc;
     margin-bottom: 8px;
-    background-color: var(--box-background);
-    border-radius: 6px;
+    background-color: #ffffff;
+    border-radius: var(--box-border-radius);
     display: flex;
     overflow: hidden;
     cursor: pointer;
@@ -4106,9 +4473,9 @@ body.wegmans .unscramble-label {
 
 .bonus-box {
     height: 140px;
-    border: var(--box-border-width) solid var(--box-border-color);
-    background-color: var(--box-background);
-    border-radius: 6px;
+    border: 0px solid #ccc;
+    background-color: #ffffff;
+    border-radius: var(--box-border-radius);
     margin-bottom: 20px;
     display: flex;
     overflow: hidden;
@@ -4198,11 +4565,11 @@ body.wegmans .unscramble-label {
     min-height: calc(100vh - 116px);
     justify-content: flex-start;
     width: 100%;
-    background-color: #f5f5f5 !important;
+    background-color: transparent !important;
 }
 
 #deals-page {
-    background-color: #f5f5f5 !important;
+    background-color: transparent !important;
 }
 
 #deals-page .profile-container {
@@ -4309,10 +4676,6 @@ body.wegmans .unscramble-label {
     pointer-events: auto;
 }
 
-/* Wegmans orange for draw and go buttons */
-body.wegmans .journey-go-button {
-    background: linear-gradient(to bottom, #e65f45, #ce3f24) !important;
-}
 
 .journey-go-button:focus {
     outline: none;
@@ -4346,7 +4709,7 @@ body.wegmans .journey-go-button {
     justify-content: center;
     min-height: auto;
     padding: 0px 20px;
-    background-color: #f5f5f5;
+    background-color: transparent;
     overflow: hidden;
     margin: -40px 0 0 0;
     width: 100%;
@@ -4459,11 +4822,11 @@ body.wegmans .journey-go-button {
 
 .game-overlay {
     position: fixed;
-    top: 56px;
+    top: 46px;
     left: 0;
     width: 100%;
-    height: calc(100% - 56px);
-    background: #f5f5f5;
+    height: calc(100% - 46px);
+    background: transparent;
     z-index: 10000;
     display: none;
     touch-action: none;
@@ -4489,7 +4852,7 @@ body.wegmans .journey-go-button {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #f5f5f5;
+    background-color: transparent;
     z-index: 10001;
     opacity: 1;
     pointer-events: none;
@@ -4500,11 +4863,145 @@ body.wegmans .journey-go-button {
 .reward-overlay {
     position: absolute;
     inset: 0;
-    z-index: 10002;
+    z-index: 12000;
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
+}
+
+/* Daily avatar unlock overlay (unique window) */
+.avatar-unlock-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-unlock-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 0;
+}
+
+.avatar-unlock-rain {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.avatar-unlock-box {
+    position: relative;
+    width: 260px;
+    max-width: 90vw;
+    background: #ffffff;
+    border-radius: var(--box-border-radius);
+    /* padding: 14px 14px 16px; */
+    box-sizing: border-box;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.avatar-unlock-header {
+    font-family: 'Abril Fatface', serif; /* match game thumbnail titles */
+    font-size: 28px;
+    font-weight: 400;
+    text-align: center;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    padding: 10px 18px;
+    background: linear-gradient(to bottom, #2DD7A4, #1DB88A);
+    border-radius: var(--box-border-radius) var(--box-border-radius) 0 0;
+}
+
+.avatar-unlock-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.avatar-unlock-line1,
+.avatar-unlock-line2 {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    color: #444;
+}
+
+.avatar-unlock-line1 {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.avatar-unlock-line2 {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    margin-top: 0;
+    margin-bottom: 9px; /* 5px below PLAYED 6 GAMES */
+}
+
+.avatar-unlock-divider {
+    width: 100%;
+    height: 1px;
+    background: #ddd;
+    margin: 0;
+}
+
+.avatar-unlock-badge-slot {
+    width: 128px;
+    height: 128px;
+    border-radius: var(--box-border-radius);
+    overflow: hidden;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;    /* 5px above avatar image */
+    margin-bottom: 8px;
+}
+
+.avatar-unlock-badge {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    display: block;
+}
+
+.avatar-unlock-rain .rain-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 28px;
+    line-height: 1;
+    transform-origin: center center;
+    color: #FF8C42;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-unlock-rain .rain-item-emoji {
+    font-size: 32px;
+}
+
+.avatar-unlock-click {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .reward-overlay.pointer-events-on {
@@ -4554,7 +5051,7 @@ body.wegmans .journey-go-button {
     margin-top: -25px;
     background: #ffffff;
     border: 1px solid #cccccc;
-    border-radius: 10px;
+    border-radius: var(--box-border-radius);
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -4711,14 +5208,14 @@ body.wegmans .journey-go-button {
 .game-overlay-close {
     background: white;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     display: none;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     color: #dc3545;
-    font-size: 20px;
+    font-size: 16px;
     cursor: pointer;
     font-weight: 400;
     line-height: 1;
@@ -4764,7 +5261,7 @@ body.wegmans .journey-go-button {
     font-weight: 400;
     line-height: 1;
     padding: 0;
-    top: 72px;
+    top: 62px;
     right: 20px;
     left: auto;
     transform: none;
@@ -4777,16 +5274,8 @@ body.wegmans .journey-go-button {
     color: #000;
 }
 
-/* Firehouse close button - ensure x is visible */
-body.firehouse2 .game-overlay-close {
-    color: #dc3545 !important;
-    background: white !important;
-    font-weight: 700 !important;
-    font-size: 22px !important;
-}
-
 .header-logo {
-    height: 45px;
+    height: 26px;
     width: auto;
     padding: 0;
     border: none;
@@ -4807,10 +5296,10 @@ body.firehouse2 .game-overlay-close {
     width: 22px;
     height: 22px;
     padding: 0;
-    border: 2px solid #666;
+    border: 2px solid var(--calendar-top-solid, #e73f65);
     border-radius: 50%;
     background: transparent;
-    color: #666;
+    color: var(--calendar-top-solid, #e73f65);
     font-size: 14px;
     font-weight: 700;
     display: inline-flex;
@@ -4819,7 +5308,7 @@ body.firehouse2 .game-overlay-close {
     justify-content: center;
     cursor: pointer;
     position: absolute;
-    right: 15px;
+    right: 12px;
     top: 68px;
     z-index: 1000;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -4835,97 +5324,46 @@ body.firehouse2 .game-overlay-close {
     display: none;
 }
 
+body.carousel-type1-visible .help-button {
+    top: 177px;
+}
+
+@media (max-width: 767px) {
+    .help-button {
+        top: 58px;
+    }
+    body.carousel-type1-visible .help-button {
+        top: 177px;
+    }
+    #community-page .community-online-wrapper {
+        margin-top: 20px;
+    }
+    .play-box-nav {
+        display: none !important;
+    }
+}
+
 /* White help button for bigy2 */
 body.bigy2 .help-button {
     border: 2px solid #ffffff !important;
     color: #ffffff !important;
 }
 
-/* Firehouse2 calendar styling */
-body.firehouse2 .week-combined-container2B .week-record-box-type1 {
-    background: linear-gradient(to bottom, #bf1722, #a00910) !important;
-}
-
-/* Dark grey background for week-theme-section in firehouse2 */
-body.firehouse2 .week-combined-container2B .week-theme-section {
-    background: #000000 !important;
-}
-
-/* Orange background for week-theme-section in wegmans */
-body.wegmans .week-combined-container2B .week-theme-section {
-    background: #ce3f24 !important;
-}
-
-/* Inner drop shadow on thanksgiving pattern image for firehouse2 */
-body.firehouse2 .week-combined-container2B .week-theme-section::before {
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 1) !important;
-}
-
-body.firehouse2 .week-combined-container2B .week-box-type1.today {
-    background: linear-gradient(to bottom, #ffe13a, #ffb731) !important;
-}
-
-/* Center and capitalize week title/subtitle for bigy2, firehouse2, and wegmans */
-body.bigy2 .week-combined-container2B .week-theme-section,
-body.firehouse2 .week-combined-container2B .week-theme-section,
-body.wegmans .week-combined-container2B .week-theme-section {
+/* Center and capitalize week title/subtitle for bigy2 */
+body.bigy2 .week-combined-container2B .week-theme-section {
     align-items: center !important;
 }
 
-body.bigy2 .week-combined-container2B .week-title,
-body.firehouse2 .week-combined-container2B .week-title,
-body.wegmans .week-combined-container2B .week-title {
+body.bigy2 .week-combined-container2B .week-title {
     text-align: center !important;
     width: 100% !important;
 }
 
-/* Nunito font for week title in firehouse2 */
-body.firehouse2 .week-combined-container2B .week-title {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-body.bigy2 .week-combined-container2B .week-subtitle,
-body.firehouse2 .week-combined-container2B .week-subtitle,
-body.wegmans .week-combined-container2B .week-subtitle {
+body.bigy2 .week-combined-container2B .week-subtitle {
     text-align: center !important;
     text-transform: uppercase !important;
     width: 100% !important;
     font-family: 'Aleo', serif !important;
-}
-
-/* Non-bold for week subtitle in firehouse2 */
-body.firehouse2 .week-combined-container2B .week-subtitle {
-    font-weight: 400 !important;
-}
-
-/* Nunito font for weekly record, day numbers, and day initials in firehouse2 */
-body.firehouse2 .week-combined-container2B .week-record-text-type1 {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-body.firehouse2 .week-combined-container2B .day-initial-type1 {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-body.firehouse2 .week-combined-container2B .day-number-type1 {
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-/* Orange numbers for wegmans */
-body.wegmans .week-combined-container2B .day-number-type1 {
-    color: #ce3f24 !important;
-}
-
-/* Today highlight for wegmans - orange background */
-body.wegmans .week-combined-container2B .week-box-type1.today {
-    background: linear-gradient(to bottom, #ce3f24, #a0301a) !important;
-    border-top: none !important;
-}
-
-/* White help button for firehouse2 */
-body.firehouse2 .help-button {
-    border: 2px solid #ffffff !important;
-    color: #ffffff !important;
 }
 
 .help-popup-overlay {
@@ -4947,11 +5385,14 @@ body.firehouse2 .help-button {
 
 .help-popup-content {
     background: white;
-    border-radius: 6px;
-    padding: 30px;
-    width: 80%;
+    border-radius: var(--box-border-radius);
+    padding: 10px 30px 30px 30px;
+    width: 85%;
     max-width: 650px;
-    max-height: 80vh;
+    height: 76vh;
+    max-height: 76vh;
+    margin: 0 auto;
+    transform: translateY(-25px);
     overflow-y: auto;
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -4981,6 +5422,14 @@ body.firehouse2 .help-button {
 
 .help-popup-title {
     display: none;
+}
+
+.help-popup-icon {
+    text-align: center;
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-top: 8px;
+    margin-bottom: 12px;
 }
 
 /* Game not complete modal */
@@ -5048,10 +5497,32 @@ body.firehouse2 .help-button {
 
 .help-popup-text {
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.3;
     color: #555;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-align: center;
+}
+
+.help-popup-divider {
+    width: 100%;
+    padding: 8px 0;
+}
+
+.help-popup-divider::before {
+    content: "";
+    display: block;
+    height: 1px;
+    background: #b1b1b1;
+    width: 100%;
+}
+
+.help-popup-item {
+    padding: 7px 0;
+}
+
+.help-popup-text p {
+    margin: 0 0 4px 0;
+    padding: 0;
 }
 
 .help-popup-text p:first-child {
@@ -5060,22 +5531,29 @@ body.firehouse2 .help-button {
     font-size: 13px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 4px;
 }
 
 .help-popup-text p.help-popup-caps {
-    font-size: 15px;
+    font-size: 14px !important;
     color: #FF8C42;
-    font-weight: 700;
-    margin-bottom: 2px;
-    margin-top: 22px;
+    font-weight: 500;
+    font-family: 'Sanchez', serif;
+    margin-bottom: 1px;
 }
-.help-popup-text > p:nth-of-type(3) {
-    margin-top: 37px;
+
+.help-popup-body-tight {
+    line-height: 1.35;
+}
+
+@media (max-width: 767px) {
+    .help-popup-credit {
+        font-size: 14px;
+        margin-top: 0;
+    }
 }
 
 .help-popup-text p {
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .help-popup-text p:last-child {
@@ -5090,11 +5568,16 @@ body.firehouse2 .help-button {
 .help-popup-credit {
     font-family: 'Roboto Slab', 'Rockwell', 'Courier New', serif !important;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 11px;
     color: #333;
-    margin-top: 35px;
+    margin-top: 6px;
     margin-bottom: 0;
     text-align: center;
+}
+
+/* TEMP DEBUG: visualize Journey board bounds globally */
+#board {
+    outline: 4px solid red !important;
 }
 
 @media (min-width: 768px) {
@@ -5144,7 +5627,7 @@ body.firehouse2 .help-button {
     font-size: 26px; /* match .section-title / THIS WEEK */
     font-weight: 400;
     color: #000;
-    font-family: 'Aleo', serif;
+    font-family: 'Adamina', serif;
     margin: 0; /* remove extra vertical space between title and subtitle */
     letter-spacing: 0.5px;
 }
@@ -5202,8 +5685,8 @@ body.firehouse2 .help-button {
     width: 100%;
     display: flex;
     flex-direction: column;
-    border: var(--box-border-width) solid var(--box-border-color);
-    background-color: var(--box-background);
+    border: 0px solid #ccc;
+    background-color: #ffffff;
     border-radius: var(--box-border-radius);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -5221,7 +5704,7 @@ body.firehouse2 .help-button {
 }
 
 .boost-game-score {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     padding: 15px 20px;
     text-align: center;
 }
@@ -5538,10 +6021,10 @@ body.firehouse2 .help-button {
 }
 
 .entry-button {
-    background: linear-gradient(135deg, #FFB84D, #FF8C42);
+    background: var(--masterGrad);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--box-border-radius);
     padding: 16px 40px;
     font-size: 18px;
     font-weight: 700;
@@ -5651,7 +6134,7 @@ body[style*="background-color: #000000"] .cost-text {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 0;
     text-align: center;
-    letter-spacing: 0.5px;
+    /* letter-spacing: 0.5px; */
 }
 
 .prize-section {
@@ -5672,16 +6155,15 @@ body[style*="background-color: #000000"] .cost-text {
 
 /* Prizes page: use orange section bars above each prize grid, like main page sections */
 #prizes-page .prize-section-title {
-    background: linear-gradient(to bottom, #FFB84D, #FF8C42);
-    color: #fff;
+    background: var(--masterGrad);
+    color: var(--header-text-color);
     margin: 0 20px 0 20px;
     padding: 10px 16px;
     text-align: center;
-    border-radius: 6px 6px 0 0;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 12px;
+    border-radius: var(--box-border-radius) var(--box-border-radius) 0 0;
     font-weight: 800;
     letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 #prizes-page .prize-container {
@@ -5693,11 +6175,11 @@ body[style*="background-color: #000000"] .cost-text {
     width: calc(100% - 40px);
     margin: 0 20px;
     border: 1px solid #bbe1f0;
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     overflow: hidden;
     padding: 0;
-    background: transparent;
-    box-shadow: none;
+    background: #ffffff;
 }
 
 .prize-container .prize-box {
@@ -5835,7 +6317,7 @@ body[style*="background-color: #000000"] .cost-text {
     align-items: center;
     justify-content: center;
     aspect-ratio: 1;
-    border-radius: 8px;
+    border-radius: var(--box-border-radius);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
@@ -5898,7 +6380,7 @@ body[style*="background-color: #000000"] .cost-text {
 #instructionsStartDiv {
     background: white;
     padding: 20px;
-    border-radius: 6px;
+    border-radius: var(--box-border-radius);
     border: 1px solid #ccc;
     margin-bottom: 12px;
     width: auto;

@@ -453,12 +453,6 @@ function showQuizStars() {
     const starsElement = document.querySelector('.quiz-stars');
     
     if (starsElement) {
-        // Set up stars but keep hidden initially
-        starsElement.style.display = 'flex';
-        starsElement.style.opacity = '0';
-        starsElement.style.maxHeight = '0';
-        starsElement.style.overflow = 'hidden';
-        
         const starElements = starsElement.querySelectorAll('.quiz-star');
         starElements.forEach((star, index) => {
             if (index < starsEarned) {
@@ -467,16 +461,28 @@ function showQuizStars() {
                 star.classList.add('grey');
             }
         });
+
+        const isDesktop = window.innerWidth >= 768;
+        if (isDesktop) {
+            // Desktop: stars already visible (grey) from CSS; just update colors
+            starsElement.style.opacity = '1';
+            starsElement.style.maxHeight = '20px';
+            starsElement.style.overflow = 'visible';
+            return;
+        }
+
+        // Mobile: hide initially then expand and fade in
+        starsElement.style.display = 'flex';
+        starsElement.style.opacity = '0';
+        starsElement.style.maxHeight = '0';
+        starsElement.style.overflow = 'hidden';
         
-        // First expand the container, then fade in stars (no bounce)
         if (typeof gsap !== 'undefined') {
-            // Expand container first (reduced height to account for less spacing)
             gsap.to(starsElement, {
                 maxHeight: '20px',
                 duration: 0.3,
                 ease: 'power2.out',
                 onComplete: () => {
-                    // Then just fade in (no scale/bounce animation)
                     gsap.to(starsElement, {
                         opacity: 1,
                         duration: 0.4,
@@ -485,7 +491,6 @@ function showQuizStars() {
                 }
             });
         } else {
-            // Fallback if GSAP not available
             starsElement.style.maxHeight = '20px';
             starsElement.style.opacity = '1';
         }

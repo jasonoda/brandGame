@@ -254,6 +254,42 @@ const gameConfig = {
     'bonusSpin': { path: 'games/bonusSpin/index.html', specialAttrs: {} }
 };
 
+// Global badge keys (default + earned)
+const DEFAULT_BADGE_KEY = 'defaultBadgeFile';
+const BADGES_EARNED_KEY = 'badgesEarnedFiles';
+let defaultBadge = null;
+let badgesEarned = [];
+try {
+    defaultBadge = localStorage.getItem(DEFAULT_BADGE_KEY);
+    const storedEarned = localStorage.getItem(BADGES_EARNED_KEY);
+    if (storedEarned) {
+        const parsed = JSON.parse(storedEarned);
+        if (Array.isArray(parsed)) badgesEarned = parsed;
+    }
+} catch (e) {
+    badgesEarned = [];
+}
+
+// Helper to unlock/persist a badge file and refresh profile badges UI
+function unlockBadge(badgeFile) {
+    if (!badgeFile) return null;
+    badgesEarned.push(badgeFile);
+    badgesEarned = Array.from(new Set(badgesEarned));
+    localStorage.setItem(BADGES_EARNED_KEY, JSON.stringify(badgesEarned));
+    if (typeof window.renderBadges === 'function') {
+        window.renderBadges();
+    }
+    // Also light up the bottom reward thumbnail area for badge-like unlocks
+    // Use the existing dailyAvatar config to keep it visually consistent
+    try {
+        showRewardOverlay('dailyAvatar', 1, [], '+1');
+    } catch (e) {
+        // ignore visual failure â€“ badge persistence is the important part
+    }
+
+    return badgeFile;
+}
+
 // Reward overlay thumbnail config (gradient, title, img src)
 const rewardThumbConfig = {
     phrases: { gradient: 'linear-gradient(to bottom, #2DD7A4, #1DB88A)', title: 'PHRASES', img: 'src/img/phrases.svg' },
@@ -269,7 +305,8 @@ const rewardThumbConfig = {
     blackjack: { gradient: 'linear-gradient(to bottom, #52d077, #2aa04a)', title: 'SPEED 21', img: 'src/img/speed21.svg' },
     lostAndFound: { gradient: 'linear-gradient(to bottom, #F86DAA, #C6387A)', title: 'LOST & FOUND', img: 'src/img/lostAndFount.svg' },
     memory: { gradient: 'linear-gradient(to bottom, #00d4ff, #0099cc)', title: 'MEMORY', img: 'src/img/memory.svg' },
-    match3: { gradient: 'linear-gradient(to bottom, #e84066, #c82a48)', title: 'MARKET MATCH', img: 'src/img/bigy/sweepsGame.png' }
+    match3: { gradient: 'linear-gradient(to bottom, #e84066, #c82a48)', title: 'MARKET MATCH', img: 'src/img/bigy/sweepsGame.png' },
+    dailyAvatar: { gradient: 'linear-gradient(to bottom, #FF8C42, #FF6B35)', title: 'BASIC BADGE', img: '' }
 };
 
 // Track current active game
@@ -365,6 +402,255 @@ function startRewardRain(stars) {
     }
 }
 
+// Daily badge overlay rain â€“ same animation pattern, but rendered inside avatarUnlockOverlay
+function startAvatarUnlockRain() {
+    const overlay = document.getElementById('avatarUnlockOverlay');
+    if (!overlay || typeof gsap === 'undefined') return;
+    const rain = overlay.querySelector('.avatar-unlock-rain');
+    if (!rain) return;
+
+    rain.innerHTML = '';
+
+    const firstEmoji = (typeof getCurrentTheme === 'function' && getCurrentTheme().suspectEmojis)
+        ? (getCurrentTheme().suspectEmojis[0] || '★')
+        : '★';
+
+    // Match intensity of a strong win (roughly 3 stars)
+    const itemCount = Math.min(40, 6 + 3 * 6);
+    const rect = rain.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    function rand(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    for (let i = 0; i < itemCount; i++) {
+        const isEmoji = Math.random() < 0.5;
+        const span = document.createElement('span');
+        span.className = 'rain-item' + (isEmoji ? ' rain-item-emoji' : '');
+        span.textContent = isEmoji ? firstEmoji : '★';
+        span.style.left = rand(-20, w + 20) + 'px';
+        span.style.top = '-50px';
+        rain.appendChild(span);
+
+        const duration = rand(1, 1.8);
+        const rotation = rand(-360, 360);
+        const driftX = rand(-120, 120);
+        const delay = rand(0, 0.8);
+
+        gsap.fromTo(
+            span,
+            { y: 0, x: 0, rotation: 0, opacity: 0.9 },
+            {
+                y: h + 80,
+                x: driftX,
+                rotation,
+                duration,
+                delay,
+                ease: 'linear',
+                onComplete: () => span.remove()
+            }
+        );
+    }
+}
+
+// Generic badge unlock overlay using avatarUnlockOverlay
+function showBadgeUnlockOverlay(badgeFile, headerText, line1Text, line2Text) {
+    const overlay = document.getElementById('avatarUnlockOverlay');
+    if (!overlay) return;
+
+    const headerEl = overlay.querySelector('.avatar-unlock-header');
+    if (headerEl && headerText) {
+        headerEl.textContent = headerText;
+    }
+
+    const badgeImg = overlay.querySelector('.avatar-unlock-badge');
+    if (badgeImg && badgeFile) {
+        badgeImg.src = `src/badges/${badgeFile}`;
+    }
+
+    const line1 = overlay.querySelector('.avatar-unlock-line1');
+    const line2 = overlay.querySelector('.avatar-unlock-line2');
+    if (line1 && line1Text) line1.textContent = line1Text;
+    if (line2 && line2Text) line2.textContent = line2Text;
+
+    if (appSounds.reward1) appSounds.reward1.play();
+
+    const box = overlay.querySelector('.avatar-unlock-box');
+    const backdrop = overlay.querySelector('.avatar-unlock-backdrop');
+    overlay.style.display = 'flex';
+    overlay.classList.add('show');
+
+    if (typeof gsap !== 'undefined' && box) {
+        gsap.fromTo(
+            box,
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.25, ease: 'back.out(1.4)' }
+        );
+    }
+
+    // Start emoji/star rain behind the window once layout is in place
+    requestAnimationFrame(() => startAvatarUnlockRain());
+
+    const closeWithFade = () => {
+        overlay.removeEventListener('click', closeWithFade);
+        const finish = () => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('show');
+            if (backdrop) backdrop.style.opacity = '';
+            if (typeof hideRewardOverlay === 'function') {
+                hideRewardOverlay();
+            }
+        };
+
+        if (typeof gsap !== 'undefined' && box) {
+            const tweenBox = gsap.to(box, {
+                opacity: 0,
+                scale: 0.9,
+                duration: 0.15,
+                ease: 'power2.in'
+            });
+            const tweenBackdrop = backdrop
+                ? gsap.to(backdrop, { opacity: 0, duration: 0.15, ease: 'power2.in' })
+                : null;
+
+            if (tweenBackdrop) {
+                tweenBackdrop.eventCallback('onComplete', finish);
+            } else {
+                tweenBox.eventCallback('onComplete', finish);
+            }
+        } else {
+            finish();
+        }
+    };
+
+    // Click anywhere on overlay once to dismiss
+    overlay.addEventListener('click', closeWithFade, { once: true });
+}
+
+// Check if the daily badge condition is met (played at least 6 unique games today)
+function checkDailyBadgeUnlock() {
+    const todayKey = getTodayKey();
+    const playedGames = JSON.parse(localStorage.getItem(`playedGames_${todayKey}`) || '[]');
+    return Array.isArray(playedGames) && playedGames.length >= 6;
+}
+
+// If conditions are right (no game overlay, on main page, and flag set), show the daily badge popup
+function maybeShowDailyBadgeOverlay() {
+    const gameOverlay = document.getElementById('gameOverlay');
+    const isGameActive = !!(gameOverlay && gameOverlay.classList.contains('active'));
+    if (isGameActive) return;
+
+    const activeTab = document.querySelector('.tab-button.active');
+    const isMainPage = !!(activeTab && activeTab.getAttribute('data-page') === 'main');
+    if (!isMainPage) return;
+
+    const todayKey = getTodayKey();
+    const autoKey = `dailyBadgeAutoShown_${todayKey}`;
+    const pendingKey = `dailyBadgePending_${todayKey}`;
+
+    if (localStorage.getItem(autoKey) === 'true') return;
+    if (localStorage.getItem(pendingKey) !== 'true') return;
+
+    // Mark as shown for today and clear pending flag
+    localStorage.setItem(autoKey, 'true');
+    localStorage.removeItem(pendingKey);
+
+    // Show the same daily badge overlay used by the 'u' key
+    if (typeof showDailyAvatarUnlockOverlay === 'function') {
+        showDailyAvatarUnlockOverlay();
+    }
+}
+
+// Daily avatar unlock celebration (triggered via keyboard 'u' for now)
+function showDailyAvatarUnlockOverlay() {
+    const files = window.BADGE_FILES || [];
+    // Pick a new badge to award: prefer an_ badges not already earned
+    let available = files.filter(f => f.startsWith('an_') && !badgesEarned.includes(f));
+    if (available.length === 0) {
+        available = files.filter(f => !badgesEarned.includes(f));
+    }
+    const newBadgeFile = available.length ? available[Math.floor(Math.random() * available.length)] : null;
+
+    if (newBadgeFile) {
+        unlockBadge(newBadgeFile);
+    }
+
+    const headerText = 'DAILY BADGE';
+    const line1Text = 'DAILY BADGE UNLOCKED!';
+    const line2Text = 'PLAYED 6 GAMES';
+    showBadgeUnlockOverlay(newBadgeFile, headerText, line1Text, line2Text);
+}
+
+// Board avatar space badge celebration (+loc_ badge)
+function showBoardBadgeOverlay() {
+    const files = window.BADGE_FILES || [];
+    if (!files.length) {
+        return;
+    }
+    // Prefer loc_ badges not already earned; fall back to any loc_ badge
+    let available = files.filter(f => f.startsWith('loc_') && !badgesEarned.includes(f));
+    if (!available.length) {
+        available = files.filter(f => f.startsWith('loc_'));
+    }
+    const newBadgeFile = available.length ? available[Math.floor(Math.random() * available.length)] : null;
+    if (newBadgeFile) {
+        unlockBadge(newBadgeFile);
+    }
+
+    const headerText = 'BOARD BADGE';
+    const line1Text = 'BOARD BADGE UNLOCKED!';
+    const line2Text = 'LANDED ON AVATAR SPACE';
+    showBadgeUnlockOverlay(newBadgeFile, headerText, line1Text, line2Text);
+}
+window.showBoardBadgeOverlay = showBoardBadgeOverlay;
+
+// Prize tiles completion â†’ badge awards (called from prizes/prizes.js)
+function handlePrizeTilesCompletion(setName) {
+    const files = window.BADGE_FILES || [];
+    if (!files.length) return;
+
+    let prefixes;
+    let headerText;
+    let line1Text;
+    let line2Text;
+
+    if (setName === 'big') {
+        // Top grid â†’ gold_ badge
+        prefixes = ['gold_'];
+        headerText = 'GOLD BADGE';
+        line1Text = 'GOLD BADGE UNLOCKED!';
+        line2Text = 'TOP TILE BOARD COMPLETE';
+    } else if (setName === 'medium') {
+        // Middle grid â†’ silver_ badge
+        prefixes = ['silver_'];
+        headerText = 'SILVER BADGE';
+        line1Text = 'SILVER BADGE UNLOCKED!';
+        line2Text = 'MIDDLE TILE BOARD COMPLETE';
+    } else if (setName === 'small') {
+        // Bottom grid â†’ basic/avatar/location badge
+        prefixes = ['an_', 'loc_'];
+        headerText = 'BASIC BADGE';
+        line1Text = 'BASIC BADGE UNLOCKED!';
+        line2Text = 'BOTTOM TILE BOARD COMPLETE';
+    } else {
+        return;
+    }
+
+    let available = files.filter(f => prefixes.some(prefix => f.startsWith(prefix)) && !badgesEarned.includes(f));
+    if (!available.length) {
+        // Fall back to any badge with the desired prefix if all in that family are already earned
+        available = files.filter(f => prefixes.some(prefix => f.startsWith(prefix)));
+    }
+    const newBadgeFile = available.length ? available[Math.floor(Math.random() * available.length)] : null;
+    if (newBadgeFile) {
+        unlockBadge(newBadgeFile);
+    }
+
+    showBadgeUnlockOverlay(newBadgeFile, headerText, line1Text, line2Text);
+}
+window.handlePrizeTilesCompletion = handlePrizeTilesCompletion;
 function showRewardOverlay(gameId, stars, notes, diceLabel) {
     const el = document.getElementById('rewardOverlay');
     if (!el) return;
@@ -385,7 +671,7 @@ function showRewardOverlay(gameId, stars, notes, diceLabel) {
     headerInner.className = 'reward-header-gradient';
     headerInner.style.background = config.gradient;
     headerInner.innerHTML = `
-        <button type="button" class="reward-overlay-close" aria-label="Close">✕</button>
+        <button type="button" class="reward-overlay-close" aria-label="Close">âœ•</button>
         <div class="reward-header-image"><img src="${config.img}" alt=""></div>
         <div class="reward-header-title">${config.title}</div>
     `;
@@ -516,6 +802,16 @@ function endGameFunction(gameId, starsEarned, notes, delay) {
     setTimeout(function() {
         showRewardOverlay(gameId, starsEarned, notes, '+1');
     }, delayMs);
+
+    // Update daily badge progress after each completed puzzle game
+    const todayKey = getTodayKey();
+    if (checkDailyBadgeUnlock()) {
+        const autoKey = `dailyBadgeAutoShown_${todayKey}`;
+        const pendingKey = `dailyBadgePending_${todayKey}`;
+        if (localStorage.getItem(autoKey) !== 'true' && localStorage.getItem(pendingKey) !== 'true') {
+            localStorage.setItem(pendingKey, 'true');
+        }
+    }
 }
 
 window.endGameFunction = endGameFunction;
@@ -585,7 +881,7 @@ function openGame(gameId, extraParams) {
     let gameUrl = config.path;
     const gameParams = new URLSearchParams();
     if (headerType && gameId === 'match3') {
-        // Pass header type to match3 game so it can detect firehouse
+        // Pass header type to match3 game
         gameParams.set('d', headerType);
     }
     if (theme && (gameId === 'zoom' || gameId === 'suspect')) {
@@ -781,6 +1077,7 @@ function setCurrentDate() {
     const dateStr = `${month} ${day}, ${year}`;
     
     const isBrandMode = new URLSearchParams(window.location.search).get('m') === 'brand';
+    const isDesktop = window.innerWidth >= 768;
     dateElements.forEach(function(dateElement) {
         if (isBrandMode) {
             dateElement.textContent = 'Daily Game Center';
@@ -790,7 +1087,7 @@ function setCurrentDate() {
             dateElement.classList.add('date-tiles-mode');
             dateElement.style.textTransform = 'none';
             dateElement.style.fontSize = '14px';
-            dateElement.style.fontWeight = '800';
+            dateElement.style.fontWeight = isDesktop ? '' : '800';
         }
     });
     dateSubtitleElements.forEach(function(dateSubtitleElement) {
@@ -1064,11 +1361,35 @@ window.updateCrossStars = updateCrossStars;
     setTimeout(hideWeekHeaderBackground, 1000);
 })();
 
+// Apply theme color palette from gameVars (if provided)
+function applyThemeColors(theme) {
+    if (!theme || !theme.colors) return;
+    const root = document.documentElement;
+    Object.entries(theme.colors).forEach(([name, value]) => {
+        root.style.setProperty(`--${name}`, value);
+    });
+}
+
+// Apply centra override colors (overrides theme top-bar when d=centra)
+function applyCentraOverride() {
+    if (typeof CENTRA_OVERRIDE !== 'undefined' && CENTRA_OVERRIDE.colors) {
+        const root = document.documentElement;
+        Object.entries(CENTRA_OVERRIDE.colors).forEach(([name, value]) => {
+            root.style.setProperty(`--${name}`, value);
+        });
+    }
+}
+
 // Function to apply theme settings
 function applyThemeSettings() {
     if (typeof getCurrentTheme === 'function') {
         const theme = getCurrentTheme();
         
+        // First, apply any theme-specific color palette to CSS variables
+        applyThemeColors(theme);
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('d') === 'centra') applyCentraOverride();
+
         // Update week subtitle text (e.g. "2 days before Thanksgiving" or "July 2nd")
         const weekSubtitles = document.querySelectorAll('.week-subtitle, .week-subtitle-type1');
         const subtitleText = getSubtitleText();
@@ -1076,9 +1397,7 @@ function applyThemeSettings() {
             subtitle.textContent = subtitleText;
         });
         
-        // Update banner date (instead of TODAY'S GAMES)
-        const bannerText = document.querySelector('.todays-games-text');
-        if (bannerText) bannerText.textContent = getBannerDateText();
+        // Banner shows Jason â€¢ Streak â€¢ Best (same as user-div)
         
         // Update TODAY'S GAMES banner background (day1 image per theme)
         const day1Image = theme.day1Image || 'weeklyBackgrounds/thanksgiving_day1.png';
@@ -1090,7 +1409,8 @@ function applyThemeSettings() {
         // Update quiz titles
         const quizTitles = document.querySelectorAll('.subsection-title');
         quizTitles.forEach(title => {
-            if (title.textContent.includes('THANKSGIVING QUIZ') || title.textContent.includes('4TH OF JULY QUIZ')) {
+            const t = (title.textContent || '').toUpperCase();
+            if (t.includes('THANKSGIVING QUIZ') || t.includes('4TH OF JULY QUIZ')) {
                 title.textContent = theme.quizTitle;
             }
         });
@@ -1098,16 +1418,16 @@ function applyThemeSettings() {
         // Update background images
         const themePattern = theme.backgroundPattern;
         if (themePattern) {
-            // Check if it's firehouse or bigy - if so, put image on calendar, otherwise on carousel
+            // Check if it's bigy - if so, put image on calendar, otherwise on carousel
             const urlParams = new URLSearchParams(window.location.search);
             const headerType = urlParams.get('d');
-            const isFirehouseOrBigy = headerType === 'firehouse2' || headerType === 'bigy' || headerType === 'bigy2';
+            const isBigy = headerType === 'bigy' || headerType === 'bigy2';
             
             const style = document.createElement('style');
             style.id = 'theme-background-styles';
             
-            if (isFirehouseOrBigy) {
-                // Put background on week-theme-section for firehouse/bigy (behind "THIS WEEK'S THEME")
+            if (isBigy) {
+                // Put background on week-theme-section for bigy (behind "THIS WEEK'S THEME")
                 // Use ::before pseudo-element with 0.15 opacity
                 style.textContent = `
                     .week-theme-section::before {
@@ -1126,7 +1446,6 @@ function applyThemeSettings() {
                         pointer-events: none !important;
                         z-index: 0 !important;
                     }
-                    body.firehouse2 .week-combined-container2B .week-theme-section::before,
                     body.bigy2 .week-combined-container2B .week-theme-section::before,
                     .week-combined-container2A .week-theme-section::before {
                         content: '' !important;
@@ -1217,7 +1536,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Apply theme settings
     applyThemeSettings();
-    
+
     // Update bonus spin display - ensure it runs after DOM is ready
     setTimeout(() => {
         updateBonusSpinDisplay();
@@ -1254,28 +1573,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('[Profile] Failed to update level display:', e);
     }
     
-    // Initialize deals page display if it's the active page
-    const dealsPage = document.getElementById('deals-page');
-    if (dealsPage && dealsPage.classList.contains('active')) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const headerType = urlParams.get('d');
-        const regularDeals = document.getElementById('regular-deals');
-        const firehouseDeals = document.getElementById('dealsFirehouse');
-        
-        if (headerType === 'firehouse2' && firehouseDeals) {
-            // Show firehouse deals, hide regular deals
-            if (regularDeals) regularDeals.style.display = 'none';
-            firehouseDeals.style.display = 'grid';
-        } else {
-            // Show regular deals, hide firehouse deals
-            if (regularDeals) regularDeals.style.display = 'grid';
-            if (firehouseDeals) firehouseDeals.style.display = 'none';
-        }
-    }
-    
     loadGameScores2();
     updateBoostHighScore();
     // console.log("loadGameScores called");
+
+    // If a daily badge is pending and we're on the main page with no game open, show it.
+    maybeShowDailyBadgeOverlay();
     
     // Initialize coin displays if function exists
     
@@ -1293,12 +1596,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Avatar select popup
+    // Profile image / badges
+    const profileImage = document.querySelector('.profile-image');
+
+    // Avatar select popup (legacy â€“ no longer used, but keep in case overlay returns)
     const AVATAR_STORAGE_KEY = 'selectedAvatarPath';
     const AVATAR_PATHS = Array(50).fill('src/img/profile.png');
     const avatarSelectOverlay = document.getElementById('avatarSelectOverlay');
     const avatarSelectGrid = document.getElementById('avatarSelectGrid');
-    const profileImage = document.querySelector('.profile-image');
     const profileActions = document.querySelector('.profile-actions');
 
     function buildAvatarGrid() {
@@ -1351,10 +1656,252 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const savedAvatar = localStorage.getItem(AVATAR_STORAGE_KEY);
-    if (savedAvatar && profileImage) {
-        profileImage.src = savedAvatar;
+    // Profile badges setup â€“ one tile per image in src/badges, sorted alphabetically / numerically.
+    const BADGE_FILES = [
+        'an_1.png',
+        'an_2.png',
+        'an_3.png',
+        'an_4.png',
+        'an_5.png',
+        'an_6.png',
+        'an_7.png',
+        'an_8.png',
+        'an_9.png',
+        'an_10.png',
+        'an_11.png',
+        'an_12.png',
+        'an_13.png',
+        'an_14.png',
+        'an_15.png',
+        'an_16.png',
+        'an_17.png',
+        'an_18.png',
+        'an_19.png',
+        'an_20.png',
+        'an_21.png',
+        'an_22.png',
+        'an_23.png',
+        'an_24.png',
+        'an_25.png',
+        'an_26.png',
+        'an_27.png',
+        'an_28.png',
+        'an_29.png',
+        'an_30.png',
+        'an_31.png',
+        'an_32.png',
+        'an_33.png',
+        'an_34.png',
+        'an_35.png',
+        'an_36.png',
+        'an_37.png',
+        'an_38.png',
+        'an_39.png',
+        'an_40.png',
+        'an_41.png',
+        'an_42.png',
+        'an_43.png',
+        'an_44.png',
+        'an_45.png',
+        'an_46.png',
+        'an_47.png',
+        'an_48.png',
+        'an_49.png',
+        'an_50.png',
+        'an_51.png',
+        'an_52.png',
+        'an_53.png',
+        'an_54.png',
+        'an_56.png',
+        'an_57.png',
+        'an_58.png',
+        'an_59.png',
+        'an_60.png',
+        'an_61.png',
+        'gold_1.png',
+        'gold_2.png',
+        'gold_3.png',
+        'gold_4.png',
+        'gold_5.png',
+        'house_blue.png',
+        'house_brown.png',
+        'house_cyan.png',
+        'house_green.png',
+        'house_orange.png',
+        'house_pink.png',
+        'house_red.png',
+        'house_yellow.png',
+        'loc_1.png',
+        'loc_2.png',
+        'loc_3.png',
+        'loc_4.png',
+        'loc_5.png',
+        'loc_6.png',
+        'loc_7.png',
+        'loc_8.png',
+        'loc_9.png',
+        'loc_10.png',
+        'loc_11.png',
+        'loc_12.png',
+        'loc_13.png',
+        'loc_14.png',
+        'loc_15.png',
+        'loc_16.png',
+        'loc_17.png',
+        'loc_18.png',
+        'loc_19.png',
+        'silver_1.png',
+        'silver_2.png',
+        'silver_3.png',
+        'silver_4.png',
+        'silver_5.png',
+        'silver_6.png',
+        'silver_7.png',
+        'silver_8.png',
+        'silver_9.png',
+        'silver_10.png'
+    ];
+    window.BADGE_FILES = BADGE_FILES;
+
+    const badgesData = BADGE_FILES.map(file => ({
+        id: file.replace(/\.[^/.]+$/, ''), // filename without extension
+        file
+    }));
+
+    // If no default badge yet, pick a random an_ badge and mark it earned
+    if (!defaultBadge) {
+        const anBadges = BADGE_FILES.filter(f => f.startsWith('an_'));
+        if (anBadges.length > 0) {
+            defaultBadge = anBadges[Math.floor(Math.random() * anBadges.length)];
+            localStorage.setItem(DEFAULT_BADGE_KEY, defaultBadge);
+            badgesEarned.push(defaultBadge);
+            badgesEarned = Array.from(new Set(badgesEarned));
+            localStorage.setItem(BADGES_EARNED_KEY, JSON.stringify(badgesEarned));
+        }
     }
+
+    const currentBadge = defaultBadge;
+
+    // Use current badge as profile image if available
+    if (profileImage && currentBadge) {
+        profileImage.src = `src/badges/${currentBadge}`;
+    }
+
+    // Daily Rival avatars
+    const jasonAvatar = document.querySelector('.challenger-avatar img[alt="Jason"]');
+    const challengerAvatars = document.querySelectorAll('.challenger-avatar img, .challengers-score-avatar img');
+    if (BADGE_FILES.length) {
+        // Jason: always use currentBadge when available
+        if (jasonAvatar && currentBadge) {
+            jasonAvatar.src = `src/badges/${currentBadge}`;
+        }
+
+        // Others (including Jane + high-score avatars): random badges
+        challengerAvatars.forEach(img => {
+            if (img === jasonAvatar) return;
+            const randomFile = BADGE_FILES[Math.floor(Math.random() * BADGE_FILES.length)];
+            img.src = `src/badges/${randomFile}`;
+        });
+    }
+
+    // Daily Question avatars: use random badges for each answer icon
+    if (BADGE_FILES.length) {
+        const dailyQuestionIcons = document.querySelectorAll('.daily-question-answer-icon img');
+        dailyQuestionIcons.forEach(icon => {
+            const randomFile = BADGE_FILES[Math.floor(Math.random() * BADGE_FILES.length)];
+            icon.src = `src/badges/${randomFile}`;
+        });
+    }
+
+    function addBadgeTile(grid, badge, unlocked, typeClass) {
+        if (!grid) return;
+        const tile = document.createElement('div');
+        let cls = 'badge-tile';
+        if (unlocked) cls += ' unlocked';
+        if (typeClass) cls += ' ' + typeClass;
+        tile.className = cls;
+        if (badge && badge.file) {
+            const img = document.createElement('img');
+            img.src = `src/badges/${badge.file}`;
+            img.alt = badge.id;
+            tile.appendChild(img);
+        }
+        grid.appendChild(tile);
+        return tile;
+    }
+
+    function renderBadges() {
+        const unlockedGrid = document.querySelector('.badges-grid-unlocked');
+        const lockedGrid = document.querySelector('.badges-grid-locked');
+        const silverGrid = document.querySelector('.badges-grid-silver');
+        const goldGrid = document.querySelector('.badges-grid-gold');
+        const boardGrid = document.querySelector('.badges-grid-board');
+
+        if (!lockedGrid || !silverGrid || !goldGrid || !boardGrid || !unlockedGrid) return;
+
+        // Clear existing tiles
+        unlockedGrid.innerHTML = '';
+        lockedGrid.innerHTML = '';
+        silverGrid.innerHTML = '';
+        goldGrid.innerHTML = '';
+        boardGrid.innerHTML = '';
+
+        // Build lookup for badge metadata by file
+        const badgesByFile = {};
+        badgesData.forEach(badge => {
+            badgesByFile[badge.file] = badge;
+        });
+
+        // Category sections (gold, silver, board, basic)
+        badgesData.forEach(badge => {
+            const name = badge.id.toLowerCase();
+            const isEarned = badgesEarned.includes(badge.file);
+
+            if (name.startsWith('gold_')) {
+                addBadgeTile(goldGrid, badge, isEarned, 'badge-gold');
+            } else if (name.startsWith('silver_')) {
+                addBadgeTile(silverGrid, badge, isEarned, 'badge-silver');
+            } else if (name.startsWith('house_')) {
+                // Board-only house_* badges live in BOARD section
+                addBadgeTile(boardGrid, badge, isEarned, 'badge-board');
+            } else if (name.startsWith('loc_') || name.startsWith('an_')) {
+                // Avatar/location badges (loc_* and an_*) always appear in BASIC.
+                // If earned, they are full-opacity with no lock icon (use .unlocked).
+                const basicUnlocked = isEarned;
+                addBadgeTile(lockedGrid, badge, basicUnlocked, 'badge-locked');
+            }
+        });
+
+        // Unlocked section: show earned badges in order they were received
+        badgesEarned.forEach(file => {
+            const badge = badgesByFile[file];
+            if (!badge) return;
+            const tile = addBadgeTile(unlockedGrid, badge, true, 'badge-unlocked');
+            if (tile) {
+                tile.style.cursor = 'pointer';
+                tile.addEventListener('click', () => {
+                    // When clicking an unlocked badge, make it the current/default badge
+                    defaultBadge = badge.file;
+                    localStorage.setItem(DEFAULT_BADGE_KEY, defaultBadge);
+                    if (!badgesEarned.includes(badge.file)) {
+                        badgesEarned.push(badge.file);
+                        badgesEarned = Array.from(new Set(badgesEarned));
+                        localStorage.setItem(BADGES_EARNED_KEY, JSON.stringify(badgesEarned));
+                    }
+                    if (profileImage) {
+                        profileImage.src = `src/badges/${badge.file}`;
+                    }
+                    if (jasonAvatar) {
+                        jasonAvatar.src = `src/badges/${badge.file}`;
+                    }
+                });
+            }
+        });
+    }
+
+    // Expose and render badges on profile page
+    window.renderBadges = renderBadges;
+    renderBadges();
 
     if (helpPopupClose && helpPopup) {
         const closePopup = () => {
@@ -1396,24 +1943,6 @@ buttons.forEach(button => {
         const targetPageElement = document.getElementById(`${targetPage}-page`);
         if (targetPageElement) {
             targetPageElement.classList.add('active');
-        }
-        
-        // Handle firehouse deals display
-        if (targetPage === 'deals') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const headerType = urlParams.get('d');
-            const regularDeals = document.getElementById('regular-deals');
-            const firehouseDeals = document.getElementById('dealsFirehouse');
-            
-            if (headerType === 'firehouse2' && firehouseDeals) {
-                // Show firehouse deals, hide regular deals
-                if (regularDeals) regularDeals.style.display = 'none';
-                firehouseDeals.style.display = 'grid';
-            } else {
-                // Show regular deals, hide firehouse deals
-                if (regularDeals) regularDeals.style.display = 'grid';
-                if (firehouseDeals) firehouseDeals.style.display = 'none';
-            }
         }
         
         // Update logo visibility when switching pages
@@ -1500,19 +2029,14 @@ buttons.forEach(button => {
                 resizeMainPageScramble();
             }
         }
+
+        // After any tab change, if we're now on the main page with no game open and a badge is pending, show it.
+        maybeShowDailyBadgeOverlay();
         
     });
 });
 
 // TODAY'S GAMES banner: click goes to community tab
-const todaysGamesLink = document.getElementById('todays-games-link');
-if (todaysGamesLink) {
-    todaysGamesLink.addEventListener('click', () => {
-        const communityTab = document.querySelector('.tab-button[data-page="community"]');
-        if (communityTab) communityTab.click();
-    });
-}
-
 // Daily question: show thanks if already answered; on Enter save answer, add 3 stars, fade to thanks
 function initDailyQuestion() {
     const todayKey = getTodayKey();
@@ -1665,6 +2189,7 @@ function applyMode() {
     if (isBrandMode) {
         if (dailyBoostWrapper) dailyBoostWrapper.style.display = '';
         if (carouselType1) carouselType1.style.display = '';
+        document.body.classList.add('carousel-type1-visible');
         if (carouselType2) carouselType2.style.display = '';
         prizesTabLabels.forEach(el => { el.textContent = 'Prizes'; });
         prizesTabTilesIcons.forEach(el => { el.style.display = 'none'; });
@@ -1679,18 +2204,20 @@ function applyMode() {
         });
     } else {
         if (dailyBoostWrapper) dailyBoostWrapper.style.display = 'none';
-        if (carouselType1) carouselType1.style.display = 'none';
+        const isCentra = urlParams.get('d') === 'centra';
+        if (carouselType1) carouselType1.style.display = isCentra ? '' : 'none';
+        if (isCentra) document.body.classList.add('carousel-type1-visible'); else document.body.classList.remove('carousel-type1-visible');
         if (carouselType2) carouselType2.style.display = 'none';
         prizesTabLabels.forEach(el => { el.textContent = 'Tiles'; });
         prizesTabTilesIcons.forEach(el => { el.style.display = ''; });
         prizesTabPrizesIcons.forEach(el => { el.style.display = 'none'; });
         if (prizesTitle) prizesTitle.textContent = 'TILES';
-        if (prizesSubtitle) prizesSubtitle.innerHTML = 'Spend your stars to buy tiles.<br>Fill in all the spaces to win avatars.<br>Resets weekly.';
+        if (prizesSubtitle) prizesSubtitle.innerHTML = 'Spend your stars to buy tiles.<br>Fill in all the spaces to win badges.<br>Resets weekly.';
         prizeTierTitles.forEach(el => {
             const tier = el.getAttribute('data-prize-tier');
-            if (tier === 'gold') el.textContent = 'GOLDEN AVATAR';
-            else if (tier === 'silver') el.textContent = 'SILVER AVATAR';
-            else if (tier === 'regular') el.textContent = 'AVATAR';
+            if (tier === 'gold') el.textContent = 'GOLDEN BADGE';
+            else if (tier === 'silver') el.textContent = 'SILVER BADGE';
+            else if (tier === 'regular') el.textContent = 'BASIC BADGE';
         });
     }
 }
@@ -1789,7 +2316,7 @@ function checkURLParameters() {
             newHintButton.style.fontWeight = '600';
             newHintButton.style.boxShadow = '0 2px 6px rgba(78, 205, 196, 0.3)';
             // Remove lightbulb emoji for bigy2
-            newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
+            newHintButton.textContent = newHintButton.textContent.replace('ðŸ’¡ ', '').replace('ðŸ’¡', '');
             if (newHintButton.textContent.trim() === '') {
                 newHintButton.textContent = 'Hint';
             }
@@ -1805,170 +2332,27 @@ function checkURLParameters() {
                 }
             }, 50);
         });
-    } else if (headerType === 'firehouse2') {
-        // Show header-type2, hide header-type1
-        if (headerType1) headerType1.style.display = 'none';
-        if (headerType2) headerType2.style.display = 'block';
-        
-        // Show container2B, hide container2A
-        if (container2A) container2A.style.display = 'none';
-        if (container2B) container2B.style.display = 'flex';
-        
-        // Set firehouse logo
-        if (headerLogo) {
-            headerLogo.src = 'src/img/firehousesubs/logo.png';
-        }
-        carouselLogos.forEach(logo => {
-            logo.src = 'src/img/firehousesubs/logo.png';
-        });
-        
-        // Apply DM Sans font to all elements except serif fonts and letter-box
-        applyFontScheme('DM Sans');
-        
-        // Add body class for firehouse2 styling
-        document.body.classList.add('firehouse2');
-        
-        // Apply firehouse red styling and white text for scramble, MC, and FoF
-        applyFirehouseStyling();
-        
-        // Re-apply theme settings after firehouse styling is applied
-        applyThemeSettings();
-        
-        // Show logo for firehouse2
-        if (headerLogo) {
-            headerLogo.style.display = 'block';
-        }
-        
-        // For firehouse2, use yellow gradient hint button styling
-        const hintButton = document.querySelector('.unscramble-hint-btn');
-        if (hintButton) {
-            // Remove any existing event listeners by cloning and replacing
-            const newHintButton = hintButton.cloneNode(true);
-            hintButton.parentNode.replaceChild(newHintButton, hintButton);
-            
-            // Apply yellow gradient styling for firehouse2
-            newHintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
-            newHintButton.style.color = 'white';
-            newHintButton.style.borderRadius = '6px';
-            newHintButton.style.padding = '8px 24px';
-            newHintButton.style.fontWeight = '700';
-            newHintButton.style.boxShadow = 'none';
-            // Remove lightbulb emoji for firehouse2
-            newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
-            if (newHintButton.textContent.trim() === '') {
-                newHintButton.textContent = 'Hint';
-            }
-        }
-        
-        // Update carousel text for firehouse2
-        const carouselSlides = document.querySelectorAll('.top-logo-carousel .carousel-slide');
-        carouselSlides.forEach(slide => {
-            const title = slide.querySelector('.promotional-banner-title');
-            const subtitle = slide.querySelector('.promotional-banner-subtitle');
-            if (title && title.textContent.includes('GO UNLIMITED')) {
-                title.innerHTML = 'Feed the Crowd. Save the Day.';
-                title.style.textTransform = 'none';
-                if (subtitle) {
-                    subtitle.textContent = 'Got a big crew to feed? Call for backup with Firehouse Subs catering for any occasion.';
-                }
-            }
-            if (title && title.textContent.includes('DAILY GAMES')) {
-                title.innerHTML = '$100 Million Donated<br>to First Responders';
-                title.style.textTransform = 'none';
-                if (subtitle) {
-                    subtitle.textContent = 'The Foundation has supported thousands of equipment grants for first responders across the country.';
-                }
-            }
-        });
-        
-        // Update boost game image for firehouse
-        const boostGameImg = document.getElementById('boost-game-img');
-        if (boostGameImg) {
-            boostGameImg.src = 'src/img/firehousesubs/sweepsGame.png';
-        }
-        
-        // Update calendar for firehouse2 after container is shown
-        // Use requestAnimationFrame to ensure DOM is updated
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                if (typeof updateCalendar === 'function') {
-                    console.log('[Firehouse2] Updating calendar after container shown');
-                    updateCalendar();
-                }
-                // Re-apply theme settings after container is shown
-                applyThemeSettings();
-            }, 50);
-        });
-    } else if (headerType === 'wegmans') {
-        // Show header-type1, hide header-type2 (normal version)
-        if (headerType1) headerType1.style.display = 'block';
-        if (headerType2) headerType2.style.display = 'none';
-        
-        // Hide both containers for wegmans (uses normal calendar)
-        if (container2A) container2A.style.display = 'none';
-        if (container2B) container2B.style.display = 'none';
-        
-        // Set wegmans logo for wegmans header (upper left)
-        if (headerLogo) {
-            headerLogo.src = 'src/img/wegmans/wegmans.png';
-            headerLogo.style.display = 'block'; // Explicitly show logo for wegmans
-        }
-        // Update all carousel logos to use wegmans2.png
-        carouselLogos.forEach(logo => {
-            logo.src = 'src/img/wegmans/wegmans2.png';
-        });
-        
-        // Also update first and last carousel slides specifically for wegmans
-        const carouselSlides = document.querySelectorAll('.carousel-slide-type1');
-        if (carouselSlides.length > 0) {
-            // First slide
-            const firstSlide = carouselSlides[0];
-            const firstSlideImg = firstSlide.querySelector('img');
-            if (firstSlideImg) {
-                firstSlideImg.src = 'src/img/wegmans/wegmans2.png';
-            }
-            // Last slide
-            const lastSlide = carouselSlides[carouselSlides.length - 1];
-            const lastSlideImg = lastSlide.querySelector('img');
-            if (lastSlideImg) {
-                lastSlideImg.src = 'src/img/wegmans/wegmans2.png';
-            }
-        }
-        
-        // Apply Nunito font (default)
-        applyFontScheme('Nunito');
-        
-        // Add body class for wegmans styling
-        document.body.classList.add('wegmans');
-        
-        // Re-apply theme settings
-        applyThemeSettings();
-    } else {
-        // Remove bigy2 and firehouse2 classes if they exist
+    } else if (headerType === 'centra') {
+        // Centra: show carousel at top only, nothing else changes (same as default)
         document.body.classList.remove('bigy2');
-        document.body.classList.remove('firehouse2');
-        document.body.classList.remove('wegmans');
-        
-        // Default: show header-type1, hide header-type2
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
-        
-        // Hide both containers for default
         if (container2A) container2A.style.display = 'none';
         if (container2B) container2B.style.display = 'none';
-        
-        // Set default temp logo
-        if (headerLogo) {
-            headerLogo.src = 'src/img/tempLogo.png';
-        }
-        carouselLogos.forEach(logo => {
-            logo.src = 'src/img/tempLogo.png';
-        });
-        
-        // Apply Nunito font (default)
+        if (headerLogo) headerLogo.src = 'src/img/tempLogo.png';
+        carouselLogos.forEach((logo, i) => { logo.src = `src/img/centra/carousel${(i % 3) + 1}.png`; });
         applyFontScheme('Nunito');
-        
-        // Apply default grey/white styling
+        applyDefaultStyling();
+    } else {
+        // Default: show header-type1, hide header-type2
+        document.body.classList.remove('bigy2');
+        if (headerType1) headerType1.style.display = 'block';
+        if (headerType2) headerType2.style.display = 'none';
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'none';
+        if (headerLogo) headerLogo.src = 'src/img/tempLogo.png';
+        carouselLogos.forEach((logo, i) => { logo.src = `src/img/centra/carousel${(i % 3) + 1}.png`; });
+        applyFontScheme('Nunito');
         applyDefaultStyling();
     }
     
@@ -1979,9 +2363,10 @@ function checkURLParameters() {
     applyMode();
         
     // Initialize the appropriate carousel based on header type
-    if (headerType === 'bigy' || headerType === 'bigy2' || headerType === 'firehouse2') {
+    if (headerType === 'bigy' || headerType === 'bigy2') {
         initBigyCarousel();
     } else {
+        // Default and centra: type1 carousel at top
         initType1Carousel();
     }
     
@@ -2009,10 +2394,25 @@ function applyFontScheme(fontFamily) {
         const computedStyle = window.getComputedStyle(element);
         const currentFont = computedStyle.fontFamily;
         
-        // Skip if it's a serif font (Abril Fatface, Aleo, Spectral)
+        // Skip if it's a serif font we want to preserve (Abril Fatface, Aleo, Spectral, Sanchez, Adamina)
         if (currentFont.includes('Abril Fatface') || 
             currentFont.includes('Aleo') || 
-            currentFont.includes('Spectral')) {
+            currentFont.includes('Spectral') ||
+            currentFont.includes('Sanchez') ||
+            currentFont.includes('Adamina')) {
+            return;
+        }
+        
+        // Skip subsection titles (On this day in history, Daily Poll, etc. â€“ use Sanchez from CSS)
+        if (element.classList.contains('subsection-title')) {
+            return;
+        }
+        // Skip section headers that use Sanchez from CSS (achievements, challenges, account, avatar select, prizes/tiles)
+        if (element.classList.contains('achievements-header') ||
+            element.classList.contains('challenges-header') ||
+            element.classList.contains('account-header') ||
+            element.classList.contains('avatar-select-title') ||
+            element.classList.contains('prize-section-title')) {
             return;
         }
         
@@ -2027,297 +2427,6 @@ function applyFontScheme(fontFamily) {
 }
 
 // Function to apply bigy styling (blue backgrounds, white text)
-function applyWegmansStyling() {
-    // Change page background to white for wegmans
-    document.body.style.backgroundColor = 'white';
-    
-    // Change all sections to white background
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.backgroundColor = 'white';
-    });
-    
-    // Scramble sections - orange gradient for wegmans
-    const scrambleTop = document.querySelector('.scramble-top-section');
-    const scrambleBottom = document.querySelector('.scramble-bottom-section');
-    if (scrambleTop) {
-        scrambleTop.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
-        scrambleTop.style.backgroundColor = '';
-        scrambleTop.style.borderBottom = 'none';
-    }
-    if (scrambleBottom) {
-        scrambleBottom.style.background = '#ce3f24';
-        scrambleBottom.style.backgroundColor = '#ce3f24';
-    }
-    
-    // MC sections - orange for wegmans (darker top, lighter bottom)
-    const mcTop = document.querySelector('.mc-top-section');
-    const mcBottom = document.querySelector('.mc-bottom-section');
-    if (mcTop) {
-        mcTop.style.background = '#a0301a';
-        mcTop.style.backgroundColor = '#a0301a';
-        mcTop.style.borderBottom = 'none';
-    }
-    if (mcBottom) {
-        mcBottom.style.background = '#ce3f24';
-        mcBottom.style.backgroundColor = '#ce3f24';
-    }
-    
-    // Quiz sections - orange gradient for wegmans
-    const quizTop = document.querySelector('.quiz-top-section');
-    const quizBottom = document.querySelector('.quiz-bottom-section');
-    if (quizTop) {
-        quizTop.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
-        quizTop.style.backgroundColor = '';
-        quizTop.style.borderBottom = 'none';
-    }
-    if (quizBottom) {
-        // quizBottom.style.background = '#ce3f24';
-        quizBottom.style.backgroundColor = '#ce3f24';
-    }
-    
-    // FoF sections - orange for wegmans (darker top, lighter bottom)
-    const fofTop = document.querySelector('.fof-top-section');
-    const fofBottom = document.querySelector('.fof-bottom-section');
-    if (fofTop) {
-        fofTop.style.background = '#a0301a';
-        fofTop.style.backgroundColor = '#a0301a';
-        fofTop.style.borderBottom = 'none';
-    }
-    if (fofBottom) {
-        fofBottom.style.background = '#ce3f24';
-        fofBottom.style.backgroundColor = '#ce3f24';
-    }
-    
-    // Stars - wegmans color (#ce3f24) instead of red
-    const unscrambleStars = document.querySelectorAll('.unscramble-stars');
-    unscrambleStars.forEach(stars => {
-        stars.style.color = '#ce3f24';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#ce3f24';
-        });
-    });
-    
-    const mcStars = document.querySelectorAll('.mc-stars');
-    mcStars.forEach(stars => {
-        stars.style.color = '#ce3f24';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#ce3f24';
-        });
-    });
-    
-    const fofStars = document.querySelectorAll('.fof-stars');
-    fofStars.forEach(stars => {
-        stars.style.color = '#ce3f24';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#ce3f24';
-        });
-    });
-    
-    const quizStars = document.querySelectorAll('.quiz-stars');
-    quizStars.forEach(stars => {
-        stars.style.color = '#ce3f24';
-        const starIcons = stars.querySelectorAll('.quiz-star');
-        starIcons.forEach(icon => {
-            icon.style.color = '#ce3f24';
-        });
-    });
-    
-    // Header bar and desktop top bar - orange gradient for wegmans
-    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(bar) {
-        if (bar) bar.style.background = 'linear-gradient(to bottom, #e65f45, #ce3f24)';
-    });
-    
-    // Star counter - wegmans color background
-    starCounters.forEach(function(starCounter) {
-        starCounter.style.backgroundColor = '#ce3f24';
-        const starCount = starCounter.querySelector('.star-count');
-        if (starCount) starCount.style.color = 'white';
-        const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) starIcon.style.color = '#FFD700';
-    });
-    
-    // Date text - black for wegmans
-    const dateElement = document.querySelector('.date');
-    if (dateElement) {
-        dateElement.style.color = '#000';
-    }
-    const dateSubtitle = document.querySelector('.date-subtitle');
-    if (dateSubtitle) {
-        dateSubtitle.style.color = '#000';
-    }
-    
-    // Show logo for wegmans
-    const headerLogo = document.querySelector('.header-logo');
-    if (headerLogo) {
-        headerLogo.style.display = 'block';
-    }
-    
-    // Question mark - default grey for wegmans (don't override)
-    
-    // Profile picture - orange for wegmans
-    const profilePicture = document.querySelector('.profile-picture');
-    if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
-        profilePicture.style.backgroundColor = '';
-    }
-    
-    // Profile container - white background for wegmans
-    const profileContainer = document.querySelector('.profile-container');
-    if (profileContainer) {
-        profileContainer.style.background = 'white';
-        profileContainer.style.backgroundColor = 'white';
-    }
-    
-    // Profile page wegmans color elements
-    const dealEarnContainer = document.querySelector('.deal-earn-container');
-    if (dealEarnContainer) {
-        dealEarnContainer.style.backgroundColor = '#ce3f24';
-    }
-    
-    // Deal button containers - wegmans color
-    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
-    dealButtonContainers.forEach(container => {
-        container.style.backgroundColor = '#ce3f24';
-    });
-    
-    const challengesContainer = document.querySelector('.profile-challenges-container');
-    if (challengesContainer) {
-        challengesContainer.style.borderColor = '';
-        challengesContainer.style.background = '';
-        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-    }
-    
-    const achievementsContainer = document.querySelector('.profile-achievements-container');
-    if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '';
-        achievementsContainer.style.background = '';
-        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-    }
-    
-    const achievementsHeader = document.querySelector('.achievements-header');
-    if (achievementsHeader) {
-        achievementsHeader.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
-    }
-    
-    const challengesHeader = document.querySelector('.challenges-header');
-    if (challengesHeader) {
-        challengesHeader.style.background = 'linear-gradient(to bottom, #ce3f24, #a0301a)';
-    }
-    
-    // Challenge items - wegmans color
-    const challengeItems = document.querySelectorAll('.challenge-item');
-    challengeItems.forEach(item => {
-        item.style.borderBottomColor = 'rgba(206, 63, 36, 0.2)';
-        item.style.background = 'linear-gradient(to bottom, rgba(206, 63, 36, 0.08) 0%, rgba(206, 63, 36, 0.04) 100%)';
-    });
-    
-    // Challenge rewards - wegmans color
-    const challengeRewards = document.querySelectorAll('.challenge-reward');
-    challengeRewards.forEach(reward => {
-        reward.style.color = '#ce3f24';
-        reward.style.background = 'linear-gradient(135deg, rgba(206, 63, 36, 0.15) 0%, rgba(206, 63, 36, 0.1) 100%)';
-        reward.style.boxShadow = '0 2px 4px rgba(206, 63, 36, 0.2)';
-    });
-    
-    // Star icons inline - wegmans color
-    const starIconsInline = document.querySelectorAll('.star-icon-inline');
-    starIconsInline.forEach(icon => {
-        icon.style.color = '#ce3f24';
-        icon.style.textShadow = '0 1px 2px rgba(206, 63, 36, 0.3)';
-    });
-    
-    // Text colors - white for wegmans
-    const subsectionTitles = document.querySelectorAll('.subsection-title');
-    subsectionTitles.forEach(title => {
-        title.style.color = 'white';
-        title.style.textTransform = 'none';
-    });
-    
-    // Section titles - remove transform for wegmans but keep default font (Aleo)
-    const sectionTitles = document.querySelectorAll('.section-title');
-    sectionTitles.forEach(title => {
-        title.style.transform = 'translateY(0)';
-    });
-    
-    // Apply yellow gradient styling to hint button for wegmans (same as firehouse)
-    const hintButton = document.querySelector('.unscramble-hint-btn');
-    if (hintButton) {
-        // Remove any existing event listeners by cloning and replacing
-        const newHintButton = hintButton.cloneNode(true);
-        hintButton.parentNode.replaceChild(newHintButton, hintButton);
-        
-        // Apply yellow gradient styling for wegmans (same as firehouse)
-        newHintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
-        newHintButton.style.color = 'white';
-        newHintButton.style.borderRadius = '6px';
-        newHintButton.style.padding = '8px 24px';
-        newHintButton.style.fontWeight = '700';
-        newHintButton.style.boxShadow = 'none';
-        // Remove lightbulb emoji for wegmans (same as firehouse)
-        newHintButton.textContent = newHintButton.textContent.replace('💡 ', '').replace('💡', '');
-        if (newHintButton.textContent.trim() === '') {
-            newHintButton.textContent = 'Hint';
-        }
-    }
-    
-    const mcQuestions = document.querySelectorAll('.mc-question');
-    mcQuestions.forEach(question => {
-        question.style.color = 'white';
-    });
-    
-    // Quiz text elements - white for wegmans
-    const quizQuestions = document.querySelectorAll('.quiz-question');
-    quizQuestions.forEach(question => {
-        question.style.color = 'white';
-    });
-    
-    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
-    quizDifficulties.forEach(difficulty => {
-        difficulty.style.color = 'white';
-    });
-    
-    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
-    quizQuestionNumbers.forEach(number => {
-        number.style.color = 'white';
-    });
-    
-    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
-    unscrambleLabels.forEach(label => {
-        label.style.color = '#666'; // Normal grey like bottom part
-    });
-    
-    const fofInstructions = document.querySelectorAll('.fof-instruction');
-    fofInstructions.forEach(instruction => {
-        instruction.style.color = 'white';
-    });
-    
-    // Change letter boxes to white to light grey gradient background with orange text for wegmans
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = 'linear-gradient(to bottom, white, #e0e0e0)';
-        box.style.color = '#ce3f24';
-        box.style.border = '2px solid #ce3f24';
-    });
-    
-    // Center the calendar "this week's theme" text for wegmans
-    const weekThemeSection = document.querySelector('.week-theme-section');
-    if (weekThemeSection) {
-        weekThemeSection.style.alignItems = 'center';
-    }
-    const weekTitle = document.querySelector('.week-title');
-    if (weekTitle) {
-        weekTitle.style.textAlign = 'center';
-    }
-    const weekSubtitle = document.querySelector('.week-subtitle');
-    if (weekSubtitle) {
-        weekSubtitle.style.textAlign = 'center';
-    }
-}
-
 function applyBigyStyling() {
     // Change page background to white for bigy
     document.body.style.backgroundColor = 'white';
@@ -2418,7 +2527,7 @@ function applyBigyStyling() {
     });
     
     // Header bar and desktop top bar - white for bigy
-    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(bar) {
+    document.querySelectorAll('.header-bar').forEach(function(bar) {
         if (bar) bar.style.background = 'white';
     });
     
@@ -2447,18 +2556,11 @@ function applyBigyStyling() {
         headerLogo.style.display = 'block';
     }
     
-    // Question mark - white for bigy
-    const helpButton = document.querySelector('.help-button');
-    if (helpButton) {
-        helpButton.style.color = 'white';
-        helpButton.style.borderColor = 'white';
-    }
-    
     // Profile picture - blue for bigy (chess piece background)
     const profilePicture = document.querySelector('.profile-picture');
     if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #758ed1, #283f7e)';
-        profilePicture.style.backgroundColor = '';
+        profilePicture.style.background = '';
+        profilePicture.style.backgroundColor = '#ffffff';
     }
     
     // Profile container - white background for bigy
@@ -2557,8 +2659,8 @@ function applyBigyStyling() {
         hintButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
         // Add lightbulb emoji for bigy
         const buttonText = hintButton.textContent.trim();
-        if (!buttonText.includes('💡')) {
-            hintButton.textContent = '💡 Hint';
+        if (!buttonText.includes('ðŸ’¡')) {
+            hintButton.textContent = 'ðŸ’¡ Hint';
         }
         // Override hover state for bigy
         hintButton.addEventListener('mouseenter', function() {
@@ -2604,13 +2706,6 @@ function applyBigyStyling() {
         instruction.style.color = 'white';
     });
     
-    // Change letter boxes to white background with blue text for bigy
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = 'white';
-        box.style.color = '#1a237e';
-    });
-    
     // Also call the scramble.js function if it exists (for dynamically created boxes)
     if (typeof applyLetterBoxStyling === 'function') {
         applyLetterBoxStyling();
@@ -2623,521 +2718,110 @@ function applyBigyStyling() {
     });
 }
 
-// Function to apply firehouse styling (red backgrounds, white text)
-function applyFirehouseStyling() {
-    // Change page background to off-white for firehouse (same as normal version)
-    document.body.style.backgroundColor = '#f5f5f5';
-    document.documentElement.style.backgroundColor = '#f5f5f5';
-    
-    // Change all sections to off-white background to match body (not white)
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.backgroundColor = '#f5f5f5';
-    });
-    
-    // Also set content wrapper and html background if they exist
-    const content = document.querySelector('.content');
-    if (content) {
-        content.style.backgroundColor = '#f5f5f5';
-    }
-    
-    // Ensure html element also has the background
-    const html = document.documentElement;
-    html.style.backgroundColor = '#f5f5f5';
-    
-    // Scramble sections - light red to dark red gradient for firehouse
-    const scrambleTop = document.querySelector('.scramble-top-section');
-    const scrambleBottom = document.querySelector('.scramble-bottom-section');
-    if (scrambleTop) {
-        scrambleTop.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
-        scrambleTop.style.backgroundColor = '';
-        scrambleTop.style.borderBottom = 'none';
-    }
-    if (scrambleBottom) {
-        scrambleBottom.style.background = '#bf1722';
-        scrambleBottom.style.backgroundColor = '#bf1722';
-    }
-    
-    // MC sections - red for firehouse
-    const mcTop = document.querySelector('.mc-top-section');
-    const mcBottom = document.querySelector('.mc-bottom-section');
-    if (mcTop) {
-        mcTop.style.background = '#a00910';
-        mcTop.style.backgroundColor = '#a00910';
-        mcTop.style.borderBottom = 'none';
-    }
-    if (mcBottom) {
-        mcBottom.style.background = '#bf1722';
-        mcBottom.style.backgroundColor = '#bf1722';
-    }
-    
-    // Quiz sections - light red to dark red gradient for firehouse
-    const quizTop = document.querySelector('.quiz-top-section');
-    const quizBottom = document.querySelector('.quiz-bottom-section');
-    if (quizTop) {
-        quizTop.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
-        quizTop.style.backgroundColor = '';
-        quizTop.style.borderBottom = 'none';
-    }
-    if (quizBottom) {
-        quizBottom.style.background = '#bf1722';
-        quizBottom.style.backgroundColor = '#bf1722';
-    }
-    
-    // FoF sections - red for firehouse
-    const fofTop = document.querySelector('.fof-top-section');
-    const fofBottom = document.querySelector('.fof-bottom-section');
-    if (fofTop) {
-        fofTop.style.background = '#a00910';
-        fofTop.style.backgroundColor = '#a00910';
-        fofTop.style.borderBottom = 'none';
-    }
-    if (fofBottom) {
-        fofBottom.style.background = '#bf1722';
-        fofBottom.style.backgroundColor = '#bf1722';
-    }
-    
-    // Stars - red for firehouse
-    const unscrambleStars = document.querySelectorAll('.unscramble-stars');
-    unscrambleStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const mcStars = document.querySelectorAll('.mc-stars');
-    mcStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const fofStars = document.querySelectorAll('.fof-stars');
-    fofStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('span, .star-icon');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    const quizStars = document.querySelectorAll('.quiz-stars');
-    quizStars.forEach(stars => {
-        stars.style.color = '#dc3545';
-        const starIcons = stars.querySelectorAll('.quiz-star');
-        starIcons.forEach(icon => {
-            icon.style.color = '#dc3545';
-        });
-    });
-    
-    // Header bar and desktop top bar - dark grey to black gradient with white text and Nunito for firehouse
-    document.querySelectorAll('.header-bar, .desktop-top-bar').forEach(function(headerBar) {
-        headerBar.style.background = 'linear-gradient(to bottom,rgb(48, 48, 48), #000000)';
-        headerBar.style.color = 'white';
-        headerBar.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        headerBar.querySelectorAll('.date, .date-subtitle, .header-title, .header-logo, span, div').forEach(function(element) {
-            element.style.color = 'white';
-            element.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        });
-    });
-    
-    // Star counter - light red background for firehouse
-    document.querySelectorAll('.star-counter').forEach(function(starCounter) {
-        starCounter.style.backgroundColor = '#bf1722';
-        const starCount = starCounter.querySelector('.star-count');
-        if (starCount) starCount.style.color = 'white';
-        const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) starIcon.style.color = '#FFD700';
-    });
-    
-    // Date text - white for firehouse (in header bar with dark gradient)
-    const dateElement = document.querySelector('.date');
-    if (dateElement) {
-        dateElement.style.color = 'white';
-        dateElement.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    }
-    const dateSubtitle = document.querySelector('.date-subtitle');
-    if (dateSubtitle) {
-        dateSubtitle.style.color = 'white';
-        dateSubtitle.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    }
-    
-    // Show Firehouse logo for firehouse
-    const headerLogo = document.querySelector('.header-logo');
-    if (headerLogo) {
-        headerLogo.style.display = 'block';
-    }
-    
-    // Question mark - white for firehouse
-    const helpButton = document.querySelector('.help-button');
-    if (helpButton) {
-        helpButton.style.color = 'white';
-        helpButton.style.borderColor = 'white';
-    }
-    
-    // Profile picture - red for firehouse
-    const profilePicture = document.querySelector('.profile-picture');
-    if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #bf1722, #a00910)';
-        profilePicture.style.backgroundColor = '';
-    }
-    
-    // Profile container - white background for firehouse
-    const profileContainer = document.querySelector('.profile-container');
-    if (profileContainer) {
-        profileContainer.style.background = 'white';
-        profileContainer.style.backgroundColor = 'white';
-    }
-    
-    // Profile page red elements - change to red for firehouse
-    const dealEarnContainer = document.querySelector('.deal-earn-container');
-    if (dealEarnContainer) {
-        dealEarnContainer.style.backgroundColor = '#dc3545';
-    }
-    
-    // Deal button containers - red for firehouse
-    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
-    dealButtonContainers.forEach(container => {
-        container.style.backgroundColor = '#dc3545';
-    });
-    
-    const challengesContainer = document.querySelector('.profile-challenges-container');
-    if (challengesContainer) {
-        challengesContainer.style.borderColor = '';
-        challengesContainer.style.background = '';
-        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-    }
-    
-    const achievementsContainer = document.querySelector('.profile-achievements-container');
-    if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '';
-        achievementsContainer.style.background = '';
-        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
-    }
-    
-    const achievementsHeader = document.querySelector('.achievements-header');
-    if (achievementsHeader) {
-        achievementsHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
-    }
-    
-    const challengesHeader = document.querySelector('.challenges-header');
-    if (challengesHeader) {
-        challengesHeader.style.background = 'linear-gradient(to bottom, #dc3545, #c82333)';
-    }
-    
-    // Challenge items - red for firehouse
-    const challengeItems = document.querySelectorAll('.challenge-item');
-    challengeItems.forEach(item => {
-        item.style.borderBottomColor = 'rgba(220, 53, 69, 0.2)';
-        item.style.background = 'linear-gradient(to bottom, rgba(220, 53, 69, 0.08) 0%, rgba(220, 53, 69, 0.04) 100%)';
-    });
-    
-    // Challenge rewards - red for firehouse
-    const challengeRewards = document.querySelectorAll('.challenge-reward');
-    challengeRewards.forEach(reward => {
-        reward.style.color = '#dc3545';
-        reward.style.background = 'linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.1) 100%)';
-        reward.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.2)';
-    });
-    
-    // Star icons inline - red for firehouse
-    const starIconsInline = document.querySelectorAll('.star-icon-inline');
-    starIconsInline.forEach(icon => {
-        icon.style.color = '#dc3545';
-        icon.style.textShadow = '0 1px 2px rgba(220, 53, 69, 0.3)';
-    });
-    
-    // Text colors - white for firehouse (keep as is, no uppercase)
-    const subsectionTitles = document.querySelectorAll('.subsection-title');
-    subsectionTitles.forEach(title => {
-        title.style.color = 'white';
-        title.style.textTransform = 'none'; // Remove uppercase for firehouse
-        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    // Section titles - remove transform for firehouse but keep default font (Aleo)
-    const sectionTitles = document.querySelectorAll('.section-title');
-    sectionTitles.forEach(title => {
-        title.style.transform = 'translateY(0)';
-        // Keep default Aleo font for section titles
-    });
-    
-    // Journey page - purple gradient for firehouse
-    const journeyPage = document.getElementById('journey-page');
-    if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom,rgb(103, 37, 190), #2E0E5C)';
-    }
-    
-    // Boost game title - Firehouse Match for firehouse
-    const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
-    if (gameTitle) {
-        gameTitle.textContent = 'FIREHOUSE MATCH';
-    }
-    
-    // Apply yellow gradient styling to hint button for firehouse
-    const hintButton = document.querySelector('.unscramble-hint-btn');
-    if (hintButton) {
-        hintButton.style.background = 'linear-gradient(to bottom, #FFD700, #FFA500)';
-        hintButton.style.color = 'white';
-        hintButton.style.borderRadius = '8px';
-        hintButton.style.padding = '8px 20px';
-        hintButton.style.fontWeight = '700';
-        hintButton.style.boxShadow = 'none';
-        // Add lightbulb emoji for firehouse
-        const buttonText = hintButton.textContent.trim();
-        if (!buttonText.includes('💡')) {
-            hintButton.textContent = '💡 Hint';
-        }
-        // Override hover state for firehouse
-        hintButton.addEventListener('mouseenter', function() {
-            if (!this.disabled) {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = 'none';
-            }
-        }, { once: false });
-        hintButton.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = 'none';
-        }, { once: false });
-    }
-    
-    const mcQuestions = document.querySelectorAll('.mc-question');
-    mcQuestions.forEach(question => {
-        question.style.color = 'white';
-    });
-    
-    // Quiz text elements - white for firehouse
-    const quizQuestions = document.querySelectorAll('.quiz-question');
-    quizQuestions.forEach(question => {
-        question.style.color = 'white';
-        question.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
-    quizDifficulties.forEach(difficulty => {
-        difficulty.style.color = 'white';
-        difficulty.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
-    quizQuestionNumbers.forEach(number => {
-        number.style.color = 'white';
-        number.style.fontFamily = "'Nunito', sans-serif";
-    });
-    
-    const quizQuestionsFirehouse = document.querySelectorAll('.quiz-question');
-    quizQuestionsFirehouse.forEach(question => {
-        question.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
-    unscrambleLabels.forEach(label => {
-        label.style.color = 'white';
-        label.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    const fofInstructions = document.querySelectorAll('.fof-instruction');
-    fofInstructions.forEach(instruction => {
-        instruction.style.color = 'white';
-        instruction.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    // Ensure subsection titles use Nunito (they're originally Nunito in CSS)
-    const subsectionTitlesFirehouse = document.querySelectorAll('.subsection-title');
-    subsectionTitlesFirehouse.forEach(title => {
-        title.style.fontFamily = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    });
-    
-    // Change letter boxes to white background with lighter red text for firehouse
-    const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = 'white';
-        box.style.color = '#bf1722';
-    });
-    
-    // Also call the scramble.js function if it exists (for dynamically created boxes)
-    if (typeof applyLetterBoxStyling === 'function') {
-        applyLetterBoxStyling();
-    }
-    
-    // Remove drop shadow from quiz containers for firehouse
-    const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
-    quizContainers.forEach(container => {
-        container.style.boxShadow = 'none';
-    });
-}
-
 // Function to apply default styling (grey/white backgrounds, grey text)
 function applyDefaultStyling() {
-    // Change page background to #f5f5f5 for default
     document.body.style.backgroundColor = '#f5f5f5';
-    
-    // Change all sections to #f5f5f5 background
     const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.backgroundColor = '#f5f5f5';
-    });
-    
-    // Scramble sections - default styling now handled by CSS
-    
-    // MC and FoF sections - default styling now handled by CSS
-    
-    // Profile picture - pink gradient for default
+    sections.forEach(section => { section.style.backgroundColor = '#f5f5f5'; });
+
     const profilePicture = document.querySelector('.profile-picture');
     if (profilePicture) {
-        profilePicture.style.background = 'linear-gradient(to bottom, #F093FB, #F5576C)';
-        profilePicture.style.backgroundColor = '';
+        profilePicture.style.background = '';
+        profilePicture.style.backgroundColor = '#ffffff';
     }
-    
-    // Profile container - white background for default
     const profileContainer = document.querySelector('.profile-container');
     if (profileContainer) {
         profileContainer.style.background = 'white';
         profileContainer.style.backgroundColor = 'white';
     }
-    
-    // Text colors - dark grey for default (on light grey background)
-    // Skip top sections which have green background and white text
+
     const subsectionTitles = document.querySelectorAll('.subsection-title');
     subsectionTitles.forEach(title => {
-        // Set white if it's inside a top section (which has green background and white text)
-        if (title.closest('.scramble-top-section') || 
-            title.closest('.mc-top-section') || 
-            title.closest('.fof-top-section') ||
-            title.closest('.quiz-top-section')) {
-            title.style.color = 'white';
-        } else {
-            title.style.color = '#666';
-        }
-        title.style.textTransform = 'uppercase'; // Ensure uppercase for default
+        title.style.fontFamily = '';
+        title.style.color = ''; /* use CSS var(--header-text-color) */
+        title.style.textTransform = 'uppercase';
     });
-    
-    const mcQuestions = document.querySelectorAll('.mc-question');
-    mcQuestions.forEach(question => {
-        question.style.color = '#666';
+
+    document.querySelectorAll('.mc-question').forEach(q => { q.style.color = '#666'; });
+    document.querySelectorAll('.unscramble-label').forEach(l => { l.style.color = '#666'; });
+    document.querySelectorAll('.fof-instruction').forEach(i => { i.style.color = '#666'; });
+    document.querySelectorAll('.quiz-question').forEach(q => { q.style.color = '#666'; });
+    document.querySelectorAll('.quiz-difficulty').forEach(d => { d.style.color = '#666'; });
+    document.querySelectorAll('.quiz-question-number').forEach(n => { n.style.color = '#999'; });
+
+    document.querySelectorAll('.section-title').forEach(t => {
+        t.style.fontFamily = "'Aleo', serif";
+        t.style.transform = 'translateY(2px)';
     });
-    
-    const unscrambleLabels = document.querySelectorAll('.unscramble-label');
-    unscrambleLabels.forEach(label => {
-        label.style.color = '#666';
-    });
-    
-    const fofInstructions = document.querySelectorAll('.fof-instruction');
-    fofInstructions.forEach(instruction => {
-        instruction.style.color = '#666';
-    });
-    
-    // Quiz text elements - dark grey for default
-    const quizQuestions = document.querySelectorAll('.quiz-question');
-    quizQuestions.forEach(question => {
-        question.style.color = '#666';
-    });
-    
-    const quizDifficulties = document.querySelectorAll('.quiz-difficulty');
-    quizDifficulties.forEach(difficulty => {
-        difficulty.style.color = '#666';
-    });
-    
-    const quizQuestionNumbers = document.querySelectorAll('.quiz-question-number');
-    quizQuestionNumbers.forEach(number => {
-        number.style.color = '#999';
-    });
-    
-    // Change section titles to Aleo (default) - remove any inline styles
-    const sectionTitles = document.querySelectorAll('.section-title');
-    sectionTitles.forEach(title => {
-        title.style.fontFamily = "'Aleo', serif";
-        title.style.transform = 'translateY(2px)';
-    });
-    
-    // Journey page - purple gradient for default
+
     const journeyPage = document.getElementById('journey-page');
-    if (journeyPage) {
-        journeyPage.style.background = 'linear-gradient(to bottom,rgb(94, 35, 172), #2E0E5C)';
-    }
-    
-    // Remove any inline styles from letter boxes for default mode (let CSS handle it)
+    if (journeyPage) journeyPage.style.background = 'linear-gradient(to bottom,rgb(94, 35, 172), #2E0E5C)';
+
     const letterBoxes = document.querySelectorAll('.letter-box');
-    letterBoxes.forEach(box => {
-        box.style.background = '';
-        box.style.color = '';
-    });
-    
-    // Also call the scramble.js function if it exists (for dynamically created boxes)
-    if (typeof applyLetterBoxStyling === 'function') {
-        applyLetterBoxStyling();
-    }
-    
-    // Profile page elements - ensure orange for default (remove any bigy overrides)
-    // Note: Deal button containers stay red for both default and bigy
+    letterBoxes.forEach(box => { box.style.background = ''; box.style.color = ''; });
+    if (typeof applyLetterBoxStyling === 'function') applyLetterBoxStyling();
+
     const dealEarnContainer = document.querySelector('.deal-earn-container');
-    if (dealEarnContainer) {
-        dealEarnContainer.style.backgroundColor = '#FF8C42';
-    }
-    
-    // Deal button containers - red for default (not orange)
-    const dealButtonContainers = document.querySelectorAll('.deal-button-container');
-    dealButtonContainers.forEach(container => {
-        container.style.backgroundColor = '#dc3545';
-    });
-    
+    if (dealEarnContainer) dealEarnContainer.style.backgroundColor = '#FF8C42';
+    document.querySelectorAll('.deal-button-container').forEach(c => { c.style.backgroundColor = '#dc3545'; });
+
     const challengesContainer = document.querySelector('.profile-challenges-container');
     if (challengesContainer) {
-        challengesContainer.style.borderColor = '';
-        challengesContainer.style.background = '';
-        challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+        challengesContainer.style.borderColor = ''; challengesContainer.style.background = ''; challengesContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
-    
     const achievementsContainer = document.querySelector('.profile-achievements-container');
     if (achievementsContainer) {
-        achievementsContainer.style.borderColor = '';
-        achievementsContainer.style.background = '';
-        achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+        achievementsContainer.style.borderColor = ''; achievementsContainer.style.background = ''; achievementsContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     }
-    
     const achievementsHeader = document.querySelector('.achievements-header');
-    if (achievementsHeader) {
-        achievementsHeader.style.background = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
-    }
-    
+    if (achievementsHeader) { achievementsHeader.style.background = ''; achievementsHeader.style.fontFamily = ''; }
     const challengesHeader = document.querySelector('.challenges-header');
-    if (challengesHeader) {
-        challengesHeader.style.background = 'linear-gradient(to bottom, #FFB84D, #FF8C42)';
-    }
-    
-    // Challenge items - orange for default (CSS already has orange, but ensure no bigy overrides)
-    const challengeItems = document.querySelectorAll('.challenge-item');
-    challengeItems.forEach(item => {
+    if (challengesHeader) { challengesHeader.style.background = ''; challengesHeader.style.fontFamily = ''; }
+    const accountHeader = document.querySelector('.account-header');
+    if (accountHeader) accountHeader.style.fontFamily = '';
+    const avatarSelectTitle = document.querySelector('.avatar-select-title');
+    if (avatarSelectTitle) avatarSelectTitle.style.fontFamily = '';
+    document.querySelectorAll('#prizes-page .prize-section-title').forEach(function(el) { el.style.fontFamily = ''; el.style.color = ''; });
+    document.querySelectorAll('.badges-section-title').forEach(function(el) { el.style.color = ''; });
+
+    // Calendar: clear inline backgrounds on week section only; calendar-user-div uses CSS variable
+    document.querySelectorAll('.header-type1 .week-section-type1').forEach(function(el) {
+        el.style.background = '';
+        el.style.backgroundColor = '';
+    });
+
+    // Header bar: clear inline styles so CSS variables (--top-bar-bg-desktop etc.) apply
+    document.querySelectorAll('.header-bar').forEach(function(bar) {
+        if (bar) {
+            bar.style.background = '';
+            bar.style.color = '';
+            bar.style.fontFamily = '';
+            bar.querySelectorAll('.date, .date-subtitle, .header-title, .header-logo, span, div').forEach(function(el) {
+                el.style.color = '';
+                el.style.fontFamily = '';
+            });
+        }
+    });
+
+    document.querySelectorAll('.challenge-item').forEach(item => {
         item.style.borderBottomColor = 'rgba(255, 140, 66, 0.2)';
         item.style.background = 'linear-gradient(to bottom, rgba(255, 140, 66, 0.08) 0%, rgba(255, 140, 66, 0.04) 100%)';
     });
-    
-    // Challenge rewards - orange for default
-    const challengeRewards = document.querySelectorAll('.challenge-reward');
-    challengeRewards.forEach(reward => {
+    document.querySelectorAll('.challenge-reward').forEach(reward => {
         reward.style.color = '#FF8C42';
         reward.style.background = 'linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 140, 66, 0.1) 100%)';
         reward.style.boxShadow = '0 2px 4px rgba(255, 140, 66, 0.2)';
     });
-    
-    // Star icons inline - orange for default
-    const starIconsInline = document.querySelectorAll('.star-icon-inline');
-    starIconsInline.forEach(icon => {
+
+    document.querySelectorAll('.star-icon-inline').forEach(icon => {
         icon.style.color = '#FF8C42';
         icon.style.textShadow = '0 1px 2px rgba(255, 140, 66, 0.3)';
     });
-    
-    // Restore drop shadow on quiz containers for default
-    const quizContainers = document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container');
-    quizContainers.forEach(container => {
-        container.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+
+    document.querySelectorAll('.on-this-day-container, .mc-container, .fof-container, .quiz-container').forEach(c => {
+        c.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
     });
-    
-    // Apply default teal styling to hint button (remove gold styling)
+
     const hintButton = document.querySelector('.unscramble-hint-btn');
     if (hintButton) {
         hintButton.style.background = 'linear-gradient(to bottom, #6EDDD4, #4ECDC4)';
@@ -3146,21 +2830,17 @@ function applyDefaultStyling() {
         hintButton.style.padding = '8px 24px';
         hintButton.style.fontWeight = '600';
         hintButton.style.boxShadow = '0 2px 6px rgba(78, 205, 196, 0.3)';
-        // Remove lightbulb emoji for default
-        hintButton.textContent = hintButton.textContent.replace('💡 ', '').replace('💡', '');
-        if (hintButton.textContent.trim() === '') {
-            hintButton.textContent = 'Hint';
-        }
+        hintButton.textContent = hintButton.textContent.replace('ðŸ’¡ ', '').replace('ðŸ’¡', '');
+        if (hintButton.textContent.trim() === '') hintButton.textContent = 'Hint';
     }
-    
-    // Star counter - set star icon to orange for default
-    const starCounter = document.querySelector('.star-counter');
-    if (starCounter) {
+
+    document.querySelectorAll('.star-counter').forEach(function(starCounter) {
+        starCounter.style.backgroundColor = '';
+        const starCount = starCounter.querySelector('.star-count');
+        if (starCount) starCount.style.color = '';
         const starIcon = starCounter.querySelector('.star-icon');
-        if (starIcon) {
-            starIcon.style.color = '#FF8C42';
-        }
-    }
+        if (starIcon) starIcon.style.color = '#FF8C42';
+    });
 }
 
 // Initialize bigy carousel
@@ -3395,6 +3075,7 @@ function initType1Carousel() {
         
         if (instant) {
             carousel.style.transition = 'none';
+            carousel.offsetHeight; // force reflow so transition=none is applied before transform
         } else {
             carousel.style.transition = 'transform 1.2s ease';
         }
@@ -3405,52 +3086,54 @@ function initType1Carousel() {
         
         if (instant) {
             requestAnimationFrame(() => {
-                carousel.style.transition = 'transform 0.5s ease';
+                requestAnimationFrame(() => {
+                    carousel.style.transition = 'transform 1.2s ease';
+                });
             });
         }
     }
     
-    // Function to go to next slide (for auto-cycling - loops around)
+    // Function to go to next slide (auto-cycling: 0→1→2→3→instant jump to 0 for seamless loop)
     function nextSlide() {
-        // Check if header-type1 is still visible
         if (headerType1.style.display === 'none') {
             clearInterval(carouselIntervalType1);
             return;
         }
-        
-        if (currentSlide === 2) {
-            showSlide(3, false);
-            setTimeout(() => {
-                showSlide(0, true);
-            }, 1200);
+        const next = currentSlide + 1;
+        if (next === slides.length - 1) {
+            // Going to clone (4th = same as 1st); when transition ends, snap to 0 with no animation
+            function onLoopTransitionEnd(e) {
+                if (e.target !== carousel || e.propertyName !== 'transform') return;
+                carousel.removeEventListener('transitionend', onLoopTransitionEnd);
+                // Snap in next frame so transition has fully completed; use transition=none so no animation
+                requestAnimationFrame(() => {
+                    carousel.style.transition = 'none';
+                    const w = carouselContainer.offsetWidth || window.innerWidth;
+                    carousel.style.transform = `translateX(0px)`;
+                    currentSlide = 0;
+                    carousel.offsetHeight; // reflow
+                    requestAnimationFrame(() => {
+                        carousel.style.transition = 'transform 1.2s ease';
+                    });
+                });
+            }
+            carousel.addEventListener('transitionend', onLoopTransitionEnd);
+            showSlide(next, false);
         } else {
-            const next = currentSlide + 1;
             showSlide(next);
         }
     }
-    
-    // Function to go to next slide manually (no wrap around)
+
     function nextSlideManual() {
-        if (headerType1.style.display === 'none') {
-            return;
-        }
-        if (currentSlide >= 2) {
-            return;
-        }
-        const next = currentSlide + 1;
-        showSlide(next);
+        if (headerType1.style.display === 'none') return;
+        if (currentSlide >= slides.length - 1) return;
+        showSlide(currentSlide + 1);
     }
-    
-    // Function to go to previous slide manually (no wrap around)
+
     function prevSlide() {
-        if (headerType1.style.display === 'none') {
-            return;
-        }
-        if (currentSlide <= 0) {
-            return;
-        }
-        const prev = currentSlide - 1;
-        showSlide(prev);
+        if (headerType1.style.display === 'none') return;
+        if (currentSlide <= 0) return;
+        showSlide(currentSlide - 1);
     }
     
     // Initialize dimensions and show first slide
@@ -3524,34 +3207,20 @@ function updateGamesPageStats() {
 function updateBoostGameBox() {
     const gameTitle = document.querySelector('#community-page .boost-game-box .game-title');
     if (gameTitle) {
-        // Check if firehouse is active
-        const urlParams = new URLSearchParams(window.location.search);
-        const headerType = urlParams.get('d');
-        if (headerType === 'firehouse2') {
-            gameTitle.textContent = 'FIREHOUSE MATCH';
-        } else {
-            gameTitle.textContent = 'MARKET MATCH';
-        }
+        gameTitle.textContent = 'MARKET MATCH';
     }
     
-    // Update play-color-box with image and red gradient
     const playColorBox = document.querySelector('#community-page .boost-game-box .play-color-box');
     if (playColorBox) {
         playColorBox.style.background = 'linear-gradient(to bottom, #e84066, #c82a48)';
         
-        // Remove existing SVG
         const svg = playColorBox.querySelector('svg');
         if (svg) {
             svg.remove();
         }
         
-        // Add image if it doesn't exist
         let img = playColorBox.querySelector('img');
-        // Check if firehouse mode
-        const urlParams = new URLSearchParams(window.location.search);
-        const headerType = urlParams.get('d');
-        const isFirehouse = headerType === 'firehouse2';
-        const imageSrc = isFirehouse ? 'src/img/firehousesubs/sweepsGame.png' : 'src/img/bigy/sweepsGame.png';
+        const imageSrc = 'src/img/bigy/sweepsGame.png';
         
         if (!img) {
             img = document.createElement('img');
@@ -3580,14 +3249,11 @@ function updateLogoVisibility() {
     const closeButton = document.querySelector('.game-overlay-close');
     const helpButton = document.querySelector('.help-button');
     
-    // Check if we're in default, bigy, bigy2, firehouse2, or wegmans mode
     const urlParams = new URLSearchParams(window.location.search);
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
-    const isFirehouse2 = headerType === 'firehouse2';
-    const isWegmans = headerType === 'wegmans';
-    const isBigyMode = isBigy || isBigy2 || isFirehouse2 || isWegmans;
+    const isBigyMode = isBigy || isBigy2;
     
     // Show help button(s): on mobile show only on main screen unless game open; on desktop show only when game open (upper left)
     const shouldHideHelp = closeButton && closeButton.classList.contains('show');
@@ -3608,13 +3274,6 @@ function updateLogoVisibility() {
         } else {
             helpButton.classList.remove('hidden');
             helpButton.style.display = 'inline-flex';
-            if (isBigyMode && headerType !== 'wegmans') {
-                helpButton.style.color = 'white';
-                helpButton.style.borderColor = 'white';
-            } else {
-                helpButton.style.color = '#666';
-                helpButton.style.borderColor = '#666';
-            }
         }
     });
     // Desktop help link (6th tab) - hide when game overlay open
@@ -3629,7 +3288,7 @@ function updateLogoVisibility() {
             // Game overlay is open - hide logo
             logo.style.display = 'none';
         } else {
-            // Game overlay is closed - show logo for bigy, bigy2, firehouse2, and wegmans
+            // Game overlay is closed - show logo for bigy, bigy2
             logo.style.display = isBigyMode ? 'block' : 'none';
         }
     }
@@ -3638,16 +3297,40 @@ function updateLogoVisibility() {
 // Check URL parameters when page loads
 checkURLParameters();
 
-// Keyboard shortcut to test color scheme
+// Keyboard shortcut helpers and diagnostics
 document.addEventListener('keydown', (e) => {
     // '8' key cheat to unlock bonus spin
     if (e.key === '8') {
         localStorage.setItem('bonusSpinCheatUnlocked', 'true');
         updateBonusSpinDisplay();
         console.log('Bonus spin unlocked via cheat');
+        return;
     }
     
-    if (e.key === 'q' || e.key === 'Q') {
+    if (e.key === 'u' || e.key === 'U') {
+        // Daily badge test
+        showDailyAvatarUnlockOverlay();
+    } else if (e.key === 'i' || e.key === 'I') {
+        // Board badge test (loc_ badge)
+        if (typeof window.showBoardBadgeOverlay === 'function') {
+            window.showBoardBadgeOverlay();
+        }
+    } else if (e.key === 'o' || e.key === 'O') {
+        // Tiles top grid (gold_) test
+        if (typeof window.handlePrizeTilesCompletion === 'function') {
+            window.handlePrizeTilesCompletion('big');
+        }
+    } else if (e.key === 'p' || e.key === 'P') {
+        // Tiles middle grid (silver_) test
+        if (typeof window.handlePrizeTilesCompletion === 'function') {
+            window.handlePrizeTilesCompletion('medium');
+        }
+    } else if (e.key === '[') {
+        // Tiles bottom grid (an_/loc_) test
+        if (typeof window.handlePrizeTilesCompletion === 'function') {
+            window.handlePrizeTilesCompletion('small');
+        }
+    } else if (e.key === 'q' || e.key === 'Q') {
         // Reset all data (same as reset button, but without popup)
         resetAllData();
     } else if (e.key === '1') {
@@ -3765,6 +3448,9 @@ function actuallyCloseOverlay(gameId, overlayElement, iframeToUnload) {
     requestAnimationFrame(() => {
         window.scrollTo(0, scrollY);
     });
+
+    // When returning to the main page with no game open, show daily badge if it's pending
+    maybeShowDailyBadgeOverlay();
 }
 
 // Main close button handler - attach to all close buttons (header + desktop bar)
@@ -3895,6 +3581,22 @@ if (mysteryWordBox) {
                 iframe.contentWindow.postMessage('mysteryWordShown', '*');
             }
         }, 100);
+    });
+}
+
+// Desktop puzzle section: Community and Journey nav thumbnails (switch tab on click)
+const communityNavBox = document.getElementById('communityNavBox');
+const journeyNavBox = document.getElementById('journeyNavBox');
+if (communityNavBox) {
+    communityNavBox.addEventListener('click', () => {
+        const btn = document.querySelector('.tab-button[data-page="community"]');
+        if (btn) btn.click();
+    });
+}
+if (journeyNavBox) {
+    journeyNavBox.addEventListener('click', () => {
+        const btn = document.querySelector('.tab-button[data-page="journey"]');
+        if (btn) btn.click();
     });
 }
 
@@ -4092,6 +3794,15 @@ function updateBonusSpinDisplay() {
     const starsWon = parseInt(localStorage.getItem(`bonusSpinStars_${todayKey}`) || '0');
     const isUnlocked = checkBonusSpinUnlock() || localStorage.getItem('bonusSpinCheatUnlocked') === 'true';
     const hasSpun = localStorage.getItem(`bonusSpinSpun_${todayKey}`) === 'true';
+
+    // As we update bonus spin status, also flag daily badge once 6 unique games have been played today
+    if (checkDailyBadgeUnlock()) {
+        const autoKey = `dailyBadgeAutoShown_${todayKey}`;
+        const pendingKey = `dailyBadgePending_${todayKey}`;
+        if (localStorage.getItem(autoKey) !== 'true' && localStorage.getItem(pendingKey) !== 'true') {
+            localStorage.setItem(pendingKey, 'true');
+        }
+    }
     
     if (!goldCaseBox || !goldCaseLockText || !goldCaseStars) return;
     
@@ -4246,7 +3957,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose reset function globally for Q key handler
 window.resetAllData = resetAllData;
 
-// Online indicator: random number 120–140 (all instances)
+// Online indicator: random number 120â€“140 (all instances)
 document.addEventListener('DOMContentLoaded', () => {
     const n = 120 + Math.floor(Math.random() * 21);
     document.querySelectorAll('.online-count-num').forEach(el => { el.textContent = n; });

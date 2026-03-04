@@ -19,11 +19,9 @@ function getCurrentThemeFromURL() {
         }
     }
     
-    // Valid themes: 'thanksgiving' or 'july4th'
-    if (themeParam === 'july4th') {
-        return 'july4th';
-    }
-    // Default to thanksgiving
+    // Valid themes: 'thanksgiving', 'july4th', 'easter'
+    if (themeParam === 'july4th') return 'july4th';
+    if (themeParam === 'easter') return 'easter';
     return 'thanksgiving';
 }
 
@@ -32,11 +30,32 @@ const CURRENT_THEME = getCurrentThemeFromURL();
 const THEMES = {
     thanksgiving: {
         name: 'Thanksgiving',
-        quizTitle: 'DAILY THANKSGIVING QUIZ',
+        quizTitle: 'Daily Thanksgiving Quiz',
         backgroundPattern: 'weeklyBackgrounds/thanksgiving_pattern.jpg',
         day1Image: 'weeklyBackgrounds/thanksgiving_day1.png',
         puzzleBackground: 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg',
         zoomImage: 'weeklyBackgrounds/thanksgiving_zoom.jpg',
+        colors: {
+            
+            'top-bar-bg-mobile': '#fdd091', 
+            'top-bar-text-mobile': '#3b1f0a', 
+            'top-bar-bg-desktop': '#FF8C42',
+            'top-bar-text-desktop': '#3b1f0a',
+            
+            'page-gradient-top': '#FFE5C4', 
+            
+            'masterGrad': 'linear-gradient(to bottom, #ffd391, #ffd391)',
+            
+            'header-text-color': '#7e5637',
+            
+            'calendar-background-top-color': 'linear-gradient(to bottom,rgb(231, 63, 63),rgb(203, 44, 44))',
+            'calendar-background-top-text': '#ffffff',
+            'calendar-top-solid': '#e73f3f',
+            'calendar-background-color': '#FFF6E8',      // light cream
+            'calendar-background-bottom-color': '#FFF6E8',
+            'calendar-border-color': '#e3c3a8',
+            'calendar-highlight-color': '#ffffff'
+        },
         phrases: [
             "Saving room for pumpkin pie",
             "Thankful for the little things",
@@ -65,13 +84,29 @@ const THEMES = {
     },
     july4th: {
         name: '4th of July',
-        quizTitle: 'DAILY 4TH OF JULY QUIZ',
+        quizTitle: 'Daily 4th of July Quiz',
         backgroundPattern: 'weeklyBackgrounds/forthOfJuly_pattern.png',
         day1Image: 'weeklyBackgrounds/forthOfJuly_day1.png',
         puzzleBackground: 'weeklyBackgrounds/fourthOfJuly_puzzleBig.jpg',
         puzzleMedium: 'weeklyBackgrounds/fourthOfJuly_puzzleMedium.jpg',
         puzzleSmall: 'weeklyBackgrounds/fourthOfJuly_puzzleSmall.jpg',
         zoomImage: 'weeklyBackgrounds/forthOfJuly_zoom.jpg',
+        colors: {
+            'top-bar-bg-mobile': '#71dad4',
+            'top-bar-text-mobile': '#000000',
+            'top-bar-bg-desktop': '#e6e6e6',
+            'top-bar-text-desktop': '#333333',
+            'page-gradient-top': '#bdeeea',
+            'masterGrad': '#cdfffc',
+            'header-text-color': '#7b8f94',
+            'calendar-background-top-color': 'linear-gradient(to bottom, #e73f65, #cb2c4b)',
+            'calendar-background-top-text': '#ffffff',
+            'calendar-top-solid': '#e73f65',
+            'calendar-background-color': '#e8fffe',
+            'calendar-background-bottom-color': '#e8fffe',
+            'calendar-border-color': '#a8d1ce',
+            'calendar-highlight-color': '#ffffff'
+        },
         phrases: [
             "Land of the free home of the brave",
             "Red white and blue all the way through",
@@ -86,9 +121,70 @@ const THEMES = {
             'FLAG', 'JULY', 'FOURTH', 
             'NATION', 'UNITED', 'STATES', 'BRAVE', 'FREE'
         ],
-        suspectEmojis: ['🇺🇸', '🧨', '🦅', '⭐', '🔥'],
-        beticleWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE', ],
-        mysteryWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE', ]
+        suspectEmojis: ['⭐', '🇺🇸', '🧨', '🦅', '🔥'],
+        beticleWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE'],
+        mysteryWords: ['STARS', 'BRAVE', 'UNITE', 'GLORY', 'HONOR', 'PRIDE', 'UNION', 'EAGLE']
+    },
+    easter: {
+        name: 'Easter',
+        quizTitle: 'Daily Easter Quiz',
+        backgroundPattern: 'weeklyBackgrounds/easter_pattern.png',
+        day1Image: 'weeklyBackgrounds/easter_day1.png',
+        puzzleBackground: 'weeklyBackgrounds/easter_puzzleBig.jpg',
+        puzzleMedium: 'weeklyBackgrounds/easter_puzzleMedium.jpg',
+        puzzleSmall: 'weeklyBackgrounds/easter_puzzleSmall.jpg',
+        zoomImage: 'weeklyBackgrounds/easter_zoom.jpg',
+        colors: {
+            'top-bar-bg-mobile': '#78e8bd',
+            'top-bar-text-mobile': '#1a3d1a',
+            'top-bar-bg-desktop': '#a8d5a8',
+            'top-bar-text-desktop': '#1b5e20',
+            'page-gradient-top': '#b2eed7',
+            'masterGrad': '#d4fff8',
+            'header-text-color': '#37899e',
+            'calendar-background-top-color': 'linear-gradient(to bottom, #00b1b7,#00b1b7)',
+            'calendar-background-top-text': '#ffffff',
+            'calendar-top-solid': '#00b1b7',
+            'calendar-background-color': '#ffffff',
+            'calendar-background-bottom-color': '#e8f5e9',
+            'calendar-border-color': '#b3eab5',
+            'calendar-highlight-color': '#d4fff8'
+        },
+        phrases: [
+            "Spring has sprung and so have we",
+            "Hoppy Easter to one and all",
+            "Egg hunts and chocolate bunnies",
+            "Baskets full of pastel treats",
+            "Some bunny loves you very much",
+            "Peeps and jelly beans for days",
+            "Fresh flowers and Easter parade",
+            "New life and blooming gardens",
+            "Hide the eggs then find them all",
+            "Easter brunch and family time",
+            "Pastel colors and sunny skies",
+            "Spring cleaning then egg decorating",
+            "Bunnies chicks and lambs abound",
+            "Celebrate the season of growth",
+            "Sweet treats and springtime cheer"
+        ],
+        crossWords: [
+            'EASTER', 'BUNNY', 'SPRING', 'EGGS', 'BASKET', 'BLOOM',
+            'CHICK', 'LAMB', 'PEEPS', 'PASTEL', 'TULIP', 'GRASS',
+            'HUNT', 'BLOOM', 'RENEW', 'JOY'
+        ],
+        suspectEmojis: ['🐣', '🐰', '🌸', '🥚', '🌷'],
+        beticleWords: ['BUNNY', 'BLOOM', 'GRASS', 'CHICK', 'TULIP', 'SWEET', 'FRESH', 'HOPPY', 'PETAL', 'SPRIG', 'LILAC', 'BULBS', 'BIRCH', 'HATCH', 'BLOOM'],
+        mysteryWords: ['BUNNY', 'BLOOM', 'GRASS', 'CHICK', 'TULIP', 'SWEET', 'FRESH', 'HOPPY', 'PETAL', 'SPRIG', 'LILAC', 'BULBS', 'BIRCH', 'HATCH', 'BLOOM']
+    }
+};
+
+// Centra (d=centra): overrides theme top-bar colors when applied
+const CENTRA_OVERRIDE = {
+    colors: {
+        'top-bar-bg-mobile': '#03b0b6',
+        'top-bar-text-mobile': '#ffffff',
+        'top-bar-bg-desktop': '#03b0b6',
+        'top-bar-text-desktop': '#ffffff'
     }
 };
 
@@ -368,11 +464,102 @@ function getQuizData() {
                     }
                 ]
             }
-           
+        ];
+    } else if (themeKey === 'easter') {
+        return [
+            {
+                "set": 1,
+                "questions": [
+                    {
+                        "question": "What animal is most commonly associated with Easter in Western tradition?",
+                        "answers": ["Chick", "Bunny", "Lamb"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which spring flower is often linked to Easter and rebirth?",
+                        "answers": ["Daisy", "Tulip", "Lily"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "What do children often hunt for on Easter morning?",
+                        "answers": ["Treasure", "Eggs", "Candy"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which candy is shaped like a baby chicken and popular at Easter?",
+                        "answers": ["Jelly beans", "Peeps", "Chocolate eggs"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Easter falls on the first Sunday after the first full moon after which equinox?",
+                        "answers": ["Summer", "Vernal (spring)", "Autumn"],
+                        "correct": 1
+                    }
+                ]
+            },
+            {
+                "set": 2,
+                "questions": [
+                    {
+                        "question": "What color is traditionally associated with Easter and new life?",
+                        "answers": ["Red", "Green", "Pastel yellow"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "What do people often put Easter treats in?",
+                        "answers": ["Sack", "Basket", "Box"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which holiday comes right before Easter in the Christian calendar?",
+                        "answers": ["Christmas", "Palm Sunday", "Pentecost"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "What type of eggs are commonly dyed or decorated at Easter?",
+                        "answers": ["Goose eggs", "Chicken eggs", "Duck eggs"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "What word do people often say instead of 'happy' for Easter?",
+                        "answers": ["Hoppy", "Springy", "Bouncy"],
+                        "correct": 0
+                    }
+                ]
+            },
+            {
+                "set": 3,
+                "questions": [
+                    {
+                        "question": "Which animal symbolizes innocence and is often seen at Easter?",
+                        "answers": ["Lamb", "Deer", "Dove"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "What season does Easter typically celebrate?",
+                        "answers": ["Winter", "Spring", "Summer"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Which flower is sometimes called the Easter lily?",
+                        "answers": ["Rose", "White trumpet lily", "Sunflower"],
+                        "correct": 1
+                    },
+                    {
+                        "question": "What do some communities hold on Easter weekend?",
+                        "answers": ["Easter parade", "Egg roll", "Both"],
+                        "correct": 2
+                    },
+                    {
+                        "question": "What shape are many Easter chocolates?",
+                        "answers": ["Square", "Egg or bunny", "Star"],
+                        "correct": 1
+                    }
+                ]
+            }
         ];
     }
     
-    // Default to Thanksgiving if theme not found
     return [];
 }
 
@@ -416,7 +603,7 @@ function getRandomCrossWords(count = 2) {
 // -------------------------------------------------------------------------------------------
 
 function getSuspectEmojis() {
-    // Always use current theme emojis (no firehouse check for suspect game)
+    // Always use current theme emojis
     const theme = getCurrentTheme();
     return theme.suspectEmojis; // 5 emojis
 }

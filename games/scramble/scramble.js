@@ -1111,6 +1111,19 @@ function showSuccessElements() {
     
     if (!onThisDayContainer) return;
     
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop) {
+        // Desktop: stars already visible (grey) from CSS; no height animation
+        if (hintButton) hintButton.style.display = 'none';
+        if (unscrambleLabel) {
+            unscrambleLabel.style.textAlign = 'center';
+            unscrambleLabel.textContent = currentDayData.event;
+            unscrambleLabel.style.opacity = '1';
+        }
+        if (starsElement) starsElement.style.opacity = '1';
+        return;
+    }
+
     const currentHeight = onThisDayContainer.offsetHeight;
     
     gsap.to([unscrambleLabel, hintButton], {
@@ -1265,30 +1278,14 @@ function showCompletedScramble() {
     }
 }
 
-// Apply letter box styling based on URL parameter
+// Apply letter box styling: rely on CSS variables / base styles only
 function applyLetterBoxStyling() {
     if (isIframeContext) return; // Only for main page
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
-    
     const letterBoxes = document.querySelectorAll('.letter-box');
     letterBoxes.forEach(box => {
-        if (headerType === 'bigy' || headerType === 'bigy2') {
-            box.style.background = 'white';
-            box.style.color = '#1a237e';
-        } else if (headerType === 'firehouse2') {
-            box.style.background = 'white';
-            box.style.color = '#bf1722';
-        } else if (headerType === 'wegmans') {
-            // Use wegmans orange gradient for letter boxes
-            box.style.background = 'linear-gradient(to bottom,rgb(255, 123, 47),rgb(230, 87, 16))';
-            box.style.color = 'white';
-            box.style.border = 'none';
-        } else {
-            box.style.background = '';
-            box.style.color = '';
-        }
+        box.style.background = '';
+        box.style.color = '';
+        box.style.border = '';
     });
 }
 
