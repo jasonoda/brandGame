@@ -42,7 +42,7 @@ const THEMES = {
             'top-bar-bg-desktop': '#FF8C42',
             'top-bar-text-desktop': '#3b1f0a',
             
-            'page-gradient-top': '#FFE5C4', 
+            'page-gradient-top': '#fbead5', 
             
             'masterGrad': 'linear-gradient(to bottom, #ffd391, #ffd391)',
             
@@ -51,10 +51,10 @@ const THEMES = {
             'calendar-background-top-color': 'linear-gradient(to bottom,rgb(231, 63, 63),rgb(203, 44, 44))',
             'calendar-background-top-text': '#ffffff',
             'calendar-top-solid': '#e73f3f',
-            'calendar-background-color': '#FFF6E8',      // light cream
+            'calendar-background-color': '#ffffff',      // light cream
             'calendar-background-bottom-color': '#FFF6E8',
             'calendar-border-color': '#e3c3a8',
-            'calendar-highlight-color': '#ffffff'
+            'calendar-highlight-color': '#FFF6E8'
         },
         phrases: [
             "Saving room for pumpkin pie",
@@ -94,7 +94,7 @@ const THEMES = {
         colors: {
             'top-bar-bg-mobile': '#71dad4',
             'top-bar-text-mobile': '#000000',
-            'top-bar-bg-desktop': '#e6e6e6',
+            'top-bar-bg-desktop': '#71dad4',
             'top-bar-text-desktop': '#333333',
             'page-gradient-top': '#bdeeea',
             'masterGrad': '#cdfffc',
@@ -102,10 +102,10 @@ const THEMES = {
             'calendar-background-top-color': 'linear-gradient(to bottom, #e73f65, #cb2c4b)',
             'calendar-background-top-text': '#ffffff',
             'calendar-top-solid': '#e73f65',
-            'calendar-background-color': '#e8fffe',
+            'calendar-background-color': '#ffffff',
             'calendar-background-bottom-color': '#e8fffe',
             'calendar-border-color': '#a8d1ce',
-            'calendar-highlight-color': '#ffffff'
+            'calendar-highlight-color': '#e8fffe'
         },
         phrases: [
             "Land of the free home of the brave",
@@ -151,26 +151,14 @@ const THEMES = {
             'calendar-highlight-color': '#d4fff8'
         },
         phrases: [
-            "Spring has sprung and so have we",
-            "Hoppy Easter to one and all",
-            "Egg hunts and chocolate bunnies",
-            "Baskets full of pastel treats",
-            "Some bunny loves you very much",
-            "Peeps and jelly beans for days",
-            "Fresh flowers and Easter parade",
-            "New life and blooming gardens",
-            "Hide the eggs then find them all",
-            "Easter brunch and family time",
-            "Pastel colors and sunny skies",
-            "Spring cleaning then egg decorating",
-            "Bunnies chicks and lambs abound",
-            "Celebrate the season of growth",
-            "Sweet treats and springtime cheer"
+            "A basket full of chocolate eggs",
+            "Yummy treats from the shop",
+            "The Easter Bunny strikes again"
         ],
         crossWords: [
             'EASTER', 'BUNNY', 'SPRING', 'EGGS', 'BASKET', 'BLOOM',
-            'CHICK', 'LAMB', 'PEEPS', 'PASTEL', 'TULIP', 'GRASS',
-            'HUNT', 'BLOOM', 'RENEW', 'JOY'
+            'CHICK', 'PEEPS', 'PASTEL', 'TULIP', 'GRASS',
+            'HUNT', 'BLOOM', 'RENEW'
         ],
         suspectEmojis: ['🐣', '🐰', '🌸', '🥚', '🌷'],
         beticleWords: ['BUNNY', 'BLOOM', 'GRASS', 'CHICK', 'TULIP', 'SWEET', 'FRESH', 'HOPPY', 'PETAL', 'SPRIG', 'LILAC', 'BULBS', 'BIRCH', 'HATCH', 'BLOOM'],

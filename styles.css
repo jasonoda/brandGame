@@ -6,7 +6,7 @@
     --top-bar-bg-desktop: #e6e6e6;
     --top-bar-text-desktop:#333333;
     /* ----------------GRADIENT---------------- */
-    --page-gradient-top: #bdeeea;
+    --page-gradient-top: #ffffff;
     /* ----------------HEADER---------------- */
     --masterGrad: #cdfffc;
     --header-text-color: #7b8f94;
@@ -41,10 +41,6 @@ button:focus {
     outline: none;
 }
 
-html {
-    overflow-x: hidden;
-}
-
 body {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     padding-bottom: 60px;
@@ -71,6 +67,28 @@ body {
     background: linear-gradient(to bottom, var(--page-gradient-top), transparent);
     z-index: 0;
     pointer-events: none;
+}
+
+/* Global app loading state: hide content until JS has applied theme/brand settings */
+body.app-loading .content {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.app-ready .content {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.15s ease-out;
+}
+
+/* Fade in the gradient backdrop together with the content */
+body.app-loading .page-gradient-backdrop {
+    opacity: 0;
+}
+
+body.app-ready .page-gradient-backdrop {
+    opacity: 1;
+    transition: opacity 0.15s ease-out;
 }
 
 /* Splash Overlay */
@@ -217,7 +235,7 @@ body {
         height: 46px;
         padding: 0 20px;
         gap: 24px;
-        background: var(--masterGrad);
+        background: var(--top-bar-bg-desktop);
         color: var(--top-bar-text-desktop);
     }
     .header-bar .header-logo,
@@ -364,11 +382,17 @@ body {
     }
     body {
         padding-bottom: 0;
+        overflow: hidden;
+        height: 100vh;
     }
     .content {
         padding-top: 46px;
         max-width: none;
         width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
     .desktop-scroll-wrap {
         flex: 1;
@@ -717,11 +741,6 @@ body {
     background-color: transparent;
     padding: 0;
     margin: 0;
-}
-
-#main-page {
-    position: relative;
-    z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -1711,12 +1730,8 @@ body {
 }
 /* Top bar text/date/icons on mobile (star container keeps its own colors) */
 .header-bar .date-container .date,
-.header-bar .date-container .date-subtitle,
-.header-bar .game-overlay-close {
-    color: var(--top-bar-text-mobile);
-}
-.header-bar .date-container .date,
 .header-bar .date-container .date-subtitle {
+    color: var(--top-bar-text-mobile);
     font-family: 'Adamina', serif;
 }
 
@@ -2068,27 +2083,26 @@ body.mode-brand .date-subtitle {
 /* Type 1 Carousel Styles */
 .top-logo-carousel-container-type1 {
     position: relative;
-    left: 50%;
     margin: 0;
-    /* 110% of viewport, centered: half of 110vw = 55vw */
-    transform: translateX(-55vw);
-    width: 110vw;
+    width: 100%;
     height: 120px;
     overflow: hidden;
-    z-index: 0;
+    z-index: 4;
     padding-top: 10px;
     background-color: #0f3340;
     background-image: url('weeklyBackgrounds/thanksgiving_pattern.jpg');
-    background-size: 120% auto;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
-@media (max-width: 767px) {
+/* Desktop: allow a little extra visual bleed without causing layout scroll */
+@media (min-width: 768px) {
     .top-logo-carousel-container-type1 {
-        left: 0;
-        transform: none;
-        width: 100vw;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 101vw;
+        background-size: 120% auto;
     }
 }
 
@@ -5573,11 +5587,6 @@ body.bigy2 .week-combined-container2B .week-subtitle {
     margin-top: 6px;
     margin-bottom: 0;
     text-align: center;
-}
-
-/* TEMP DEBUG: visualize Journey board bounds globally */
-#board {
-    outline: 4px solid red !important;
 }
 
 @media (min-width: 768px) {

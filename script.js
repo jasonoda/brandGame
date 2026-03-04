@@ -2333,13 +2333,13 @@ function checkURLParameters() {
             }, 50);
         });
     } else if (headerType === 'centra') {
-        // Centra: show carousel at top only, nothing else changes (same as default)
+        // Centra: show carousel at top only, logo in upper-left over the bar
         document.body.classList.remove('bigy2');
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
         if (container2A) container2A.style.display = 'none';
         if (container2B) container2B.style.display = 'none';
-        if (headerLogo) headerLogo.src = 'src/img/tempLogo.png';
+        if (headerLogo) headerLogo.src = 'src/img/centra/centra_logo.png';
         carouselLogos.forEach((logo, i) => { logo.src = `src/img/centra/carousel${(i % 3) + 1}.png`; });
         applyFontScheme('Nunito');
         applyDefaultStyling();
@@ -3253,7 +3253,8 @@ function updateLogoVisibility() {
     const headerType = urlParams.get('d');
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
-    const isBigyMode = isBigy || isBigy2;
+    const isCentra = headerType === 'centra';
+    const isLogoMode = isBigy || isBigy2 || isCentra;
     
     // Show help button(s): on mobile show only on main screen unless game open; on desktop show only when game open (upper left)
     const shouldHideHelp = closeButton && closeButton.classList.contains('show');
@@ -3288,14 +3289,22 @@ function updateLogoVisibility() {
             // Game overlay is open - hide logo
             logo.style.display = 'none';
         } else {
-            // Game overlay is closed - show logo for bigy, bigy2
-            logo.style.display = isBigyMode ? 'block' : 'none';
+            // Game overlay is closed - show logo for header types that use one (bigy, bigy2, centra)
+            logo.style.display = isLogoMode ? 'block' : 'none';
         }
     }
 }
 
 // Check URL parameters when page loads
 checkURLParameters();
+
+// Mark app as ready after the full window load (fonts, CSS, images) to avoid flashes
+window.addEventListener('load', () => {
+    if (document && document.body) {
+        document.body.classList.remove('app-loading');
+        document.body.classList.add('app-ready');
+    }
+});
 
 // Keyboard shortcut helpers and diagnostics
 document.addEventListener('keydown', (e) => {
