@@ -294,7 +294,7 @@ function unlockBadge(badgeFile) {
 const rewardThumbConfig = {
     phrases: { gradient: 'linear-gradient(to bottom, #2DD7A4, #1DB88A)', title: 'PHRASES', img: 'src/img/phrases.svg' },
     cross: { gradient: 'linear-gradient(to bottom, #00d4ff, #06b6e2)', title: 'CROSS', img: 'src/img/cross.svg' },
-    goldCase: { gradient: 'linear-gradient(to bottom, #FFD700, #FFA500)', title: 'GOLD CASE', img: 'src/img/goldCase.svg' },
+    goldCase: { gradient: 'linear-gradient(to bottom, #FFD700, #FFA500)', title: 'CA$ES', img: 'src/img/goldCase.svg' },
     suspect: { gradient: 'linear-gradient(to bottom, #FF6B6B, #D63645)', title: 'SUSPECT', img: 'src/img/suspect.svg' },
     defuser: { gradient: 'linear-gradient(to bottom, #808080, #404040)', title: 'DEFUSER', img: 'src/img/defuser.svg' },
     tally: { gradient: '#FF69B4', title: 'TALLY', img: 'src/img/tally.svg' },
@@ -671,7 +671,7 @@ function showRewardOverlay(gameId, stars, notes, diceLabel) {
     headerInner.className = 'reward-header-gradient';
     headerInner.style.background = config.gradient;
     headerInner.innerHTML = `
-        <button type="button" class="reward-overlay-close" aria-label="Close">âœ•</button>
+        <button type="button" class="reward-overlay-close" aria-label="Close">X</button>
         <div class="reward-header-image"><img src="${config.img}" alt=""></div>
         <div class="reward-header-title">${config.title}</div>
     `;
@@ -905,9 +905,6 @@ function openGame(gameId, extraParams) {
     // Show overlay
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    // Hide main sections while the game iframe is visible
-    setMainSectionsVisible(false);
-    
     // Show close button(s) - both header and desktop bar
     document.querySelectorAll('.game-overlay-close').forEach(function(btn) { btn.classList.add('show'); });
     updateLogoVisibility();
@@ -932,14 +929,14 @@ window.addEventListener('message', (event) => {
             endGameFunction(gameId, stars != null ? stars : 1, notes || [], delay);
         }
     } else if (event.data && typeof event.data === 'object' && event.data.type === 'arcadeComplete') {
-        const { gameId, stars } = event.data;
+        const { gameId, stars, notes } = event.data;
         if (gameId && currentGameId === gameId) {
             const starsEarned = typeof stars === 'number' ? stars : 1;
             if (starsEarned > 0) {
                 startRewardCelebration(starsEarned);
             }
             setTimeout(() => {
-                showRewardOverlay(gameId, starsEarned, [], '+1');
+                showRewardOverlay(gameId, starsEarned, notes || [], '+1');
             }, 1000);
         }
     }
@@ -1370,11 +1367,21 @@ function applyThemeColors(theme) {
     });
 }
 
-// Apply centra override colors (overrides theme top-bar when d=centra)
-function applyCentraOverride() {
-    if (typeof CENTRA_OVERRIDE !== 'undefined' && CENTRA_OVERRIDE.colors) {
+// Apply brand override colors (Centra, Supervalu, etc.) when d=...
+function applyBrandOverride() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const headerType = urlParams.get('d');
+    let override = null;
+
+    if (headerType === 'centra' && typeof CENTRA_OVERRIDE !== 'undefined') {
+        override = CENTRA_OVERRIDE;
+    } else if (headerType === 'supervalu' && typeof SUPERVALU_OVERRIDE !== 'undefined') {
+        override = SUPERVALU_OVERRIDE;
+    }
+
+    if (override && override.colors) {
         const root = document.documentElement;
-        Object.entries(CENTRA_OVERRIDE.colors).forEach(([name, value]) => {
+        Object.entries(override.colors).forEach(([name, value]) => {
             root.style.setProperty(`--${name}`, value);
         });
     }
@@ -1387,8 +1394,8 @@ function applyThemeSettings() {
         
         // First, apply any theme-specific color palette to CSS variables
         applyThemeColors(theme);
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('d') === 'centra') applyCentraOverride();
+        // Then apply any brand override (centra, supervalu, etc.)
+        applyBrandOverride();
 
         // Update week subtitle text (e.g. "2 days before Thanksgiving" or "July 2nd")
         const weekSubtitles = document.querySelectorAll('.week-subtitle, .week-subtitle-type1');
@@ -1594,6 +1601,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.style.overflow = 'hidden';
             });
         });
+    }
+
+    // Help page + popup: if a brand override (d=...) is active, show first carousel image instead of controller emoji
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const headerType = urlParams.get('d');
+        if (headerType) {
+            const helpIcons = document.querySelectorAll('#help-page .help-popup-icon, #help-popup-overlay .help-popup-icon');
+            const firstCarouselImg = document.querySelector('.top-logo-carousel-type1 .carousel-slide-type1 img');
+            if (helpIcons.length && firstCarouselImg) {
+                helpIcons.forEach(iconEl => {
+                    iconEl.textContent = '';
+                    const img = document.createElement('img');
+                    img.src = firstCarouselImg.src;
+                    img.alt = 'Brand logo';
+                    img.style.maxWidth = '180px';
+                    img.style.maxHeight = '60px';
+                    img.style.objectFit = 'contain';
+                    iconEl.appendChild(img);
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to update help page icon for brand override', e);
     }
     
     // Profile image / badges
@@ -1813,6 +1844,93 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Daily Question + sample answers + Daily Poll: theme-specific text for thanksgiving, july4th, easter
+    (function updateDailyQuestionAndPollByTheme() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const themeParam = urlParams.get('theme');
+        let themeKey = 'thanksgiving';
+        if (themeParam === 'july4th') themeKey = 'july4th';
+        else if (themeParam === 'easter') themeKey = 'easter';
+
+        const questionEl = document.querySelector('.daily-question-text');
+        const answerEls = document.querySelectorAll('.daily-question-answer-text');
+
+        const presets = {
+            thanksgiving: {
+                question: "What's your favorite Thanksgiving side?",
+                answers: [
+                    'Herbed stuffing with gravy',
+                    'Creamy mashed potatoes',
+                    'Green bean casserole with crispy onions',
+                    'Sweet potato casserole with marshmallows',
+                    'Homemade cranberry sauce',
+                    'Buttery dinner rolls',
+                    'Roasted turkey with crispy skin',
+                    'Pumpkin pie with whipped cream'
+                ]
+            },
+            july4th: {
+                question: "What's your must-have food at a 4th of July cookout?",
+                answers: [
+                    'Grilled burgers with all the toppings',
+                    'Hot dogs fresh off the grill',
+                    'BBQ ribs or pulled pork sandwiches',
+                    'Corn on the cob with butter and salt',
+                    'Potato salad or macaroni salad',
+                    'Watermelon slices straight from the fridge',
+                    'Chips and dip on repeat',
+                    'Red, white, and blue desserts'
+                ]
+            },
+            easter: {
+                question: 'What was your favorite Easter candy to find in your basket growing up?',
+                answers: [
+                    "Reese's peanut butter eggs",
+                    'Cadbury Creme Eggs',
+                    'Cadbury Mini Eggs',
+                    'Marshmallow Peeps',
+                    "Robin's Eggs malted candies",
+                    'Chocolate bunny (solid, not hollow)',
+                    'Jelly beans hidden in plastic eggs',
+                    'Caramel-filled chocolate eggs'
+                ]
+            }
+        };
+
+        const preset = presets[themeKey] || presets.thanksgiving;
+        if (questionEl) {
+            questionEl.textContent = preset.question;
+        }
+        if (answerEls.length) {
+            answerEls.forEach((el, idx) => {
+                if (!preset.answers || !preset.answers.length) return;
+                const answer = preset.answers[idx % preset.answers.length];
+                el.textContent = answer;
+            });
+        }
+
+        // Daily Poll: theme-specific question and options
+        const pollQuestionEl = document.querySelector('.poll-question');
+        const pollButtons = document.querySelectorAll('.poll-buttons .poll-button');
+        if (pollQuestionEl && pollButtons.length >= 2) {
+            if (themeKey === 'july4th') {
+                pollQuestionEl.textContent = 'Fireworks?';
+                pollButtons[0].textContent = 'Love them';
+                pollButtons[1].textContent = 'Too loud';
+            } else if (themeKey === 'easter') {
+                // Preserve the line break after "bunny" for Easter
+                pollQuestionEl.innerHTML = 'Which part of the chocolate bunny<br>do you eat first?';
+                pollButtons[0].textContent = 'Ears first';
+                pollButtons[1].textContent = 'Feet first';
+            } else {
+                // Thanksgiving default
+                pollQuestionEl.textContent = 'Sweet potato casserole?';
+                pollButtons[0].textContent = 'Yum!';
+                pollButtons[1].textContent = 'No thanks';
+            }
+        }
+    })();
+
     function addBadgeTile(grid, badge, unlocked, typeClass) {
         if (!grid) return;
         const tile = document.createElement('div');
@@ -1948,9 +2066,6 @@ buttons.forEach(button => {
         // Update logo visibility when switching pages
         updateLogoVisibility();
         
-        // Scroll viewport to top when switching tabs/pages (snap, no animation)
-        window.scrollTo(0, 0);
-        
         // Update move stars display when switching to journey tab
         if (targetPage === 'journey') {
             if (window.updateMoveStarsDisplay) {
@@ -1986,7 +2101,17 @@ buttons.forEach(button => {
         
         // Help button visibility: only on home page (updateLogoVisibility checks home + close button)
         updateLogoVisibility();
-        
+
+        // Scroll to top when switching tabs/pages (snap, no animation)
+        // Mobile: scroll window; Desktop: scroll the desktop scroll container
+        const isDesktop = window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
+        if (isDesktop) {
+            const desktopScrollWrap = document.querySelector('.desktop-scroll-wrap');
+            if (desktopScrollWrap) desktopScrollWrap.scrollTop = 0;
+        } else {
+            window.scrollTo(0, 0);
+        }
+
         
         // Trigger rival page animations
         if (targetPage === 'rival') {
@@ -2204,9 +2329,12 @@ function applyMode() {
         });
     } else {
         if (dailyBoostWrapper) dailyBoostWrapper.style.display = 'none';
-        const isCentra = urlParams.get('d') === 'centra';
-        if (carouselType1) carouselType1.style.display = isCentra ? '' : 'none';
-        if (isCentra) document.body.classList.add('carousel-type1-visible'); else document.body.classList.remove('carousel-type1-visible');
+        const headerType = urlParams.get('d');
+        const isCentra = headerType === 'centra';
+        const isSupervalu = headerType === 'supervalu';
+        const showTopCarousel = isCentra || isSupervalu;
+        if (carouselType1) carouselType1.style.display = showTopCarousel ? '' : 'none';
+        if (showTopCarousel) document.body.classList.add('carousel-type1-visible'); else document.body.classList.remove('carousel-type1-visible');
         if (carouselType2) carouselType2.style.display = 'none';
         prizesTabLabels.forEach(el => { el.textContent = 'Tiles'; });
         prizesTabTilesIcons.forEach(el => { el.style.display = ''; });
@@ -2343,6 +2471,24 @@ function checkURLParameters() {
         carouselLogos.forEach((logo, i) => { logo.src = `src/img/centra/carousel${(i % 3) + 1}.png`; });
         applyFontScheme('Nunito');
         applyDefaultStyling();
+    } else if (headerType === 'supervalu') {
+        // SuperValu: show carousel at top only, use SuperValu branding
+        document.body.classList.remove('bigy2');
+        if (headerType1) headerType1.style.display = 'block';
+        if (headerType2) headerType2.style.display = 'none';
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'none';
+        if (headerLogo) headerLogo.src = 'src/img/superValu/supervalu_logo.png';
+        carouselLogos.forEach((logo, i) => {
+            logo.src = `src/img/superValu/carousel${(i % 3) + 1}.png`;
+        });
+        const supervaluCarouselContainer = document.querySelector('.top-logo-carousel-container-type1');
+        if (supervaluCarouselContainer) {
+            supervaluCarouselContainer.style.backgroundColor = '#a50025';
+            supervaluCarouselContainer.style.backgroundImage = 'none';
+        }
+        applyFontScheme('Nunito');
+        applyDefaultStyling();
     } else {
         // Default: show header-type1, hide header-type2
         document.body.classList.remove('bigy2');
@@ -2366,8 +2512,14 @@ function checkURLParameters() {
     if (headerType === 'bigy' || headerType === 'bigy2') {
         initBigyCarousel();
     } else {
-        // Default and centra: type1 carousel at top
+        // Default, Centra, SuperValu: type1 carousel at top
         initType1Carousel();
+
+        // Defensive: ensure top carousel container is visible for Centra/SuperValu
+        const topCarouselContainer = document.querySelector('.top-logo-carousel-container-type1');
+        if (topCarouselContainer && (headerType === 'centra' || headerType === 'supervalu')) {
+            topCarouselContainer.style.display = '';
+        }
     }
     
     // Update date display based on p parameter
@@ -3254,7 +3406,8 @@ function updateLogoVisibility() {
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
     const isCentra = headerType === 'centra';
-    const isLogoMode = isBigy || isBigy2 || isCentra;
+    const isSupervalu = headerType === 'supervalu';
+    const isLogoMode = isBigy || isBigy2 || isCentra || isSupervalu;
     
     // Show help button(s): on mobile show only on main screen unless game open; on desktop show only when game open (upper left)
     const shouldHideHelp = closeButton && closeButton.classList.contains('show');
@@ -3262,19 +3415,15 @@ function updateLogoVisibility() {
     const activeTab = document.querySelector('.tab-button.active');
     const isMainPage = activeTab && activeTab.getAttribute('data-page') === 'main';
     const helpButtons = document.querySelectorAll('.help-button');
-    helpButtons.forEach(function(helpButton) {
-        if (isDesktop && !shouldHideHelp) {
-            helpButton.classList.add('hidden');
-            helpButton.style.display = 'none';
-        } else if (shouldHideHelp && !isDesktop) {
-            helpButton.classList.add('hidden');
-            helpButton.style.display = 'none';
-        } else if (!isDesktop && !isMainPage) {
-            helpButton.classList.add('hidden');
-            helpButton.style.display = 'none';
+    // Show help button only on mobile main page when overlay is closed
+    const shouldShowHelp = !isDesktop && isMainPage && !shouldHideHelp;
+    helpButtons.forEach(function(btn) {
+        if (shouldShowHelp) {
+            btn.classList.remove('hidden');
+            btn.style.display = 'inline-flex';
         } else {
-            helpButton.classList.remove('hidden');
-            helpButton.style.display = 'inline-flex';
+            btn.classList.add('hidden');
+            btn.style.display = 'none';
         }
     });
     // Desktop help link (6th tab) - hide when game overlay open
@@ -3447,9 +3596,6 @@ function actuallyCloseOverlay(gameId, overlayElement, iframeToUnload) {
     }
     
     document.body.style.overflow = '';
-    
-    // Restore main sections once the iframe is closed
-    setMainSectionsVisible(true);
     
     // Reload game scores to update stars
     loadGameScores2();

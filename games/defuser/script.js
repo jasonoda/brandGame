@@ -192,13 +192,14 @@ function defuserAwardStarsForCurrentRun() {
     const isGameWon = gameState.currentRound >= 7;
     const starsThisRun = isGameWon ? 5 : defuserGetStarsForRoundsCompleted(roundsCompleted);
     const newStars = starsThisRun <= 0 ? 0 : Math.max(existing, starsThisRun);
+    const displayRounds = isGameWon ? 7 : roundsCompleted;
 
     if (window.parent && window.parent !== window) {
         window.parent.postMessage({
             type: 'puzzleComplete',
             gameId: 'defuser',
             stars: newStars,
-            notes: ['WIRES CUT ' + roundsCompleted + ' / 7'],
+            notes: ['WIRES CUT ' + displayRounds + ' / 7'],
             delay: 0
         }, '*');
     }

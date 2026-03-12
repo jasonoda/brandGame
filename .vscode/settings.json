@@ -1,6 +1,6 @@
 {
   "editor.colorDecorators": true,
-  "editor.defaultColorDecorators": true,
+  "editor.defaultColorDecorators": "auto",
   "files.associations": {
     "gameVars.js": "javascriptreact"
   }

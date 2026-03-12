@@ -66,6 +66,14 @@ function playSound(type) {
     }
 }
 
+// Dev/testing shortcut: press "Z" to drop remaining time to 3 seconds
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'z' || e.key === 'Z') {
+        timeRemaining = Math.min(timeRemaining, 3);
+        updateTimerDisplay();
+    }
+});
+
 // ===== STAR THRESHOLDS =====
 const starThresholds = [0, 18000, 26000, 32000, 38000];
 
@@ -657,8 +665,9 @@ function createScoreDisplay() {
 function updateTimerDisplay() {
     const timerElement = document.getElementById('timeDisplay');
     if (timerElement) {
-        const minutes = Math.floor(timeRemaining / 60);
-        const seconds = Math.floor(timeRemaining % 60);
+        const safeTime = Math.max(0, timeRemaining);
+        const minutes = Math.floor(safeTime / 60);
+        const seconds = Math.floor(safeTime % 60);
         timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 }
@@ -997,14 +1006,13 @@ function showGameOverScreen() {
         ['Level Reached', levelReached]
     ];
     
-    createFinalScoreOverlay(score, statsArray);
-    
     // Calculate stars earned and save to local storage
     const starsEarned = calculateStarsFromScore(score);
     saveMemoryGameResult(score, starsEarned);
     
     if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'arcadeComplete', gameId: 'memory', stars: starsEarned }, '*');
+        const notes = statsArray.map(([label, value]) => `${label}: ${value}`);
+        window.parent.postMessage({ type: 'arcadeComplete', gameId: 'memory', stars: starsEarned, notes }, '*');
     }
 }
 

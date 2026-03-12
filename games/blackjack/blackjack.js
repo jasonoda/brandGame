@@ -929,14 +929,14 @@ class Scene {
                 
                 // Animate cards out with GSAP using tracked array
                 if (this.cardElements.length > 0) {
-                    this.cardElements.forEach((card, index) => {
+                    this.cardElements.forEach((card) => {
                         gsap.to(card, {
                             left: '-300px',
                             rotation: 45,
+                            opacity: 0,
                             duration: 0.2,
                             ease: "power2.in",
                             delay: 0
-                            
                         });
                     });
                 }
@@ -1194,15 +1194,13 @@ class Scene {
             ['BUSTS', this.bustCount]
         ];
         
-        // Use the new endScore system
-        this.e.endScore.createFinalScoreOverlay(this.score, statsArray);
-        
         // Calculate stars earned and save to local storage
         const starsEarned = calculateBlackjackStarsFromScore(this.score);
         saveBlackjackGameResult(this.score, starsEarned);
         
         if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'arcadeComplete', gameId: 'blackjack', stars: starsEarned }, '*');
+            const notes = statsArray.map(([label, value]) => `${label}: ${value}`);
+            window.parent.postMessage({ type: 'arcadeComplete', gameId: 'blackjack', stars: starsEarned, notes }, '*');
         }
         
         // Send final validation breadcrumb

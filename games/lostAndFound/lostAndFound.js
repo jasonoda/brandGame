@@ -1270,7 +1270,7 @@ update() {
                     this.currentIntervalMatchScores.push(this.timeLeftBonus);
                 }
 
-                // Create final score overlay using endScore.js
+                // Create stats array for standardized reward overlay
                 const statsArray = [
                     ["Regular Matches", this.regularMatches || 0],
                     ["Multiplier Bonus", this.scoreBonus || 0],
@@ -1279,8 +1279,6 @@ update() {
                     ["Time Left Bonus", this.timeLeftBonus || 0],
                     ["Longest Streak", this.longestStreak || 1]
                 ];
-                
-                this.e.endScore.createFinalScoreOverlay(this.score, statsArray);
                 
                 // Set final levelScore and matchScores for validation breadcrumb (like temp files)
                 this.levelScore = this.currentIntervalScore;
@@ -1308,7 +1306,8 @@ update() {
                 saveLostAndFoundGameResult(this.score, starsEarned);
                 
                 if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({ type: 'arcadeComplete', gameId: 'lostAndFound', stars: starsEarned }, '*');
+                    const notes = statsArray.map(([label, value]) => `${label}: ${value}`);
+                    window.parent.postMessage({ type: 'arcadeComplete', gameId: 'lostAndFound', stars: starsEarned, notes }, '*');
                 }
                 
                 this.action="over"

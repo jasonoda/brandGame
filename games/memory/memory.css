@@ -425,7 +425,7 @@ body{
     position: fixed;
     top: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+    background: transparent;
     z-index: 442000;
     pointer-events: none;
 }

@@ -176,6 +176,32 @@ const CENTRA_OVERRIDE = {
     }
 };
 
+// Supervalu (d=supervalu): overrides theme and calendar colors when applied
+const SUPERVALU_OVERRIDE = {
+    colors: {
+        'top-bar-bg-mobile': '#c8102e',
+        'top-bar-text-mobile': '#ffffff',
+        'top-bar-bg-desktop': '#c8102e',
+        'top-bar-text-desktop': '#ffffff',
+
+        // Background / gradients
+        'page-gradient-top': '#ffe5ea', // very light red wash
+        'masterGrad': '#fdc9d4', // slightly darker flat light red header background
+
+        // Header text color for section titles, etc. (dark red)
+        'header-text-color': '#ba4862',
+
+        // Calendar colors (match July 4th red)
+        'calendar-background-top-color': 'linear-gradient(to bottom, #e73f65, #cb2c4b)',
+        'calendar-background-top-text': '#ffffff',
+        'calendar-top-solid': '#e73f65',
+        'calendar-background-color': '#ffffff',
+        'calendar-background-bottom-color': '#ffe5ea',
+        'calendar-border-color': '#f2b3c0',
+        'calendar-highlight-color': '#ffe5ea'
+    }
+};
+
 // Get current theme
 function getCurrentTheme() {
     return THEMES[CURRENT_THEME] || THEMES.thanksgiving;
@@ -459,88 +485,28 @@ function getQuizData() {
                 "set": 1,
                 "questions": [
                     {
-                        "question": "What animal is most commonly associated with Easter in Western tradition?",
-                        "answers": ["Chick", "Bunny", "Lamb"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "Which spring flower is often linked to Easter and rebirth?",
-                        "answers": ["Daisy", "Tulip", "Lily"],
-                        "correct": 2
-                    },
-                    {
-                        "question": "What do children often hunt for on Easter morning?",
-                        "answers": ["Treasure", "Eggs", "Candy"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "Which candy is shaped like a baby chicken and popular at Easter?",
-                        "answers": ["Jelly beans", "Peeps", "Chocolate eggs"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "Easter falls on the first Sunday after the first full moon after which equinox?",
-                        "answers": ["Summer", "Vernal (spring)", "Autumn"],
-                        "correct": 1
-                    }
-                ]
-            },
-            {
-                "set": 2,
-                "questions": [
-                    {
-                        "question": "What color is traditionally associated with Easter and new life?",
-                        "answers": ["Red", "Green", "Pastel yellow"],
-                        "correct": 2
-                    },
-                    {
-                        "question": "What do people often put Easter treats in?",
-                        "answers": ["Sack", "Basket", "Box"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "Which holiday comes right before Easter in the Christian calendar?",
-                        "answers": ["Christmas", "Palm Sunday", "Pentecost"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "What type of eggs are commonly dyed or decorated at Easter?",
-                        "answers": ["Goose eggs", "Chicken eggs", "Duck eggs"],
-                        "correct": 1
-                    },
-                    {
-                        "question": "What word do people often say instead of 'happy' for Easter?",
-                        "answers": ["Hoppy", "Springy", "Bouncy"],
-                        "correct": 0
-                    }
-                ]
-            },
-            {
-                "set": 3,
-                "questions": [
-                    {
-                        "question": "Which animal symbolizes innocence and is often seen at Easter?",
-                        "answers": ["Lamb", "Deer", "Dove"],
+                        "question": "What day of the week is Easter always celebrated on?",
+                        "answers": ["Sunday", "Friday", "Wednesday"],
                         "correct": 0
                     },
                     {
-                        "question": "What season does Easter typically celebrate?",
-                        "answers": ["Winter", "Spring", "Summer"],
+                        "question": "What comes immediately before Easter Sunday in the Christian calendar?",
+                        "answers": ["Good Friday", "Palm Sunday", "Christmas Eve"],
+                        "correct": 0
+                    },
+                    {
+                        "question": "What 40-day period of fasting often comes before Easter?",
+                        "answers": ["Advent", "Lent", "Epiphany"],
                         "correct": 1
                     },
                     {
-                        "question": "Which flower is sometimes called the Easter lily?",
-                        "answers": ["Rose", "White trumpet lily", "Sunflower"],
+                        "question": "In many European traditions, what animal originally delivered Easter eggs before the rabbit became popular?",
+                        "answers": ["Stork", "Hen", "Lamb"],
                         "correct": 1
                     },
                     {
-                        "question": "What do some communities hold on Easter weekend?",
-                        "answers": ["Easter parade", "Egg roll", "Both"],
-                        "correct": 2
-                    },
-                    {
-                        "question": "What shape are many Easter chocolates?",
-                        "answers": ["Square", "Egg or bunny", "Star"],
+                        "question": "Which church council helped standardize how the date of Easter is calculated?",
+                        "answers": ["Council of Trent", "Council of Nicaea", "Council of Chalcedon"],
                         "correct": 1
                     }
                 ]
