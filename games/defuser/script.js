@@ -30,6 +30,13 @@ const COLOR_PALETTES = {
     ]
 };
 
+// Human-readable labels for colors by category (used in logs and tutorial)
+const COLOR_LABELS = {
+    cool: ['green', 'neon green', 'cyan', 'blue', 'purple'],
+    warm: ['yellow', 'orange', 'red', 'pink', 'magenta'],
+    neutral: ['light grey', 'grey', 'black', 'brown', 'tan']
+};
+
 // Apply colors to key boxes (only show colors being used)
 function applyKeyBoxColors() {
     const keyGroups = document.querySelectorAll('.key-group');
@@ -165,11 +172,11 @@ function defuserAddStars(count) {
 
 function defuserGetStarsForRoundsCompleted(roundsCompleted) {
     if (!roundsCompleted || roundsCompleted <= 0) return 0;
-    if (roundsCompleted >= 7) return 5; // completed all levels
-    if (roundsCompleted === 6) return 4;
-    if (roundsCompleted === 5) return 3;
-    if (roundsCompleted === 4) return 2;
-    // 1–3 completed
+    if (roundsCompleted >= TOTAL_ROUNDS) return 5; // completed all rounds
+    if (roundsCompleted >= TOTAL_ROUNDS - 1) return 4;
+    if (roundsCompleted >= Math.ceil(TOTAL_ROUNDS * 0.6)) return 3;
+    if (roundsCompleted >= Math.ceil(TOTAL_ROUNDS * 0.3)) return 2;
+    // Very low completion still gets 1 star
     return 1;
 }
 
@@ -184,22 +191,41 @@ function defuserGetStarRowHTML(starCount) {
     return html;
 }
 
-function defuserAwardStarsForCurrentRun() {
+function defuserAwardStarsForCurrentRun(didWin) {
     const todayKey = defuserGetTodayKey();
     const existing = parseInt(localStorage.getItem(`defuserStars_${todayKey}`) || '0');
     
-    const roundsCompleted = Math.max(0, gameState.currentRound - 1);
-    const isGameWon = gameState.currentRound >= 7;
+    // Wires successfully cut.
+    // Use explicit counter, and on a loss hard‑clamp to at most TOTAL_ROUNDS - 1,
+    // and never exceed the last fully completed round (currentRound - 1).
+    const rawCompleted = Math.max(0, gameState.wiresCutTotal || 0);
+    const maxFullRounds = Math.max(0, gameState.currentRound - 1);
+    const safeCompleted = Math.min(rawCompleted, maxFullRounds);
+    const roundsCompleted = didWin
+        ? TOTAL_ROUNDS
+        : Math.min(safeCompleted, TOTAL_ROUNDS - 1);
+    const isGameWon = didWin === true;
     const starsThisRun = isGameWon ? 5 : defuserGetStarsForRoundsCompleted(roundsCompleted);
     const newStars = starsThisRun <= 0 ? 0 : Math.max(existing, starsThisRun);
-    const displayRounds = isGameWon ? 7 : roundsCompleted;
+    const displayRounds = roundsCompleted;
+
+    // Compute additional stats for end-of-game window
+    const misses = gameState.wrongMoves || 0;
+    const remaining = Math.max(0, gameState.timeRemaining || 0);
+    const remMinutes = Math.floor(remaining / 60);
+    const remSeconds = remaining % 60;
+    const remainingStr = `${remMinutes}:${remSeconds.toString().padStart(2, '0')}`;
 
     if (window.parent && window.parent !== window) {
         window.parent.postMessage({
             type: 'puzzleComplete',
             gameId: 'defuser',
             stars: newStars,
-            notes: ['WIRES CUT ' + displayRounds + ' / 7'],
+            notes: [
+                'WIRES CUT ' + displayRounds + ' / ' + TOTAL_ROUNDS,
+                'MISSES: ' + misses,
+                'TIME LEFT: ' + remainingStr
+            ],
             delay: 0
         }, '*');
     }
@@ -276,7 +302,9 @@ function drawConnectingLines(updatePositionsOnly = false) {
                 topBoxColor: connection.topBoxColor,
                 bottomBoxColor: connection.bottomBoxColor,
                 matchesRules: connection.matchesRules,
-                isCorrect: connection.isCorrect
+                isCorrect: connection.isCorrect,
+                startShape: connection.startShape,
+                endShape: connection.endShape
             });
             
             // Draw the line with rounded edges (colored, dotted if needed)
@@ -285,31 +313,40 @@ function drawConnectingLines(updatePositionsOnly = false) {
             // Don't update box colors here - they should only be set during initial drawing
             // Box colors are managed separately and shouldn't change during position updates
             
-            // Draw grey circles at start and end points (only if visible)
+            // Draw endpoint shapes at start and end points (only if visible)
             if (opacity > 0) {
-                const circleRadius = 5;
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#888888'; // Keep circles grey
-                ctx.strokeStyle = '#ffffff'; // White outline
-                ctx.lineWidth = 4;
-                
-                ctx.beginPath();
-                ctx.arc(startX, startY, circleRadius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.arc(endX, endY, circleRadius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
+                const startShape = connection.startShape || 'circle';
+                const endShape = connection.endShape || 'circle';
+                drawEndpointShape(ctx, startX, startY, startShape, color);
+                drawEndpointShape(ctx, endX, endY, endShape, color);
             }
         });
         
-        // Keep top boxes grey (preserve grey on resize)
-        originalWireConnections.forEach((connection, colorIndex) => {
+        // Re-apply circuit colors to boxes based on each connection's circuitColor
+        originalWireConnections.forEach((connection) => {
             const topIndex = connection.topIndex;
+            const bottomIndex = connection.bottomIndex;
             const topBox = topBoxes[topIndex];
-            topBox.style.background = 'linear-gradient(to bottom, #999999, #777777)'; // Keep grey with gradient
+            const bottomBox = bottomBoxes[bottomIndex];
+            if (!topBox || !bottomBox) return;
+
+            let topBoxColor, bottomBoxColor;
+            if (connection.circuitColor === 'dark') {
+                topBoxColor = 'linear-gradient(to bottom, #555555, #333333)';
+                bottomBoxColor = 'linear-gradient(to bottom, #555555, #333333)';
+            } else if (connection.circuitColor === 'light') {
+                topBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
+                bottomBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
+            } else if (connection.circuitColor === 'opposite') {
+                topBoxColor = 'linear-gradient(to bottom, #555555, #333333)';
+                bottomBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
+            } else {
+                topBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
+                bottomBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
+            }
+
+            topBox.style.background = topBoxColor;
+            bottomBox.style.background = bottomBoxColor;
         });
         
         // Redraw cut line if active
@@ -362,9 +399,15 @@ function drawConnectingLines(updatePositionsOnly = false) {
     }
     
     const wireAssignments = gameState.wireAssignments;
-    
-    // Draw a line for each wire assignment
-    wireAssignments.forEach((assignment, wireIndex) => {
+
+    // Determine how many wires we can safely draw based on available boxes
+    const maxByBoxes = Math.min(topIndices.length, bottomIndices.length, topBoxes.length, bottomBoxes.length);
+    const maxByAssignments = wireAssignments.length;
+    const wireCount = Math.min(maxByBoxes, maxByAssignments, getCurrentNumWires());
+
+    // Draw a line for each wire assignment, clamped to safe wireCount
+    for (let wireIndex = 0; wireIndex < wireCount; wireIndex++) {
+        const assignment = wireAssignments[wireIndex];
         // Use shuffled indices to ensure one-to-one mapping
         const topIndex = topIndices[wireIndex];
         const bottomIndex = bottomIndices[wireIndex];
@@ -386,7 +429,23 @@ function drawConnectingLines(updatePositionsOnly = false) {
             bottomBoxColor = 'linear-gradient(to bottom, #999999, #777777)';
         }
         
-        // Store original connection
+        // Helper to choose shapes for endpoints, respecting shapeKey ('same' | 'different')
+        const SHAPES = ['circle', 'square', 'triangle'];
+        function getRandomShape() {
+            const idx = Math.floor(Math.random() * SHAPES.length);
+            return SHAPES[idx];
+        }
+        function getRandomDifferentShape(baseShape) {
+            const otherShapes = SHAPES.filter(s => s !== baseShape);
+            const idx = Math.floor(Math.random() * otherShapes.length);
+            return otherShapes[idx];
+        }
+
+        const shouldBeSameShape = assignment.shapeKey === 'same';
+        const startShape = getRandomShape();
+        const endShape = shouldBeSameShape ? startShape : getRandomDifferentShape(startShape);
+
+        // Store original connection (include shapes so debug can use reliable data)
         originalWireConnections.push({
             topIndex,
             bottomIndex,
@@ -400,7 +459,9 @@ function drawConnectingLines(updatePositionsOnly = false) {
             circuitColor: assignment.circuitColor,
             matchesRules: assignment.matchesRules,
             matchRules: assignment.matchRules || [],
-            excludeRules: assignment.excludeRules || []
+            excludeRules: assignment.excludeRules || [],
+            startShape,
+            endShape
         });
         
         const topBox = topBoxes[topIndex];
@@ -421,9 +482,9 @@ function drawConnectingLines(updatePositionsOnly = false) {
         const bottomBoxRect = bottomBox.getBoundingClientRect();
         
         const startX = topBoxRect.left + topBoxRect.width / 2 - middleRect.left;
-        const startY = topBoxRect.bottom + 10 - middleRect.top; // 10px below bottom of top box
+        const startY = topBoxRect.bottom + 18 - middleRect.top; // 18px below bottom of top box (extra space for shape)
         const endX = bottomBoxRect.left + bottomBoxRect.width / 2 - middleRect.left;
-        const endY = bottomBoxRect.top - 10 - middleRect.top; // 10px above top of bottom box
+        const endY = bottomBoxRect.top - 18 - middleRect.top; // 18px above top of bottom box (extra space for shape)
         
         // Store wire line data for intersection detection
         wireLines.push({
@@ -443,26 +504,18 @@ function drawConnectingLines(updatePositionsOnly = false) {
             topBoxColor: topBoxColor,
             bottomBoxColor: bottomBoxColor,
             matchesRules: assignment.matchesRules,
-            isCorrect: assignment.isCorrect
+            isCorrect: assignment.isCorrect,
+            startShape,
+            endShape
         });
         
         // Draw the line with rounded edges (colored, dotted if needed)
         drawWireLine(ctx, startX, startY, endX, endY, assignment.color, 1, assignment.isDotted, assignment.isCurved || false);
-        
-        // Draw grey circles at start and end points (boxes are colored instead)
-        const circleRadius = 5;
-        ctx.fillStyle = '#888888'; // Keep circles grey
-        ctx.strokeStyle = '#ffffff'; // White outline
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(startX, startY, circleRadius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(endX, endY, circleRadius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-    });
+
+        // Draw shapes at start and end points, matching the wire color
+        drawEndpointShape(ctx, startX, startY, startShape, assignment.color);
+        drawEndpointShape(ctx, endX, endY, endShape, assignment.color);
+    }
     
     // Keep top boxes grey (they're already grey from CSS)
     
@@ -477,10 +530,9 @@ function logWireAssignments() {
     
     const rules = gameState.selectedRules;
     const totalRules = rules.length; // Get actual total rule count
-    const fakeRule = rules[gameState.fakeRuleIndex];
     
-    // Helper to check if wire matches a rule
-    function matchesRule(wireProps, rule) {
+    // Helper to check if wire matches a rule (mirror main rule logic)
+    function matchesRuleForDebug(wireProps, rule) {
         if (rule.category === 'color') {
             return wireProps.category === rule.key;
         } else if (rule.category === 'lineStyle') {
@@ -489,7 +541,10 @@ function logWireAssignments() {
             return wireProps.circuitColor === rule.key;
         } else if (rule.category === 'curvature') {
             return wireProps.isCurved === (rule.key === 'curved');
+        } else if (rule.category === 'shape') {
+            return wireProps.shapeKey === rule.key;
         }
+        // numbers handled separately
         return false;
     }
     
@@ -497,7 +552,7 @@ function logWireAssignments() {
     function countMatches(wireProps) {
         let count = 0;
         rules.forEach(rule => {
-            if (rule.category !== 'numbers' && matchesRule(wireProps, rule)) {
+            if (rule.category !== 'numbers' && matchesRuleForDebug(wireProps, rule)) {
                 count++;
             }
         });
@@ -525,13 +580,6 @@ function logWireAssignments() {
     
     // Sort by topIndex (left to right)
     wiresWithTopIndex.sort((a, b) => a.topIndex - b.topIndex);
-    
-    // Color labels for display
-    const COLOR_LABELS = {
-        cool: ['green', 'neon green', 'cyan', 'blue', 'purple'],
-        warm: ['yellow', 'orange', 'red', 'pink', 'magenta'],
-        neutral: ['light grey', 'grey', 'black', 'brown', 'tan']
-    };
     
     // Helper function to determine actual category from color
     // Handles RGB strings and named colors, with normalization
@@ -631,8 +679,13 @@ function logWireAssignments() {
         return colorValue;
     }
     
+    console.log('\n=== RULES THIS ROUND ===');
+    rules.forEach((rule, idx) => {
+        console.log(`  Rule ${idx + 1}: [${rule.category}] ${rule.text} (key=${rule.key})`);
+    });
+
     console.log('\n=== WIRES (Left to Right) ===');
-    wiresWithTopIndex.forEach((wire) => {
+    wiresWithTopIndex.forEach((wire, wireIndex) => {
         // Get actual category from color (don't trust stored category)
         const actualCategory = getActualCategoryFromColor(wire.color);
         
@@ -696,6 +749,9 @@ function logWireAssignments() {
                 matches = wireValue === (rule.key === 'curved');
             } else if (category === 'numbers') {
                 matches = wireValue === rule.key;
+            } else if (category === 'shape') {
+                // wireValue is 'same' or 'different'
+                matches = wireValue === rule.key;
             }
             
             if (rule.isFake) {
@@ -711,7 +767,17 @@ function logWireAssignments() {
         const curvatureMarker = getPropertyMarker('curvature', wire.isCurved || false);
         const numbersMarker = getPropertyMarker('numbers', numberRelationship);
         const circuitsMarker = getPropertyMarker('circuits', wire.circuitColor);
-        
+
+        // Shape debug: are the endpoint shapes the same or different?
+        // Use connection data so order is reliable.
+        let shapeRelationship = 'unknown';
+        let shapeMarker = '(-)';
+        if (connection && connection.startShape && connection.endShape) {
+            const isSameShape = (connection.startShape === connection.endShape);
+            shapeRelationship = isSameShape ? 'same' : 'different';
+            shapeMarker = getPropertyMarker('shape', shapeRelationship);
+        }
+
         // Count (t)'s and (x)'s for match count
         // x/3 tally should be all the (t)'s plus the (x) if matching
         let matchCount = 0;
@@ -720,6 +786,7 @@ function logWireAssignments() {
         if (curvatureMarker === '(t)' || curvatureMarker === '(x)') matchCount++;
         if (numbersMarker === '(t)' || numbersMarker === '(x)') matchCount++;
         if (circuitsMarker === '(t)' || circuitsMarker === '(x)') matchCount++;
+        if (shapeMarker === '(t)' || shapeMarker === '(x)') matchCount++;
         
         // Cap at total rules
         matchCount = Math.min(matchCount, totalRules);
@@ -730,10 +797,13 @@ function logWireAssignments() {
         const dottedStatus = wire.isDotted ? 'dotted' : 'solid';
         const circuitStatus = wire.circuitColor || 'unknown';
         
-        // Format: COLOR [CORRECT] - X/totalRules - color category(t/f/-/x), dotted/solid(t/f/-/x), straight/curved(t/f/-/x), even/odd/same(t/f/-/x), circuit light/dark/opposite(t/f/-/x)
+        // Format: COLOR [CORRECT] - X/totalRules - color category(t/f/-/x), dotted/solid(t/f/-/x),
+        // straight/curved(t/f/-/x), even/odd/same(t/f/-/x), circuit light/dark/opposite(t/f/-/x),
+        // shape same/different(t/f)
         const curvatureStatus = (wire.isCurved || false) ? 'curved' : 'straight';
         const statusPart = correctStatus ? ` ${correctStatus}` : '';
-        console.log(`${colorLabel.toUpperCase()}${statusPart} - ${matchCount}/${totalRules} - ${actualCategory}${colorMarker}, ${dottedStatus}${lineStyleMarker}, ${curvatureStatus}${curvatureMarker}, ${numberRelationship}${numbersMarker}, ${circuitStatus}${circuitsMarker}`);
+        const shapeStatusLabel = shapeRelationship !== 'unknown' ? `shape ${shapeRelationship}` : 'shape';
+        console.log(`${colorLabel.toUpperCase()}${statusPart} - ${matchCount}/${totalRules} - ${actualCategory}${colorMarker}, ${dottedStatus}${lineStyleMarker}, ${curvatureStatus}${curvatureMarker}, ${numberRelationship}${numbersMarker}, ${circuitStatus}${circuitsMarker}, ${shapeStatusLabel}${shapeMarker}`);
     });
 }
 
@@ -782,6 +852,39 @@ function drawWireLine(ctx, startX, startY, endX, endY, color, opacity, isDotted 
     ctx.restore();
 }
 
+// Draw an endpoint shape (circle, square, triangle) at a given position
+function drawEndpointShape(ctx, x, y, shape, color) {
+    const size = 9; // slightly smaller approximate "radius" for all shapes
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = color || '#888888';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+
+    if (shape === 'square') {
+        ctx.beginPath();
+        ctx.rect(x - size, y - size, size * 2, size * 2);
+        ctx.fill();
+        ctx.stroke();
+    } else if (shape === 'triangle') {
+        ctx.beginPath();
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x - size, y + size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    } else {
+        // default to circle
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
 // Redraw all wire lines
 function redrawWireLines() {
     const canvas = document.getElementById('linesCanvas');
@@ -800,26 +903,13 @@ function redrawWireLines() {
     const bottomBoxes = document.querySelectorAll('.bottom-boxes .box');
     
     wireLines.forEach(wire => {
+        // Always draw endpoint shapes so they don't fade out with the line
+        drawEndpointShape(ctx, wire.startX, wire.startY, wire.startShape || 'circle', wire.color);
+        drawEndpointShape(ctx, wire.endX, wire.endY, wire.endShape || 'circle', wire.color);
+
+        // Only draw the connecting line if it still has opacity
         if (wire.opacity > 0) {
             drawWireLine(ctx, wire.startX, wire.startY, wire.endX, wire.endY, wire.color, wire.opacity, wire.isDotted, wire.isCurved || false);
-            
-            // Don't update box colors here - they should only be set during initial drawing
-            // Box colors are managed separately and shouldn't change during redraws
-            
-            // Draw grey circles at start and end points
-            const circleRadius = 5;
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = '#888888'; // Keep circles grey
-            ctx.strokeStyle = '#ffffff'; // White outline
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(wire.startX, wire.startY, circleRadius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(wire.endX, wire.endY, circleRadius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
         }
     });
     
@@ -1095,6 +1185,16 @@ function handleCutEnd(e) {
             // Multiple wires cut
             if (correctWires.length > 0 && wrongWires.length > 0) {
                 // Mixed: only cut wrong ones, leave correct alone
+                // WRONG transition: turn middle section red and fade back to white
+                const middleSection = document.querySelector('.middle-section');
+                if (middleSection && typeof gsap !== 'undefined') {
+                    middleSection.style.backgroundColor = '#ff4b4b'; // red
+                    gsap.to(middleSection, {
+                        backgroundColor: '#ffffff',
+                        duration: 0.75,
+                        ease: 'sine.out'
+                    });
+                }
                 showPopup('WRONG!');
                 gameState.wrongMoves += wrongWires.length;
                 updateBombBoxes();
@@ -1116,6 +1216,16 @@ function handleCutEnd(e) {
                 });
             } else if (wrongWires.length > 0) {
                 // All wrong
+                // WRONG transition: turn middle section red and fade back to white
+                const middleSection = document.querySelector('.middle-section');
+                if (middleSection && typeof gsap !== 'undefined') {
+                    middleSection.style.backgroundColor = '#ff4b4b'; // red
+                    gsap.to(middleSection, {
+                        backgroundColor: '#ffffff',
+                        duration: 0.75,
+                        ease: 'sine.out'
+                    });
+                }
                 showPopup('WRONG!');
                 gameState.wrongMoves += wrongWires.length;
                 updateBombBoxes();
@@ -1155,6 +1265,16 @@ function handleCutEnd(e) {
                     return;
                 }
                 
+                // WRONG transition: turn middle section red and fade back to white
+                const middleSection = document.querySelector('.middle-section');
+                if (middleSection && typeof gsap !== 'undefined') {
+                    middleSection.style.backgroundColor = '#ff4b4b'; // red
+                    gsap.to(middleSection, {
+                        backgroundColor: '#ffffff',
+                        duration: 0.75,
+                        ease: 'sine.out'
+                    });
+                }
                 showPopup('WRONG!');
                 gameState.wrongMoves++;
                 updateBombBoxes();
@@ -1226,19 +1346,22 @@ function getEventPosition(e) {
     return { x: 0, y: 0 };
 }
 
+const TOTAL_ROUNDS = 10;
+
 // Game state
 let gameState = {
-    selectedRules: [], // Array of {category, ruleText, ruleKey, isFake}
-    trueRules: [], // Array of rules that are always true
-    maybeRules: [], // Array of rules where one is false
-    fakeRuleIndex: null, // Index of the fake rule within maybeRules
+    selectedRules: [], // Array of {category, ruleText, ruleKey}
+    totalRules: [], // Array of rules currently in play
     wireAssignments: [], // Array of wire property assignments
     correctWireIndex: null, // Index of the correct wire
     correctCuts: 0, // Number of correct wires cut
+    wiresCutTotal: 0, // Total correct wires cut this run
     wrongMoves: 0, // Number of wrong wires cut
-    timeRemaining: 180, // Time in seconds (3 minutes)
+    timeRemaining: 120, // Time in seconds (2 minutes)
     currentRound: 1, // Current round number
-    isCuttingEnabled: true // Whether wire cutting is enabled
+    isCuttingEnabled: true, // Whether wire cutting is enabled
+    roundStartTime: null, // Timestamp when current round started
+    roundDurations: [] // Array of per-round durations in seconds
 };
 
 let timerInterval = null;
@@ -1249,87 +1372,140 @@ let tutorialStep = 0;
 // Rule categories
 // Rounds configuration
 const ROUNDS_CONFIG = {
+    // Round 1: introductory – all easy rules, fewer wires
     1: {
         numWires: 6,
-        trueRules: 3,
-        maybeRules: 0,
+        totalRules: 3,
+        easyRules: 3,
+        hardRules: 0,
         wireDistribution: {
-            right3: 1,  // 1 wire matches 3/3 rules (correct)
-            right2: 3,  // 3 wires match 2/3 rules
-            right1: 1,  // 1 wire matches 1/3 rules
-            right0: 1   // 1 wire matches 0/3 rules
+            right3: 1,
+            right2: 3,
+            right1: 1,
+            right0: 1
         }
     },
+    // Round 2: similar difficulty, slightly more wires
     2: {
-        numWires: 9,
-        trueRules: 3,
-        maybeRules: 0,
+        numWires: 7,
+        totalRules: 3,
+        easyRules: 3,
+        hardRules: 0,
         wireDistribution: {
-            right3: 1,  // 1 wire matches 3/3 rules (correct)
-            right2: 5,  // 5 wires match 2/3 rules
-            right1: 2,  // 2 wires match 1/3 rules
-            right0: 1   // 1 wire matches 0/3 rules
+            right3: 1,
+            right2: 3,
+            right1: 2,
+            right0: 1
         }
     },
+    // Round 3: introduce 1 hard rule
     3: {
-        numWires: 6,
-        trueRules: 1,
-        maybeRules: 2,
+        numWires: 8,
+        totalRules: 3,
+        easyRules: 2,
+        hardRules: 1,
         wireDistribution: {
-            right3: 2,  // 2 wires match 3/3 rules (incorrect - all rules including fake)
-            right2: 1,  // 1 wire matches 2/3 rules (CORRECT - true + real maybe)
-            right1: 2,  // 2 wires match 1/3 rules
-            right0: 1   // 1 wire matches 0/3 rules
+            right3: 1,
+            right2: 4,
+            right1: 2,
+            right0: 1
         }
     },
+    // Round 4: similar rule mix, more wires
     4: {
-        numWires: 12,
-        trueRules: 3,
-        maybeRules: 0,
+        numWires: 9,
+        totalRules: 3,
+        easyRules: 2,
+        hardRules: 1,
         wireDistribution: {
-            right3: 1,  // 1 wire matches 3/3 rules (correct)
-            right2: 7,  // 7 wires match 2/3 rules
-            right1: 3,  // 3 wires match 1/3 rules
-            right0: 1   // 1 wire matches 0/3 rules
+            right3: 1,
+            right2: 4,
+            right1: 3,
+            right0: 1
         }
     },
+    // Round 5: 1 easy + 2 hard
     5: {
-        numWires: 12,
-        trueRules: 1,
-        maybeRules: 2,
+        numWires: 10,
+        totalRules: 3,
+        easyRules: 2,
+        hardRules: 1,
         wireDistribution: {
-            right3: 5,  // 5 wires match 3/3 rules (incorrect - all rules including fake)
-            right2: 1,  // 1 wire matches 2/3 rules (CORRECT - true + real maybe)
-            right1: 4,  // 4 wires match 1/3 rules
-            right0: 2   // 2 wires match 0/3 rules
+            right3: 1,
+            right2: 5,
+            right1: 3,
+            right0: 1
         }
     },
+    // Round 6: 1 easy + 2 hard, more wires
     6: {
-        numWires: 15,
-        trueRules: 0,
-        maybeRules: 3,
+        numWires: 11,
+        totalRules: 3,
+        easyRules: 1,
+        hardRules: 2,
         wireDistribution: {
-            right3: 5,  // 5 wires match 3/3 rules (incorrect - all rules including fake)
-            right2: 1,  // 1 wire matches 2/3 rules (CORRECT - 0 true + 2 real maybe)
-            right1: 5,  // 5 wires match 1/3 rules
-            right0: 4   // 4 wires match 0/3 rules
+            right3: 1,
+            right2: 6,
+            right1: 3,
+            right0: 1
         }
     },
+    // Round 7: 1 easy + 3 hard (4 rules total)
     7: {
         numWires: 12,
-        trueRules: 0,
-        maybeRules: 4,
+        totalRules: 4,
+        easyRules: 1,
+        hardRules: 3,
         wireDistribution: {
-            right4: 4,  // 5 wires match 4/4 rules (incorrect - all rules including fake)
-            right3: 1,  // 1 wire matches 3/4 rules (CORRECT - 0 true + 3 real maybe)
-            right2: 4,  // 5 wires match 2/4 rules
-            right1: 2,   // 4 wires match 1/4 rules
-            right0: 1   // 4 wires match 0/4 rules
+            right4: 1,
+            right3: 6,
+            right2: 3,
+            right1: 2
+        }
+    },
+    // Round 8: 1 easy + 3 hard, more wires
+    8: {
+        numWires: 13,
+        totalRules: 4,
+        easyRules: 1,
+        hardRules: 3,
+        wireDistribution: {
+            right4: 1,
+            right3: 7,
+            right2: 3,
+            right1: 2
+        }
+    },
+    // Round 9: 1 easy + 3 hard, near max wires
+    9: {
+        numWires: 14,
+        totalRules: 3,
+        easyRules: 0, // all hard rules
+        hardRules: 3,
+        wireDistribution: {
+            right3: 1,
+            right2: 8,
+            right1: 3,
+            right0: 2
+        }
+    },
+    // Round 10: 1 easy + 3 hard, max wires (15)
+    10: {
+        numWires: 15,
+        totalRules: 3,
+        easyRules: 0, // all hard rules
+        hardRules: 3,
+        wireDistribution: {
+            right3: 1,
+            right2: 9,
+            right1: 3,
+            right0: 2
         }
     }
 };
 
 const RULE_CATEGORIES = {
+    // Easy rule categories
     color: [
         { text: 'cool color', key: 'cool' },
         { text: 'warm color', key: 'warm' },
@@ -1339,89 +1515,68 @@ const RULE_CATEGORIES = {
         { text: 'solid line', key: 'solid' },
         { text: 'dotted line', key: 'dotted' }
     ],
-    numbers: [
-        { text: "numbers add to even", key: 'even' },
-        { text: "numbers add to odd", key: 'odd' },
-        { text: "numbers are the same", key: 'same' }
+    curvature: [
+        { text: 'straight', key: 'straight' },
+        { text: 'curved', key: 'curved' }
     ],
+    // Hard rule categories
     circuits: [
         { text: "dark circuits", key: 'dark' },
         { text: "light circuits", key: 'light' },
         { text: "opposite color circuits", key: 'opposite' }
     ],
-    curvature: [
-        { text: 'straight', key: 'straight' },
-        { text: 'curved', key: 'curved' }
+    numbers: [
+        { text: "numbers add to even", key: 'even' },
+        { text: "numbers add to odd", key: 'odd' },
+        { text: "numbers are the same", key: 'same' }
+    ],
+    shape: [
+        { text: 'shapes are the same', key: 'same' },
+        { text: 'shapes are different', key: 'different' }
     ]
 };
 
 // Select rules based on current round configuration
 function selectRules() {
     const roundConfig = ROUNDS_CONFIG[gameState.currentRound] || ROUNDS_CONFIG[1];
-    const numTrueRules = roundConfig.trueRules;
-    const numMaybeRules = roundConfig.maybeRules;
+    const numTotalRules = roundConfig.totalRules;
+    const numEasy = Math.min(roundConfig.easyRules || 0, numTotalRules);
+    const numHard = Math.max(0, numTotalRules - numEasy);
+
+    const easyCategories = ['color', 'lineStyle', 'curvature'];
+    const hardCategories = ['circuits', 'numbers', 'shape'];
+
+    const shuffledEasy = [...easyCategories].sort(() => Math.random() - 0.5);
+    const shuffledHard = [...hardCategories].sort(() => Math.random() - 0.5);
+
+    const selectedEasy = shuffledEasy.slice(0, numEasy);
+    const selectedHard = shuffledHard.slice(0, numHard);
+    const selectedCategories = [...selectedEasy, ...selectedHard];
     
-    const categories = Object.keys(RULE_CATEGORIES);
-    const shuffledCategories = [...categories].sort(() => Math.random() - 0.5);
-    const totalRules = numTrueRules + numMaybeRules;
-    const selectedCategories = shuffledCategories.slice(0, totalRules);
-    
-    // Select true rules (always true)
-    gameState.trueRules = [];
-    for (let i = 0; i < numTrueRules; i++) {
-        const category = selectedCategories[i];
-        const rules = RULE_CATEGORIES[category];
-        const randomRule = rules[Math.floor(Math.random() * rules.length)];
-        gameState.trueRules.push({
+    // Select total rules for this round
+    gameState.totalRules = [];
+    selectedCategories.forEach((category) => {
+        const rulesForCategory = RULE_CATEGORIES[category];
+        const randomRule = rulesForCategory[Math.floor(Math.random() * rulesForCategory.length)];
+        gameState.totalRules.push({
             category: category,
             text: randomRule.text,
-            key: randomRule.key,
-            isFake: false
+            key: randomRule.key
         });
-    }
+    });
     
-    // Select maybe rules (one is false)
-    gameState.maybeRules = [];
-    for (let i = numTrueRules; i < totalRules; i++) {
-        const category = selectedCategories[i];
-        const rules = RULE_CATEGORIES[category];
-        const randomRule = rules[Math.floor(Math.random() * rules.length)];
-        gameState.maybeRules.push({
-            category: category,
-            text: randomRule.text,
-            key: randomRule.key,
-            isFake: false
-        });
-    }
-    
-    // Randomly select one maybe rule to be fake
-    if (gameState.maybeRules.length > 0) {
-        gameState.fakeRuleIndex = Math.floor(Math.random() * gameState.maybeRules.length);
-        gameState.maybeRules[gameState.fakeRuleIndex].isFake = true;
-    } else {
-        gameState.fakeRuleIndex = null;
-    }
-    
-    // Combine all rules for backward compatibility
-    gameState.selectedRules = [...gameState.trueRules, ...gameState.maybeRules];
+    // All rules in totalRules are active for this round
+    gameState.selectedRules = [...gameState.totalRules];
     
     // Console log
     console.log('=== RULE SELECTION ===');
-    const totalRulesCount = numTrueRules + numMaybeRules;
-    console.log(`Round ${gameState.currentRound}: ${numTrueRules} true rules, ${numMaybeRules} maybe rules (Total: ${totalRulesCount} rules)`);
-    if (gameState.fakeRuleIndex !== null) {
-        console.log(`Fake Rule (Maybe Index ${gameState.fakeRuleIndex}):`, gameState.maybeRules[gameState.fakeRuleIndex].text);
-    }
-    console.log('True Rules:');
-    gameState.trueRules.forEach((rule, index) => {
+    const totalRulesCount = numTotalRules;
+    console.log(`Round ${gameState.currentRound}: ${numTotalRules} total rules`);
+    console.log('Rules:');
+    gameState.totalRules.forEach((rule, index) => {
         console.log(`  [${index}] ${rule.text}`);
     });
-    if (gameState.maybeRules.length > 0) {
-        console.log('Maybe Rules:');
-        gameState.maybeRules.forEach((rule, index) => {
-            console.log(`  [${index}] ${rule.isFake ? '[FAKE]' : '[REAL]'} ${rule.text}`);
-        });
-    }
+    // No maybe rules to log – all rules are true now
     
     return gameState.selectedRules;
 }
@@ -1588,23 +1743,15 @@ function createNumberDisplay(numberType) {
 }
 
 // Helper function to set tutorial rules
-// Can be called with either:
-//   - Array of rules (backward compatible): setTutorialRules([rule1, rule2, rule3])
-//   - Object with trueRules and maybeRules: setTutorialRules({ trueRules: [...], maybeRules: [...] })
+// Accepts either:
+//   - Array of rules: setTutorialRules([rule1, rule2, rule3])
+//   - Object with trueRules: setTutorialRules({ trueRules: [...] })
 function setTutorialRules(rules) {
     console.log('setTutorialRules called with:', rules);
     
-    let trueRulesList = [];
-    let maybeRulesList = [];
-    
-    // Handle both array format (backward compatible) and object format
-    if (Array.isArray(rules)) {
-        trueRulesList = rules;
-        maybeRulesList = [];
-    } else if (rules && typeof rules === 'object') {
-        trueRulesList = rules.trueRules || [];
-        maybeRulesList = rules.maybeRules || [];
-    }
+    const trueRulesList = Array.isArray(rules)
+        ? rules
+        : (rules && typeof rules === 'object' ? (rules.trueRules || []) : []);
     
     // Helper function to create rule display in a rule box
     function populateRuleBox(ruleBox, rule) {
@@ -1681,35 +1828,17 @@ function setTutorialRules(rules) {
         }
     }
     
-    // Update maybe rules header
+    // Hide maybe rules header and boxes – tutorial now only shows green rules
     const maybeRulesHeader = document.getElementById('maybeRulesHeader');
-    if (maybeRulesHeader) {
-        maybeRulesHeader.style.display = (maybeRulesList.length > 0) ? 'flex' : 'none';
-    }
-    
-    // Update maybe rule boxes
+    if (maybeRulesHeader) maybeRulesHeader.style.display = 'none';
     for (let i = 0; i < 4; i++) {
         const maybeRuleBox = document.getElementById(`falseRule${i + 1}`);
-        if (maybeRuleBox) {
-            if (i < maybeRulesList.length && maybeRulesList[i]) {
-                const rule = maybeRulesList[i];
-                console.log(`Setting maybe rule ${i + 1}:`, rule);
-                populateRuleBox(maybeRuleBox, rule);
-                maybeRuleBox.style.display = 'flex';
-                maybeRuleBox.style.background = 'linear-gradient(to bottom, #e84066, #d5355a)';
-                maybeRuleBox.style.color = '#ffffff';
-                console.log(`Maybe rule ${i + 1} box updated`);
-            } else {
-                maybeRuleBox.style.display = 'none';
-            }
-        }
+        if (maybeRuleBox) maybeRuleBox.style.display = 'none';
     }
     
     // Store rules in gameState for wire assignment
-    gameState.trueRules = trueRulesList;
-    gameState.maybeRules = maybeRulesList;
-    gameState.selectedRules = [...trueRulesList, ...maybeRulesList];
-    gameState.fakeRuleIndex = maybeRulesList.length > 0 ? 0 : null; // Set first maybe rule as fake for tutorial
+    gameState.totalRules = trueRulesList;
+    gameState.selectedRules = [...trueRulesList];
     
     // Recalculate heights
     updateRuleHeights();
@@ -1725,29 +1854,29 @@ function updateRuleDisplay() {
     }
     
     const roundConfig = ROUNDS_CONFIG[gameState.currentRound] || ROUNDS_CONFIG[1];
-    const numTrueRules = roundConfig.trueRules;
-    const numMaybeRules = roundConfig.maybeRules;
+    const numTrueRules = roundConfig.totalRules;
     
-    // Hide/show "These rules are true:" header
+    // Hide/show header above the rule list
     const trueRulesHeader = document.getElementById('trueRulesHeader');
     if (trueRulesHeader) {
         trueRulesHeader.style.display = (numTrueRules > 0) ? 'flex' : 'none';
     }
     
     // Update all true rule boxes
-    for (let i = 0; i < 3; i++) {
+    // Use totalRules count from round config; hide any extra boxes beyond that
+    for (let i = 0; i < numTrueRules || document.getElementById(`trueRule${i + 1}`); i++) {
         const trueRuleBox = document.getElementById(`trueRule${i + 1}`);
         if (trueRuleBox) {
-            if (i < numTrueRules && gameState.trueRules[i]) {
+            if (i < numTrueRules && gameState.totalRules[i]) {
                 // Clear existing content
                 trueRuleBox.innerHTML = '';
                 
                 // Add text
-                const textNode = document.createTextNode(gameState.trueRules[i].text);
+                const textNode = document.createTextNode(gameState.totalRules[i].text);
                 trueRuleBox.appendChild(textNode);
                 
                 // If rule mentions a color category, add color palette display
-                const rule = gameState.trueRules[i];
+                const rule = gameState.totalRules[i];
                 if (rule.category === 'color' && (rule.key === 'cool' || rule.key === 'warm' || rule.key === 'neutral')) {
                     const paletteDisplay = createColorPaletteDisplay(rule.key);
                     if (paletteDisplay) {
@@ -1790,76 +1919,12 @@ function updateRuleDisplay() {
         }
     }
     
-    // Show/hide maybe rules section
+    // Hide maybe rules section – no maybe rules in gameplay
     const maybeRulesHeader = document.getElementById('maybeRulesHeader');
-    
-    if (numMaybeRules === 0) {
-        // Hide maybe rules section
-        if (maybeRulesHeader) maybeRulesHeader.style.display = 'none';
-        // Hide all maybe rule boxes (up to 4)
-        for (let i = 1; i <= 4; i++) {
-            const falseRuleBox = document.getElementById(`falseRule${i}`);
-            if (falseRuleBox) falseRuleBox.style.display = 'none';
-        }
-    } else {
-        // Show maybe rules section
-        if (maybeRulesHeader) maybeRulesHeader.style.display = 'flex';
-        
-        // Update all maybe rule boxes (up to 4)
-        for (let i = 0; i < 4; i++) {
-            const falseRuleBox = document.getElementById(`falseRule${i + 1}`);
-            if (falseRuleBox) {
-                if (i < numMaybeRules && gameState.maybeRules[i]) {
-                    // Clear existing content
-                    falseRuleBox.innerHTML = '';
-                    
-                    // Add text
-                    const textNode = document.createTextNode(gameState.maybeRules[i].text);
-                    falseRuleBox.appendChild(textNode);
-                    
-                    // If rule mentions a color category, add color palette display
-                    const rule = gameState.maybeRules[i];
-                    if (rule.category === 'color' && (rule.key === 'cool' || rule.key === 'warm' || rule.key === 'neutral')) {
-                        const paletteDisplay = createColorPaletteDisplay(rule.key);
-                        if (paletteDisplay) {
-                            falseRuleBox.appendChild(paletteDisplay);
-                        }
-                    } else if (rule.category === 'circuits' && (rule.key === 'light' || rule.key === 'dark' || rule.key === 'opposite')) {
-                        // If rule mentions circuits, add circuit display
-                        const circuitDisplay = createCircuitDisplay(rule.key);
-                        if (circuitDisplay) {
-                            falseRuleBox.appendChild(circuitDisplay);
-                        }
-                    } else if (rule.category === 'lineStyle' && (rule.key === 'solid' || rule.key === 'dotted')) {
-                        // If rule mentions line style, add line style display
-                        const lineStyleDisplay = createLineStyleDisplay(rule.key);
-                        if (lineStyleDisplay) {
-                            falseRuleBox.appendChild(lineStyleDisplay);
-                        }
-                    } else if (rule.category === 'numbers' && (rule.key === 'odd' || rule.key === 'even' || rule.key === 'same')) {
-                        // If rule mentions numbers, add number display
-                        const numberDisplay = createNumberDisplay(rule.key);
-                        if (numberDisplay) {
-                            falseRuleBox.appendChild(numberDisplay);
-                        }
-                    } else if (rule.category === 'curvature' && (rule.key === 'straight' || rule.key === 'curved')) {
-                        // If rule mentions curvature, add curvature display
-                        const curvatureDisplay = createCurvatureDisplay(rule.key);
-                        if (curvatureDisplay) {
-                            falseRuleBox.appendChild(curvatureDisplay);
-                        }
-                    }
-                    
-                    falseRuleBox.style.display = 'flex';
-                    // Ensure red gradient styling is applied
-                    falseRuleBox.style.background = 'linear-gradient(to bottom, #e84066, #d5355a)';
-                    falseRuleBox.style.borderColor = '#cc0000';
-                    falseRuleBox.style.color = '#ffffff';
-                } else {
-                    falseRuleBox.style.display = 'none';
-                }
-            }
-        }
+    if (maybeRulesHeader) maybeRulesHeader.style.display = 'none';
+    for (let i = 1; i <= 4; i++) {
+        const falseRuleBox = document.getElementById(`falseRule${i}`);
+        if (falseRuleBox) falseRuleBox.style.display = 'none';
     }
     
     // Recalculate heights based on visible elements
@@ -1932,21 +1997,9 @@ function assignWireProperties() {
     const roundConfig = ROUNDS_CONFIG[gameState.currentRound] || ROUNDS_CONFIG[1];
     const distribution = roundConfig.wireDistribution;
     const rules = gameState.selectedRules;
-    const trueRules = gameState.trueRules;
-    const maybeRules = gameState.maybeRules;
-    const fakeRule = maybeRules[gameState.fakeRuleIndex] || null;
-    const realRules = [...trueRules, ...maybeRules.filter(r => !r.isFake)]; // All real rules
-    const totalRules = rules.length; // Total number of rules (true + maybe)
-    
+    const trueRules = gameState.totalRules;
+    const totalRules = rules.length; // Total number of rules
     console.log('=== WIRE ASSIGNMENT START ===');
-    // Log distribution using rightN format
-    const distKeys = Object.keys(distribution).filter(k => k.startsWith('right')).sort((a, b) => {
-        const numA = parseInt(a.replace('right', ''));
-        const numB = parseInt(b.replace('right', ''));
-        return numB - numA; // Sort descending
-    });
-    const distLog = distKeys.map(k => `${k}:${distribution[k]}`).join(', ');
-    console.log(`Round ${gameState.currentRound}: ${distLog}`);
     
     // Track distributions for balance
     const colorCounts = { cool: 0, warm: 0, neutral: 0 };
@@ -1979,34 +2032,29 @@ function assignWireProperties() {
         return shuffled.slice(0, count);
     }
     
-    // Randomly select colorsPerCategory colors from each palette category
-    const selectedCoolColors = randomlySelectFromArray(COLOR_PALETTES.cool.map((color, idx) => ({ color, index: idx, label: COLOR_LABELS.cool[idx] || `cool-${idx}` })), colorsPerCategory);
-    const selectedWarmColors = randomlySelectFromArray(COLOR_PALETTES.warm.map((color, idx) => ({ color, index: idx, label: COLOR_LABELS.warm[idx] || `warm-${idx}` })), colorsPerCategory);
-    const selectedNeutralColors = randomlySelectFromArray(COLOR_PALETTES.neutral.map((color, idx) => ({ color, index: idx, label: COLOR_LABELS.neutral[idx] || `neutral-${idx}` })), colorsPerCategory);
-    
-    // Add selected colors to availableColors
-    selectedCoolColors.forEach(item => {
-        availableColors.push({ 
-            color: item.color, 
-            category: 'cool', 
-            index: item.index,
-            label: item.label
+    // Build full available color pool (all distinct colors from all categories)
+    COLOR_PALETTES.cool.forEach((color, idx) => {
+        availableColors.push({
+            color,
+            category: 'cool',
+            index: idx,
+            label: COLOR_LABELS.cool[idx] || `cool-${idx}`
         });
     });
-    selectedWarmColors.forEach(item => {
-        availableColors.push({ 
-            color: item.color, 
-            category: 'warm', 
-            index: item.index,
-            label: item.label
+    COLOR_PALETTES.warm.forEach((color, idx) => {
+        availableColors.push({
+            color,
+            category: 'warm',
+            index: idx,
+            label: COLOR_LABELS.warm[idx] || `warm-${idx}`
         });
     });
-    selectedNeutralColors.forEach(item => {
-        availableColors.push({ 
-            color: item.color, 
-            category: 'neutral', 
-            index: item.index,
-            label: item.label
+    COLOR_PALETTES.neutral.forEach((color, idx) => {
+        availableColors.push({
+            color,
+            category: 'neutral',
+            index: idx,
+            label: COLOR_LABELS.neutral[idx] || `neutral-${idx}`
         });
     });
     
@@ -2036,12 +2084,15 @@ function assignWireProperties() {
             return wireProps.circuitColor === rule.key;
         } else if (rule.category === 'curvature') {
             return wireProps.isCurved === (rule.key === 'curved');
+        } else if (rule.category === 'shape') {
+            // wireProps.shapeKey is 'same' or 'different'
+            return wireProps.shapeKey === rule.key;
         }
         // numbers rule is checked separately in assignNumbers
         return false;
     }
     
-    // Helper function to count how many rules a wire matches (including fake, for display)
+    // Helper function to count how many rules a wire matches (display only; all rules are true)
     function countMatches(wireProps) {
         let count = 0;
         let details = [];
@@ -2049,10 +2100,10 @@ function assignWireProperties() {
             if (rule.category !== 'numbers') {
                 if (matchesRule(wireProps, rule)) {
                     count++;
-                    details.push(`${rule.category}(${rule.key})${rule.isFake ? ' [FAKE]' : ''}`);
+                    details.push(`${rule.category}(${rule.key})`);
                 } else {
                     // Show which rule it doesn't match
-                    details.push(`NOT ${rule.category}(${rule.key})${rule.isFake ? ' [FAKE]' : ''}`);
+                    details.push(`NOT ${rule.category}(${rule.key})`);
                 }
             }
         });
@@ -2299,6 +2350,21 @@ function assignWireProperties() {
         }
         if (wireCurvature) curvedCount++;
         
+        // Shape: decide whether endpoints should be the same or different
+        const shapeRuleMatch = matchRules.find(r => r.category === 'shape');
+        const shapeRuleExclude = excludeRules.find(r => r.category === 'shape');
+        let wireShapeKey;
+        if (shapeRuleMatch) {
+            // Must satisfy the shape rule ('same' or 'different')
+            wireShapeKey = shapeRuleMatch.key;
+        } else if (shapeRuleExclude) {
+            // Must NOT satisfy the excluded shape rule
+            wireShapeKey = (shapeRuleExclude.key === 'same') ? 'different' : 'same';
+        } else {
+            // No shape rule involved for this wire: random but balanced later
+            wireShapeKey = Math.random() < 0.5 ? 'same' : 'different';
+        }
+
         const wire = {
             color: wireColor.color,
             category: wireColor.category,
@@ -2306,6 +2372,7 @@ function assignWireProperties() {
             isDotted: wireLineStyle,
             circuitColor: wireCircuits,
             isCurved: wireCurvature,
+            shapeKey: wireShapeKey,
             matchesRules: matchCount,
             isCorrect: false,
             matchRules: [...matchRules], // Store which rules should be matched
@@ -2462,34 +2529,14 @@ function assignWireProperties() {
     }
     
     // STEP 1: Create CORRECT wire
-    // For Round 1-2: matches all 3 true rules (3/3) - all rules are true
-    // For Round 3-7: matches 1 true + 1 real maybe, opposite of fake (2/3)
+    // Correct wire always matches all currently active rules
     console.log('\n=== STEP 1: Creating CORRECT wire ===');
-    console.log(`fakeRule exists: ${!!fakeRule}`);
-    console.log(`totalRules: ${totalRules}`);
     
-    let correctMatchRules = [];
+    let correctMatchRules = [...rules];
     let correctExcludeRules = [];
-    let correctMatchCount;
-    
-    if (!fakeRule) {
-        // All rules are true, so correct wire matches all rules
-        correctMatchRules = rules; // Match all rules
-        correctExcludeRules = []; // Exclude none
-        correctMatchCount = totalRules;
-        console.log(`No fake rule: Correct wire will match ALL ${totalRules} rules (${totalRules}/${totalRules})`);
-        console.log(`  matchRules: ${correctMatchRules.map(r => r.text).join(', ')}`);
-    } else {
-        // Correct wire matches: all true rules + all real maybe rules (excluding fake)
-        // Match count = trueRules.length + (maybeRules.length - 1)
-        const realMaybes = maybeRules.filter(r => !r.isFake);
-        correctMatchRules = [...trueRules, ...realMaybes];
-        correctExcludeRules = [fakeRule];
-        correctMatchCount = trueRules.length + realMaybes.length;
-        console.log(`Fake rule exists: Correct wire will match ${correctMatchCount}/${totalRules} rules`);
-        console.log(`  matchRules: ${correctMatchRules.map(r => r.text).join(', ')}`);
-        console.log(`  excludeRules: ${correctExcludeRules.map(r => r.text).join(', ')}`);
-    }
+    let correctMatchCount = totalRules;
+    console.log(`Correct wire will match ALL ${totalRules} rules (${totalRules}/${totalRules})`);
+    console.log(`  matchRules: ${correctMatchRules.map(r => r.text).join(', ')}`);
     
     console.log(`Creating correct wire with matchesRules: ${correctMatchCount}`);
     const correctWire = createWireWithMatches(correctMatchCount, correctMatchRules, correctExcludeRules);
@@ -2546,39 +2593,11 @@ function assignWireProperties() {
                 matchRules = [];
                 excludeRules = rules;
             } else {
-                // Match some but not all rules
-                if (!fakeRule) {
-                    // All rules are true - match any combination of matchCount rules
-                    const combinations = generateCombinations(rules.length, matchCount);
-                    const combo = combinations[i % combinations.length];
-                    matchRules = combo.map(idx => rules[idx]);
-                    excludeRules = rules.filter((r, idx) => !combo.includes(idx));
-                } else {
-                    // Has fake rule - need to avoid matching the correct combination
-                    const realMaybes = maybeRules.filter(r => !r.isFake);
-                    const correctCombo = [...trueRules, ...realMaybes];
-                    
-                    if (matchCount === correctMatchCount) {
-                        // For correct match count, must use a different combination than correct wire
-                        // Correct wire has: all true + all real maybes (excludes fake)
-                        // Incorrect wires should include fake rule
-                        const numRulesNeeded = matchCount;
-                        
-                        // Always include fake rule, then add others to reach matchCount
-                        matchRules = [fakeRule];
-                        const remainingNeeded = numRulesNeeded - 1;
-                        
-                        // Add some true rules and/or real maybes, but not all
-                        const availableRules = [...trueRules, ...realMaybes].sort(() => Math.random() - 0.5);
-                        matchRules.push(...availableRules.slice(0, remainingNeeded));
-                        excludeRules = rules.filter(r => !matchRules.includes(r));
-                    } else {
-                        // For other match counts, pick any combination
-                        const allRulesShuffled = [...rules].sort(() => Math.random() - 0.5);
-                        matchRules = allRulesShuffled.slice(0, matchCount);
-                        excludeRules = rules.filter(r => !matchRules.includes(r));
-                    }
-                }
+                // Match some but not all rules (all rules are true)
+                const combinations = generateCombinations(rules.length, matchCount);
+                const combo = combinations[i % combinations.length];
+                matchRules = combo.map(idx => rules[idx]);
+                excludeRules = rules.filter((r, idx) => !combo.includes(idx));
             }
             
             const wire = createWireWithMatches(matchCount, matchRules, excludeRules);
@@ -2779,8 +2798,9 @@ function initializeGame() {
     gameState.currentRound = 1;
     gameState.isCuttingEnabled = false; // Disable cutting until start menu is closed
     gameState.correctCuts = 0;
+    gameState.wiresCutTotal = 0;
     gameState.wrongMoves = 0;
-    gameState.timeRemaining = 180; // Initialize timer to 3 minutes at game start
+    gameState.timeRemaining = 120; // Initialize timer to 2 minutes at game start
     
     // Disable pause button until game starts
     const pauseButton = document.getElementById('pauseButton');
@@ -2825,6 +2845,10 @@ function initializeGame() {
 function handleCorrectAnswer(cutWire) {
     // Correct wire cut - proceed to next round
     gameState.correctCuts++;
+    // Only increment wiresCutTotal for real gameplay rounds (1..TOTAL_ROUNDS)
+    if (!tutorialMode && gameState.currentRound >= 1 && gameState.currentRound <= TOTAL_ROUNDS) {
+        gameState.wiresCutTotal = (gameState.wiresCutTotal || 0) + 1;
+    }
     
     // Disable cutting
     gameState.isCuttingEnabled = false;
@@ -2848,38 +2872,62 @@ function handleCorrectAnswer(cutWire) {
         });
     }
     
-    // Check if this is the final round (round 7 completed)
-    const isFinalRound = gameState.currentRound >= 7;
+    // Record duration for this round
+    if (gameState.roundStartTime != null) {
+        const now = performance.now ? performance.now() : Date.now();
+        const durationSec = (now - gameState.roundStartTime) / 1000;
+        gameState.roundDurations.push({
+            round: gameState.currentRound,
+            seconds: durationSec
+        });
+    }
+
+    // Check if this is the final round (all wires completed)
+    const isFinalRound = gameState.currentRound >= TOTAL_ROUNDS;
     
     if (isFinalRound) {
-        defuserAwardStarsForCurrentRun();
+        // Log per-round timing breakdown on win
+        if (gameState.roundDurations && gameState.roundDurations.length > 0) {
+            console.log('=== DEFUSER ROUND TIME BREAKDOWN ===');
+            gameState.roundDurations.forEach(entry => {
+                const secs = entry.seconds.toFixed(2);
+                console.log(`Round ${entry.round}: ${secs} seconds`);
+            });
+            const total = gameState.roundDurations.reduce((sum, r) => sum + r.seconds, 0);
+            console.log(`Total active round time: ${total.toFixed(2)} seconds`);
+            console.log('=== END DEFUSER ROUND TIME BREAKDOWN ===');
+        }
+
+        defuserAwardStarsForCurrentRun(true);
         const pauseButton = document.getElementById('pauseButton');
         if (pauseButton) {
             pauseButton.disabled = true;
         }
     } else {
-        // Show popup, wait 1.0s, then hide and start fade out
-        showPopup('CORRECT!', () => {
-            // After popup hides, start fade out with slower animation (1.5s)
-            fadeOutRound(() => {
-                // Move to next round
-                gameState.currentRound++;
-                
-                // Update info screen
-                updateInfoDisplay();
-                
-                // Initialize next round
-                initializeRound(() => {
-                    // Fade in new round with slower animation (1.5s)
-                    fadeInRound(() => {
-                        // Enable cutting
-                        gameState.isCuttingEnabled = true;
-                        // Restart timer after fade in completes (don't reset time)
-                        startTimer();
-                    });
+        // CORRECT transition:
+        // 1) Immediately turn middle section green
+        // 2) Wait 0.8s
+        // 3) Set up next round, where initializeRound() makes middle opacity 0
+        // 4) fadeInRound() fades the middle back in
+        const middleSection = document.querySelector('.middle-section');
+        if (middleSection) {
+            middleSection.style.backgroundColor = '#4dcfa8';
+        }
+
+        setTimeout(() => {
+            // Move to next round
+            gameState.currentRound++;
+            updateInfoDisplay();
+
+            // Initialize next round, then use the existing fade-in helper
+            initializeRound(() => {
+                fadeInRound(() => {
+                    // Enable cutting and restart timer (without resetting time)
+                    gameState.isCuttingEnabled = true;
+                    startTimer();
                 });
             });
-        });
+        }, 1000);
     }
 }
 
@@ -2960,6 +3008,16 @@ function showPopup(message, onComplete, isWin = false, subText = '') {
 // Handle game over when timer runs out
 function handleGameOver() {
     if (defuserSounds.defuser_explode) defuserSounds.defuser_explode.play();
+    // Record duration for the current round if in progress
+    if (gameState.roundStartTime != null) {
+        const now = performance.now ? performance.now() : Date.now();
+        const durationSec = (now - gameState.roundStartTime) / 1000;
+        gameState.roundDurations.push({
+            round: gameState.currentRound,
+            seconds: durationSec
+        });
+    }
+
     // Disable cutting
     gameState.isCuttingEnabled = false;
     
@@ -2969,7 +3027,19 @@ function handleGameOver() {
         timerInterval = null;
     }
     
-    defuserAwardStarsForCurrentRun();
+    defuserAwardStarsForCurrentRun(false);
+
+    // Log per-round timing breakdown
+    if (gameState.roundDurations && gameState.roundDurations.length > 0) {
+        console.log('=== DEFUSER ROUND TIME BREAKDOWN ===');
+        gameState.roundDurations.forEach(entry => {
+            const secs = entry.seconds.toFixed(2);
+            console.log(`Round ${entry.round}: ${secs} seconds`);
+        });
+        const total = gameState.roundDurations.reduce((sum, r) => sum + r.seconds, 0);
+        console.log(`Total active round time: ${total.toFixed(2)} seconds`);
+        console.log('=== END DEFUSER ROUND TIME BREAKDOWN ===');
+    }
 
     // Show red flash
     showFlashOverlay(false); // false = red flash for game over
@@ -3011,54 +3081,23 @@ function updateBombBoxes() {
 
 // Show round callout at the start of each round
 function showRoundCallout() {
-    const callout = document.getElementById('roundCallout');
-    if (!callout) return;
-    
-    // Kill any existing tweens on the callout
-    gsap.killTweensOf(callout);
-    
-    // Position callout in center of middle-section
-    const middleSection = document.querySelector('.middle-section');
-    if (middleSection) {
-        const rect = middleSection.getBoundingClientRect();
-        callout.style.position = 'absolute';
-        callout.style.top = '50%';
-        callout.style.left = '50%';
-        callout.style.transform = 'translate(-50%, -50%)';
-    }
-    
-    callout.textContent = `WIRE ${gameState.currentRound} / 7`;
-    callout.style.display = 'block';
-    callout.style.opacity = '1';
-    
-    // Hide after 2 seconds, then fade out
-    setTimeout(() => {
-        gsap.to(callout, {
-            opacity: 0,
-            duration: 0.4,
-            onComplete: () => {
-                callout.style.display = 'none';
-            }
-        });
-    }, 2000);
+    return; // still disabled visually, but comment no longer mentions 7
 }
 
 // Update info display with current round
 function updateInfoDisplay() {
     const infoSectionText = document.getElementById('infoSectionText');
     if (infoSectionText) {
-        infoSectionText.textContent = `WIRE ${gameState.currentRound}/7 - Drag to cut a wire`;
+        infoSectionText.textContent = `WIRE ${gameState.currentRound}/${TOTAL_ROUNDS} - Drag to cut a wire`;
     }
 }
 
 // Fade out current round (wires and clues)
 function fadeOutRound(onComplete) {
-    const topSection = document.querySelector('.top-section');
     const middleSection = document.querySelector('.middle-section');
     
-    // Apply opacity to containers for smoother transition
+    // Only fade out the middle section; leave the top section visible
     const fadeTargets = [];
-    if (topSection) fadeTargets.push(topSection);
     if (middleSection) fadeTargets.push(middleSection);
     
     // Fade out containers (slower: 1.5s)
@@ -3077,37 +3116,26 @@ function fadeOutRound(onComplete) {
 
 // Fade in new round
 function fadeInRound(onComplete) {
-    const topSection = document.querySelector('.top-section');
     const middleSection = document.querySelector('.middle-section');
-    
-    // Reset container opacities to 0 first (before new content is visible)
-    if (topSection) {
-        topSection.style.opacity = '0';
+
+    // Only fade in the middle section (top stays untouched)
+    if (middleSection && typeof gsap !== 'undefined') {
+        gsap.to(middleSection, {
+            opacity: 1,
+            duration: 0.5
+        });
+    } else if (middleSection) {
+        // Fallback: ensure it's visible
+        middleSection.style.opacity = '1';
     }
-    if (middleSection) {
-        middleSection.style.opacity = '0';
-    }
-    
-    // Apply opacity to containers for smoother transition
-    const fadeTargets = [];
-    if (topSection) fadeTargets.push(topSection);
-    if (middleSection) fadeTargets.push(middleSection);
-    
+
     // Show round callout
     showRoundCallout();
-    
-    // Fade in containers (0.75s)
-    if (fadeTargets.length > 0) {
-        gsap.to(fadeTargets, {
-            opacity: 1,
-            duration: 0.75
-        });
-    }
-    
-    // Call onComplete after fade duration (0.75s)
+
+    // Run callback after tween duration so timing stays consistent
     setTimeout(() => {
         if (onComplete) onComplete();
-    }, 750);
+    }, 500);
 }
 
 // Initialize a new round
@@ -3117,16 +3145,16 @@ function initializeRound(onComplete) {
     originalWireConnections = [];
     gameState.wireAssignments = [];
     gameState.correctCuts = 0;
-    
-    // Only set opacity to 0 if this is NOT the first round (to prevent flash during transitions)
-    // For the first round, containers should already be visible (opacity 1)
-    if (gameState.currentRound > 1) {
-        const topSection = document.querySelector('.top-section');
-        const middleSection = document.querySelector('.middle-section');
-        if (topSection) topSection.style.opacity = '0';
-        if (middleSection) middleSection.style.opacity = '0';
+
+    // Prepare middle section for a clean fade-in:
+    // make it fully transparent and reset background to white
+    // *before* we change its contents.
+    const middleSection = document.querySelector('.middle-section');
+    if (middleSection) {
+        middleSection.style.opacity = '0';
+        middleSection.style.backgroundColor = '#ffffff';
     }
-    
+
     // Regenerate boxes for new wire count
     generateBoxes();
     
@@ -3140,6 +3168,9 @@ function initializeRound(onComplete) {
     // Apply key colors
     applyKeyBoxColors();
     
+    // Record round start time for per-round timing
+    gameState.roundStartTime = performance.now ? performance.now() : Date.now();
+
     // Draw wires - ensure boxes are fully created before drawing
     setTimeout(() => {
         // Verify boxes match wire count
@@ -3215,13 +3246,13 @@ function startTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
     }
-    
-    // Only reset time if it hasn't been initialized or is already at/below 0
-    // NEVER reset if time is positive (continues from where it left off)
+
+    // Only initialize timeRemaining to 2:00 if it hasn't been set yet
+    // or has gone invalid (e.g., after a previous game)
     if (gameState.timeRemaining === undefined || gameState.timeRemaining < 0) {
-        gameState.timeRemaining = 180;
+        gameState.timeRemaining = 120;
     }
-    
+
     // Don't start timer if time is already 0 (game over)
     if (gameState.timeRemaining <= 0) {
         return;
@@ -3310,15 +3341,11 @@ const tutorialSteps = [
     },
     {
         title: "CIRCUITS:",
-        content: "Wires are connected to 2 circuits<br>• They can be light or dark<br>• They can have numbers that are the same or add to odd or even"
+        content: "Wires are connected to 2 circuits<br>• They can be light or dark<br>• They can have numbers that are the same or add to odd or even<br>• They can have shapes that are the same or different"
     },
     {
         title: "DEFUSE THE BOMB",
-        content: "• You have 3 minutes to cut 7 wires.<br>• You can cut 3 connections<br>incorrectly before losing"
-    },
-    {
-        title: "FALSE RULES",
-        content: "Sometimes some rules are false.<br>In this example you want to find the wire that has 2/3 correct rules instead of 3/3."
+        content: "• You have 2 minutes to cut 10 wires.<br>• You can cut 3 connections<br>incorrectly before losing"
     },
     {
         title: "Drag to cut a wire",
@@ -3409,18 +3436,13 @@ function showTutorialStep(stepIndex) {
         
         // Change rules when reaching FALSE RULES step (step 4)
         if (stepIndex === 4) {
-            console.log('Showing maybe rules step and updating rules');
-            // Change rules to show trueRules and maybeRules
-            setTutorialRules({
-                trueRules: [
-                    { text: 'cool color', category: 'color', key: 'cool' }
-                ],
-                maybeRules: [
-                    { text: 'straight', category: 'curvature', key: 'straight' },
-                    { text: 'numbers are the same', category: 'numbers', key: 'same' }
-                ]
-            });
-            
+            console.log('Updating rules for FALSE RULES tutorial step (now using only true rules)');
+            setTutorialRules([
+                { text: 'cool color', category: 'color', key: 'cool' },
+                { text: 'straight', category: 'curvature', key: 'straight' },
+                { text: 'numbers are the same', category: 'numbers', key: 'same' }
+            ]);
+
             // Update wires to match the new rules
             console.log('Updating wires for tutorial rules');
             assignWireProperties();
@@ -3564,6 +3586,12 @@ function endTutorial() {
     // Reset to round 1
     gameState.currentRound = 1;
     initializeRound(() => {
+        // Ensure main sections are visible after tutorial
+        const topSection = document.querySelector('.top-section');
+        const middleSection = document.querySelector('.middle-section');
+        if (topSection) topSection.style.opacity = '1';
+        if (middleSection) middleSection.style.opacity = '1';
+
         // Position and show start menu 2 after round is initialized
         setTimeout(() => {
             positionStartMenu();
@@ -3734,11 +3762,15 @@ function assignNumbers() {
     const numbersRule = gameState.selectedRules.find(r => r.category === 'numbers');
     
     // Get wire connections
-    const connections = originalWireConnections || [];
+    const allConnections = originalWireConnections || [];
+
+    // Guard against having more connections than the configured number of wires
+    const expectedWires = getCurrentNumWires();
+    const connections = allConnections.slice(0, expectedWires);
     
     // Safety check: ensure we have enough boxes
     if (topBoxes.length < connections.length || bottomBoxes.length < connections.length) {
-        console.error(`Error in assignNumbers: Box count mismatch. Expected at least ${connections.length} boxes, got topBoxes: ${topBoxes.length}, bottomBoxes: ${bottomBoxes.length}. Expected wires: ${getCurrentNumWires()}`);
+        console.error(`Error in assignNumbers: Box count mismatch. Expected at least ${connections.length} boxes, got topBoxes: ${topBoxes.length}, bottomBoxes: ${bottomBoxes.length}. Expected wires: ${expectedWires}`);
         // Try to regenerate boxes
         generateBoxes();
         // Wait for DOM update and retry
@@ -3844,19 +3876,15 @@ function assignNumbers() {
 function checkForDuplicateCorrectAnswers() {
     const rules = gameState.selectedRules;
     const numbersRule = rules.find(r => r.category === 'numbers');
-    const fakeRule = gameState.maybeRules.find(r => r.isFake) || null;
-    const trueRules = gameState.trueRules;
-    const maybeRules = gameState.maybeRules;
-    const realMaybes = maybeRules.filter(r => !r.isFake);
     const totalRules = rules.length;
-    
-    // Calculate correct match count
-    const correctMatchCount = fakeRule ? (trueRules.length + realMaybes.length) : totalRules;
+
+    // With no fake rules, the correct match count is simply the total number of rules
+    const correctMatchCount = totalRules;
     
     console.log('\n=== CHECKING FOR DUPLICATE CORRECT ANSWERS ===');
     console.log(`Correct match count should be: ${correctMatchCount}/${totalRules}`);
     
-    // Helper to check if wire matches a rule
+    // Helper to check if wire matches a rule (must mirror main rule logic)
     function matchesRule(wireProps, rule) {
         if (rule.category === 'color') {
             return wireProps.category === rule.key;
@@ -3866,6 +3894,9 @@ function checkForDuplicateCorrectAnswers() {
             return wireProps.circuitColor === rule.key;
         } else if (rule.category === 'curvature') {
             return wireProps.isCurved === (rule.key === 'curved');
+        } else if (rule.category === 'shape') {
+            // wireProps.shapeKey is 'same' or 'different'
+            return wireProps.shapeKey === rule.key;
         }
         return false;
     }
@@ -4670,6 +4701,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Keyboard shortcut: 'g' key to trigger correct answer
     // Keyboard shortcut: 'h' key to trigger correct answer and skip to round 6
+    // Keyboard shortcut: 'u' key to drop timer to 3 seconds (fast test)
     document.addEventListener('keydown', (event) => {
         if (event.key === 'g' || event.key === 'G') {
             // Only trigger if cutting is enabled (game is active)
@@ -4692,6 +4724,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     handleCorrectAnswer(correctWire);
                 }
             }
+        } else if (event.key === 'u' || event.key === 'U') {
+            // Testing key: force remaining time to 3 seconds
+            gameState.timeRemaining = 3;
+            updateTimer();
         }
     });
 });
