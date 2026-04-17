@@ -7,6 +7,19 @@ function getWeekStartDate() {
     return weekStart;
 }
 
+/** Sum of dailyStars_* for Sun–Sat of the current week (calendar row). */
+function getWeekTotalPoints() {
+    const weekStart = getWeekStartDate();
+    let total = 0;
+    for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(weekStart.getDate() + i);
+        const dayKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+        total += parseInt(localStorage.getItem(`dailyStars_${dayKey}`) || '0', 10);
+    }
+    return total;
+}
+
 // Helper function to get today's key
 function getTodayKey() {
     const today = new Date();
@@ -113,6 +126,13 @@ function updateCalendar() {
             updateCalendarBox(box, index, '.day-number-type1');
         });
     }
+
+    const weekTotal = getWeekTotalPoints();
+    document.querySelectorAll('.week-total-badge').forEach(function (badge) {
+        const val = badge.querySelector('.week-total-badge-value');
+        if (val) val.textContent = String(weekTotal);
+        badge.setAttribute('aria-label', 'Weekly star total: ' + weekTotal);
+    });
 }
 
 // Make it globally accessible
@@ -874,7 +894,7 @@ function openGame(gameId, extraParams) {
     
     // Build URL with header type if present
     const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
+    const headerType = urlParams.get('d') || urlParams.get('v');
     const theme = urlParams.get('theme');
     
     // Build game URL with parameters
@@ -1063,14 +1083,14 @@ function setCurrentDate() {
     const dateSubtitleElements = document.querySelectorAll('.header-bar .date-subtitle, .desktop-date .date-subtitle');
     if (!dateElements.length) return;
     
-    const today = new Date();
+    const displayDate = typeof getThemeHeaderDisplayDate === 'function' ? getThemeHeaderDisplayDate() : new Date();
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    const month = months[today.getMonth()];
-    const day = today.getDate();
-    const year = today.getFullYear();
+    const month = months[displayDate.getMonth()];
+    const day = displayDate.getDate();
+    const year = displayDate.getFullYear();
     const dateStr = `${month} ${day}, ${year}`;
     
     const isBrandMode = new URLSearchParams(window.location.search).get('m') === 'brand';
@@ -1362,6 +1382,9 @@ window.updateCrossStars = updateCrossStars;
 function applyThemeColors(theme) {
     if (!theme || !theme.colors) return;
     const root = document.documentElement;
+    if (!Object.prototype.hasOwnProperty.call(theme.colors, 'page-flat-background')) {
+        root.style.removeProperty('--page-flat-background');
+    }
     Object.entries(theme.colors).forEach(([name, value]) => {
         root.style.setProperty(`--${name}`, value);
     });
@@ -1370,7 +1393,7 @@ function applyThemeColors(theme) {
 // Apply brand override colors (Centra, Supervalu, etc.) when d=...
 function applyBrandOverride() {
     const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
+    const headerType = urlParams.get('d') || urlParams.get('v');
     let override = null;
 
     if (headerType === 'centra' && typeof CENTRA_OVERRIDE !== 'undefined') {
@@ -2329,7 +2352,7 @@ function applyMode() {
         });
     } else {
         if (dailyBoostWrapper) dailyBoostWrapper.style.display = 'none';
-        const headerType = urlParams.get('d');
+        const headerType = urlParams.get('d') || urlParams.get('v');
         const isCentra = headerType === 'centra';
         const isSupervalu = headerType === 'supervalu';
         const showTopCarousel = isCentra || isSupervalu;
@@ -2353,7 +2376,8 @@ function applyMode() {
 // Check URL parameters on page load
 function checkURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
+    const headerType = urlParams.get('d') || urlParams.get('v');
+    const isWBrand = headerType === 'w' || headerType === 'wegmans' || headerType === 'ws';
     
     // Handle header type switching
     const headerType1 = document.querySelector('.header-type1');
@@ -2370,6 +2394,7 @@ function checkURLParameters() {
     if (headerType === 'bigy') {
         // Remove bigy2 class if it exists
         document.body.classList.remove('bigy2');
+        document.body.classList.remove('w-brand');
         
         // Show header-type2, hide header-type1
         if (headerType1) headerType1.style.display = 'none';
@@ -2396,6 +2421,7 @@ function checkURLParameters() {
         // Re-apply theme settings after bigy styling is applied
         applyThemeSettings();
     } else if (headerType === 'bigy2') {
+        document.body.classList.remove('w-brand');
         // Show header-type2, hide header-type1
         if (headerType1) headerType1.style.display = 'none';
         if (headerType2) headerType2.style.display = 'block';
@@ -2463,6 +2489,7 @@ function checkURLParameters() {
     } else if (headerType === 'centra') {
         // Centra: show carousel at top only, logo in upper-left over the bar
         document.body.classList.remove('bigy2');
+        document.body.classList.remove('w-brand');
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
         if (container2A) container2A.style.display = 'none';
@@ -2474,6 +2501,7 @@ function checkURLParameters() {
     } else if (headerType === 'supervalu') {
         // SuperValu: show carousel at top only, use SuperValu branding
         document.body.classList.remove('bigy2');
+        document.body.classList.remove('w-brand');
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
         if (container2A) container2A.style.display = 'none';
@@ -2489,9 +2517,22 @@ function checkURLParameters() {
         }
         applyFontScheme('Nunito');
         applyDefaultStyling();
+    } else if (isWBrand) {
+        // W brand: top-right static logo in header bar
+        document.body.classList.remove('bigy2');
+        document.body.classList.add('w-brand');
+        if (headerType1) headerType1.style.display = 'block';
+        if (headerType2) headerType2.style.display = 'none';
+        if (container2A) container2A.style.display = 'none';
+        if (container2B) container2B.style.display = 'none';
+        if (headerLogo) headerLogo.src = 'src/img/w-logo.svg';
+        carouselLogos.forEach((logo, i) => { logo.src = `src/img/centra/carousel${(i % 3) + 1}.png`; });
+        applyFontScheme('Nunito');
+        applyDefaultStyling();
     } else {
         // Default: show header-type1, hide header-type2
         document.body.classList.remove('bigy2');
+        document.body.classList.remove('w-brand');
         if (headerType1) headerType1.style.display = 'block';
         if (headerType2) headerType2.style.display = 'none';
         if (container2A) container2A.style.display = 'none';
@@ -3402,12 +3443,13 @@ function updateLogoVisibility() {
     const helpButton = document.querySelector('.help-button');
     
     const urlParams = new URLSearchParams(window.location.search);
-    const headerType = urlParams.get('d');
+    const headerType = urlParams.get('d') || urlParams.get('v');
     const isBigy = headerType === 'bigy';
     const isBigy2 = headerType === 'bigy2';
     const isCentra = headerType === 'centra';
     const isSupervalu = headerType === 'supervalu';
-    const isLogoMode = isBigy || isBigy2 || isCentra || isSupervalu;
+    const isWBrand = headerType === 'w' || headerType === 'wegmans' || headerType === 'ws';
+    const isLogoMode = isBigy || isBigy2 || isCentra || isSupervalu || isWBrand;
     
     // Show help button(s): on mobile show only on main screen unless game open; on desktop show only when game open (upper left)
     const shouldHideHelp = closeButton && closeButton.classList.contains('show');
@@ -3447,8 +3489,57 @@ function updateLogoVisibility() {
 // Check URL parameters when page loads
 checkURLParameters();
 
+function runWsSplashSequence() {
+    const overlay = document.getElementById('splash-overlay');
+    if (!overlay) {
+        return false;
+    }
+
+    // Move overlay to body so it is not constrained by .content stacking context.
+    if (overlay.parentElement !== document.body) {
+        document.body.appendChild(overlay);
+    }
+
+    overlay.innerHTML = '';
+    const splashImg = document.createElement('img');
+    splashImg.src = 'src/img/splashTitle.png';
+    splashImg.alt = 'Splash title';
+    overlay.appendChild(splashImg);
+
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '1';
+    splashImg.style.opacity = '0';
+    splashImg.style.transition = 'opacity 1s ease';
+    overlay.style.transition = 'opacity 0.5s ease';
+
+    // Delay 0.5s, fade image in over 1s.
+    setTimeout(() => {
+        splashImg.style.opacity = '1';
+    }, 500);
+
+    // After fade-in completes + 0.75s hold, fade overlay out over 0.5s.
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+    }, 2000);
+
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        overlay.style.opacity = '1';
+    }, 2500);
+
+    return true;
+}
+
 // Mark app as ready after the full window load (fonts, CSS, images) to avoid flashes
 window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const headerType = urlParams.get('d') || urlParams.get('v');
+    const isWsBrand = headerType === 'ws';
+
+    if (isWsBrand) {
+        runWsSplashSequence();
+    }
+
     if (document && document.body) {
         document.body.classList.remove('app-loading');
         document.body.classList.add('app-ready');
@@ -3457,6 +3548,35 @@ window.addEventListener('load', () => {
 
 // Keyboard shortcut helpers and diagnostics
 document.addEventListener('keydown', (e) => {
+    // Screen recording: M = GSAP tween scroll top → bottom (~5s), subtle non-linear ease
+    if (e.key === 'm' || e.key === 'M') {
+        const t = e.target;
+        const tag = t && t.nodeName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) {
+            return;
+        }
+        e.preventDefault();
+        if (typeof gsap === 'undefined') {
+            return;
+        }
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        if (!window.__screenRecordScrollProxy) {
+            window.__screenRecordScrollProxy = { y: 0 };
+        }
+        const proxy = window.__screenRecordScrollProxy;
+        proxy.y = window.scrollY;
+        gsap.killTweensOf(proxy);
+        gsap.to(proxy, {
+            y: maxScroll,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: () => {
+                window.scrollTo(0, proxy.y);
+            }
+        });
+        return;
+    }
+
     // '8' key cheat to unlock bonus spin
     if (e.key === '8') {
         localStorage.setItem('bonusSpinCheatUnlocked', 'true');
@@ -3736,22 +3856,6 @@ if (mysteryWordBox) {
                 iframe.contentWindow.postMessage('mysteryWordShown', '*');
             }
         }, 100);
-    });
-}
-
-// Desktop puzzle section: Community and Journey nav thumbnails (switch tab on click)
-const communityNavBox = document.getElementById('communityNavBox');
-const journeyNavBox = document.getElementById('journeyNavBox');
-if (communityNavBox) {
-    communityNavBox.addEventListener('click', () => {
-        const btn = document.querySelector('.tab-button[data-page="community"]');
-        if (btn) btn.click();
-    });
-}
-if (journeyNavBox) {
-    journeyNavBox.addEventListener('click', () => {
-        const btn = document.querySelector('.tab-button[data-page="journey"]');
-        if (btn) btn.click();
     });
 }
 

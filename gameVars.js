@@ -36,24 +36,26 @@ const THEMES = {
         puzzleBackground: 'weeklyBackgrounds/thanksgiving_puzzleBig.jpg',
         zoomImage: 'weeklyBackgrounds/thanksgiving_zoom.jpg',
         colors: {
+            'top-bar-bg-mobile': '#333333',
+            'top-bar-text-mobile': '#e8e8ec',
+            'top-bar-bg-desktop': '#333333',
+            'top-bar-text-desktop': '#ffffff',
+
+            'page-gradient-top': '#fff4ed',
+            'page-flat-background': '#fff4ed',
+
+            'masterGrad': '#333333',
+
+            'header-text-color': '#ffffff',
+            'calendar-day-text-color': '#404040',
             
-            'top-bar-bg-mobile': '#fdd091', 
-            'top-bar-text-mobile': '#3b1f0a', 
-            'top-bar-bg-desktop': '#FF8C42',
-            'top-bar-text-desktop': '#3b1f0a',
-            
-            'page-gradient-top': '#fbead5', 
-            
-            'masterGrad': 'linear-gradient(to bottom, #ffd391, #ffd391)',
-            
-            'header-text-color': '#7e5637',
-            
-            'calendar-background-top-color': 'linear-gradient(to bottom,rgb(231, 63, 63),rgb(203, 44, 44))',
+            'calendar-background-top-color': 'linear-gradient(to bottom, #fb9f52, #e88335)',
             'calendar-background-top-text': '#ffffff',
-            'calendar-top-solid': '#e73f3f',
-            'calendar-background-color': '#ffffff',      // light cream
+            'calendar-top-solid': '#f08a3c',
+            'calendar-week-total-badge-bg': '#f08a3c',
+            'calendar-background-color': '#FFFFFF',
             'calendar-background-bottom-color': '#FFF6E8',
-            'calendar-border-color': '#e3c3a8',
+            'calendar-border-color': '#e5ddd1',
             'calendar-highlight-color': '#FFF6E8'
         },
         phrases: [
@@ -92,16 +94,23 @@ const THEMES = {
         puzzleSmall: 'weeklyBackgrounds/fourthOfJuly_puzzleSmall.jpg',
         zoomImage: 'weeklyBackgrounds/forthOfJuly_zoom.jpg',
         colors: {
-            'top-bar-bg-mobile': '#71dad4',
-            'top-bar-text-mobile': '#000000',
-            'top-bar-bg-desktop': '#71dad4',
-            'top-bar-text-desktop': '#333333',
-            'page-gradient-top': '#bdeeea',
-            'masterGrad': '#cdfffc',
-            'header-text-color': '#7b8f94',
+            'top-bar-bg-mobile': '#333333',
+            'top-bar-text-mobile': '#e8e8ec',
+            'top-bar-bg-desktop': '#333333',
+            'top-bar-text-desktop': '#ffffff',
+
+            'page-gradient-top': '#cdf2f0',
+            'page-flat-background': '#cdf2f0',
+
+            'masterGrad': '#333333',
+
+            'header-text-color': '#ffffff',
+            'calendar-day-text-color': '#404040',
+
             'calendar-background-top-color': 'linear-gradient(to bottom, #e73f65, #cb2c4b)',
             'calendar-background-top-text': '#ffffff',
             'calendar-top-solid': '#e73f65',
+            'calendar-week-total-badge-bg': '#e73f65',
             'calendar-background-color': '#ffffff',
             'calendar-background-bottom-color': '#e8fffe',
             'calendar-border-color': '#a8d1ce',
@@ -135,16 +144,23 @@ const THEMES = {
         puzzleSmall: 'weeklyBackgrounds/easter_puzzleSmall.jpg',
         zoomImage: 'weeklyBackgrounds/easter_zoom.jpg',
         colors: {
-            'top-bar-bg-mobile': '#78e8bd',
-            'top-bar-text-mobile': '#1a3d1a',
-            'top-bar-bg-desktop': '#a8d5a8',
-            'top-bar-text-desktop': '#1b5e20',
-            'page-gradient-top': '#b2eed7',
-            'masterGrad': '#d4fff8',
-            'header-text-color': '#37899e',
+            'top-bar-bg-mobile': '#333333',
+            'top-bar-text-mobile': '#e8e8ec',
+            'top-bar-bg-desktop': '#333333',
+            'top-bar-text-desktop': '#ffffff',
+
+            'page-gradient-top': '#d0e6e0',
+            'page-flat-background': '#e2fff7',
+
+            'masterGrad': '#333333',
+
+            'header-text-color': '#ffffff',
+            'calendar-day-text-color': '#404040',
+
             'calendar-background-top-color': 'linear-gradient(to bottom, #00b1b7,#00b1b7)',
             'calendar-background-top-text': '#ffffff',
             'calendar-top-solid': '#00b1b7',
+            'calendar-week-total-badge-bg': '#00b1b7',
             'calendar-background-color': '#ffffff',
             'calendar-background-bottom-color': '#e8f5e9',
             'calendar-border-color': '#b3eab5',
@@ -195,6 +211,7 @@ const SUPERVALU_OVERRIDE = {
         'calendar-background-top-color': 'linear-gradient(to bottom, #e73f65, #cb2c4b)',
         'calendar-background-top-text': '#ffffff',
         'calendar-top-solid': '#e73f65',
+        'calendar-week-total-badge-bg': '#e73f65',
         'calendar-background-color': '#ffffff',
         'calendar-background-bottom-color': '#ffe5ea',
         'calendar-border-color': '#f2b3c0',
@@ -205,6 +222,61 @@ const SUPERVALU_OVERRIDE = {
 // Get current theme
 function getCurrentTheme() {
     return THEMES[CURRENT_THEME] || THEMES.thanksgiving;
+}
+
+/** 4th Thursday of November (US Thanksgiving), local date */
+function getThanksgivingThursday(year) {
+    const nov1 = new Date(year, 10, 1);
+    const firstThu = (4 - nov1.getDay() + 7) % 7;
+    return new Date(year, 10, 1 + firstThu + 21);
+}
+
+/** Easter Sunday (Gregorian), Anonymous Gregorian algorithm */
+function getEasterSunday(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const n = h + l - 7 * m + 114;
+    const month = Math.floor(n / 31);
+    const day = (n % 31) + 1;
+    return new Date(year, month - 1, day);
+}
+
+/**
+ * Date shown in the header for themed builds: the theme’s anchor holiday in its week
+ * (Thanksgiving Thursday, July 4, Easter Sunday). If that date has already passed this year,
+ * uses next year’s. Otherwise uses today’s date.
+ */
+function getThemeHeaderDisplayDate() {
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (typeof getCurrentTheme !== 'function') return today;
+    const theme = getCurrentTheme();
+    const name = theme.name;
+    let anchor;
+    const y = today.getFullYear();
+    if (name === 'Thanksgiving') {
+        anchor = getThanksgivingThursday(y);
+        if (anchor < todayStart) anchor = getThanksgivingThursday(y + 1);
+    } else if (name === '4th of July') {
+        anchor = new Date(y, 6, 4);
+        if (anchor < todayStart) anchor = new Date(y + 1, 6, 4);
+    } else if (name === 'Easter') {
+        anchor = getEasterSunday(y);
+        if (anchor < todayStart) anchor = getEasterSunday(y + 1);
+    } else {
+        return today;
+    }
+    return anchor;
 }
 
 // -------------------------------------------------------------------------------------------

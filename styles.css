@@ -14,6 +14,7 @@
     --calendar-background-top-color: linear-gradient(to bottom, #e73f65, #cb2c4b);
     --calendar-background-top-text: #ffffff;
     --calendar-top-solid: #e73f65;
+    --calendar-week-total-badge-bg: #e73f65;
     --calendar-background-color: #e8fffe;
     --calendar-background-bottom-color: #e8fffe;
     --calendar-border-color: #a8d1ce;
@@ -64,13 +65,18 @@ body {
     width: 100%;
     height: 100%;
     min-height: 100vh;
-    background: linear-gradient(to bottom, var(--page-gradient-top), transparent);
+    background: var(--page-flat-background, linear-gradient(to bottom, var(--page-gradient-top), transparent));
     z-index: 0;
     pointer-events: none;
 }
 
 /* Global app loading state: hide content until JS has applied theme/brand settings */
 body.app-loading .content {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.app-loading .bottom-bar {
     opacity: 0;
     pointer-events: none;
 }
@@ -97,16 +103,25 @@ body.app-ready .page-gradient-backdrop {
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
-    background-image: url('src/img/tempPage.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: 10002;
-    cursor: pointer;
-    max-width: 500px;
-    margin: 0 auto;
+    min-height: 100vh;
+    background: #333333;
+    z-index: 20000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.splash-overlay img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    opacity: 0;
+    transform: translateY(-40px);
 }
 
 .bottom-bar {
@@ -241,6 +256,13 @@ body.app-ready .page-gradient-backdrop {
     .header-bar .header-logo,
     .header-bar .date-container {
         display: none !important;
+    }
+    body.w-brand .header-bar .header-logo {
+        display: block !important;
+        left: 10px;
+        right: auto;
+        top: 50%;
+        transform: translateY(-50%);
     }
     .header-bar .desktop-date {
         display: flex;
@@ -415,38 +437,13 @@ body.app-ready .page-gradient-backdrop {
         max-width: 400px;
     }
     .content:has(#main-page.active) .desktop-scroll-inner {
-        max-width: 800px;
+        max-width: 500px;
     }
     .content:has(#community-page.active) .desktop-scroll-inner {
-        max-width: 800px;
+        max-width: 500px;
     }
     #community-page .games-container {
-        max-width: 800px;
-    }
-    /* Main page desktop: scramble and quiz side by side, exactly same height */
-    #main-page .section-title-warmup + .section {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        align-items: stretch;
-        min-height: 320px;
-        max-height: 520px;
-        margin-bottom: 0;
-        padding-bottom: 0;
-    }
-    #main-page .section-title-warmup + .section .on-this-day-container,
-    #main-page .section-title-warmup + .section .quiz-container,
-    #main-page .section-title-warmup + .section .mc-container {
-        height: 100%;
-        min-height: 0;
-        overflow-y: auto;
-    }
-    #main-page .section-title-warmup + .section .on-this-day-container {
-        grid-column: 1;
-    }
-    #main-page .section-title-warmup + .section .quiz-container,
-    #main-page .section-title-warmup + .section .mc-container {
-        grid-column: 2;
+        max-width: 500px;
     }
     /* Less space between warmup section and Daily Puzzles */
     #main-page .section-title-warmup + .section + .section-title-puzzles {
@@ -478,22 +475,29 @@ body.app-ready .page-gradient-backdrop {
     }
     /* Desktop: scramble layout – label top, letters + hint centered in middle, stars at bottom */
     #main-page .scramble-bottom-section {
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: auto auto 1fr auto;
         grid-template-columns: 1fr;
         gap: 12px;
         align-items: stretch;
     }
-    #main-page .scramble-bottom-section .unscramble-label {
+    #main-page .scramble-bottom-section .subsection-title {
         grid-row: 1;
         grid-column: 1;
-        margin-top: 4px;
+        margin: 0 0 4px 0;
+        padding: 0;
+        text-align: center;
+    }
+    #main-page .scramble-bottom-section .unscramble-label {
+        grid-row: 2;
+        grid-column: 1;
+        margin-top: 0;
         margin-bottom: 0;
         text-align: center;
         color: #666;
         font-size: 15px;
     }
     #main-page .scramble-bottom-section .unscramble-middle {
-        grid-row: 2;
+        grid-row: 3;
         min-height: 0;
         display: flex;
         flex-direction: column;
@@ -506,46 +510,21 @@ body.app-ready .page-gradient-backdrop {
         max-width: 100%;
     }
     #main-page .scramble-bottom-section .unscramble-stars {
-        grid-row: 3;
+        grid-row: 4;
         grid-column: 1;
         margin-top: 0;
         align-self: end;
     }
-    /* Main page desktop: puzzles section 3 per row */
-    #main-page .play-boxes {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    /* Main page desktop: arcade 3 per row, white section below colored; match puzzle horizontal spacing (gap 10px) */
-    #main-page .arcade-section {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-    #main-page .arcade-box {
-        flex-direction: column;
-        height: auto;
-        margin-bottom: 0;
-    }
-    #main-page .arcade-box .arcade-color {
-        width: 100%;
-        min-height: 200px;
-    }
-    /* Desktop-only: larger game thumbnail icons and titles */
+    /* Desktop-only: larger puzzle thumbnails and titles (arcade uses mobile row layout) */
     #main-page .play-color-box img,
     #main-page .play-color-box-image img,
-    #main-page .arcade-color img,
     #main-page .bonus-color img,
     #community-page .bonus-color img,
     .games-container .bonus-color img {
         height: 40px !important;
         width: auto !important;
     }
-    #main-page .play-box-nav .play-box-nav-icon {
-        height: 40px;
-        width: 40px;
-    }
     #main-page .play-box .game-title,
-    #main-page .arcade-box .game-title,
     #main-page .boost-game-box .game-title,
     #main-page .bonus-box .game-title,
     #community-page .bonus-box .game-title,
@@ -557,9 +536,6 @@ body.app-ready .page-gradient-backdrop {
         max-width: 6.5em;
         line-height: 1.15;
     }
-    #main-page .arcade-box {
-        height: 340px;
-    }
     #main-page .bonus-box,
     #community-page .bonus-box,
     .games-container .bonus-box {
@@ -568,36 +544,25 @@ body.app-ready .page-gradient-backdrop {
     #main-page .todays-games-banner {
         min-height: 170px;
     }
-    /* Community page desktop: online and daily poll side by side (like scramble and quiz) */
+    /* Community page desktop: greeting + daily poll stacked (same as mobile) */
     #community-page .community-top-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        align-items: stretch;
+        display: block;
         margin-top: 20px;
         margin-bottom: 0;
         padding: 0 20px;
     }
     #community-page .community-top-row .community-online-wrapper {
         margin: 0;
-        min-height: 0;
+        min-height: 200px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         border-radius: var(--box-border-radius);
     }
+    /* Row already has horizontal padding; drop .section inset so poll matches greeting width */
     #community-page .community-top-row .community-poll-section {
-        padding: 0;
-        margin: 0;
-        min-height: 0;
-    }
-    #community-page .community-top-row .community-poll-section .poll-container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-    #community-page .community-top-row .community-poll-section .poll-bottom-section {
-        flex: 1;
-        min-height: 0;
+        padding-left: 0;
+        padding-right: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
     /* Online header: Sanchez, same padding as daily poll top */
     #community-page .community-online-header {
@@ -607,9 +572,6 @@ body.app-ready .page-gradient-backdrop {
         padding: 10px 20px 10px 17px;
         text-align: center;
         color: rgba(255, 255, 255, 0.95);
-    }
-    #community-page .community-online-wrapper {
-        margin-top: 0;
     }
     #community-page .community-online-inner {
         width: 88px;
@@ -644,7 +606,7 @@ body.app-ready .page-gradient-backdrop {
         top: 72px;
         left: 20px;
         padding: 8px 14px;
-        background: white;
+        background-color: #ffffff;
         border-radius: 9999px;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         z-index: 10000;
@@ -1437,7 +1399,7 @@ body.app-ready .page-gradient-backdrop {
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
 }
 
@@ -2249,7 +2211,7 @@ body.mode-brand .date-subtitle {
 .week-combined-container2B .week-container-type1 {
     background: transparent;
     border: none; /* Remove all borders */
-    border-radius: 0;
+    border-radius: 0 0 var(--box-border-radius) var(--box-border-radius);
     box-shadow: none;
     margin: 0;
 }
@@ -2319,7 +2281,7 @@ body.mode-brand .date-subtitle {
 
 .week-combined-container2B .week-box-type1.today .day-initial-type1,
 .week-combined-container2B .week-box-type1.today .day-number-type1 {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     font-weight: 700;
 }
 
@@ -2342,7 +2304,10 @@ body.mode-brand .date-subtitle {
     background: white;
     padding: 12px 18px 16px 16px;
     margin-bottom: 0px;
-    overflow: hidden;
+    border-bottom-left-radius: var(--box-border-radius);
+    border-bottom-right-radius: var(--box-border-radius);
+    overflow: visible;
+    position: relative;
     /* border: 1px solid red; */
 }
 
@@ -2452,7 +2417,7 @@ body.mode-brand .date-subtitle {
 
 .week-record-text {
     font-size: 14px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: left;
     font-weight: 600;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2515,12 +2480,12 @@ body.mode-brand .date-subtitle {
     font-size: 12px;
     text-transform: uppercase;
     font-weight: 900;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     background-image: none !important;
     background-color: var(--calendar-background-bottom-color) !important;
 }
 .calendar-user-div .user-bullet {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     font-weight: 700;
     margin: 0 2px;
     font-size: 7px;
@@ -2537,7 +2502,7 @@ body.mode-brand .date-subtitle {
 
 .week-record-value {
     font-size: 20px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2550,6 +2515,7 @@ body.mode-brand .date-subtitle {
     justify-content: center;
     width: 100%;
     box-sizing: border-box;
+    overflow: visible;
     /* padding-right: 2px; */
     /* border: 1px solid #000; */
 }
@@ -2582,12 +2548,12 @@ body.mode-brand .date-subtitle {
 
 .week-box.today .day-initial,
 .week-box.today .day-number {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
 }
 
 .day-initial {
     font-size: 10px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
     font-weight: 600;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2596,7 +2562,7 @@ body.mode-brand .date-subtitle {
 .day-number {
     white-space: nowrap;
     font-size: 16px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2664,14 +2630,47 @@ body.mode-brand .date-subtitle {
 }
 
 .week-container-type1 {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--masterGrad);
     border: none;
     border-radius: var(--box-border-radius);
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     margin-top: 4px; /* gap so gradient does not sit behind Jason Streak Best row */
+}
+
+/* Overlay: anchored to bottom of full calendar card (days + banner image). No padding reserved — does not change image/banner height. */
+.week-container-type1 > .week-total-badge,
+.week-calendar-section > .week-total-badge {
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    /* border: 1px solid #000000; */
+    background: var(--calendar-week-total-badge-bg, var(--calendar-top-solid, #e73f65));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(20px);
+    z-index: 2;
+    box-sizing: border-box;
+    pointer-events: none;
+    margin: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.week-total-badge-value {
+    color: #ffffff;
+    font-family: 'Abril Fatface', serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    transform: translateY(-2px);
 }
 
 /* TODAY'S GAMES banner below calendar - placeholder image background, inner div has gradient + text */
@@ -2686,11 +2685,17 @@ body.mode-brand .date-subtitle {
     margin: 0;
     background: #c8d4dc url('weeklyBackgrounds/thanksgiving_day1.png') center center no-repeat;
     background-size: 100% auto;
-    border-radius: 0;
+    border-radius: 0 0 var(--box-border-radius) var(--box-border-radius);
     /* Softer inner shadow on calendar image */
     /* box-shadow: inset 0 0 3px 3px rgba(0, 0, 0, 0.18); */
     /* border-top: 1px white solid; */
     /* border-bottom: 1px white solid; */
+}
+
+.week-container-type1 .todays-games-wrapper {
+    border-bottom-left-radius: var(--box-border-radius);
+    border-bottom-right-radius: var(--box-border-radius);
+    overflow: hidden;
 }
 .calendar-user-div {
     display: flex;
@@ -2713,7 +2718,7 @@ body.mode-brand .date-subtitle {
 .calendar-user-div .user-name,
 .calendar-user-div .user-streak,
 .calendar-user-div .user-best {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     /* font-weight: 500; */
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.2;
@@ -2721,7 +2726,7 @@ body.mode-brand .date-subtitle {
     letter-spacing: 0.5px;
 }
 .calendar-user-div .user-bullet {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     line-height: 1.2;
     vertical-align: middle;
     margin: 0 3px;
@@ -2775,6 +2780,9 @@ body.mode-brand .date-subtitle {
 
 .week-days-container-type1 {
     display: flex;
+    overflow: visible;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .week-box-type1 {
@@ -2800,13 +2808,13 @@ body.mode-brand .date-subtitle {
 
 .week-box-type1.today .day-initial-type1,
 .week-box-type1.today .day-number-type1 {
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     font-weight: 700;
 }
 
 .day-initial-type1 {
     font-size: 10px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
     font-weight: 600;
 }
@@ -2814,7 +2822,7 @@ body.mode-brand .date-subtitle {
 .day-number-type1 {
     white-space: nowrap;
     font-size: 18px;
-    color: var(--header-text-color);
+    color: var(--calendar-day-text-color, var(--header-text-color));
     text-align: center;
     font-weight: 700;
     font-family: 'Nunito', 'Helvetica Neue', sans-serif;
@@ -2911,7 +2919,7 @@ body.mode-brand .date-subtitle {
     background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
-    border-bottom: none;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.45);
 }
 
 .quiz-top-section .subsection-title {
@@ -2920,12 +2928,19 @@ body.mode-brand .date-subtitle {
 
 .quiz-bottom-section {
     background-color: white;
-    padding: 20px;
+    padding: 12px 20px 20px 20px;
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 12px;
     position: relative;
+}
+
+.quiz-bottom-section .subsection-title {
+    color: var(--calendar-week-total-badge-bg, var(--calendar-top-solid, #e73f65));
+    text-align: center;
+    margin: 4px 0 0 0;
+    padding: 0;
 }
 
 .quiz-difficulty-number {
@@ -3172,7 +3187,7 @@ body.mode-brand .date-subtitle {
     margin-bottom: 10px;
 }
 
-/* Community page: top row wraps online + poll (desktop: side by side; mobile: stacked) */
+/* Community page: top row wraps online + poll (stacked) */
 .community-top-row .community-poll-section {
     margin-top: 12px;
 }
@@ -3221,7 +3236,7 @@ body.mode-brand .date-subtitle {
 
 .community-online-banner {
     position: relative;
-    background: none;
+    background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3919,7 +3934,7 @@ body.mode-brand .date-subtitle {
     background: var(--masterGrad);
     padding: 10px 20px 10px 17px;
     flex: 0 0 auto;
-    border-bottom: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
 }
 
 .scramble-top-section .subsection-title {
@@ -3928,23 +3943,38 @@ body.mode-brand .date-subtitle {
 
 .scramble-bottom-section {
     background-color: white;
-    padding: 16px 20px;
+    padding: 12px 20px 16px 20px;
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-rows: 1fr auto auto;
+    grid-template-rows: auto auto auto auto;
     grid-template-columns: 1fr auto;
     gap: 8px;
     align-items: center;
 }
 
+.scramble-bottom-section .subsection-title {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    color: var(--calendar-week-total-badge-bg, var(--calendar-top-solid, #e73f65));
+    text-align: center;
+    margin: 4px 0 0 0;
+    padding: 0;
+}
+
 .unscramble-middle {
-    display: contents;
+    grid-row: 3;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
 .unscramble-label {
     grid-row: 2;
-    grid-column: 1;
+    grid-column: 1 / -1;
 }
 
 .on-this-day-container::before {
@@ -3999,18 +4029,18 @@ body.mode-brand .date-subtitle {
     flex-wrap: nowrap;
     width: 100%;
     z-index: 1;
-    grid-row: 1;
-    grid-column: 1 / -1;
-    align-self: center;
+    grid-row: auto;
+    grid-column: auto;
+    align-self: auto;
 }
 
 .unscramble-label {
     font-size: 15px;
-    color: white;
+    color: #666;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 400;
     margin-left: 0px;
-    text-align: left;
+    text-align: center;
     line-height: normal;
     padding-top: 4px;
     padding-bottom: 4px;
@@ -4056,7 +4086,7 @@ body.mode-brand .date-subtitle {
     justify-content: center;
     gap: 2px;
     margin-top: -2px;
-    grid-row: 3;
+    grid-row: 4;
     grid-column: 1 / -1;
 }
 
@@ -5315,6 +5345,13 @@ body.mode-brand .date-subtitle {
     z-index: 10002;
     box-sizing: border-box;
     object-fit: contain;
+}
+
+/* W brand logo aligns with standard left logo placement */
+body.w-brand .header-logo {
+    left: 10px;
+    right: auto;
+    filter: none;
 }
 
 .help-button {
